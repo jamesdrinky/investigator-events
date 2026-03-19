@@ -1,0 +1,243 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --bg-night: #040913;
+  --bg-navy: #08172f;
+  --bg-atlas: #0a2c52;
+  --bg-indigo: #21154b;
+  --bg-cyan: #082a33;
+  --signal-strong: #2da8ff;
+  --signal-soft: #d5efff;
+  --globe-strong: #1dd6ca;
+  --globe-soft: #d7fff8;
+  --violet-strong: #8e6dff;
+  --violet-soft: #edc4ff;
+  --amber-strong: #ffb14a;
+  --amber-soft: #ffe0a6;
+  --magenta-strong: #ff68cb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  @apply bg-surface text-slate-100 antialiased;
+  background-color: #05070b;
+  background-image: radial-gradient(circle at 12% -4%, rgba(45, 168, 255, 0.14), transparent 22%),
+    radial-gradient(circle at 84% 2%, rgba(29, 214, 202, 0.08), transparent 18%),
+    radial-gradient(circle at 54% 34%, rgba(108, 99, 255, 0.06), transparent 22%),
+    linear-gradient(180deg, #05070b 0%, #08111f 42%, #05070b 100%);
+  background-attachment: fixed;
+  overflow-x: hidden;
+}
+
+a {
+  @apply transition-colors duration-300;
+}
+
+.container-shell {
+  @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-10;
+}
+
+.glass-panel {
+  @apply rounded-2xl border backdrop-blur-xl;
+  background: rgba(9, 13, 18, 0.84);
+  border-color: rgba(215, 238, 255, 0.14);
+  box-shadow: 0 30px 70px -42px rgba(0, 0, 0, 0.96), inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -28px 80px -70px rgba(45, 168, 255, 0.1);
+}
+
+.lux-panel {
+  @apply rounded-2xl border backdrop-blur-xl;
+  background: rgba(10, 14, 20, 0.9);
+  border-color: rgba(215, 238, 255, 0.16);
+  box-shadow: 0 38px 90px -46px rgba(0, 0, 0, 0.98), inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    inset 0 -20px 60px -46px rgba(45, 168, 255, 0.06), inset 0 0 0 1px rgba(45, 168, 255, 0.04);
+}
+
+.global-panel {
+  @apply rounded-[1.75rem] border backdrop-blur-xl;
+  background: rgba(9, 13, 19, 0.92);
+  border-color: rgba(215, 238, 255, 0.18);
+  box-shadow: 0 44px 120px -70px rgba(0, 0, 0, 1), inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    inset 0 -40px 90px -70px rgba(29, 214, 202, 0.08), inset 0 0 100px rgba(108, 99, 255, 0.03);
+}
+
+.atlas-panel {
+  @apply rounded-[2rem] border backdrop-blur-xl;
+  background: linear-gradient(180deg, rgba(14, 25, 56, 0.88), rgba(6, 11, 25, 0.97));
+  border-color: rgba(215, 238, 255, 0.18);
+  box-shadow: 0 42px 140px -64px rgba(0, 0, 0, 1), inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 0 120px rgba(45, 168, 255, 0.08);
+}
+
+.intel-grid {
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 34px 34px;
+}
+
+.geo-grid {
+  background-image: linear-gradient(to right, rgba(215, 238, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(215, 238, 255, 0.06) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+.signal-divider {
+  height: 1px;
+  background: linear-gradient(90deg, rgba(45, 168, 255, 0), rgba(45, 168, 255, 0.7), rgba(29, 214, 202, 0.72), rgba(255, 104, 203, 0.42), rgba(45, 168, 255, 0));
+}
+
+.section-pad {
+  @apply py-24 sm:py-28;
+}
+
+.eyebrow {
+  @apply text-[10px] font-semibold uppercase tracking-[0.34em] text-signal2 sm:text-xs;
+}
+
+.section-title {
+  @apply mt-4 font-[var(--font-serif)] text-3xl leading-[1.04] text-white sm:text-4xl lg:text-[3rem];
+}
+
+.section-copy {
+  @apply mt-4 text-sm leading-relaxed text-slate-300 sm:text-base;
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center rounded-full border px-6 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:brightness-105;
+  border-color: rgba(215, 238, 255, 0.22);
+  background: #1f7cf1;
+  box-shadow: 0 22px 40px -22px rgba(31, 124, 241, 0.72);
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center rounded-full border px-6 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5;
+  border-color: rgba(215, 238, 255, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(14px);
+}
+
+.surface-outline {
+  @apply border;
+  background: linear-gradient(180deg, rgba(45, 168, 255, 0.1), rgba(255, 255, 255, 0.03) 42%, rgba(255, 255, 255, 0.01));
+  border-color: rgba(215, 238, 255, 0.14);
+}
+
+.city-chip {
+  @apply rounded-full border px-2.5 py-1 text-[11px] uppercase tracking-[0.14em] text-signal2;
+  background: rgba(45, 168, 255, 0.12);
+  border-color: rgba(215, 238, 255, 0.22);
+}
+
+.global-chip {
+  @apply rounded-full border px-2.5 py-1 text-[11px] uppercase tracking-[0.14em] text-globe2;
+  background: rgba(29, 214, 202, 0.12);
+  border-color: rgba(29, 214, 202, 0.26);
+}
+
+.country-chip {
+  @apply inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] uppercase tracking-[0.12em] text-white;
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(215, 238, 255, 0.18);
+}
+
+.field-input {
+  @apply mt-1 w-full rounded-2xl border px-3 py-2.5 text-slate-100 outline-none transition duration-300;
+  border-color: rgba(215, 238, 255, 0.14);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.025));
+}
+
+.field-input:focus {
+  border-color: rgba(45, 168, 255, 0.42);
+  box-shadow: 0 0 0 1px rgba(45, 168, 255, 0.18);
+}
+
+.section-orbit {
+  position: relative;
+}
+
+.section-orbit::before {
+  content: '';
+  position: absolute;
+  inset: -12% 8% auto;
+  height: 24rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(45, 168, 255, 0.16), rgba(29, 214, 202, 0.08) 38%, transparent 70%);
+  filter: blur(40px);
+  pointer-events: none;
+}
+
+.map-sweep {
+  animation: map-sweep 11s linear infinite;
+}
+
+.aurora-drift {
+  animation: aurora-drift 18s ease-in-out infinite;
+}
+
+.float-drift {
+  animation: float-drift 8s ease-in-out infinite;
+}
+
+.glow-pulse {
+  animation: glow-pulse 3.8s ease-in-out infinite;
+}
+
+@keyframes map-sweep {
+  0% {
+    transform: translateX(-16%) rotate(-8deg);
+    opacity: 0;
+  }
+  15%,
+  80% {
+    opacity: 0.75;
+  }
+  100% {
+    transform: translateX(28%) rotate(-8deg);
+    opacity: 0;
+  }
+}
+
+@keyframes aurora-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(1.5%, -1.5%, 0) scale(1.04);
+  }
+}
+
+@keyframes float-drift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    box-shadow: 0 0 0 rgba(45, 168, 255, 0);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 28px rgba(45, 168, 255, 0.35);
+  }
+}

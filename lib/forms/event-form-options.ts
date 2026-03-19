@@ -1,0 +1,42 @@
+export const eventRegions = [
+  'Africa',
+  'Asia-Pacific',
+  'Europe',
+  'Latin America',
+  'Middle East',
+  'North America',
+  'Online / Global'
+] as const;
+
+export const eventCountries = [
+  'Argentina',
+  'Australia',
+  'Austria',
+  'Belgium',
+  'Brazil',
+  'Canada',
+  'Chile',
+  'Costa Rica',
+  'Czech Republic',
+  'Denmark',
+  'France',
+  'Germany',
+  'India',
+  'Ireland',
+  'Italy',
+  'Japan',
+  'Mexico',
+  'Netherlands',
+  'New Zealand',
+  'Norway',
+  'Online',
+  'Portugal',
+  'Singapore',
+  'South Africa',
+  'Spain',
+  'Sweden',
+  'Switzerland',
+  'United Arab Emirates',
+  'United Kingdom',
+  'United States'
+] as const;

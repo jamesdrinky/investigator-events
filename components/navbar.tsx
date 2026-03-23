@@ -26,12 +26,12 @@ export function Navbar() {
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[linear-gradient(180deg,rgba(5,11,24,0.92),rgba(5,11,24,0.68))] backdrop-blur-2xl">
       <div className="container-shell flex h-18 items-center justify-between gap-4">
         <Link href="/" className="group flex min-w-0 items-center gap-2">
-          <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-signal/24 bg-[linear-gradient(180deg,rgba(54,168,255,0.32),rgba(108,99,255,0.16)_58%,rgba(255,177,74,0.08))] text-sm font-semibold text-signal2 transition-transform duration-300 group-hover:scale-105">
+          <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/12 bg-[linear-gradient(180deg,rgba(54,168,255,0.32),rgba(108,99,255,0.16)_58%,rgba(255,177,74,0.1))] text-sm font-semibold text-white transition-transform duration-300 group-hover:scale-105">
             IE
           </span>
           <div className="min-w-0">
             <p className="truncate text-[11px] font-semibold tracking-[0.24em] text-slate-100 sm:text-sm">INVESTIGATOR EVENTS</p>
-            <p className="truncate text-[10px] uppercase tracking-[0.22em] text-slate-400">Global event network</p>
+            <p className="truncate text-[10px] uppercase tracking-[0.22em] text-slate-400">Global industry platform</p>
           </div>
         </Link>
 

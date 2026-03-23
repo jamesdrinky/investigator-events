@@ -1,10 +1,10 @@
 import { access } from 'fs/promises';
 import { constants } from 'fs';
 import path from 'path';
-import { getCityHeroImageUrl, getCitySlug } from '@/lib/utils/city-media';
+import { getCityHeroImageUrl, getTrustedCityHeroSlug } from '@/lib/utils/city-media';
 
 export async function hasCityHeroImage(city: string): Promise<boolean> {
-  const slug = getCitySlug(city);
+  const slug = getTrustedCityHeroSlug(city);
 
   if (!slug) {
     return false;
@@ -19,7 +19,7 @@ export async function hasCityHeroImage(city: string): Promise<boolean> {
 }
 
 export function getCityHeroDownloadMeta(city: string) {
-  const slug = getCitySlug(city);
+  const slug = getTrustedCityHeroSlug(city);
   const url = getCityHeroImageUrl(city);
 
   if (!slug || !url) {

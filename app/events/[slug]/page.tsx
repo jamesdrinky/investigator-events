@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { CityHeroImage } from '@/components/city-hero-image';
+import { EventCoverMedia } from '@/components/event-cover-media';
 import { EventCard } from '@/components/event-card';
 import { PageAtmosphere } from '@/components/global/page-atmosphere';
 import { LocationSignature } from '@/components/location-signature';
@@ -53,8 +53,8 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
         Math.abs(parseDate(b.date).getTime() - parseDate(event.date).getTime())
     )
     .slice(0, 3);
-  const hasHeroImage = await hasCityHeroImage(event.city);
-  const heroDownload = hasHeroImage ? getCityHeroDownloadMeta(event.city) : null;
+  const hasCityImage = await hasCityHeroImage(event.city);
+  const heroDownload = !event.coverImage && hasCityImage ? getCityHeroDownloadMeta(event.city) : null;
 
   return (
     <section className="section-pad relative overflow-hidden">
@@ -72,16 +72,19 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
                   <span>{getCountryFlag(event.country)}</span>
                   <span>{event.country}</span>
                 </span>
+                <span className="city-chip">{event.association ?? event.organiser}</span>
               </div>
-              {hasHeroImage ? (
-                <div className="mt-5 max-w-4xl">
-                  <CityHeroImage
-                    city={event.city}
-                    country={event.country}
-                    region={event.region}
-                  />
-                </div>
-              ) : null}
+              <div className="mt-5 max-w-4xl">
+                <EventCoverMedia
+                  title={event.title}
+                  city={event.city}
+                  country={event.country}
+                  region={event.region}
+                  category={event.category}
+                  coverImage={event.coverImage}
+                  coverImageAlt={event.coverImageAlt}
+                />
+              </div>
               <div className="mt-5 max-w-3xl">
                 <LocationSignature city={event.city} country={event.country} region={event.region} />
               </div>

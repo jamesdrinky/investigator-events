@@ -11,6 +11,7 @@ interface HeroProps {
     totalEvents: number;
     totalCountries: number;
     activeRegions: number;
+    totalAssociations: number;
   };
   regions: RegionCoverage[];
 }
@@ -90,13 +91,23 @@ export function Hero({ stats, regions }: HeroProps) {
             Investigator Events Worldwide
           </motion.p>
 
+          <motion.div
+            className="mx-auto mt-4 inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/[0.04] px-4 py-2 text-[11px] uppercase tracking-[0.18em] text-slate-200"
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.56, delay: 0.04 }}
+          >
+            <span className="h-2 w-2 rounded-full bg-signal" />
+            Calendar for associations, organisers, sponsors, and investigators
+          </motion.div>
+
           <motion.h1
             className="mx-auto mt-5 max-w-5xl text-center font-[var(--font-serif)] text-5xl leading-[0.92] text-white sm:text-6xl lg:text-[6.5rem]"
             initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
           >
-            Discover investigator events across the world
+            The global calendar for investigator conferences, training, and association events
           </motion.h1>
 
           <motion.p
@@ -105,8 +116,8 @@ export function Hero({ stats, regions }: HeroProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.72, delay: 0.14 }}
           >
-            Follow conferences, training events, and association meetings by city and region, then submit new events into
-            the global review queue.
+            Discover events across the year, help associations promote conferences, reduce schedule clashes, and create a
+            central platform for industry visibility worldwide.
           </motion.p>
 
           <motion.div
@@ -122,6 +133,18 @@ export function Hero({ stats, regions }: HeroProps) {
               Submit an Event
             </Link>
           </motion.div>
+
+          <motion.div
+            className="mt-5 flex flex-wrap items-center justify-center gap-2 text-xs uppercase tracking-[0.16em] text-slate-400"
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.56, delay: 0.28 }}
+          >
+            <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5">Associations</span>
+            <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5">Organisers</span>
+            <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5">Sponsors</span>
+            <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5">Weekly updates</span>
+          </motion.div>
         </motion.div>
 
         <motion.div style={{ y: footerY, opacity: footerOpacity }}>
@@ -131,15 +154,15 @@ export function Hero({ stats, regions }: HeroProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.78, delay: 0.34 }}
           >
-            <article className="rounded-[1.2rem] border border-white/10 bg-black/18 px-4 py-3">
+            <article className="rounded-[1.2rem] border border-white/10 bg-black/24 px-4 py-3 backdrop-blur-md">
             <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Countries</p>
             <p className="mt-2 text-lg font-semibold text-white">{stats.totalCountries}</p>
             </article>
-            <article className="rounded-[1.2rem] border border-white/10 bg-black/18 px-4 py-3">
-            <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Regions</p>
-            <p className="mt-2 text-lg font-semibold text-white">{stats.activeRegions}</p>
+            <article className="rounded-[1.2rem] border border-white/10 bg-black/24 px-4 py-3 backdrop-blur-md">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Associations</p>
+            <p className="mt-2 text-lg font-semibold text-white">{stats.totalAssociations}</p>
             </article>
-            <article className="rounded-[1.2rem] border border-white/10 bg-black/18 px-4 py-3">
+            <article className="rounded-[1.2rem] border border-white/10 bg-black/24 px-4 py-3 backdrop-blur-md">
             <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Live events</p>
             <p className="mt-2 text-lg font-semibold text-white">{stats.totalEvents}</p>
             </article>

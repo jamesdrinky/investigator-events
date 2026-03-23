@@ -17,6 +17,8 @@ export interface EventItem {
   category: string;
   description: string;
   website: string;
+  coverImage?: string;
+  coverImageAlt?: string;
   featured: boolean;
   approved?: boolean;
   createdAt?: string;
@@ -36,6 +38,10 @@ type CompatEventRow = Partial<EventRow> & {
   approved?: boolean | null;
   updated_at?: string | null;
   association?: string | null;
+  cover_image_url?: string | null;
+  image_url?: string | null;
+  image?: string | null;
+  cover_image_alt?: string | null;
 };
 
 export function mapEventRowToItem(row: CompatEventRow): EventItem | null {
@@ -60,6 +66,8 @@ export function mapEventRowToItem(row: CompatEventRow): EventItem | null {
     category: row.category,
     description: row.description ?? '',
     website: row.website,
+    coverImage: row.cover_image_url ?? row.image_url ?? row.image ?? undefined,
+    coverImageAlt: row.cover_image_alt ?? undefined,
     featured: row.featured ?? false,
     approved: row.approved ?? true,
     createdAt: row.created_at,

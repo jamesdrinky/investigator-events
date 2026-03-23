@@ -6,9 +6,14 @@ import { getCoverageMetrics } from '@/lib/utils/coverage';
 
 export const dynamic = 'force-dynamic';
 
-export default async function CalendarPage() {
+export default async function CalendarPage({
+  searchParams
+}: {
+  searchParams?: { association?: string };
+}) {
   const events = await fetchAllEvents();
   const coverage = getCoverageMetrics(events);
+  const initialAssociation = searchParams?.association ? decodeURIComponent(searchParams.association) : undefined;
 
   return (
     <section className="section-pad relative overflow-hidden">
@@ -22,12 +27,12 @@ export default async function CalendarPage() {
               <p className="eyebrow">Global Calendar</p>
               <h1 className="section-title">Investigator Events Calendar</h1>
               <p className="section-copy max-w-3xl">
-                Browse monthly investigator events, filter by location and category, and open each listing for detailed
-                organiser information.
+                The default timeline is built for fast scanning and comparison. Month view stays available as a cleaner
+                secondary planning overview when you need date pattern visibility.
               </p>
               <p className="mt-3 max-w-3xl text-sm text-slate-400">
-                The public calendar defaults to major conferences and flagship meetings. Switch to all events when you want
-                to include smaller webinars, training sessions, and niche gatherings.
+                The public calendar starts with major conferences and flagship meetings. Switch to all events when you need
+                the wider picture, including webinars, training sessions, and smaller network gatherings.
               </p>
 
               <div className="mt-4 flex flex-wrap gap-2">
@@ -47,10 +52,10 @@ export default async function CalendarPage() {
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_18%,rgba(139,169,255,0.14),transparent_28%),radial-gradient(circle_at_80%_68%,rgba(127,228,199,0.08),transparent_24%)]" />
               <div className="relative">
                 <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Filter Logic</p>
-                <h2 className="mt-3 font-[var(--font-serif)] text-2xl text-white">Navigate by region, country, month, and format</h2>
+                <h2 className="mt-3 font-[var(--font-serif)] text-2xl text-white">Navigate by region, country, month, and association</h2>
                 <p className="mt-3 text-sm leading-relaxed text-slate-300">
-                  Start with the broad event picture, then narrow into country, category, and month when you need a more
-                  specific planning view.
+                  Start with the broad event picture, then narrow into country, category, association, and month when you
+                  need a tighter planning view.
                 </p>
                 <div className="signal-divider mt-5" />
                 <p className="mt-5 text-xs uppercase tracking-[0.22em] text-slate-400">
@@ -78,7 +83,7 @@ export default async function CalendarPage() {
           </section>
         </Reveal>
 
-        <CalendarView events={events} />
+        <CalendarView events={events} initialAssociation={initialAssociation} />
       </div>
     </section>
   );

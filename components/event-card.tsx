@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { CategoryIcon } from '@/components/category-icon';
-import { EventCityVisual } from '@/components/event-city-visual';
+import { EventCoverMedia } from '@/components/event-cover-media';
 import type { EventItem } from '@/lib/data/events';
 import { formatEventDate } from '@/lib/utils/date';
 import { getEventSlug } from '@/lib/utils/event-slugs';
@@ -16,7 +16,15 @@ export function EventCard({ event, onSelect }: EventCardProps) {
     <>
       <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(circle_at_18%_16%,rgba(54,168,255,0.12),transparent_30%),radial-gradient(circle_at_50%_78%,rgba(29,214,202,0.08),transparent_30%)]" />
 
-      <EventCityVisual city={event.city} country={event.country} region={event.region} title={event.category} />
+      <EventCoverMedia
+        title={event.title}
+        city={event.city}
+        country={event.country}
+        region={event.region}
+        category={event.category}
+        coverImage={event.coverImage}
+        coverImageAlt={event.coverImageAlt}
+      />
 
       <div className="relative flex items-start justify-between gap-3">
         <span className="inline-flex items-center gap-2 rounded-full border border-signal/24 bg-signal/10 px-3 py-1 text-xs font-medium text-signal2">
@@ -38,7 +46,7 @@ export function EventCard({ event, onSelect }: EventCardProps) {
         </p>
         <div className="mt-2 flex flex-wrap gap-1.5">
           <span className="global-chip">{event.region}</span>
-          {event.association ? <span className="city-chip">{event.association}</span> : null}
+          <span className="city-chip">{event.association ?? event.organiser}</span>
         </div>
       </div>
 
@@ -49,7 +57,10 @@ export function EventCard({ event, onSelect }: EventCardProps) {
           Open the event record for organiser details, dates, and the official source link.
         </p>
       )}
-      <p className="relative text-sm text-slate-400">Organiser: {event.organiser}</p>
+      <div className="relative flex items-center justify-between gap-3 text-sm">
+        <p className="text-slate-400">Organiser: {event.organiser}</p>
+        <span className="text-xs uppercase tracking-[0.18em] text-slate-500 group-hover:text-slate-300">Open event</span>
+      </div>
     </>
   );
 

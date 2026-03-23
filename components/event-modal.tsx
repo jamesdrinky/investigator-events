@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
+import { EventCoverMedia } from '@/components/event-cover-media';
 import type { EventItem } from '@/lib/data/events';
 import { formatEventDate } from '@/lib/utils/date';
 import { getEventSlug } from '@/lib/utils/event-slugs';
@@ -46,6 +47,19 @@ export function EventModal({ event, onClose }: EventModalProps) {
               >
                 Close
               </button>
+            </div>
+
+            <div className="mt-5">
+              <EventCoverMedia
+                title={event.title}
+                city={event.city}
+                country={event.country}
+                region={event.region}
+                category={event.category}
+                coverImage={event.coverImage}
+                coverImageAlt={event.coverImageAlt}
+                compact
+              />
             </div>
 
             <dl className="mt-6 grid gap-3 text-sm text-slate-300 sm:grid-cols-2">

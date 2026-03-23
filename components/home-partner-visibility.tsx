@@ -3,15 +3,15 @@ import Link from 'next/link';
 const placements = [
   {
     title: 'Homepage visibility',
-    text: 'Premium placement beside featured events, weekly updates, and industry-wide discovery.'
+    text: 'Premium placement beside featured events, weekly updates, and association discovery.'
   },
   {
-    title: 'Category sponsorship',
-    text: 'Support training, conference, or regional coverage with targeted industry relevance.'
+    title: 'Featured conference support',
+    text: 'Give a major event or training series stronger visibility in the calendar and weekly brief.'
   },
   {
-    title: 'Partner programmes',
-    text: 'Create longer-term visibility for suppliers, software, training, and service providers.'
+    title: 'Supplier spotlight',
+    text: 'Relevant tools and services can appear in a cleaner, industry-specific partner area.'
   }
 ];
 
@@ -28,10 +28,10 @@ export function HomePartnerVisibility() {
           <div className="relative grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
             <div>
               <p className="eyebrow">Sponsors & Partners</p>
-              <h2 className="section-title">Built to support sponsor visibility, supplier exposure, and industry partnerships</h2>
+              <h2 className="section-title">Built to support sponsor visibility, supplier exposure, and promoted events</h2>
               <p className="section-copy max-w-xl">
-                Investigator Events is not only for event discovery. It is also designed to support premium partner
-                placement for suppliers, training providers, and specialist services that want direct industry exposure.
+                This platform is not only for browsing dates. It also gives associations, featured conferences, sponsors,
+                and relevant suppliers a credible place to appear in front of the investigator industry.
               </p>
               <div className="mt-6 flex flex-wrap gap-2">
                 {partnerGroups.map((group) => (
@@ -54,6 +54,13 @@ export function HomePartnerVisibility() {
                   <p className="mt-3 text-base text-white">{placement.text}</p>
                 </article>
               ))}
+              <article className="rounded-[1.35rem] border border-emerald-300/16 bg-[linear-gradient(180deg,rgba(41,211,163,0.08),rgba(255,255,255,0.02))] p-5">
+                <p className="text-xs uppercase tracking-[0.18em] text-emerald-100">Phase 1 structure</p>
+                <p className="mt-3 text-base text-white">
+                  Associations page visibility, featured event treatment, weekly brief mentions, and advertiser inquiry
+                  flow are already part of the product foundation.
+                </p>
+              </article>
             </div>
           </div>
         </div>

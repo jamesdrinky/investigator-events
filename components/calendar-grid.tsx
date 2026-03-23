@@ -103,7 +103,7 @@ export function CalendarGrid({ events, monthKey, selectedDate, onSelectDate }: C
   const weeks = buildWeekCells(year, month);
 
   return (
-    <section className="global-panel relative overflow-hidden p-5 sm:p-6" aria-label="Calendar month overview">
+    <section className="surface-elevated relative overflow-hidden p-5 sm:p-6" aria-label="Calendar month overview">
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.022),transparent_18%,transparent_82%,rgba(255,255,255,0.012))]" />
 
       <div className="relative space-y-5">
@@ -129,9 +129,9 @@ export function CalendarGrid({ events, monthKey, selectedDate, onSelectDate }: C
               return (
                 <div
                   key={`week-${weekIndex}`}
-                  className="grid grid-cols-[6.75rem_repeat(7,minmax(8rem,1fr))] gap-4 rounded-[1.8rem] border border-white/8 bg-[linear-gradient(180deg,rgba(10,16,27,0.96),rgba(6,10,18,0.98))] p-4 shadow-[0_26px_54px_-42px_rgba(2,6,23,0.95)]"
+                  className="grid grid-cols-[6.75rem_repeat(7,minmax(8rem,1fr))] gap-4 rounded-[1.8rem] p-4"
                 >
-                  <div className="flex min-h-[12.75rem] flex-col justify-between rounded-[1.35rem] border border-white/7 bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.012))] px-3 py-3.5">
+                  <div className="surface-flat flex min-h-[12.75rem] flex-col justify-between rounded-[1.35rem] px-3 py-3.5">
                     <div>
                       <p className="text-[10px] uppercase tracking-[0.22em] text-slate-500">Week {weekIndex + 1}</p>
                       <p className="mt-2 text-sm font-medium text-slate-100">{formatWeekRange(week) || 'Outside month'}</p>
@@ -166,7 +166,7 @@ export function CalendarGrid({ events, monthKey, selectedDate, onSelectDate }: C
                               ? 'border-signal/30 bg-[linear-gradient(180deg,rgba(54,168,255,0.16),rgba(255,255,255,0.06))] shadow-[0_18px_34px_-24px_rgba(54,168,255,0.75)]'
                               : isActive
                                 ? tone === 'major'
-                                  ? 'border-white/14 bg-[linear-gradient(180deg,rgba(30,64,175,0.24),rgba(255,255,255,0.06))] shadow-[0_20px_36px_-28px_rgba(59,130,246,0.5)] hover:-translate-y-0.5 hover:border-white/24 hover:shadow-[0_24px_46px_-28px_rgba(59,130,246,0.56)]'
+                                  ? 'border-amber-200/20 bg-[linear-gradient(180deg,rgba(255,176,50,0.18),rgba(33,150,255,0.14))] shadow-[0_20px_36px_-28px_rgba(59,130,246,0.5)] hover:-translate-y-0.5 hover:border-white/24 hover:shadow-[0_24px_46px_-28px_rgba(59,130,246,0.56)]'
                                   : 'border-white/12 bg-[linear-gradient(180deg,rgba(15,23,42,0.95),rgba(255,255,255,0.05))] hover:-translate-y-0.5 hover:border-white/22 hover:bg-[linear-gradient(180deg,rgba(30,41,59,0.98),rgba(255,255,255,0.07))]'
                                 : 'cursor-default border-white/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.016),rgba(255,255,255,0.008))]'
                             : 'border-white/5 bg-[linear-gradient(180deg,rgba(255,255,255,0.01),rgba(255,255,255,0.004))]'

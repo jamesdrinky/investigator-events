@@ -25,7 +25,7 @@ interface FilterBarProps {
 }
 
 function selectClasses() {
-  return 'h-10 min-w-[9rem] rounded-full border border-white/12 bg-[linear-gradient(180deg,rgba(12,19,30,0.96),rgba(7,12,21,0.98))] px-4 text-sm text-slate-100 outline-none transition duration-200 focus:border-signal';
+  return 'h-10 min-w-[9rem] rounded-full border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.1),rgba(255,255,255,0.04))] px-4 text-sm text-slate-100 outline-none transition duration-200 focus:border-globe';
 }
 
 export function FilterBar({
@@ -45,22 +45,22 @@ export function FilterBar({
 }: FilterBarProps) {
   return (
     <motion.section
-      className="global-panel relative overflow-hidden p-4"
+      className="relative overflow-hidden rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(14,26,41,0.8),rgba(255,255,255,0.03))] p-4"
       aria-label="Event filters"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),transparent_32%,rgba(255,255,255,0.02))]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),transparent_32%,rgba(41,211,163,0.03))]" />
       <div className="relative flex flex-col gap-3">
         <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex flex-wrap items-center gap-2">
-            <div className="inline-flex items-center overflow-hidden rounded-full border border-white/12 bg-white/[0.03] p-1">
+            <div className="inline-flex items-center overflow-hidden rounded-full border border-white/12 bg-white/[0.06] p-1">
               <button
                 type="button"
                 onClick={() => onChangeScope('main')}
                 className={`rounded-full px-4 py-2 text-sm transition ${
-                  scope === 'main' ? 'bg-white text-slate-950' : 'text-slate-300 hover:text-white'
+                  scope === 'main' ? 'bg-[linear-gradient(135deg,#34b3ff,#29d3a3)] text-white' : 'text-slate-300 hover:text-white'
                 }`}
               >
                 Main
@@ -69,7 +69,7 @@ export function FilterBar({
                 type="button"
                 onClick={() => onChangeScope('all')}
                 className={`rounded-full px-4 py-2 text-sm transition ${
-                  scope === 'all' ? 'bg-white text-slate-950' : 'text-slate-300 hover:text-white'
+                  scope === 'all' ? 'bg-[linear-gradient(135deg,#34b3ff,#29d3a3)] text-white' : 'text-slate-300 hover:text-white'
                 }`}
               >
                 All
@@ -163,12 +163,12 @@ export function FilterBar({
               </button>
             ) : null}
 
-            <div className="inline-flex items-center overflow-hidden rounded-full border border-white/12 bg-white/[0.03] p-1">
+            <div className="inline-flex items-center overflow-hidden rounded-full border border-white/12 bg-white/[0.06] p-1">
               <button
                 type="button"
                 onClick={() => onChangeView('list')}
                 className={`relative shrink-0 rounded-full px-4 py-2 text-sm transition ${
-                  view === 'list' ? 'bg-signal text-white' : 'text-slate-300 hover:text-white'
+                  view === 'list' ? 'bg-[linear-gradient(135deg,#34b3ff,#29d3a3)] text-white' : 'text-slate-300 hover:text-white'
                 }`}
               >
                 Timeline
@@ -177,7 +177,7 @@ export function FilterBar({
                 type="button"
                 onClick={() => onChangeView('calendar')}
                 className={`relative shrink-0 rounded-full px-4 py-2 text-sm transition ${
-                  view === 'calendar' ? 'bg-signal text-white' : 'text-slate-300 hover:text-white'
+                  view === 'calendar' ? 'bg-[linear-gradient(135deg,#34b3ff,#29d3a3)] text-white' : 'text-slate-300 hover:text-white'
                 }`}
               >
                 Month

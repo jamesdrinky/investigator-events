@@ -4,20 +4,29 @@
 
 :root {
   color-scheme: dark;
-  --bg-night: #040913;
-  --bg-navy: #08172f;
-  --bg-atlas: #0a2c52;
-  --bg-indigo: #21154b;
-  --bg-cyan: #082a33;
-  --signal-strong: #2da8ff;
-  --signal-soft: #d5efff;
-  --globe-strong: #1dd6ca;
-  --globe-soft: #d7fff8;
-  --violet-strong: #8e6dff;
-  --violet-soft: #edc4ff;
-  --amber-strong: #ffb14a;
-  --amber-soft: #ffe0a6;
-  --magenta-strong: #ff68cb;
+  --bg-night: #06111a;
+  --bg-navy: #0d2138;
+  --bg-atlas: #143b69;
+  --bg-indigo: #293071;
+  --bg-cyan: #0f5751;
+  --surface-void: #071019;
+  --surface-deep: #0d1b2b;
+  --surface-mid: #13263b;
+  --surface-light: #dcecff;
+  --primary-strong: #2a9bff;
+  --primary-soft: #d8ecff;
+  --accent-strong: #1ad7f1;
+  --accent-soft: #d7fbff;
+  --secondary-strong: #7a68ff;
+  --secondary-soft: #e5deff;
+  --highlight-strong: #22c55e;
+  --highlight-soft: #dcfce7;
+  --signal-strong: #1f8cff;
+  --signal-soft: #d8ecff;
+  --globe-strong: #11c7e8;
+  --globe-soft: #d7fbff;
+  --violet-strong: #6b5cff;
+  --violet-soft: #e5deff;
 }
 
 * {
@@ -33,11 +42,9 @@ body {
 
 body {
   @apply bg-surface text-slate-100 antialiased;
-  background-color: #05070b;
-  background-image: radial-gradient(circle at 12% -4%, rgba(45, 168, 255, 0.14), transparent 22%),
-    radial-gradient(circle at 84% 2%, rgba(29, 214, 202, 0.08), transparent 18%),
-    radial-gradient(circle at 54% 34%, rgba(108, 99, 255, 0.06), transparent 22%),
-    linear-gradient(180deg, #05070b 0%, #08111f 42%, #05070b 100%);
+  background-color: #07131d;
+  background-image: radial-gradient(circle at 16% 0%, rgba(31, 140, 255, 0.16), transparent 24%),
+    linear-gradient(180deg, #07131d 0%, #0b1827 24%, #102235 48%, #09131d 100%);
   background-attachment: fixed;
   overflow-x: hidden;
 }
@@ -50,36 +57,57 @@ a {
   @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-10;
 }
 
-.glass-panel {
-  @apply rounded-2xl border backdrop-blur-xl;
-  background: rgba(9, 13, 18, 0.84);
-  border-color: rgba(215, 238, 255, 0.14);
-  box-shadow: 0 30px 70px -42px rgba(0, 0, 0, 0.96), inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    inset 0 -28px 80px -70px rgba(45, 168, 255, 0.1);
+.surface-cinematic {
+  @apply rounded-[2rem] overflow-hidden;
+  background: linear-gradient(135deg, rgba(24, 92, 168, 0.96), rgba(9, 22, 39, 0.96) 34%, rgba(34, 84, 156, 0.94) 100%);
 }
 
-.lux-panel {
-  @apply rounded-2xl border backdrop-blur-xl;
-  background: rgba(10, 14, 20, 0.9);
-  border-color: rgba(215, 238, 255, 0.16);
-  box-shadow: 0 38px 90px -46px rgba(0, 0, 0, 0.98), inset 0 1px 0 rgba(255, 255, 255, 0.09),
-    inset 0 -20px 60px -46px rgba(45, 168, 255, 0.06), inset 0 0 0 1px rgba(45, 168, 255, 0.04);
+.surface-elevated {
+  @apply rounded-[1.8rem];
+  background: linear-gradient(180deg, rgba(19, 41, 68, 0.95), rgba(10, 23, 38, 0.99));
+  box-shadow: 0 28px 72px -44px rgba(0, 0, 0, 0.72), 0 14px 32px -24px rgba(26, 215, 241, 0.2);
+  transition: transform 300ms ease, box-shadow 300ms ease, background 300ms ease;
 }
 
-.global-panel {
-  @apply rounded-[1.75rem] border backdrop-blur-xl;
-  background: rgba(9, 13, 19, 0.92);
-  border-color: rgba(215, 238, 255, 0.18);
-  box-shadow: 0 44px 120px -70px rgba(0, 0, 0, 1), inset 0 1px 0 rgba(255, 255, 255, 0.09),
-    inset 0 -40px 90px -70px rgba(29, 214, 202, 0.08), inset 0 0 100px rgba(108, 99, 255, 0.03);
+.surface-elevated:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 34px 84px -46px rgba(0, 0, 0, 0.78), 0 16px 36px -28px rgba(31, 140, 255, 0.18);
 }
 
-.atlas-panel {
-  @apply rounded-[2rem] border backdrop-blur-xl;
-  background: linear-gradient(180deg, rgba(14, 25, 56, 0.88), rgba(6, 11, 25, 0.97));
-  border-color: rgba(215, 238, 255, 0.18);
-  box-shadow: 0 42px 140px -64px rgba(0, 0, 0, 1), inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    inset 0 0 120px rgba(45, 168, 255, 0.08);
+.surface-flat {
+  @apply rounded-[1.6rem];
+  background: linear-gradient(180deg, rgba(42, 155, 255, 0.08), rgba(26, 215, 241, 0.03));
+}
+
+.glass-panel,
+.lux-panel,
+.global-panel,
+.atlas-panel,
+.luminous-panel,
+.luminous-dark-panel {
+  border: none;
+}
+
+.glass-panel,
+.lux-panel,
+.global-panel,
+.atlas-panel,
+.luminous-panel,
+.luminous-dark-panel {
+  background: linear-gradient(180deg, rgba(17, 37, 62, 0.94), rgba(10, 23, 38, 0.98));
+  box-shadow: 0 28px 72px -44px rgba(0, 0, 0, 0.72), 0 12px 28px -24px rgba(17, 199, 232, 0.16);
+}
+
+.section-open {
+  position: relative;
+}
+
+.section-open::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0));
+  pointer-events: none;
 }
 
 .intel-grid {
@@ -96,11 +124,11 @@ a {
 
 .signal-divider {
   height: 1px;
-  background: linear-gradient(90deg, rgba(45, 168, 255, 0), rgba(45, 168, 255, 0.7), rgba(29, 214, 202, 0.72), rgba(255, 104, 203, 0.42), rgba(45, 168, 255, 0));
+  background: linear-gradient(90deg, rgba(31, 140, 255, 0), rgba(31, 140, 255, 0.72), rgba(17, 199, 232, 0.7), rgba(107, 92, 255, 0.46), rgba(31, 140, 255, 0));
 }
 
 .section-pad {
-  @apply py-24 sm:py-28;
+  @apply py-16 sm:py-20;
 }
 
 .eyebrow {
@@ -112,21 +140,19 @@ a {
 }
 
 .section-copy {
-  @apply mt-4 text-sm leading-relaxed text-slate-300 sm:text-base;
+  @apply mt-4 text-sm leading-relaxed text-slate-200 sm:text-base;
 }
 
 .btn-primary {
-  @apply inline-flex items-center justify-center rounded-full border px-6 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:brightness-105;
-  border-color: rgba(215, 238, 255, 0.22);
-  background: #1f7cf1;
-  box-shadow: 0 22px 40px -22px rgba(31, 124, 241, 0.72);
+  @apply inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:brightness-105;
+  background: linear-gradient(135deg, #2a9bff, #1ad7f1);
+  box-shadow: 0 20px 42px -22px rgba(26, 215, 241, 0.54);
 }
 
 .btn-secondary {
   @apply inline-flex items-center justify-center rounded-full border px-6 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5;
-  border-color: rgba(215, 238, 255, 0.18);
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(14px);
+  border-color: rgba(122, 104, 255, 0.54);
+  background: rgba(122, 104, 255, 0.1);
 }
 
 .surface-outline {
@@ -136,32 +162,31 @@ a {
 }
 
 .city-chip {
-  @apply rounded-full border px-2.5 py-1 text-[11px] uppercase tracking-[0.14em] text-signal2;
-  background: rgba(45, 168, 255, 0.12);
-  border-color: rgba(215, 238, 255, 0.22);
+  @apply rounded-full px-2.5 py-1 text-[11px] uppercase tracking-[0.14em];
+  color: var(--secondary-soft);
+  background: rgba(122, 104, 255, 0.22);
 }
 
 .global-chip {
-  @apply rounded-full border px-2.5 py-1 text-[11px] uppercase tracking-[0.14em] text-globe2;
-  background: rgba(29, 214, 202, 0.12);
-  border-color: rgba(29, 214, 202, 0.26);
+  @apply rounded-full px-2.5 py-1 text-[11px] uppercase tracking-[0.14em];
+  color: var(--accent-soft);
+  background: rgba(26, 215, 241, 0.22);
 }
 
 .country-chip {
-  @apply inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] uppercase tracking-[0.12em] text-white;
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(215, 238, 255, 0.18);
+  @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] uppercase tracking-[0.12em] text-white;
+  background: rgba(34, 197, 94, 0.18);
 }
 
 .field-input {
   @apply mt-1 w-full rounded-2xl border px-3 py-2.5 text-slate-100 outline-none transition duration-300;
-  border-color: rgba(215, 238, 255, 0.14);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.025));
+  border-color: rgba(31, 140, 255, 0.22);
+  background: linear-gradient(180deg, rgba(17, 37, 62, 0.92), rgba(10, 23, 38, 0.98));
 }
 
 .field-input:focus {
-  border-color: rgba(45, 168, 255, 0.42);
-  box-shadow: 0 0 0 1px rgba(45, 168, 255, 0.18);
+  border-color: rgba(17, 199, 232, 0.48);
+  box-shadow: 0 0 0 1px rgba(17, 199, 232, 0.18);
 }
 
 .section-orbit {
@@ -174,70 +199,6 @@ a {
   inset: -12% 8% auto;
   height: 24rem;
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(45, 168, 255, 0.16), rgba(29, 214, 202, 0.08) 38%, transparent 70%);
-  filter: blur(40px);
+  background: radial-gradient(circle, rgba(31, 140, 255, 0.16), rgba(17, 199, 232, 0.08) 38%, transparent 70%);
   pointer-events: none;
-}
-
-.map-sweep {
-  animation: map-sweep 11s linear infinite;
-}
-
-.aurora-drift {
-  animation: aurora-drift 18s ease-in-out infinite;
-}
-
-.float-drift {
-  animation: float-drift 8s ease-in-out infinite;
-}
-
-.glow-pulse {
-  animation: glow-pulse 3.8s ease-in-out infinite;
-}
-
-@keyframes map-sweep {
-  0% {
-    transform: translateX(-16%) rotate(-8deg);
-    opacity: 0;
-  }
-  15%,
-  80% {
-    opacity: 0.75;
-  }
-  100% {
-    transform: translateX(28%) rotate(-8deg);
-    opacity: 0;
-  }
-}
-
-@keyframes aurora-drift {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  50% {
-    transform: translate3d(1.5%, -1.5%, 0) scale(1.04);
-  }
-}
-
-@keyframes float-drift {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-@keyframes glow-pulse {
-  0%,
-  100% {
-    opacity: 0.45;
-    box-shadow: 0 0 0 rgba(45, 168, 255, 0);
-  }
-  50% {
-    opacity: 1;
-    box-shadow: 0 0 28px rgba(45, 168, 255, 0.35);
-  }
 }

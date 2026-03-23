@@ -25,11 +25,11 @@ export function HomeGlobalCoordinationNetwork({ stats, regions }: HomeGlobalCoor
   };
 
   return (
-    <section className="section-pad relative overflow-hidden py-18 sm:py-22 lg:py-24">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_20%,rgba(54,168,255,0.12),transparent_18%),radial-gradient(circle_at_86%_26%,rgba(255,104,203,0.08),transparent_16%),linear-gradient(180deg,rgba(4,18,31,0.02),rgba(3,10,16,0.9))]" />
+    <section className="relative overflow-hidden bg-[linear-gradient(180deg,rgba(4,12,20,0),rgba(4,12,20,0.46)_18%,rgba(3,8,15,0.88)_100%)] py-24 sm:py-28 lg:py-32">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_20%,rgba(42,155,255,0.16),transparent_18%),radial-gradient(circle_at_86%_26%,rgba(122,104,255,0.08),transparent_16%),linear-gradient(180deg,rgba(4,18,31,0.02),rgba(3,10,16,0.96))]" />
 
       <div className="container-shell relative">
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,0.72fr)_minmax(460px,1.28fr)] lg:items-center">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,0.62fr)_minmax(520px,1.38fr)] lg:items-center">
           <div className="max-w-xl pt-4 sm:pt-6 lg:pt-10">
             <p className="eyebrow">Global Activity View</p>
             <h2 className="mt-5 font-[var(--font-serif)] text-4xl leading-[1.02] text-white sm:text-5xl lg:text-[4.2rem]">
@@ -52,7 +52,7 @@ export function HomeGlobalCoordinationNetwork({ stats, regions }: HomeGlobalCoor
               </span>
             </div>
 
-            <div className="mt-10 rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.07),rgba(255,255,255,0.03))] p-4 backdrop-blur-md">
+            <div className="mt-10 rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] p-4 backdrop-blur-md">
               <div className="city-chip w-fit px-4 py-1.5 text-[11px] tracking-[0.18em]">
                 Regional priority
               </div>

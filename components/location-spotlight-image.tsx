@@ -36,6 +36,15 @@ function createSkyline(seed: number, width: number, height: number) {
   return bars;
 }
 
+function createSignalRoute(seed: number, width: number, height: number) {
+  const points = Array.from({ length: 5 }, (_, index) => ({
+    x: 44 + index * ((width - 88) / 4),
+    y: 34 + ((seed + index * 29) % Math.max(42, height - 68))
+  }));
+
+  return points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`).join(' ');
+}
+
 export function LocationSpotlightImage({
   city,
   country,
@@ -49,17 +58,19 @@ export function LocationSpotlightImage({
   const width = 560;
   const height = compact ? 168 : 248;
   const skyline = createSkyline(seed, width, compact ? 90 : 132);
+  const signalRoute = createSignalRoute(seed, width, compact ? 88 : 124);
 
   return (
     <div
       className={`relative overflow-hidden rounded-[1.8rem] border border-white/12 ${compact ? 'h-[11rem]' : 'h-[16rem] sm:h-[18rem]'} ${className}`}
       style={{
-        backgroundImage: `radial-gradient(circle at 16% 18%, ${palette.glow}, transparent 22%), radial-gradient(circle at 84% 16%, ${palette.glow2}, transparent 18%), linear-gradient(180deg, rgba(11,18,31,0.88), rgba(6,10,18,0.98))`
+        backgroundImage: `radial-gradient(circle at 16% 18%, ${palette.glow}, transparent 22%), radial-gradient(circle at 84% 16%, ${palette.glow2}, transparent 18%), linear-gradient(180deg, rgba(8,17,31,0.82), rgba(7,14,24,0.96) 56%, rgba(8,20,19,0.98))`
       }}
     >
-      <div className="pointer-events-none absolute inset-0 geo-grid opacity-[0.16]" />
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent_26%,transparent_72%,rgba(255,255,255,0.04))]" />
+      <div className="pointer-events-none absolute inset-0 geo-grid opacity-[0.12]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),transparent_24%,transparent_70%,rgba(255,255,255,0.03))]" />
       <div className="pointer-events-none absolute left-[8%] top-[14%] h-2 w-2 rounded-full bg-white/75 shadow-[0_0_20px_4px_rgba(184,228,255,0.12)]" />
+      <div className="pointer-events-none absolute right-[10%] top-[16%] h-28 w-28 rounded-full bg-white/[0.03] blur-3xl" />
 
       <svg viewBox={`0 0 ${width} ${height}`} className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true">
         <defs>
@@ -73,6 +84,20 @@ export function LocationSpotlightImage({
             <rect key={`${bar.x}-${index}`} x={bar.x} y={height - bar.height} width={bar.width} height={bar.height} rx="3" />
           ))}
         </g>
+        <path d={signalRoute} fill="none" stroke={palette.line} strokeOpacity="0.72" strokeWidth="2.4" strokeLinecap="round" strokeDasharray="6 8" />
+        {signalRoute
+          .replace(/[ML]/g, '')
+          .trim()
+          .split(' ')
+          .reduce<Array<{ x: number; y: number }>>((points, value, index, array) => {
+            if (index % 2 === 0) {
+              points.push({ x: Number(value), y: Number(array[index + 1]) });
+            }
+            return points;
+          }, [])
+          .map((point, index) => (
+            <circle key={`${point.x}-${index}`} cx={point.x} cy={point.y} r="4.5" fill={palette.line} fillOpacity="0.2" />
+          ))}
         <line x1="0" x2={width} y1={height - 26} y2={height - 26} stroke={palette.line} strokeOpacity="0.5" />
         <rect x="0" y={height - 24} width={width} height="24" fill="rgba(3,16,24,0.92)" />
       </svg>
@@ -86,14 +111,14 @@ export function LocationSpotlightImage({
             <span>{country}</span>
           </span>
           <span className="global-chip">{region}</span>
-          <span className="city-chip">location fallback</span>
+          <span className="city-chip">destination focus</span>
         </div>
 
         <div>
           {title ? <p className="text-[11px] uppercase tracking-[0.24em] text-slate-300">{title}</p> : null}
           <p className={`mt-2 font-[var(--font-serif)] leading-none text-white ${compact ? 'text-3xl' : 'text-4xl sm:text-5xl'}`}>{city}</p>
           <p className="mt-2 max-w-md text-sm uppercase tracking-[0.26em] text-slate-300">
-            Editorial destination surface
+            Curated city signal
           </p>
         </div>
       </div>

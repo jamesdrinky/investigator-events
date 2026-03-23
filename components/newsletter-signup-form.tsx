@@ -13,7 +13,7 @@ const initialState: NewsletterFormState = {
 };
 
 function inputClasses() {
-  return 'h-11 rounded-full border border-white/12 bg-[linear-gradient(180deg,rgba(12,19,30,0.96),rgba(7,12,21,0.98))] px-4 text-sm text-slate-100 outline-none transition duration-200 focus:border-signal';
+  return 'h-11 rounded-full border border-white/12 bg-[linear-gradient(180deg,rgba(12,20,32,0.96),rgba(8,13,22,0.98))] px-4 text-sm text-slate-100 outline-none transition duration-200 focus:border-globe';
 }
 
 function SubmitButton() {
@@ -30,7 +30,8 @@ export function NewsletterSignupForm() {
   const [state, formAction] = useFormState(subscribeToNewsletter, initialState);
 
   return (
-    <form action={formAction} className="grid gap-3">
+    <form action={formAction} className="grid gap-3 rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.025))] p-4 sm:p-5">
+      <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Subscriber preferences</p>
       <div className="grid gap-3 md:grid-cols-[minmax(0,1.2fr)_minmax(0,0.7fr)_minmax(0,0.9fr)_auto]">
         <input type="email" name="email" required placeholder="Email address" className={inputClasses()} />
         <select name="region" defaultValue="" className={inputClasses()}>
@@ -50,6 +51,10 @@ export function NewsletterSignupForm() {
         </select>
         <SubmitButton />
       </div>
+
+      <p className="text-xs text-slate-400">
+        We currently use your email, preferred region, and main interest to shape future updates and event alerts.
+      </p>
 
       {state.status === 'success' ? (
         <p className="rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-200">{state.message}</p>

@@ -8,6 +8,7 @@ import { DayPreviewModal } from '@/components/day-preview-modal';
 import { EventCoverMedia } from '@/components/event-cover-media';
 import { EventModal } from '@/components/event-modal';
 import { FilterBar } from '@/components/filter-bar';
+import { SaveDateLinks } from '@/components/save-date-links';
 import type { EventItem } from '@/lib/data/events';
 import { formatEventDate, formatMonthLabel, getEventDurationDays, getMonthKey, sortEventsByDate } from '@/lib/utils/date';
 import { getEventSlug } from '@/lib/utils/event-slugs';
@@ -129,14 +130,14 @@ export function CalendarView({ events, initialAssociation }: CalendarViewProps) 
   }, [activeMonth]);
 
   return (
-    <div className="space-y-7">
+    <div className="space-y-5">
       <motion.section
-        className="global-panel relative overflow-hidden p-5 sm:p-6"
+        className="surface-flat relative overflow-hidden p-5 sm:p-6"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),transparent_24%,rgba(255,255,255,0.02))]" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent_24%,rgba(36,212,199,0.035))]" />
         <div className="relative">
           <p className="eyebrow">Calendar Overview</p>
           <p className="section-copy mt-3 max-w-4xl">
@@ -144,8 +145,8 @@ export function CalendarView({ events, initialAssociation }: CalendarViewProps) 
             opens up to secondary meetings when you need the wider schedule.
           </p>
 
-          <div className="mt-5 grid gap-3 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="rounded-[1.4rem] border border-white/10 bg-white/[0.03] p-4">
+          <div className="mt-4 grid gap-3 lg:grid-cols-[1.1fr_0.9fr]">
+            <div className="surface-flat p-4">
               <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Current view</p>
               <p className="mt-2 text-base text-white">{eventScopeLabel}</p>
               <p className="mt-2 text-sm text-slate-300">
@@ -153,7 +154,7 @@ export function CalendarView({ events, initialAssociation }: CalendarViewProps) 
                 windows.
               </p>
             </div>
-            <div className="rounded-[1.4rem] border border-white/10 bg-white/[0.03] p-4">
+            <div className="surface-flat p-4">
               <div className="flex flex-wrap gap-2">
                 {highlightedCountries.map((country) => (
                   <span key={country} className="city-chip">
@@ -222,14 +223,20 @@ export function CalendarView({ events, initialAssociation }: CalendarViewProps) 
                           return (
                             <article
                               key={event.id}
-                              className="lux-panel group relative overflow-hidden p-4 transition duration-300 hover:-translate-y-0.5 hover:border-white/22 sm:p-5"
+                              className={`relative overflow-hidden rounded-[1.9rem] p-4 transition duration-300 sm:p-5 ${
+                                event.featured ? 'surface-cinematic' : 'surface-elevated'
+                              }`}
                             >
-                              <div className="relative grid gap-4 lg:grid-cols-[11rem_minmax(0,1fr)_auto] lg:items-start">
-                                <div className="rounded-[1.35rem] border border-white/10 bg-white/[0.03] px-4 py-4">
+                              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),transparent_26%,rgba(36,212,199,0.03))]" />
+                              <div className="relative grid gap-4 lg:grid-cols-[11rem_minmax(0,1fr)_12rem] lg:items-start">
+                                <div className="surface-flat rounded-[1.45rem] px-4 py-4">
                                   <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">{formatMonthLabel(monthKey)}</p>
                                   <p className="mt-3 text-lg font-semibold text-white">{formatEventDate(event)}</p>
                                   <div className="mt-4 flex flex-wrap gap-2">
                                     <span className="global-chip">{event.region}</span>
+                                    <span className="city-chip">
+                                      {durationDays} day{durationDays === 1 ? '' : 's'}
+                                    </span>
                                   </div>
                                 </div>
 
@@ -250,14 +257,17 @@ export function CalendarView({ events, initialAssociation }: CalendarViewProps) 
                                   <div className="flex flex-wrap gap-2">
                                     <span className="city-chip">{event.association ?? event.organiser}</span>
                                     <span className="city-chip">{event.category}</span>
-                                    <span className="city-chip">
-                                      {durationDays} day{durationDays === 1 ? '' : 's'}
-                                    </span>
+                                    {event.featured ? <span className="global-chip">Featured</span> : null}
                                   </div>
 
-                                  <p className="line-clamp-3 text-sm leading-relaxed text-slate-300">
+                                  <p className="text-sm leading-relaxed text-slate-300">
                                     {event.description || 'Open the event record for organiser details, dates, and the official source link.'}
                                   </p>
+
+                                  <div className="flex flex-wrap items-center gap-3 pt-1">
+                                    <SaveDateLinks event={event} compact />
+                                    <span className="text-xs uppercase tracking-[0.16em] text-slate-500">Keep the date in your own calendar</span>
+                                  </div>
                                 </div>
 
                                 <div className="flex flex-col gap-4 lg:items-end">
@@ -274,16 +284,16 @@ export function CalendarView({ events, initialAssociation }: CalendarViewProps) 
                                     priorityLabel={event.featured ? 'Featured event' : event.category}
                                   />
                                   <div className="flex flex-wrap gap-3 lg:justify-end">
-                                  <button
-                                    type="button"
-                                    onClick={() => setSelectedEvent(event)}
-                                    className="btn-primary px-5 py-2.5"
-                                  >
-                                    Preview event
-                                  </button>
-                                  <Link href={`/events/${getEventSlug(event)}`} className="btn-secondary px-5 py-2.5">
-                                    Open event page
-                                  </Link>
+                                    <button
+                                      type="button"
+                                      onClick={() => setSelectedEvent(event)}
+                                      className="btn-primary px-5 py-2.5"
+                                    >
+                                      Preview event
+                                    </button>
+                                    <Link href={`/events/${getEventSlug(event)}`} className="btn-secondary px-5 py-2.5">
+                                      Open event page
+                                    </Link>
                                   </div>
                                 </div>
                               </div>
@@ -300,7 +310,7 @@ export function CalendarView({ events, initialAssociation }: CalendarViewProps) 
           <motion.div key="calendar" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.22 }}>
             {activeMonth ? (
               <section className="space-y-4">
-                <div className="global-panel relative overflow-hidden p-4 sm:p-5">
+                <div className="surface-elevated relative overflow-hidden p-4 sm:p-5">
                   <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.028),transparent_44%,rgba(255,255,255,0.018))]" />
                   <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div>
@@ -368,7 +378,7 @@ export function CalendarView({ events, initialAssociation }: CalendarViewProps) 
       </AnimatePresence>
 
       {shouldShowEmptyState && (
-        <motion.div className="global-panel relative overflow-hidden p-8 text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <motion.div className="surface-flat relative overflow-hidden p-8 text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <h3 className="text-lg font-semibold text-white">
             {events.length === 0 ? 'No live events yet' : 'No events match this view'}
           </h3>

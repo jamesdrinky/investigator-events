@@ -30,6 +30,11 @@ export function Footer() {
               </Link>
             </li>
             <li>
+              <Link href="/associations" className="hover:text-signal2">
+                Associations
+              </Link>
+            </li>
+            <li>
               <Link href="/submit-event" className="hover:text-signal2">
                 Submit Event
               </Link>

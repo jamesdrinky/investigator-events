@@ -1,17 +1,17 @@
 import { access } from 'fs/promises';
 import { constants } from 'fs';
 import path from 'path';
-import { getCityHeroImageUrl, getTrustedCityHeroSlug } from '@/lib/utils/city-media';
+import { getCityHeroImageUrl, getTrustedCityHeroAsset, getTrustedCityHeroSlug } from '@/lib/utils/city-media';
 
 export async function hasCityHeroImage(city: string): Promise<boolean> {
-  const slug = getTrustedCityHeroSlug(city);
+  const asset = getTrustedCityHeroAsset(city);
 
-  if (!slug) {
+  if (!asset) {
     return false;
   }
 
   try {
-    await access(path.join(process.cwd(), 'public', 'cities', slug, 'hero.jpg'), constants.F_OK);
+    await access(path.join(process.cwd(), 'public', 'cities', asset.slug, asset.fileName), constants.F_OK);
     return true;
   } catch {
     return false;

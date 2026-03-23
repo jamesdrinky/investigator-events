@@ -20,9 +20,9 @@ export default async function CalendarPage({
       <PageAtmosphere />
       <div className="container-shell">
         <Reveal>
-          <header className="mb-10 global-panel relative overflow-hidden p-6 sm:p-8 lg:p-10">
+          <header className="mb-6 relative overflow-hidden rounded-[2.2rem] border border-white/12 bg-[linear-gradient(135deg,rgba(21,58,100,0.9),rgba(13,24,39,0.94)_34%,rgba(16,88,92,0.82)_100%)] p-6 sm:p-8 lg:p-10">
             <div className="pointer-events-none absolute inset-0 geo-grid opacity-[0.08]" />
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(139,169,255,0.18),transparent_30%),radial-gradient(circle_at_82%_22%,rgba(127,228,199,0.12),transparent_24%)]" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(139,169,255,0.22),transparent_30%),radial-gradient(circle_at_82%_22%,rgba(127,228,199,0.16),transparent_24%)]" />
             <div className="relative">
               <p className="eyebrow">Global Calendar</p>
               <h1 className="section-title">Investigator Events Calendar</h1>
@@ -46,8 +46,8 @@ export default async function CalendarPage({
         </Reveal>
 
         <Reveal delay={0.04}>
-          <section className="mb-10 grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
-            <article className="lux-panel relative overflow-hidden p-5 sm:p-6">
+          <section className="mb-6 grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
+            <article className="surface-flat relative overflow-hidden p-5 sm:p-6">
               <div className="pointer-events-none absolute inset-0 geo-grid opacity-[0.08]" />
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_18%,rgba(139,169,255,0.14),transparent_28%),radial-gradient(circle_at_80%_68%,rgba(127,228,199,0.08),transparent_24%)]" />
               <div className="relative">
@@ -64,7 +64,7 @@ export default async function CalendarPage({
               </div>
             </article>
 
-            <article className="lux-panel relative overflow-hidden p-5 sm:p-6">
+            <article className="surface-elevated relative overflow-hidden p-5 sm:p-6">
               <div className="relative grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
                 <div className="rounded-xl border border-white/12 bg-[linear-gradient(180deg,rgba(77,163,255,0.14),rgba(255,255,255,0.03))] p-4">
                   <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Region-first view</p>

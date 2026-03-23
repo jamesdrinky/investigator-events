@@ -29,7 +29,7 @@ export function DayPreviewModal({ date, events, onClose, onPreviewEvent }: DayPr
     <AnimatePresence>
       {open ? (
         <motion.div
-          className="fixed inset-0 z-[72] flex items-end justify-center bg-slate-950/72 p-3 backdrop-blur-[6px] sm:items-center sm:p-6"
+          className="fixed inset-0 z-[72] flex items-end justify-center bg-slate-950/78 p-3 sm:items-center sm:p-6"
           role="dialog"
           aria-modal="true"
           aria-label={date ? `Events on ${dayDetailFormatter.format(new Date(`${date}T00:00:00Z`))}` : 'Selected date events'}
@@ -40,7 +40,7 @@ export function DayPreviewModal({ date, events, onClose, onPreviewEvent }: DayPr
           transition={{ duration: 0.18 }}
         >
           <motion.article
-            className="lux-panel max-h-[88vh] w-full max-w-4xl overflow-y-auto p-5 sm:p-6"
+            className="surface-elevated max-h-[88vh] w-full max-w-4xl overflow-y-auto p-5 sm:p-6"
             onClick={(e) => e.stopPropagation()}
             initial={{ y: 20, opacity: 0, scale: 0.985 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
@@ -70,7 +70,7 @@ export function DayPreviewModal({ date, events, onClose, onPreviewEvent }: DayPr
               {events.map((event) => (
                 <article
                   key={`${date}-${event.id}`}
-                  className="rounded-[1.45rem] border border-white/10 bg-white/[0.035] p-4 sm:p-5"
+                  className="surface-flat p-4 sm:p-5"
                 >
                   <div className="grid gap-4 lg:grid-cols-[14rem_minmax(0,1fr)]">
                     <EventCoverMedia
@@ -104,7 +104,7 @@ export function DayPreviewModal({ date, events, onClose, onPreviewEvent }: DayPr
                         <span className="city-chip">{event.category}</span>
                       </div>
 
-                      <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-slate-300">
+                      <p className="mt-4 text-sm leading-relaxed text-slate-300">
                         {event.description || 'Open the full event record for organiser details, dates, and the official source link.'}
                       </p>
 

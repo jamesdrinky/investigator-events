@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
 import { EventCoverMedia } from '@/components/event-cover-media';
+import { SaveDateLinks } from '@/components/save-date-links';
 import type { EventItem } from '@/lib/data/events';
 import { formatEventDate } from '@/lib/utils/date';
 import { getEventSlug } from '@/lib/utils/event-slugs';
@@ -17,7 +18,7 @@ export function EventModal({ event, onClose }: EventModalProps) {
     <AnimatePresence>
       {event ? (
         <motion.div
-          className="fixed inset-0 z-[70] flex items-end justify-center bg-slate-950/72 p-3 backdrop-blur-sm sm:items-center"
+          className="fixed inset-0 z-[70] flex items-end justify-center bg-slate-950/78 p-3 sm:items-center"
           role="dialog"
           aria-modal="true"
           aria-label={`${event.title} details`}
@@ -28,7 +29,7 @@ export function EventModal({ event, onClose }: EventModalProps) {
           transition={{ duration: 0.2 }}
         >
           <motion.article
-            className="lux-panel max-h-[90vh] w-full max-w-xl overflow-y-auto p-6"
+            className="surface-elevated max-h-[90vh] w-full max-w-xl overflow-y-auto p-6"
             onClick={(e) => e.stopPropagation()}
             initial={{ y: 28, opacity: 0, scale: 0.98 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
@@ -105,6 +106,7 @@ export function EventModal({ event, onClose }: EventModalProps) {
               >
                 Open Event Page
               </Link>
+              <SaveDateLinks event={event} />
             </div>
           </motion.article>
         </motion.div>

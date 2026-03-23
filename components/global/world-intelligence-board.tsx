@@ -37,11 +37,12 @@ function createPath(from: { x: number; y: number }, to: { x: number; y: number }
 
 export function WorldIntelligenceBoard({ regions }: WorldIntelligenceBoardProps) {
   const reduceMotion = useReducedMotion();
+  const visibleRegions = regions.filter((region) => region.eventCount > 0).slice(0, 4);
 
   return (
-    <div className="relative min-h-[28rem] overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(9,20,44,0.92),rgba(4,10,22,0.97))] p-5 sm:min-h-[32rem] sm:p-6">
-      <div className="pointer-events-none absolute inset-0 geo-grid opacity-[0.06]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_14%_18%,rgba(54,168,255,0.22),transparent_22%),radial-gradient(circle_at_82%_18%,rgba(255,104,203,0.1),transparent_18%),radial-gradient(circle_at_52%_80%,rgba(29,214,202,0.08),transparent_26%)]" />
+    <div className="relative min-h-[34rem] overflow-hidden rounded-[2.2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(8,20,40,0.96),rgba(2,7,16,0.99))] p-5 shadow-[0_48px_120px_-72px_rgba(42,155,255,0.42)] sm:min-h-[40rem] sm:p-7">
+      <div className="pointer-events-none absolute inset-0 geo-grid opacity-[0.07]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_14%_18%,rgba(42,155,255,0.26),transparent_22%),radial-gradient(circle_at_82%_18%,rgba(122,104,255,0.12),transparent_18%),radial-gradient(circle_at_52%_80%,rgba(26,215,241,0.1),transparent_26%)]" />
       <div className="pointer-events-none absolute left-[6%] top-[6%] h-[54%] w-[88%] opacity-[0.14]">
         <WorldMapMotif />
       </div>
@@ -49,9 +50,9 @@ export function WorldIntelligenceBoard({ regions }: WorldIntelligenceBoardProps)
       <svg viewBox="0 0 100 62" className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true">
         <defs>
           <linearGradient id="board-route" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="rgba(77,163,255,0.08)" />
-            <stop offset="48%" stopColor="rgba(184,228,255,0.62)" />
-            <stop offset="100%" stopColor="rgba(52,211,153,0.18)" />
+            <stop offset="0%" stopColor="rgba(77,163,255,0.18)" />
+            <stop offset="48%" stopColor="rgba(214,236,255,0.78)" />
+            <stop offset="100%" stopColor="rgba(26,215,241,0.3)" />
           </linearGradient>
         </defs>
 
@@ -72,9 +73,9 @@ export function WorldIntelligenceBoard({ regions }: WorldIntelligenceBoardProps)
                 d={path}
                 fill="none"
                 stroke="url(#board-route)"
-                strokeWidth="0.42"
+                strokeWidth={index === 0 || index === 3 ? '0.62' : '0.46'}
                 initial={{ pathLength: 0.04, opacity: 0.08 }}
-                animate={reduceMotion ? { pathLength: 1, opacity: 0.3 } : { pathLength: 1, opacity: [0.16, 0.72, 0.16] }}
+                animate={reduceMotion ? { pathLength: 1, opacity: 0.36 } : { pathLength: 1, opacity: [0.2, 0.88, 0.2] }}
                 transition={
                   reduceMotion
                     ? { duration: 0.8, ease: 'easeOut' }
@@ -85,7 +86,7 @@ export function WorldIntelligenceBoard({ regions }: WorldIntelligenceBoardProps)
                 d={path}
                 fill="none"
                 stroke="rgba(210,255,236,0.82)"
-                strokeWidth="0.65"
+                strokeWidth={index === 0 || index === 3 ? '0.82' : '0.68'}
                 pathLength={0.14}
                 initial={{ pathOffset: 1, opacity: 0 }}
                 animate={reduceMotion ? { pathOffset: 0.18, opacity: 0.2 } : { pathOffset: [1, 0.18, 0], opacity: [0, 1, 0] }}
@@ -99,7 +100,7 @@ export function WorldIntelligenceBoard({ regions }: WorldIntelligenceBoardProps)
           );
         })}
 
-        {regions.map((region, index) => {
+        {visibleRegions.map((region, index) => {
           const point = regionNodes[region.name];
           const share = Math.max(region.share, 0.08);
 
@@ -126,7 +127,7 @@ export function WorldIntelligenceBoard({ regions }: WorldIntelligenceBoardProps)
         })}
       </svg>
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[34%] bg-[linear-gradient(to_top,rgba(3,10,16,0.94),rgba(3,10,16,0.22),transparent)]" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[28%] bg-[linear-gradient(to_top,rgba(3,10,16,0.94),rgba(3,10,16,0.18),transparent)]" />
 
       <div className="relative flex h-full flex-col justify-between">
         <div className="flex items-start justify-between gap-3">
@@ -141,18 +142,16 @@ export function WorldIntelligenceBoard({ regions }: WorldIntelligenceBoardProps)
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          {regions
-            .filter((region) => region.eventCount > 0)
-            .map((region) => (
-              <div key={region.name} className="rounded-[1.4rem] border border-white/10 bg-black/24 px-4 py-4 backdrop-blur-md">
+        <div className="mt-10 grid gap-3 sm:grid-cols-2">
+          {visibleRegions.map((region) => (
+              <div key={region.name} className="rounded-[1.4rem] border border-white/10 bg-black/22 px-4 py-4 backdrop-blur-md">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">{region.name}</p>
                     <p className="mt-2 font-[var(--font-serif)] text-3xl leading-none text-white">{region.eventCount}</p>
                     <p className="mt-2 text-xs uppercase tracking-[0.18em] text-slate-500">{region.countryCount} countries active</p>
                   </div>
-                  <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-slate-300">
+                  <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-slate-200">
                     {Math.round(region.share * 100)}%
                   </div>
                 </div>

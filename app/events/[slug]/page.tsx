@@ -6,6 +6,7 @@ import { EventCard } from '@/components/event-card';
 import { PageAtmosphere } from '@/components/global/page-atmosphere';
 import { LocationSignature } from '@/components/location-signature';
 import { Reveal } from '@/components/motion/reveal';
+import { SaveDateLinks } from '@/components/save-date-links';
 import { fetchAllEvents, fetchEventBySlug } from '@/lib/data/events';
 import { formatEventDate, parseDate } from '@/lib/utils/date';
 import { getCityHeroDownloadMeta, hasCityHeroImage } from '@/lib/utils/city-media.server';
@@ -98,6 +99,7 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
                 <Link href="/calendar" className="btn-secondary px-5 py-2.5">
                   Return to Calendar
                 </Link>
+                <SaveDateLinks event={event} />
                 {heroDownload ? (
                   <a href={heroDownload.url} download={heroDownload.filename} className="btn-secondary px-5 py-2.5">
                     Download Event Media

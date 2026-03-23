@@ -1,8 +1,8 @@
 const curatedCityHeroSlugMap: Record<string, string | null> = {
-  'Philadelphia, United States': null,
-  Philadelphia: null,
-  'Philadelphia, PA': null,
-  'Philadelphia, Pennsylvania': null,
+  'Philadelphia, United States': 'philadelphia-pa',
+  Philadelphia: 'philadelphia-pa',
+  'Philadelphia, PA': 'philadelphia-pa',
+  'Philadelphia, Pennsylvania': 'philadelphia-pa',
   'National Harbor': 'national-harbor-md',
   'San Antonio': 'san-antonio-tx',
   'San Jose': 'san-jose',
@@ -20,7 +20,7 @@ const curatedCityHeroSlugMap: Record<string, string | null> = {
   'Cathedral City': 'cathedral-city-ca'
 };
 
-const blockedCityHeroSlugs = new Set(['philadelphia', 'philadelphia-pa', 'philadelphia-pennsylvania']);
+const blockedCityHeroSlugs = new Set<string>();
 
 export function getCitySlug(city: string): string {
   return city
@@ -33,18 +33,12 @@ export function getCitySlug(city: string): string {
 }
 
 export function getCityHeroImageUrl(city: string): string | null {
-  const mapped = curatedCityHeroSlugMap[city];
-
-  if (mapped === null) {
+  const asset = getTrustedCityHeroAsset(city);
+  if (!asset) {
     return null;
   }
 
-  const slug = mapped ?? getCitySlug(city);
-  if (!slug || blockedCityHeroSlugs.has(slug)) {
-    return null;
-  }
-
-  return `/cities/${slug}/hero.jpg`;
+  return `/cities/${asset.slug}/${asset.fileName}`;
 }
 
 export function getTrustedCityHeroSlug(city: string): string | null {
@@ -61,4 +55,18 @@ export function getTrustedCityHeroSlug(city: string): string | null {
   }
 
   return slug;
+}
+
+export function getTrustedCityHeroAsset(city: string): { slug: string; fileName: string } | null {
+  const slug = getTrustedCityHeroSlug(city);
+
+  if (!slug) {
+    return null;
+  }
+
+  if (slug === 'philadelphia-pa') {
+    return { slug, fileName: 'filly.jpg' };
+  }
+
+  return { slug, fileName: 'hero.jpg' };
 }

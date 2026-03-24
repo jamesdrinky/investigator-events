@@ -13,7 +13,7 @@ const initialState: NewsletterFormState = {
 };
 
 function inputClasses() {
-  return 'h-13 rounded-[1.15rem] border border-white/80 bg-white/92 px-4 text-sm text-slate-800 outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] transition duration-200 focus:border-sky-400 focus:ring-2 focus:ring-sky-100';
+  return 'h-13 rounded-[1.15rem] border border-white/80 bg-white/92 px-4 text-sm text-slate-800 outline-none shadow-[0_18px_40px_-34px_rgba(15,23,42,0.16),inset_0_1px_0_rgba(255,255,255,0.8)] transition duration-300 focus:border-sky-400 focus:ring-2 focus:ring-sky-100';
 }
 
 function SubmitButton() {
@@ -23,7 +23,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex h-13 items-center justify-center rounded-[1.15rem] bg-[linear-gradient(135deg,#1668ff,#14b8ff,#645bff)] px-6 py-2.5 text-sm font-semibold text-white shadow-[0_24px_48px_-28px_rgba(22,104,255,0.46)] transition duration-300 hover:-translate-y-0.5 hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
+      className="inline-flex h-13 items-center justify-center rounded-[1.15rem] bg-[linear-gradient(135deg,#1668ff,#14b8ff,#645bff)] px-6 py-2.5 text-sm font-semibold text-white shadow-[0_28px_58px_-28px_rgba(22,104,255,0.48)] transition duration-500 hover:-translate-y-1 hover:scale-[1.01] hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
     >
       {pending ? 'Subscribing...' : 'Subscribe'}
     </button>
@@ -36,8 +36,9 @@ export function NewsletterSignupForm() {
   return (
     <form
       action={formAction}
-      className="grid gap-5 rounded-[2.3rem] border border-white/85 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-5 shadow-[0_34px_96px_-54px_rgba(15,23,42,0.16)] sm:p-6 lg:p-7"
+      className="relative grid gap-5 rounded-[2.3rem] border border-white/85 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-5 shadow-[0_34px_96px_-54px_rgba(15,23,42,0.16)] sm:p-6 lg:p-7"
     >
+      <div className="pointer-events-none absolute inset-0 rounded-[2.3rem] bg-[linear-gradient(135deg,rgba(255,255,255,0.28),rgba(255,255,255,0)_26%,rgba(255,255,255,0.1)_54%,rgba(255,255,255,0)_100%)]" />
       <div className="grid gap-3 lg:grid-cols-2">
         <label className="grid gap-2 text-sm text-slate-600">
           <span>Email</span>

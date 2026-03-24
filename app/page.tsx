@@ -40,6 +40,8 @@ export default async function HomePage() {
 
       <section className="relative overflow-hidden py-24 sm:py-28">
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0),rgba(237,245,255,0.75)_36%,rgba(255,255,255,0))]" />
+        <div className="pointer-events-none absolute left-[8%] top-12 h-48 w-48 rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.14),transparent_72%)] blur-3xl" />
+        <div className="pointer-events-none absolute right-[6%] bottom-10 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(111,86,255,0.12),transparent_72%)] blur-3xl" />
         <div className="container-shell relative">
           <Reveal className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-3xl">
@@ -56,8 +58,9 @@ export default async function HomePage() {
           {leadEvent ? (
             <div className="mt-12 grid gap-6 xl:grid-cols-[minmax(0,1.18fr)_minmax(0,0.82fr)]">
               <Reveal x={-18}>
-                <article className="group relative overflow-hidden rounded-[2.8rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(242,247,255,0.82))] p-5 shadow-[0_44px_120px_-64px_rgba(22,104,255,0.28)] sm:p-7">
+                <article className="group relative overflow-hidden rounded-[2.8rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(242,247,255,0.86))] p-5 shadow-[0_44px_120px_-64px_rgba(22,104,255,0.28)] transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-[0_56px_150px_-70px_rgba(22,104,255,0.34)] sm:p-7">
                   <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(25,112,255,0.14),transparent_26%),radial-gradient(circle_at_84%_14%,rgba(14,182,255,0.14),transparent_20%),radial-gradient(circle_at_72%_82%,rgba(111,86,255,0.1),transparent_24%)]" />
+                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.36),rgba(255,255,255,0)_24%,rgba(255,255,255,0.14)_54%,rgba(255,255,255,0)_100%)] opacity-80" />
                   <div className="relative grid gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-end">
                     <div className="flex h-full flex-col justify-between">
                       <div>
@@ -71,7 +74,9 @@ export default async function HomePage() {
                         <p className="mt-2 text-base text-slate-600">
                           {leadEvent.city}, {leadEvent.country} / {leadEvent.association ?? leadEvent.organiser}
                         </p>
-                        <p className="mt-5 max-w-xl text-sm leading-relaxed text-slate-600">{leadEvent.description || 'A highlighted listing from the global investigator calendar.'}</p>
+                        <p className="mt-5 max-w-xl text-sm leading-relaxed text-slate-600">
+                          {leadEvent.description || 'A highlighted listing from the global investigator calendar.'}
+                        </p>
                       </div>
 
                       <div className="mt-8 flex flex-wrap gap-3">
@@ -103,8 +108,9 @@ export default async function HomePage() {
               <div className="grid gap-6">
                 {supportEvents.map((event, index) => (
                   <Reveal key={event.id} x={18} delay={0.05 + index * 0.05}>
-                    <article className="group relative overflow-hidden rounded-[2.4rem] border border-white/80 bg-white/94 p-5 shadow-[0_34px_96px_-56px_rgba(15,23,42,0.18)] sm:p-6">
+                    <article className="group relative overflow-hidden rounded-[2.4rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-5 shadow-[0_34px_96px_-56px_rgba(15,23,42,0.18)] transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-[0_46px_118px_-62px_rgba(22,104,255,0.26)] sm:p-6">
                       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_88%_18%,rgba(14,182,255,0.11),transparent_22%),radial-gradient(circle_at_16%_84%,rgba(111,86,255,0.08),transparent_22%)]" />
+                      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.28),rgba(255,255,255,0)_32%,rgba(255,255,255,0.12)_56%,rgba(255,255,255,0)_100%)]" />
                       <div className="relative grid gap-5 sm:grid-cols-[10.5rem_minmax(0,1fr)] sm:items-center">
                         <EventCoverMedia
                           title={event.title}
@@ -129,7 +135,7 @@ export default async function HomePage() {
                             <Link href={`/events/${getEventSlug(event)}`} className="btn-secondary px-5 py-2.5">
                               View event
                             </Link>
-                            <a href={event.website} target="_blank" rel="noreferrer" className="text-sm font-semibold text-blue-700 transition hover:text-slate-950">
+                            <a href={event.website} target="_blank" rel="noreferrer" className="premium-link text-sm font-semibold text-blue-700 transition hover:text-slate-950">
                               Official site
                             </a>
                           </div>
@@ -150,6 +156,8 @@ export default async function HomePage() {
 
       <section className="relative overflow-hidden py-24 sm:py-28">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(22,104,255,0.08),transparent_22%),radial-gradient(circle_at_82%_18%,rgba(20,184,255,0.08),transparent_18%),linear-gradient(180deg,rgba(244,248,255,0.5),rgba(255,255,255,0.95))]" />
+        <div className="pointer-events-none absolute left-[4%] top-[12%] h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(20,184,255,0.12),transparent_72%)] blur-3xl" />
+        <div className="pointer-events-none absolute right-[8%] bottom-[10%] h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(111,86,255,0.1),transparent_72%)] blur-3xl" />
         <div className="container-shell relative">
           <Reveal className="grid gap-10 xl:grid-cols-[minmax(0,0.86fr)_minmax(0,1.14fr)] xl:items-end">
             <div className="max-w-xl">
@@ -162,15 +170,15 @@ export default async function HomePage() {
               </p>
 
               <div className="mt-8 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-[1.7rem] border border-white/80 bg-white/88 px-5 py-5 shadow-[0_22px_60px_-40px_rgba(15,23,42,0.16)]">
+                <div className="rounded-[1.7rem] border border-white/80 bg-white/88 px-5 py-5 shadow-[0_22px_60px_-40px_rgba(15,23,42,0.16)] transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-[0_34px_72px_-40px_rgba(36,76,170,0.22)]">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">Visible bodies</p>
                   <p className="mt-2 text-3xl font-semibold tracking-[-0.05em] text-slate-950">{network.length}</p>
                 </div>
-                <div className="rounded-[1.7rem] border border-white/80 bg-white/88 px-5 py-5 shadow-[0_22px_60px_-40px_rgba(15,23,42,0.16)]">
+                <div className="rounded-[1.7rem] border border-white/80 bg-white/88 px-5 py-5 shadow-[0_22px_60px_-40px_rgba(15,23,42,0.16)] transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-[0_34px_72px_-40px_rgba(36,76,170,0.22)]">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">Countries</p>
                   <p className="mt-2 text-3xl font-semibold tracking-[-0.05em] text-slate-950">{coverage.totalCountries}</p>
                 </div>
-                <div className="rounded-[1.7rem] border border-white/80 bg-white/88 px-5 py-5 shadow-[0_22px_60px_-40px_rgba(15,23,42,0.16)]">
+                <div className="rounded-[1.7rem] border border-white/80 bg-white/88 px-5 py-5 shadow-[0_22px_60px_-40px_rgba(15,23,42,0.16)] transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-[0_34px_72px_-40px_rgba(36,76,170,0.22)]">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">Regions</p>
                   <p className="mt-2 text-3xl font-semibold tracking-[-0.05em] text-slate-950">
                     {coverage.regions.filter((region) => region.eventCount > 0).length}
@@ -185,14 +193,15 @@ export default async function HomePage() {
 
             <div className="relative overflow-hidden rounded-[2.8rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(239,246,255,0.86))] p-6 shadow-[0_44px_120px_-66px_rgba(22,104,255,0.26)] sm:p-8">
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_12%,rgba(22,104,255,0.12),transparent_24%),radial-gradient(circle_at_85%_18%,rgba(20,184,255,0.12),transparent_20%),radial-gradient(circle_at_72%_82%,rgba(111,86,255,0.08),transparent_20%)]" />
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.34),rgba(255,255,255,0)_28%,rgba(255,255,255,0.14)_56%,rgba(255,255,255,0)_100%)]" />
               <div className="relative">
                 <div className="grid gap-3 sm:grid-cols-3">
                   {secondaryAssociations.map((association, index) => (
                     <div
                       key={association.calendarAssociation}
-                      className="rounded-[1.6rem] border border-white/90 bg-white/88 p-4 shadow-[0_18px_46px_-34px_rgba(15,23,42,0.14)]"
+                      className="rounded-[1.6rem] border border-white/90 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(247,250,255,0.9))] p-4 shadow-[0_18px_46px_-34px_rgba(15,23,42,0.14)] transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-[0_30px_70px_-38px_rgba(22,104,255,0.22)]"
                     >
-                      <div className="flex h-16 items-center justify-center rounded-[1.2rem] bg-slate-50 px-4">
+                      <div className="flex h-16 items-center justify-center rounded-[1.2rem] bg-[linear-gradient(145deg,#ffffff,#f5f9ff)] px-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
                         {association.logoSrc ? (
                           <Image
                             src={association.logoSrc}
@@ -213,7 +222,7 @@ export default async function HomePage() {
                 </div>
 
                 {featuredAssociation ? (
-                  <div className="mt-6 grid gap-6 rounded-[2rem] border border-white/90 bg-white/92 p-6 shadow-[0_26px_70px_-42px_rgba(15,23,42,0.16)] lg:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)] lg:items-center">
+                  <div className="mt-6 grid gap-6 rounded-[2rem] border border-white/90 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-6 shadow-[0_26px_70px_-42px_rgba(15,23,42,0.16)] lg:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)] lg:items-center">
                     <div className="flex h-32 items-center justify-center rounded-[1.7rem] bg-[linear-gradient(145deg,#ffffff,#f5f9ff)] px-6 shadow-[inset_0_0_0_1px_rgba(226,232,240,0.82)]">
                       {featuredAssociation.logoSrc ? (
                         <Image
@@ -241,7 +250,7 @@ export default async function HomePage() {
                           View linked events
                         </Link>
                         {featuredAssociation.website ? (
-                          <a href={featuredAssociation.website} target="_blank" rel="noreferrer" className="text-sm font-semibold text-blue-700 transition hover:text-slate-950">
+                          <a href={featuredAssociation.website} target="_blank" rel="noreferrer" className="premium-link text-sm font-semibold text-blue-700 transition hover:text-slate-950">
                             Association website
                           </a>
                         ) : null}
@@ -257,9 +266,12 @@ export default async function HomePage() {
 
       <section id="newsletter" className="relative overflow-hidden pb-24 pt-24 sm:pb-28 sm:pt-28">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_16%,rgba(22,104,255,0.08),transparent_24%),radial-gradient(circle_at_80%_18%,rgba(111,86,255,0.08),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0),rgba(241,246,255,0.8)_40%,rgba(255,255,255,0.98))]" />
+        <div className="pointer-events-none absolute left-[8%] top-8 h-44 w-44 rounded-full bg-[radial-gradient(circle,rgba(14,182,255,0.12),transparent_72%)] blur-3xl" />
+        <div className="pointer-events-none absolute right-[10%] bottom-[12%] h-52 w-52 rounded-full bg-[radial-gradient(circle,rgba(111,86,255,0.1),transparent_72%)] blur-3xl" />
         <div className="container-shell relative">
           <Reveal>
             <div className="overflow-hidden rounded-[3rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(239,246,255,0.9))] p-6 shadow-[0_52px_140px_-74px_rgba(22,104,255,0.3)] sm:p-8 lg:p-10">
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.3),rgba(255,255,255,0)_28%,rgba(255,255,255,0.12)_56%,rgba(255,255,255,0)_100%)]" />
               <div className="grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start">
                 <div className="max-w-xl">
                   <p className="eyebrow">Newsletter</p>

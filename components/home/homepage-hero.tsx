@@ -180,6 +180,7 @@ function HeroEventCard({
   compact?: boolean;
 }) {
   const image = safeCoverImage(event.coverImage);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
 
   return (
     <motion.article
@@ -187,22 +188,49 @@ function HeroEventCard({
       initial={{ opacity: 0, y: 32, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.9, delay, ease: [0.16, 1, 0.3, 1] }}
-      whileHover={{ y: -8, rotateX: compact ? 0 : 4, rotateY: compact ? 0 : -5, scale: compact ? 1.015 : 1.02 }}
+      whileHover={{ y: -10, scale: compact ? 1.02 : 1.028 }}
+      style={{ rotateX: tilt.y, rotateY: tilt.x, transformStyle: 'preserve-3d' }}
+      onPointerMove={(eventObject) => {
+        const bounds = eventObject.currentTarget.getBoundingClientRect();
+        const relativeX = (eventObject.clientX - bounds.left) / bounds.width - 0.5;
+        const relativeY = (eventObject.clientY - bounds.top) / bounds.height - 0.5;
+        setTilt({
+          x: compact ? relativeX * 5 : relativeX * 9,
+          y: compact ? relativeY * -5 : relativeY * -8
+        });
+      }}
+      onPointerLeave={() => setTilt({ x: 0, y: 0 })}
     >
       <div className={`relative ${compact ? 'min-h-[10rem]' : 'min-h-[14rem]'}`}>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(34,117,255,0.26),transparent_28%),radial-gradient(circle_at_82%_16%,rgba(14,182,255,0.24),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.62),rgba(255,255,255,0.18))]" />
+        <motion.div
+          className="absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(34,117,255,0.26),transparent_28%),radial-gradient(circle_at_82%_16%,rgba(14,182,255,0.24),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.72),rgba(255,255,255,0.16))]"
+          animate={{ opacity: [0.8, 1, 0.84], scale: [1, 1.03, 1] }}
+          transition={{ duration: 7 + delay * 3, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <div className="pointer-events-none absolute inset-0 rounded-[1.9rem] ring-1 ring-white/55" />
         {image ? (
           <>
-            <img src={image} alt={`${event.title} image`} className="absolute inset-0 h-full w-full object-cover" />
+            <motion.img
+              src={image}
+              alt={`${event.title} image`}
+              className="absolute inset-0 h-full w-full object-cover"
+              animate={{ scale: [1, 1.035, 1] }}
+              transition={{ duration: 12 + delay * 2, repeat: Infinity, ease: 'easeInOut' }}
+            />
             <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,17,31,0.06),rgba(9,17,31,0.24)_38%,rgba(6,12,22,0.82))]" />
           </>
         ) : null}
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(130deg,rgba(255,255,255,0.26),rgba(255,255,255,0)_34%,rgba(255,255,255,0.14)_58%,rgba(255,255,255,0)_76%)] opacity-90" />
 
         <div className="absolute left-4 top-4">
           <AssociationLogoBadge associationName={event.associationName} compact />
         </div>
 
-        <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
+        <motion.div
+          className="absolute inset-x-0 bottom-0 p-4 sm:p-5"
+          animate={{ y: [0, -2, 0] }}
+          transition={{ duration: 8 + delay * 3, repeat: Infinity, ease: 'easeInOut' }}
+        >
           <p className={`max-w-[18rem] font-semibold tracking-[-0.03em] ${compact ? 'text-base' : 'text-xl'} ${image ? 'text-white' : 'text-slate-950'}`}>
             {event.title}
           </p>
@@ -213,7 +241,7 @@ function HeroEventCard({
               {event.city}, {event.country}
             </span>
           </div>
-        </div>
+        </motion.div>
       </div>
     </motion.article>
   );
@@ -308,7 +336,21 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
   return (
     <section className="relative overflow-hidden pb-20 pt-10 sm:pb-24 sm:pt-14 lg:pb-28">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(33,118,255,0.18),transparent_22%),radial-gradient(circle_at_88%_14%,rgba(0,196,255,0.16),transparent_18%),radial-gradient(circle_at_56%_62%,rgba(111,86,255,0.12),transparent_30%),linear-gradient(180deg,#fbfdff_0%,#f4f8ff_46%,#f8fbff_100%)]" />
-      <div className="pointer-events-none absolute inset-x-[15%] top-24 h-[34rem] rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.22),rgba(22,104,255,0.05)_42%,transparent_72%)] blur-3xl" />
+      <motion.div
+        className="pointer-events-none absolute left-[-10%] top-14 h-[26rem] w-[34rem] rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.22),rgba(22,104,255,0.02)_58%,transparent_72%)] blur-3xl"
+        animate={reducedMotion ? undefined : { x: [0, 36, -14, 0], y: [0, 18, -10, 0], scale: [1, 1.08, 0.98, 1] }}
+        transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <motion.div
+        className="pointer-events-none absolute right-[-8%] top-10 h-[22rem] w-[30rem] rounded-full bg-[radial-gradient(circle,rgba(14,182,255,0.2),rgba(14,182,255,0.03)_56%,transparent_74%)] blur-3xl"
+        animate={reducedMotion ? undefined : { x: [0, -28, 10, 0], y: [0, -14, 12, 0], scale: [1.02, 0.96, 1.04, 1.02] }}
+        transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <motion.div
+        className="pointer-events-none absolute inset-x-[15%] top-24 h-[34rem] rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.22),rgba(22,104,255,0.05)_42%,transparent_72%)] blur-3xl"
+        animate={reducedMotion ? undefined : { opacity: [0.72, 1, 0.82], scale: [1, 1.06, 1] }}
+        transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
+      />
 
       <div className="container-shell relative">
         <div className="grid gap-14 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-center">
@@ -324,15 +366,20 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
             </div>
 
             <motion.h1
-              className="mt-8 max-w-[10ch] text-5xl font-semibold leading-[0.9] tracking-[-0.06em] text-slate-950 sm:text-6xl lg:text-[5.6rem]"
+              className="mt-8 max-w-[10ch] text-5xl font-semibold leading-[0.88] tracking-[-0.065em] text-slate-950 sm:text-6xl lg:text-[5.6rem]"
               initial={reducedMotion ? false : { opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
             >
               Every investigator event.
-              <span className="mt-2 block bg-[linear-gradient(90deg,#0f172a_0%,#1668ff_46%,#10b8ff_72%,#6f56ff_100%)] bg-clip-text text-transparent">
+              <motion.span
+                className="mt-2 block bg-[linear-gradient(90deg,#0f172a_0%,#1668ff_46%,#10b8ff_72%,#6f56ff_100%)] bg-clip-text text-transparent"
+                animate={reducedMotion ? undefined : { backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
+                transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+                style={{ backgroundSize: '180% 180%' }}
+              >
                 One global calendar.
-              </span>
+              </motion.span>
             </motion.h1>
 
             <motion.p
@@ -365,13 +412,14 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               transition={{ duration: 0.85, delay: 0.26, ease: [0.16, 1, 0.3, 1] }}
             >
               {stats.map((item) => (
-                <div
+                <motion.div
                   key={item.label}
                   className="rounded-[1.7rem] border border-white/80 bg-white/78 px-4 py-4 shadow-[0_26px_72px_-44px_rgba(15,23,42,0.18)] backdrop-blur-xl"
+                  whileHover={{ y: -6, scale: 1.02, boxShadow: '0 36px 80px -42px rgba(36,76,170,0.28)' }}
                 >
                   <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">{item.label}</p>
                   <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-slate-950">{item.value}</p>
-                </div>
+                </motion.div>
               ))}
             </motion.div>
           </motion.div>
@@ -397,10 +445,15 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
             >
               <div className="absolute inset-[8%] rounded-full bg-[radial-gradient(circle,rgba(79,70,229,0.18),rgba(14,165,233,0.14)_34%,transparent_68%)] blur-3xl" />
               <div className="absolute inset-x-[14%] bottom-[8%] h-[16%] rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.26),rgba(22,104,255,0.06)_52%,transparent_76%)] blur-2xl" />
+              <motion.div
+                className="absolute left-[18%] top-[18%] h-[12rem] w-[12rem] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.72),rgba(255,255,255,0.02)_68%)] blur-2xl"
+                animate={reducedMotion ? undefined : { x: [0, 12, -10, 0], y: [0, -12, 8, 0], opacity: [0.66, 0.96, 0.7] }}
+                transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut' }}
+              />
 
               <motion.div
                 className="absolute inset-[10%] rounded-[3rem] border border-white/70 bg-[linear-gradient(145deg,rgba(255,255,255,0.82),rgba(241,247,255,0.36))] shadow-[0_48px_150px_-64px_rgba(27,61,145,0.42)] backdrop-blur-2xl"
-                animate={reducedMotion ? undefined : { y: [0, -5, 0, 4, 0] }}
+                animate={reducedMotion ? undefined : { y: [0, -5, 0, 4, 0], rotateZ: [0, 0.35, 0, -0.2, 0] }}
                 transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
               />
 
@@ -424,10 +477,12 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
                 </defs>
 
                 <ellipse cx="0" cy="204" rx="164" ry="28" fill="rgba(76,127,255,0.12)" />
+                <ellipse cx="0" cy="204" rx="132" ry="18" fill="rgba(125,211,252,0.12)" />
                 <circle cx="0" cy="0" r="190" fill="url(#hero-globe-shell)" opacity="0.82" />
                 <circle cx="0" cy="0" r="190" fill="none" stroke="rgba(255,255,255,0.82)" strokeWidth="1.5" />
                 <ellipse cx="0" cy="0" rx="188" ry="76" fill="none" stroke="rgba(84,130,255,0.12)" strokeWidth="1" />
                 <ellipse cx="0" cy="0" rx="188" ry="128" fill="none" stroke="rgba(84,130,255,0.08)" strokeWidth="1" />
+                <path d="M -188 0 A 188 190 0 0 1 188 0" fill="none" stroke="rgba(255,255,255,0.36)" strokeWidth="1" />
 
                 {projectedDots
                   .filter((dot) => dot.z <= 0)
@@ -445,7 +500,16 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
                 {routePaths.map((route) => (
                   <g key={route.id} opacity={route.opacity}>
                     <path d={route.d} fill="none" stroke="rgba(95,135,255,0.16)" strokeWidth="4.4" strokeLinecap="round" />
-                    <path d={route.d} fill="none" stroke="url(#hero-route-stroke)" strokeWidth="2.1" strokeLinecap="round" strokeDasharray="10 14" />
+                    <motion.path
+                      d={route.d}
+                      fill="none"
+                      stroke="url(#hero-route-stroke)"
+                      strokeWidth="2.1"
+                      strokeLinecap="round"
+                      strokeDasharray="10 14"
+                      animate={reducedMotion ? undefined : { strokeDashoffset: [0, -96] }}
+                      transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
+                    />
                   </g>
                 ))}
 
@@ -462,11 +526,28 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
                     />
                   ))}
 
-                {projectedNodes.map((node) => (
+                {projectedNodes.map((node, index) => (
                   <g key={node.id} opacity={node.z > -0.22 ? 1 : 0.34}>
-                    <circle cx={node.x} cy={node.y} r="18" fill="url(#hero-node-glow)" opacity="0.88" />
+                    <motion.circle
+                      cx={node.x}
+                      cy={node.y}
+                      r="18"
+                      fill="url(#hero-node-glow)"
+                      opacity="0.88"
+                      animate={reducedMotion ? undefined : { scale: [0.82, 1.22, 0.82], opacity: [0.34, 0.9, 0.34] }}
+                      transition={{ duration: 3.6, delay: index * 0.45, repeat: Infinity, ease: 'easeInOut' }}
+                    />
                     <circle cx={node.x} cy={node.y} r="5.8" fill="#f8fdff" />
-                    <circle cx={node.x} cy={node.y} r="9" fill="none" stroke="rgba(125,211,252,0.8)" strokeWidth="1.4" />
+                    <motion.circle
+                      cx={node.x}
+                      cy={node.y}
+                      r="9"
+                      fill="none"
+                      stroke="rgba(125,211,252,0.8)"
+                      strokeWidth="1.4"
+                      animate={reducedMotion ? undefined : { scale: [0.92, 1.16, 0.92], opacity: [0.54, 1, 0.54] }}
+                      transition={{ duration: 2.8, delay: index * 0.35, repeat: Infinity, ease: 'easeInOut' }}
+                    />
                   </g>
                 ))}
               </svg>
@@ -484,7 +565,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               {globeEvents[0] ? (
                 <Link
                   href={`/events/${getEventSlug(events[0])}`}
-                  className="absolute bottom-[13%] left-[6%] inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/88 px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-[0_26px_70px_-42px_rgba(15,23,42,0.26)] backdrop-blur-xl transition hover:-translate-y-0.5"
+                  className="absolute bottom-[13%] left-[6%] inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/88 px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-[0_26px_70px_-42px_rgba(15,23,42,0.26)] backdrop-blur-xl transition duration-500 hover:-translate-y-1 hover:shadow-[0_34px_78px_-42px_rgba(36,76,170,0.3)]"
                 >
                   Open featured event
                 </Link>

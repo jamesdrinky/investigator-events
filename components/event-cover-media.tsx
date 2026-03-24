@@ -52,18 +52,20 @@ export function EventCoverMedia({
 
   return (
     <div
-      className={`group/media relative overflow-hidden rounded-[1.7rem] border border-white/70 bg-slate-100 shadow-[0_30px_70px_-44px_rgba(22,104,255,0.34)] ${
+      className={`group/media relative overflow-hidden rounded-[1.7rem] border border-white/70 bg-slate-100 shadow-[0_30px_70px_-44px_rgba(22,104,255,0.34)] transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1 group-hover:shadow-[0_42px_110px_-46px_rgba(22,104,255,0.42)] ${
         compact ? 'h-[12rem]' : 'h-[18rem] sm:h-[20rem]'
       } ${className}`}
     >
+      <div className="pointer-events-none absolute inset-0 rounded-[1.7rem] ring-1 ring-white/50" />
       <img
         src={safeCoverImage}
         alt={coverImageAlt ?? `${title} cover image`}
-        className="h-full w-full object-cover transition duration-700 ease-out group-hover:scale-[1.05] group-hover/media:scale-[1.04]"
+        className="h-full w-full object-cover transition duration-700 ease-out group-hover:scale-[1.07] group-hover/media:scale-[1.05]"
         onError={() => setHasError(true)}
       />
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(9,17,31,0.02),rgba(9,17,31,0.12)_34%,rgba(5,12,22,0.78))]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(22,104,255,0.22),transparent_26%),radial-gradient(circle_at_82%_24%,rgba(20,184,255,0.16),transparent_22%),radial-gradient(circle_at_68%_88%,rgba(100,91,255,0.14),transparent_26%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.22),rgba(255,255,255,0)_34%,rgba(255,255,255,0.1)_60%,rgba(255,255,255,0)_100%)] opacity-80 transition duration-500 group-hover/media:opacity-100" />
 
       <div className="absolute left-4 top-4 z-10">
         <AssociationLogoBadge associationName={associationName} compact={compact} />
@@ -77,7 +79,7 @@ export function EventCoverMedia({
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[48%] bg-[linear-gradient(to_top,rgba(4,12,22,0.95),rgba(4,12,22,0.26),transparent)]" />
       <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-4">
         <div className="min-w-0">
-          <p className={`truncate font-[var(--font-serif)] leading-none text-white ${compact ? 'text-3xl' : 'text-4xl sm:text-5xl'}`}>
+          <p className={`truncate font-[var(--font-serif)] leading-none tracking-[-0.04em] text-white ${compact ? 'text-3xl' : 'text-4xl sm:text-5xl'}`}>
             {city}
           </p>
           <p className="mt-2 text-sm uppercase tracking-[0.2em] text-slate-100">{country}</p>

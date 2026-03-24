@@ -3,8 +3,9 @@ import Link from 'next/link';
 export function Footer() {
   return (
     <footer className="relative overflow-hidden border-t border-slate-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#f5f9ff_100%)]">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(22,104,255,0.08),transparent_22%),radial-gradient(circle_at_86%_16%,rgba(20,184,255,0.08),transparent_18%),radial-gradient(circle_at_70%_84%,rgba(100,91,255,0.06),transparent_18%)]" />
-      <div className="pointer-events-none absolute left-[10%] top-6 h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.12),transparent_72%)] blur-3xl" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(22,104,255,0.1),transparent_22%),radial-gradient(circle_at_86%_16%,rgba(20,184,255,0.1),transparent_18%),radial-gradient(circle_at_70%_84%,rgba(100,91,255,0.08),transparent_18%),radial-gradient(circle_at_54%_14%,rgba(236,72,153,0.04),transparent_18%)]" />
+      <div className="pointer-events-none absolute left-[10%] top-6 h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.14),transparent_72%)] blur-3xl" />
+      <div className="pointer-events-none absolute right-[12%] top-10 h-36 w-36 rounded-full bg-[radial-gradient(circle,rgba(111,86,255,0.12),transparent_72%)] blur-3xl" />
       <div className="container-shell relative grid gap-10 py-16 md:grid-cols-[1.2fr_0.8fr_0.8fr_0.9fr] lg:py-20">
         <div>
           <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#1668ff,#14b8ff,#645bff)] text-sm font-semibold text-white shadow-[0_22px_46px_-24px_rgba(22,104,255,0.44)]">

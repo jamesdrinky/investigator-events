@@ -69,7 +69,10 @@ export function AssociationsDirectory({ associations, stats }: AssociationsDirec
           { label: 'Regions', value: stats.regionCount, note: 'active geographic coverage' },
           { label: 'Linked live', value: stats.liveCoverageAssociations, note: 'already tied to events' }
         ].map((item) => (
-          <article key={item.label} className="rounded-[1.9rem] border border-white/80 bg-white p-5 shadow-[0_24px_52px_-34px_rgba(15,23,42,0.16)]">
+          <article
+            key={item.label}
+            className="rounded-[1.9rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-5 shadow-[0_24px_52px_-34px_rgba(15,23,42,0.16)] transition duration-500 hover:-translate-y-1 hover:shadow-[0_34px_76px_-38px_rgba(36,76,170,0.22)]"
+          >
             <p className="text-[10px] uppercase tracking-[0.22em] text-slate-500">{item.label}</p>
             <p className="mt-3 font-[var(--font-serif)] text-4xl leading-none text-slate-950">{item.value}</p>
             <p className="mt-3 text-sm text-slate-600">{item.note}</p>
@@ -77,7 +80,7 @@ export function AssociationsDirectory({ associations, stats }: AssociationsDirec
         ))}
       </section>
 
-      <section className="rounded-[2.2rem] border border-white/80 bg-white p-4 shadow-[0_28px_60px_-38px_rgba(15,23,42,0.16)] sm:p-5">
+      <section className="rounded-[2.2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(245,249,255,0.92))] p-4 shadow-[0_28px_60px_-38px_rgba(15,23,42,0.16)] sm:p-5">
         <div className="grid gap-3 lg:grid-cols-[1.2fr_0.7fr_0.7fr]">
           <label>
             <span className="sr-only">Search associations</span>
@@ -123,15 +126,15 @@ export function AssociationsDirectory({ associations, stats }: AssociationsDirec
                 {featuredAssociation.country} · {featuredAssociation.region}. Open the linked calendar view to see every connected event listing.
               </p>
               <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-[1.4rem] border border-white/90 bg-white/88 p-4">
+                <div className="rounded-[1.4rem] border border-white/90 bg-white/88 p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] transition duration-500 hover:-translate-y-1">
                   <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Linked events</p>
                   <p className="mt-2 font-[var(--font-serif)] text-3xl text-slate-950">{featuredAssociation.eventCount}</p>
                 </div>
-                <div className="rounded-[1.4rem] border border-white/90 bg-white/88 p-4">
+                <div className="rounded-[1.4rem] border border-white/90 bg-white/88 p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] transition duration-500 hover:-translate-y-1">
                   <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Country</p>
                   <p className="mt-2 text-lg font-semibold text-slate-950">{featuredAssociation.country}</p>
                 </div>
-                <div className="rounded-[1.4rem] border border-white/90 bg-white/88 p-4">
+                <div className="rounded-[1.4rem] border border-white/90 bg-white/88 p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] transition duration-500 hover:-translate-y-1">
                   <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Region</p>
                   <p className="mt-2 text-lg font-semibold text-slate-950">{featuredAssociation.region}</p>
                 </div>
@@ -149,7 +152,7 @@ export function AssociationsDirectory({ associations, stats }: AssociationsDirec
               </div>
             </div>
 
-            <div className="flex h-44 items-center justify-center rounded-[2rem] border border-white/90 bg-white px-8 shadow-[0_24px_50px_-36px_rgba(15,23,42,0.16)]">
+            <div className="flex h-44 items-center justify-center rounded-[2rem] border border-white/90 bg-[linear-gradient(145deg,#ffffff,#f5f9ff)] px-8 shadow-[0_24px_50px_-36px_rgba(15,23,42,0.16)]">
               {featuredAssociation.logoSrc ? (
                 <Image
                   src={featuredAssociation.logoSrc}
@@ -168,14 +171,14 @@ export function AssociationsDirectory({ associations, stats }: AssociationsDirec
         </section>
       ) : null}
 
-      <section className="rounded-[2.5rem] border border-white/80 bg-white p-5 shadow-[0_28px_64px_-40px_rgba(15,23,42,0.16)] sm:p-6">
+      <section className="rounded-[2.5rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(245,249,255,0.92))] p-5 shadow-[0_28px_64px_-40px_rgba(15,23,42,0.16)] sm:p-6">
         <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 xl:grid-cols-4">
           {filteredAssociations.map((association) => (
             <article
               key={association.slug}
-              className="group rounded-[1.75rem] border border-slate-100 bg-slate-50 px-3 py-4 transition duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-[0_22px_48px_-32px_rgba(22,104,255,0.18)]"
+              className="group rounded-[1.75rem] border border-white/85 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.9))] px-3 py-4 transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:bg-white hover:shadow-[0_28px_64px_-32px_rgba(22,104,255,0.22)]"
             >
-              <div className="flex h-18 items-center justify-center rounded-[1.1rem] bg-white px-4 shadow-[inset_0_0_0_1px_rgba(226,232,240,0.9)]">
+              <div className="flex h-18 items-center justify-center rounded-[1.1rem] bg-[linear-gradient(145deg,#ffffff,#f6f9ff)] px-4 shadow-[inset_0_0_0_1px_rgba(226,232,240,0.9)]">
                 {association.logoSrc ? (
                   <Image
                     src={association.logoSrc}
@@ -196,7 +199,7 @@ export function AssociationsDirectory({ associations, stats }: AssociationsDirec
               <div className="mt-4 flex flex-wrap gap-3">
                 <Link
                   href={`/calendar?association=${encodeURIComponent(association.calendarAssociation)}`}
-                  className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-900"
+                  className="premium-link text-xs font-semibold uppercase tracking-[0.14em] text-slate-900"
                 >
                   View events
                 </Link>

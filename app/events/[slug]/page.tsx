@@ -69,9 +69,11 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
   return (
     <section className="section-pad relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_14%,rgba(22,104,255,0.08),transparent_24%),radial-gradient(circle_at_84%_20%,rgba(20,184,255,0.08),transparent_20%)]" />
+      <div className="pointer-events-none absolute left-[8%] top-[10%] h-48 w-48 rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.12),transparent_72%)] blur-3xl" />
       <div className="container-shell relative space-y-8">
         <Reveal>
           <header className="overflow-hidden rounded-[2.5rem] border border-white/80 bg-[linear-gradient(135deg,#ffffff_0%,#eef6ff_48%,#f5fbff_100%)] p-6 shadow-[0_36px_96px_-56px_rgba(15,23,42,0.18)] sm:p-8 lg:p-10">
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.24),rgba(255,255,255,0)_28%,rgba(255,255,255,0.1)_56%,rgba(255,255,255,0)_100%)]" />
             <div className="grid gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-start">
               <div>
                 <div className="flex flex-wrap gap-2">
@@ -91,17 +93,17 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
                 </p>
 
                 <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-[1.5rem] border border-white/90 bg-white/90 p-4">
+                  <div className="rounded-[1.5rem] border border-white/90 bg-white/90 p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] transition duration-500 hover:-translate-y-1">
                     <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Dates</p>
                     <p className="mt-2 text-sm font-medium text-slate-950">{formatEventDate(event)}</p>
                   </div>
-                  <div className="rounded-[1.5rem] border border-white/90 bg-white/90 p-4">
+                  <div className="rounded-[1.5rem] border border-white/90 bg-white/90 p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] transition duration-500 hover:-translate-y-1">
                     <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Location</p>
                     <p className="mt-2 text-sm font-medium text-slate-950">
                       {event.city}, {event.country}
                     </p>
                   </div>
-                  <div className="rounded-[1.5rem] border border-white/90 bg-white/90 p-4">
+                  <div className="rounded-[1.5rem] border border-white/90 bg-white/90 p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] transition duration-500 hover:-translate-y-1">
                     <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Organiser</p>
                     <p className="mt-2 text-sm font-medium text-slate-950">{event.association ?? event.organiser}</p>
                   </div>
@@ -136,21 +138,21 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
 
         <Reveal delay={0.04}>
           <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-            <article className="rounded-[2rem] border border-white/80 bg-white p-6 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.16)] sm:p-7">
+            <article className="rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-6 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.16)] sm:p-7">
               <p className="eyebrow">Why Open This</p>
               <h2 className="mt-4 font-[var(--font-serif)] text-3xl text-slate-950">A useful event record, not just a title and date.</h2>
               <div className="mt-6 grid gap-3">
-                <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+                <div className="rounded-[1.5rem] border border-slate-200/80 bg-slate-50/90 p-4">
                   <p className="text-[10px] uppercase tracking-[0.18em] text-blue-700">Who it is for</p>
                   <p className="mt-2 text-sm leading-relaxed text-slate-700">{buildAudienceCopy(event.category)}</p>
                 </div>
-                <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+                <div className="rounded-[1.5rem] border border-slate-200/80 bg-slate-50/90 p-4">
                   <p className="text-[10px] uppercase tracking-[0.18em] text-cyan-700">Why it matters</p>
                   <p className="mt-2 text-sm leading-relaxed text-slate-700">
                     This record brings together the key facts people need before they decide to travel, register, submit, sponsor, or monitor timing.
                   </p>
                 </div>
-                <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+                <div className="rounded-[1.5rem] border border-slate-200/80 bg-slate-50/90 p-4">
                   <p className="text-[10px] uppercase tracking-[0.18em] text-violet-700">What to do next</p>
                   <p className="mt-2 text-sm leading-relaxed text-slate-700">
                     Use the official website for registration and agenda details, then save the dates to your own calendar.
@@ -159,23 +161,23 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
               </div>
             </article>
 
-            <article className="rounded-[2rem] border border-white/80 bg-white p-6 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.16)] sm:p-7">
+            <article className="rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-6 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.16)] sm:p-7">
               <p className="eyebrow">Event Summary</p>
               <h2 className="mt-4 font-[var(--font-serif)] text-3xl text-slate-950">Confirmed details</h2>
               <dl className="mt-6 grid gap-4 sm:grid-cols-2">
-                <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+                <div className="rounded-[1.5rem] border border-slate-200/80 bg-slate-50/90 p-4">
                   <dt className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Event type</dt>
                   <dd className="mt-2 text-base text-slate-950">{event.category}</dd>
                 </div>
-                <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+                <div className="rounded-[1.5rem] border border-slate-200/80 bg-slate-50/90 p-4">
                   <dt className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Coverage region</dt>
                   <dd className="mt-2 text-base text-slate-950">{event.region}</dd>
                 </div>
-                <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+                <div className="rounded-[1.5rem] border border-slate-200/80 bg-slate-50/90 p-4">
                   <dt className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Host organisation</dt>
                   <dd className="mt-2 text-base text-slate-950">{event.organiser}</dd>
                 </div>
-                <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+                <div className="rounded-[1.5rem] border border-slate-200/80 bg-slate-50/90 p-4">
                   <dt className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Association</dt>
                   <dd className="mt-2 text-base text-slate-950">{event.association ?? 'Not specified separately'}</dd>
                 </div>
@@ -185,7 +187,7 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
         </Reveal>
 
         <Reveal delay={0.08}>
-          <section className="rounded-[2rem] border border-white/80 bg-white p-6 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.16)] sm:p-7">
+          <section className="rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(245,249,255,0.92))] p-6 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.16)] sm:p-7">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="eyebrow">Related Events</p>

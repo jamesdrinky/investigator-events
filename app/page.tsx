@@ -39,9 +39,11 @@ export default async function HomePage() {
       <HomepageHero events={heroEvents} stats={heroStats} />
 
       <section className="relative overflow-hidden py-24 sm:py-28">
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0),rgba(237,245,255,0.75)_36%,rgba(255,255,255,0))]" />
-        <div className="pointer-events-none absolute left-[8%] top-12 h-48 w-48 rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.14),transparent_72%)] blur-3xl" />
-        <div className="pointer-events-none absolute right-[6%] bottom-10 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(111,86,255,0.12),transparent_72%)] blur-3xl" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0),rgba(234,244,255,0.84)_32%,rgba(255,255,255,0))]" />
+        <div className="pointer-events-none absolute left-[8%] top-12 h-52 w-52 rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.18),transparent_72%)] blur-3xl" />
+        <div className="pointer-events-none absolute right-[8%] top-[18%] h-48 w-48 rounded-full bg-[radial-gradient(circle,rgba(34,211,238,0.16),transparent_72%)] blur-3xl" />
+        <div className="pointer-events-none absolute right-[6%] bottom-10 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(111,86,255,0.16),transparent_72%)] blur-3xl" />
+        <div className="pointer-events-none absolute left-[30%] bottom-[12%] h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(236,72,153,0.08),transparent_72%)] blur-3xl" />
         <div className="container-shell relative">
           <Reveal className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-3xl">
@@ -58,9 +60,9 @@ export default async function HomePage() {
           {leadEvent ? (
             <div className="mt-12 grid gap-6 xl:grid-cols-[minmax(0,1.18fr)_minmax(0,0.82fr)]">
               <Reveal x={-18}>
-                <article className="group relative overflow-hidden rounded-[2.8rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(242,247,255,0.86))] p-5 shadow-[0_44px_120px_-64px_rgba(22,104,255,0.28)] transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-[0_56px_150px_-70px_rgba(22,104,255,0.34)] sm:p-7">
-                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(25,112,255,0.14),transparent_26%),radial-gradient(circle_at_84%_14%,rgba(14,182,255,0.14),transparent_20%),radial-gradient(circle_at_72%_82%,rgba(111,86,255,0.1),transparent_24%)]" />
-                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.36),rgba(255,255,255,0)_24%,rgba(255,255,255,0.14)_54%,rgba(255,255,255,0)_100%)] opacity-80" />
+                <article className="group relative overflow-hidden rounded-[2.8rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(242,247,255,0.86))] p-5 shadow-[0_44px_120px_-64px_rgba(22,104,255,0.28)] transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:shadow-[0_62px_160px_-72px_rgba(76,90,255,0.36)] sm:p-7">
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(25,112,255,0.18),transparent_26%),radial-gradient(circle_at_84%_14%,rgba(14,182,255,0.18),transparent_20%),radial-gradient(circle_at_72%_82%,rgba(111,86,255,0.14),transparent_24%),radial-gradient(circle_at_42%_86%,rgba(236,72,153,0.08),transparent_24%)]" />
+                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.42),rgba(255,255,255,0)_24%,rgba(255,255,255,0.16)_54%,rgba(255,255,255,0)_100%)] opacity-80" />
                   <div className="relative grid gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-end">
                     <div className="flex h-full flex-col justify-between">
                       <div>
@@ -108,9 +110,9 @@ export default async function HomePage() {
               <div className="grid gap-6">
                 {supportEvents.map((event, index) => (
                   <Reveal key={event.id} x={18} delay={0.05 + index * 0.05}>
-                    <article className="group relative overflow-hidden rounded-[2.4rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-5 shadow-[0_34px_96px_-56px_rgba(15,23,42,0.18)] transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-[0_46px_118px_-62px_rgba(22,104,255,0.26)] sm:p-6">
-                      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_88%_18%,rgba(14,182,255,0.11),transparent_22%),radial-gradient(circle_at_16%_84%,rgba(111,86,255,0.08),transparent_22%)]" />
-                      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.28),rgba(255,255,255,0)_32%,rgba(255,255,255,0.12)_56%,rgba(255,255,255,0)_100%)]" />
+                    <article className="group relative overflow-hidden rounded-[2.4rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-5 shadow-[0_34px_96px_-56px_rgba(15,23,42,0.18)] transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:shadow-[0_54px_126px_-62px_rgba(76,90,255,0.28)] sm:p-6">
+                      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_88%_18%,rgba(14,182,255,0.14),transparent_22%),radial-gradient(circle_at_16%_84%,rgba(111,86,255,0.1),transparent_22%),radial-gradient(circle_at_18%_18%,rgba(236,72,153,0.06),transparent_24%)]" />
+                      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.3),rgba(255,255,255,0)_32%,rgba(255,255,255,0.14)_56%,rgba(255,255,255,0)_100%)]" />
                       <div className="relative grid gap-5 sm:grid-cols-[10.5rem_minmax(0,1fr)] sm:items-center">
                         <EventCoverMedia
                           title={event.title}
@@ -155,9 +157,10 @@ export default async function HomePage() {
       </section>
 
       <section className="relative overflow-hidden py-24 sm:py-28">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(22,104,255,0.08),transparent_22%),radial-gradient(circle_at_82%_18%,rgba(20,184,255,0.08),transparent_18%),linear-gradient(180deg,rgba(244,248,255,0.5),rgba(255,255,255,0.95))]" />
-        <div className="pointer-events-none absolute left-[4%] top-[12%] h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(20,184,255,0.12),transparent_72%)] blur-3xl" />
-        <div className="pointer-events-none absolute right-[8%] bottom-[10%] h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(111,86,255,0.1),transparent_72%)] blur-3xl" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(22,104,255,0.12),transparent_22%),radial-gradient(circle_at_82%_18%,rgba(20,184,255,0.12),transparent_18%),linear-gradient(180deg,rgba(240,246,255,0.62),rgba(255,255,255,0.96))]" />
+        <div className="pointer-events-none absolute left-[4%] top-[12%] h-44 w-44 rounded-full bg-[radial-gradient(circle,rgba(20,184,255,0.16),transparent_72%)] blur-3xl" />
+        <div className="pointer-events-none absolute right-[8%] bottom-[10%] h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(111,86,255,0.14),transparent_72%)] blur-3xl" />
+        <div className="pointer-events-none absolute left-[34%] top-[8%] h-32 w-32 rounded-full bg-[radial-gradient(circle,rgba(236,72,153,0.08),transparent_72%)] blur-3xl" />
         <div className="container-shell relative">
           <Reveal className="grid gap-10 xl:grid-cols-[minmax(0,0.86fr)_minmax(0,1.14fr)] xl:items-end">
             <div className="max-w-xl">
@@ -192,8 +195,8 @@ export default async function HomePage() {
             </div>
 
             <div className="relative overflow-hidden rounded-[2.8rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(239,246,255,0.86))] p-6 shadow-[0_44px_120px_-66px_rgba(22,104,255,0.26)] sm:p-8">
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_12%,rgba(22,104,255,0.12),transparent_24%),radial-gradient(circle_at_85%_18%,rgba(20,184,255,0.12),transparent_20%),radial-gradient(circle_at_72%_82%,rgba(111,86,255,0.08),transparent_20%)]" />
-              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.34),rgba(255,255,255,0)_28%,rgba(255,255,255,0.14)_56%,rgba(255,255,255,0)_100%)]" />
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_12%,rgba(22,104,255,0.16),transparent_24%),radial-gradient(circle_at_85%_18%,rgba(20,184,255,0.14),transparent_20%),radial-gradient(circle_at_72%_82%,rgba(111,86,255,0.12),transparent_20%),radial-gradient(circle_at_50%_80%,rgba(236,72,153,0.06),transparent_22%)]" />
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.4),rgba(255,255,255,0)_28%,rgba(255,255,255,0.16)_56%,rgba(255,255,255,0)_100%)]" />
               <div className="relative">
                 <div className="grid gap-3 sm:grid-cols-3">
                   {secondaryAssociations.map((association, index) => (
@@ -265,13 +268,15 @@ export default async function HomePage() {
       </section>
 
       <section id="newsletter" className="relative overflow-hidden pb-24 pt-24 sm:pb-28 sm:pt-28">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_16%,rgba(22,104,255,0.08),transparent_24%),radial-gradient(circle_at_80%_18%,rgba(111,86,255,0.08),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0),rgba(241,246,255,0.8)_40%,rgba(255,255,255,0.98))]" />
-        <div className="pointer-events-none absolute left-[8%] top-8 h-44 w-44 rounded-full bg-[radial-gradient(circle,rgba(14,182,255,0.12),transparent_72%)] blur-3xl" />
-        <div className="pointer-events-none absolute right-[10%] bottom-[12%] h-52 w-52 rounded-full bg-[radial-gradient(circle,rgba(111,86,255,0.1),transparent_72%)] blur-3xl" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_16%,rgba(22,104,255,0.12),transparent_24%),radial-gradient(circle_at_80%_18%,rgba(111,86,255,0.12),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0),rgba(241,246,255,0.84)_40%,rgba(255,255,255,0.98))]" />
+        <div className="pointer-events-none absolute left-[8%] top-8 h-48 w-48 rounded-full bg-[radial-gradient(circle,rgba(14,182,255,0.16),transparent_72%)] blur-3xl" />
+        <div className="pointer-events-none absolute right-[10%] bottom-[12%] h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(111,86,255,0.14),transparent_72%)] blur-3xl" />
+        <div className="pointer-events-none absolute left-[38%] top-[16%] h-32 w-32 rounded-full bg-[radial-gradient(circle,rgba(236,72,153,0.08),transparent_72%)] blur-3xl" />
         <div className="container-shell relative">
           <Reveal>
-            <div className="overflow-hidden rounded-[3rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(239,246,255,0.9))] p-6 shadow-[0_52px_140px_-74px_rgba(22,104,255,0.3)] sm:p-8 lg:p-10">
-              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.3),rgba(255,255,255,0)_28%,rgba(255,255,255,0.12)_56%,rgba(255,255,255,0)_100%)]" />
+            <div className="relative overflow-hidden rounded-[3rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(239,246,255,0.9))] p-6 shadow-[0_56px_150px_-74px_rgba(76,90,255,0.32)] sm:p-8 lg:p-10">
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.34),rgba(255,255,255,0)_28%,rgba(255,255,255,0.14)_56%,rgba(255,255,255,0)_100%)]" />
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_22%_18%,rgba(34,211,238,0.14),transparent_24%),radial-gradient(circle_at_82%_22%,rgba(111,86,255,0.16),transparent_22%),radial-gradient(circle_at_56%_78%,rgba(236,72,153,0.08),transparent_24%)]" />
               <div className="grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start">
                 <div className="max-w-xl">
                   <p className="eyebrow">Newsletter</p>
@@ -282,13 +287,13 @@ export default async function HomePage() {
                     New additions, approaching dates, and one standout event worth your attention. Clean, useful, and easy to stay ahead with.
                   </p>
                   <div className="mt-8 flex flex-wrap gap-3">
-                    <span className="rounded-full border border-white/85 bg-white/88 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-700">
+                    <span className="rounded-full border border-white/85 bg-white/88 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-700 shadow-[0_18px_40px_-30px_rgba(36,76,170,0.16)]">
                       New listings
                     </span>
-                    <span className="rounded-full border border-white/85 bg-white/88 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-700">
+                    <span className="rounded-full border border-white/85 bg-white/88 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-700 shadow-[0_18px_40px_-30px_rgba(36,76,170,0.16)]">
                       Approaching dates
                     </span>
-                    <span className="rounded-full border border-white/85 bg-white/88 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-700">
+                    <span className="rounded-full border border-white/85 bg-white/88 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-700 shadow-[0_18px_40px_-30px_rgba(36,76,170,0.16)]">
                       Standout event
                     </span>
                   </div>

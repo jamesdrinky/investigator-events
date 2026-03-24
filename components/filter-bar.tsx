@@ -26,7 +26,7 @@ interface FilterBarProps {
 }
 
 function selectClasses() {
-  return 'h-11 min-w-[9rem] rounded-full border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition duration-200 focus:border-sky-400 focus:ring-2 focus:ring-sky-100';
+  return 'h-11 min-w-[9rem] rounded-full border border-white/85 bg-white/92 px-4 text-sm text-slate-700 outline-none shadow-[0_18px_38px_-30px_rgba(15,23,42,0.14)] transition duration-300 focus:border-sky-400 focus:ring-2 focus:ring-sky-100';
 }
 
 export function FilterBar({
@@ -46,23 +46,25 @@ export function FilterBar({
 }: FilterBarProps) {
   return (
     <motion.section
-      className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/95 p-4 shadow-[0_24px_48px_-30px_rgba(15,23,42,0.18)]"
+      className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(245,249,255,0.92))] p-4 shadow-[0_28px_66px_-34px_rgba(15,23,42,0.18)]"
       aria-label="Event filters"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_14%_20%,rgba(22,104,255,0.07),transparent_24%),radial-gradient(circle_at_84%_20%,rgba(20,184,255,0.06),transparent_18%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_14%_20%,rgba(22,104,255,0.08),transparent_24%),radial-gradient(circle_at_84%_20%,rgba(20,184,255,0.08),transparent_18%),linear-gradient(135deg,rgba(255,255,255,0.24),rgba(255,255,255,0)_30%,rgba(255,255,255,0.1)_56%,rgba(255,255,255,0)_100%)]" />
       <div className="relative flex flex-col gap-4">
         <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex flex-wrap items-center gap-2">
-            <div className="inline-flex items-center overflow-hidden rounded-full border border-slate-200 bg-slate-50 p-1">
+            <div className="inline-flex items-center overflow-hidden rounded-full border border-white/85 bg-white/92 p-1 shadow-[0_18px_44px_-32px_rgba(15,23,42,0.16)]">
               <button
                 type="button"
                 onClick={() => onChangeScope('main')}
                 title="Major conferences and flagship meetings"
                 className={`rounded-full px-4 py-2 text-sm transition ${
-                  scope === 'main' ? 'bg-[linear-gradient(135deg,#1668ff,#14b8ff,#645bff)] text-white' : 'text-slate-500 hover:text-slate-900'
+                  scope === 'main'
+                    ? 'bg-[linear-gradient(135deg,#1668ff,#14b8ff,#645bff)] text-white shadow-[0_18px_36px_-22px_rgba(22,104,255,0.44)]'
+                    : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 Major Events
@@ -72,7 +74,9 @@ export function FilterBar({
                 onClick={() => onChangeScope('all')}
                 title="All approved listings including training, webinars, and smaller gatherings"
                 className={`rounded-full px-4 py-2 text-sm transition ${
-                  scope === 'all' ? 'bg-[linear-gradient(135deg,#1668ff,#14b8ff,#645bff)] text-white' : 'text-slate-500 hover:text-slate-900'
+                  scope === 'all'
+                    ? 'bg-[linear-gradient(135deg,#1668ff,#14b8ff,#645bff)] text-white shadow-[0_18px_36px_-22px_rgba(22,104,255,0.44)]'
+                    : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 All Events
@@ -86,7 +90,7 @@ export function FilterBar({
               id="search-filter"
               type="search"
               placeholder="Search event, city, host, or country"
-              className="h-11 min-w-[16rem] flex-1 rounded-full border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition duration-200 focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
+              className="h-11 min-w-[16rem] flex-1 rounded-full border border-white/85 bg-white/92 px-4 text-sm text-slate-700 outline-none shadow-[0_18px_38px_-30px_rgba(15,23,42,0.14)] transition duration-300 focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
               value={values.search}
               onChange={(e) => onChange({ ...values, search: e.target.value })}
             />
@@ -172,18 +176,20 @@ export function FilterBar({
               <button
                 type="button"
                 onClick={onReset}
-                className="rounded-full border border-slate-200 px-4 py-2 text-sm text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+                className="rounded-full border border-white/85 bg-white/92 px-4 py-2 text-sm text-slate-600 shadow-[0_16px_34px_-28px_rgba(15,23,42,0.14)] transition duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50"
               >
                 Reset
               </button>
             ) : null}
 
-            <div className="inline-flex items-center overflow-hidden rounded-full border border-slate-200 bg-slate-50 p-1">
+            <div className="inline-flex items-center overflow-hidden rounded-full border border-white/85 bg-white/92 p-1 shadow-[0_18px_44px_-32px_rgba(15,23,42,0.16)]">
               <button
                 type="button"
                 onClick={() => onChangeView('list')}
                 className={`rounded-full px-4 py-2 text-sm transition ${
-                  view === 'list' ? 'bg-[linear-gradient(135deg,#1668ff,#14b8ff)] text-white' : 'text-slate-500 hover:text-slate-900'
+                  view === 'list'
+                    ? 'bg-[linear-gradient(135deg,#1668ff,#14b8ff)] text-white shadow-[0_18px_36px_-22px_rgba(22,104,255,0.44)]'
+                    : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 Timeline
@@ -192,7 +198,9 @@ export function FilterBar({
                 type="button"
                 onClick={() => onChangeView('calendar')}
                 className={`rounded-full px-4 py-2 text-sm transition ${
-                  view === 'calendar' ? 'bg-[linear-gradient(135deg,#1668ff,#14b8ff)] text-white' : 'text-slate-500 hover:text-slate-900'
+                  view === 'calendar'
+                    ? 'bg-[linear-gradient(135deg,#1668ff,#14b8ff)] text-white shadow-[0_18px_36px_-22px_rgba(22,104,255,0.44)]'
+                    : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 Month

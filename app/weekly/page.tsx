@@ -20,9 +20,10 @@ export default async function WeeklyPage() {
 
   return (
     <section className="section-pad relative overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_14%,rgba(22,104,255,0.08),transparent_24%),radial-gradient(circle_at_84%_18%,rgba(20,184,255,0.08),transparent_20%)]" />
       <div className="container-shell space-y-6">
         <Reveal>
-          <header className="relative overflow-hidden rounded-[2.2rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-8 lg:p-10">
+          <header className="relative overflow-hidden rounded-[2.2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(239,246,255,0.9))] p-6 shadow-[0_32px_76px_-42px_rgba(15,23,42,0.16)] sm:p-8 lg:p-10">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,rgba(37,99,235,0.1),transparent_24%),radial-gradient(circle_at_82%_22%,rgba(45,212,191,0.08),transparent_20%),radial-gradient(circle_at_62%_80%,rgba(139,92,246,0.08),transparent_24%)]" />
             <div className="relative grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
               <div>
@@ -32,11 +33,11 @@ export default async function WeeklyPage() {
                   A cleaner editorial read on what changed, what is coming up next, and which events deserve attention.
                 </p>
                 <div className="mt-5 flex flex-wrap gap-3">
-                  <div className="rounded-2xl border border-sky-100 bg-sky-50 px-4 py-4">
+                  <div className="rounded-2xl border border-sky-100 bg-[linear-gradient(145deg,rgba(239,246,255,0.96),rgba(255,255,255,0.9))] px-4 py-4 shadow-[0_18px_42px_-34px_rgba(36,76,170,0.12)]">
                     <p className="text-[10px] uppercase tracking-[0.18em] text-sky-700">Newly added</p>
                     <p className="mt-2 font-[var(--font-serif)] text-4xl text-slate-950">{weekly.newlyAdded.length}</p>
                   </div>
-                  <div className="rounded-2xl border border-violet-100 bg-violet-50 px-4 py-4">
+                  <div className="rounded-2xl border border-violet-100 bg-[linear-gradient(145deg,rgba(245,243,255,0.96),rgba(255,255,255,0.9))] px-4 py-4 shadow-[0_18px_42px_-34px_rgba(111,86,255,0.12)]">
                     <p className="text-[10px] uppercase tracking-[0.18em] text-violet-700">Upcoming in 30 days</p>
                     <p className="mt-2 font-[var(--font-serif)] text-4xl text-slate-950">{weekly.upcoming.length}</p>
                   </div>
@@ -44,7 +45,7 @@ export default async function WeeklyPage() {
               </div>
 
               {leadEvent ? (
-                <article className="rounded-[1.8rem] border border-slate-200 bg-white p-5 shadow-sm">
+                <article className="rounded-[1.8rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-5 shadow-[0_24px_54px_-34px_rgba(15,23,42,0.16)]">
                   <EventCoverMedia
                     title={leadEvent.title}
                     city={leadEvent.city}
@@ -112,7 +113,7 @@ export default async function WeeklyPage() {
                 </div>
               </article>
 
-              <article className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
+              <article className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-6 shadow-[0_24px_54px_-34px_rgba(15,23,42,0.16)] sm:p-7">
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(52,179,255,0.08),transparent_24%),radial-gradient(circle_at_80%_70%,rgba(123,124,255,0.07),transparent_22%)]" />
                 <div className="relative">
                   <p className="eyebrow">Inbox Version</p>

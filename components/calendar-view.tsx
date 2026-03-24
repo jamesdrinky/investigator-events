@@ -137,14 +137,14 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
   return (
     <div className="space-y-5">
       <motion.section
-        className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/95 p-5 shadow-[0_24px_48px_-30px_rgba(15,23,42,0.16)] sm:p-6"
+        className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(244,248,255,0.92))] p-5 shadow-[0_30px_70px_-34px_rgba(15,23,42,0.16)] sm:p-6"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
       >
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_20%,rgba(22,104,255,0.07),transparent_24%),radial-gradient(circle_at_84%_20%,rgba(20,184,255,0.06),transparent_20%)]" />
         <div className="relative grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="rounded-[1.6rem] bg-slate-50/80 p-4">
+          <div className="rounded-[1.6rem] border border-white/70 bg-white/72 p-4 shadow-[0_18px_44px_-34px_rgba(15,23,42,0.12)]">
             <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Current view</p>
             <p className="mt-2 text-base font-medium text-slate-950">{eventScopeLabel}</p>
             <p className="mt-2 text-sm text-slate-600">
@@ -153,11 +153,11 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-[1.6rem] bg-blue-50/80 p-4">
+            <div className="rounded-[1.6rem] border border-white/70 bg-[linear-gradient(145deg,rgba(239,246,255,0.96),rgba(255,255,255,0.92))] p-4 shadow-[0_18px_44px_-34px_rgba(36,76,170,0.12)]">
               <p className="text-[10px] uppercase tracking-[0.2em] text-blue-700">Major vs all</p>
               <p className="mt-2 text-sm text-slate-700">Major Events is the quicker planning view. All Events is the wider industry scan.</p>
             </div>
-            <div className="rounded-[1.6rem] bg-cyan-50/80 p-4">
+            <div className="rounded-[1.6rem] border border-white/70 bg-[linear-gradient(145deg,rgba(236,254,255,0.96),rgba(255,255,255,0.92))] p-4 shadow-[0_18px_44px_-34px_rgba(14,165,233,0.12)]">
               <p className="text-[10px] uppercase tracking-[0.2em] text-cyan-700">Fast scanning</p>
               <p className="mt-2 text-sm text-slate-700">Timeline for detail, month view for date clustering and collision checks.</p>
             </div>
@@ -227,13 +227,13 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
                         return (
                           <article
                             key={event.id}
-                            className={`relative overflow-hidden rounded-[2rem] p-4 transition duration-300 sm:p-5 ${
+                            className={`group relative overflow-hidden rounded-[2rem] p-4 transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 sm:p-5 ${
                               event.featured
-                                ? 'border border-blue-100 bg-[linear-gradient(135deg,#ffffff_0%,#eff6ff_52%,#f4fbff_100%)] shadow-[0_30px_60px_-36px_rgba(22,104,255,0.2)]'
-                                : 'border border-white/80 bg-white shadow-[0_22px_48px_-34px_rgba(15,23,42,0.16)]'
+                                ? 'border border-blue-100 bg-[linear-gradient(135deg,#ffffff_0%,#eff6ff_52%,#f4fbff_100%)] shadow-[0_30px_60px_-36px_rgba(22,104,255,0.2)] hover:shadow-[0_42px_88px_-40px_rgba(22,104,255,0.26)]'
+                                : 'border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.9))] shadow-[0_22px_48px_-34px_rgba(15,23,42,0.16)] hover:shadow-[0_36px_76px_-36px_rgba(15,23,42,0.2)]'
                             }`}
                           >
-                            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_14%_18%,rgba(22,104,255,0.07),transparent_22%),radial-gradient(circle_at_86%_76%,rgba(20,184,255,0.05),transparent_18%)]" />
+                            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_14%_18%,rgba(22,104,255,0.07),transparent_22%),radial-gradient(circle_at_86%_76%,rgba(20,184,255,0.05),transparent_18%),linear-gradient(135deg,rgba(255,255,255,0.22),rgba(255,255,255,0)_30%,rgba(255,255,255,0.08)_56%,rgba(255,255,255,0)_100%)]" />
                             <div className="relative grid gap-4 lg:grid-cols-[13rem_minmax(0,1fr)_auto] lg:items-start">
                               <EventCoverMedia
                                 title={event.title}
@@ -257,7 +257,9 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
                                     {event.category}
                                   </span>
                                 </div>
-                                <h4 className="mt-4 text-2xl font-semibold leading-tight text-slate-950">{event.title}</h4>
+                                <h4 className="mt-4 text-2xl font-semibold leading-tight tracking-[-0.03em] text-slate-950 transition duration-300 group-hover:text-blue-700">
+                                  {event.title}
+                                </h4>
                                 <p className="mt-3 text-sm font-medium uppercase tracking-[0.16em] text-blue-700">
                                   {formatEventDate(event)}
                                 </p>
@@ -294,7 +296,7 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
           <motion.div key="calendar" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.22 }}>
             {activeMonth ? (
               <section className="space-y-4">
-                <div className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/95 p-4 shadow-[0_20px_42px_-30px_rgba(15,23,42,0.15)] sm:p-5">
+                <div className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(245,249,255,0.92))] p-4 shadow-[0_24px_52px_-30px_rgba(15,23,42,0.15)] sm:p-5">
                   <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(22,104,255,0.07),transparent_24%),radial-gradient(circle_at_78%_24%,rgba(20,184,255,0.06),transparent_20%)]" />
                   <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div>
@@ -314,7 +316,7 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
                               setFilters({ ...filters, month: 'All' });
                             }
                           }}
-                          className="inline-flex min-h-12 flex-1 items-center justify-center rounded-[1.2rem] border border-slate-200 bg-slate-50 px-5 text-sm font-medium text-slate-700 transition hover:-translate-y-0.5 hover:border-sky-200 hover:bg-sky-50"
+                          className="inline-flex min-h-12 flex-1 items-center justify-center rounded-[1.2rem] border border-white/85 bg-white/92 px-5 text-sm font-medium text-slate-700 shadow-[0_18px_34px_-28px_rgba(15,23,42,0.14)] transition duration-300 hover:-translate-y-0.5 hover:border-sky-200 hover:bg-sky-50"
                         >
                           Previous
                         </button>
@@ -327,7 +329,7 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
                               setFilters({ ...filters, month: 'All' });
                             }
                           }}
-                          className="inline-flex min-h-12 flex-1 items-center justify-center rounded-[1.2rem] border border-sky-600 bg-sky-600 px-5 text-sm font-medium text-white transition hover:-translate-y-0.5 hover:bg-sky-700"
+                          className="inline-flex min-h-12 flex-1 items-center justify-center rounded-[1.2rem] border border-sky-600 bg-[linear-gradient(135deg,#1668ff,#14b8ff)] px-5 text-sm font-medium text-white shadow-[0_24px_48px_-28px_rgba(22,104,255,0.46)] transition duration-300 hover:-translate-y-0.5 hover:brightness-105"
                         >
                           Next
                         </button>
@@ -355,7 +357,7 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
       </AnimatePresence>
 
       {shouldShowEmptyState && (
-        <motion.div className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white p-8 text-center shadow-[0_20px_40px_-30px_rgba(15,23,42,0.14)]" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <motion.div className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(245,249,255,0.92))] p-8 text-center shadow-[0_24px_52px_-30px_rgba(15,23,42,0.14)]" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <h3 className="text-lg font-semibold text-slate-950">
             {events.length === 0 ? 'No live events yet' : 'No events match this view'}
           </h3>

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 import { AssociationLogoBadge } from '@/components/association-logo-badge';
+import { FeaturedEventMiniMap } from '@/components/featured-event-mini-map';
 import type { EventItem } from '@/lib/data/events';
 import { formatEventDate } from '@/lib/utils/date';
 import { getEventSlug } from '@/lib/utils/event-slugs';
@@ -179,16 +180,17 @@ function HeroEventCard({
   delay: number;
   compact?: boolean;
 }) {
+  const reducedMotion = useReducedMotion();
   const image = safeCoverImage(event.coverImage);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
 
   return (
     <motion.article
-      className={`pointer-events-auto absolute overflow-hidden rounded-[1.9rem] border border-white/75 bg-white/84 shadow-[0_40px_120px_-48px_rgba(36,76,170,0.42)] backdrop-blur-2xl ${className}`}
+      className={`pointer-events-auto absolute overflow-hidden rounded-[1.9rem] border border-white/75 bg-[linear-gradient(155deg,rgba(255,255,255,0.9),rgba(239,245,255,0.72))] shadow-[0_36px_96px_-46px_rgba(36,76,170,0.34)] backdrop-blur-2xl ${className}`}
       initial={{ opacity: 0, y: 32, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.9, delay, ease: [0.16, 1, 0.3, 1] }}
-      whileHover={{ y: -10, scale: compact ? 1.02 : 1.028 }}
+      whileHover={{ y: compact ? -6 : -9, scale: compact ? 1.018 : 1.022 }}
       style={{ rotateX: tilt.y, rotateY: tilt.x, transformStyle: 'preserve-3d' }}
       onPointerMove={(eventObject) => {
         const bounds = eventObject.currentTarget.getBoundingClientRect();
@@ -201,11 +203,17 @@ function HeroEventCard({
       }}
       onPointerLeave={() => setTilt({ x: 0, y: 0 })}
     >
-      <div className={`relative ${compact ? 'min-h-[10rem]' : 'min-h-[14rem]'}`}>
+      <div className={`relative ${compact ? 'min-h-[10rem]' : 'min-h-[14.25rem]'}`}>
         <motion.div
-          className="absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(34,117,255,0.26),transparent_28%),radial-gradient(circle_at_82%_16%,rgba(14,182,255,0.24),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.72),rgba(255,255,255,0.16))]"
-          animate={{ opacity: [0.8, 1, 0.84], scale: [1, 1.03, 1] }}
-          transition={{ duration: 7 + delay * 3, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(34,117,255,0.34),transparent_28%),radial-gradient(circle_at_82%_16%,rgba(14,182,255,0.3),transparent_22%),radial-gradient(circle_at_84%_80%,rgba(124,58,237,0.16),transparent_24%),radial-gradient(circle_at_62%_72%,rgba(236,72,153,0.12),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.76),rgba(255,255,255,0.16))]"
+          animate={{ opacity: [0.82, 1, 0.86], scale: [1, 1.035, 1], backgroundPosition: ['0% 0%', '100% 100%', '0% 0%'] }}
+          transition={{ duration: 9 + delay * 3, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ backgroundSize: '140% 140%' }}
+        />
+        <motion.div
+          className="pointer-events-none absolute inset-0 bg-[linear-gradient(118deg,rgba(255,255,255,0)_18%,rgba(255,255,255,0.28)_38%,rgba(255,255,255,0.08)_52%,rgba(255,255,255,0)_72%)] opacity-70"
+          animate={reducedMotion ? undefined : { x: ['-24%', '116%'] }}
+          transition={{ duration: 2.8, delay: 0.7 + delay, repeat: Infinity, repeatDelay: 4.8, ease: [0.16, 1, 0.3, 1] }}
         />
         <div className="pointer-events-none absolute inset-0 rounded-[1.9rem] ring-1 ring-white/55" />
         {image ? (
@@ -214,33 +222,70 @@ function HeroEventCard({
               src={image}
               alt={`${event.title} image`}
               className="absolute inset-0 h-full w-full object-cover"
-              animate={{ scale: [1, 1.035, 1] }}
+              animate={{ scale: [1, 1.038, 1], x: [0, -3, 0], y: [0, 2, 0] }}
               transition={{ duration: 12 + delay * 2, repeat: Infinity, ease: 'easeInOut' }}
             />
             <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,17,31,0.06),rgba(9,17,31,0.24)_38%,rgba(6,12,22,0.82))]" />
           </>
         ) : null}
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(130deg,rgba(255,255,255,0.26),rgba(255,255,255,0)_34%,rgba(255,255,255,0.14)_58%,rgba(255,255,255,0)_76%)] opacity-90" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(130deg,rgba(255,255,255,0.3),rgba(255,255,255,0)_34%,rgba(255,255,255,0.16)_58%,rgba(255,255,255,0)_76%)] opacity-90" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,rgba(111,86,255,0.16),transparent_26%),radial-gradient(circle_at_0%_100%,rgba(34,211,238,0.14),transparent_22%),radial-gradient(circle_at_84%_18%,rgba(236,72,153,0.1),transparent_20%)] opacity-90" />
 
-        <div className="absolute left-4 top-4">
+        <div className="absolute left-4 top-4 z-10">
           <AssociationLogoBadge associationName={event.associationName} compact />
         </div>
 
+        {!compact ? (
+          <div className="absolute left-4 top-[3.7rem] z-10">
+            <FeaturedEventMiniMap city={event.city} country={event.country} />
+          </div>
+        ) : null}
+
         <motion.div
-          className="absolute inset-x-0 bottom-0 p-4 sm:p-5"
+          className={`absolute inset-x-0 bottom-0 z-10 ${compact ? 'p-4 sm:p-5' : 'p-5 sm:p-5'}`}
           animate={{ y: [0, -2, 0] }}
           transition={{ duration: 8 + delay * 3, repeat: Infinity, ease: 'easeInOut' }}
         >
-          <p className={`max-w-[18rem] font-semibold tracking-[-0.03em] ${compact ? 'text-base' : 'text-xl'} ${image ? 'text-white' : 'text-slate-950'}`}>
+          <p
+            className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${
+              image ? 'text-sky-100/90' : 'text-slate-500'
+            }`}
+            style={{
+              display: '-webkit-box',
+              WebkitLineClamp: 1,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden'
+            }}
+          >
+            {event.associationName ?? 'Featured event'}
+          </p>
+          <p
+            className={`mt-2 max-w-[18rem] font-semibold leading-[1.08] tracking-[-0.03em] ${compact ? 'text-[0.96rem]' : 'text-[1.17rem]'} ${
+              image ? 'text-white' : 'text-slate-950'
+            }`}
+            style={{
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden'
+            }}
+          >
             {event.title}
           </p>
-          <div className={`mt-3 flex flex-wrap items-center gap-2 text-[11px] font-medium uppercase tracking-[0.18em] ${image ? 'text-sky-100' : 'text-blue-700'}`}>
-            <span>{event.date}</span>
-            <span className={image ? 'text-white/50' : 'text-slate-300'}>/</span>
-            <span>
-              {event.city}, {event.country}
-            </span>
-          </div>
+          <p className={`mt-2.5 text-[10px] font-semibold uppercase tracking-[0.15em] ${image ? 'text-sky-100/92' : 'text-blue-700'}`}>
+            {event.date}
+          </p>
+          <p
+            className={`mt-1.5 text-[11px] font-medium leading-[1.25] ${image ? 'text-white/88' : 'text-slate-600'}`}
+            style={{
+              display: '-webkit-box',
+              WebkitLineClamp: 1,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden'
+            }}
+          >
+            {event.city}, {event.country}
+          </p>
         </motion.div>
       </div>
     </motion.article>
@@ -335,21 +380,31 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
 
   return (
     <section className="relative overflow-hidden pb-20 pt-10 sm:pb-24 sm:pt-14 lg:pb-28">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(33,118,255,0.18),transparent_22%),radial-gradient(circle_at_88%_14%,rgba(0,196,255,0.16),transparent_18%),radial-gradient(circle_at_56%_62%,rgba(111,86,255,0.12),transparent_30%),linear-gradient(180deg,#fbfdff_0%,#f4f8ff_46%,#f8fbff_100%)]" />
       <motion.div
-        className="pointer-events-none absolute left-[-10%] top-14 h-[26rem] w-[34rem] rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.22),rgba(22,104,255,0.02)_58%,transparent_72%)] blur-3xl"
-        animate={reducedMotion ? undefined : { x: [0, 36, -14, 0], y: [0, 18, -10, 0], scale: [1, 1.08, 0.98, 1] }}
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(33,118,255,0.26),transparent_22%),radial-gradient(circle_at_88%_14%,rgba(0,196,255,0.22),transparent_18%),radial-gradient(circle_at_56%_62%,rgba(111,86,255,0.18),transparent_30%),radial-gradient(circle_at_82%_42%,rgba(236,72,153,0.1),transparent_24%),linear-gradient(180deg,#fbfdff_0%,#f4f8ff_46%,#f8fbff_100%)]"
+        animate={reducedMotion ? undefined : { backgroundPosition: ['0% 0%', '100% 60%', '0% 0%'] }}
+        transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
+        style={{ backgroundSize: '140% 140%' }}
+      />
+      <motion.div
+        className="pointer-events-none absolute left-[-10%] top-14 h-[26rem] w-[34rem] rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.28),rgba(22,104,255,0.06)_58%,transparent_72%)] blur-3xl"
+        animate={reducedMotion ? undefined : { x: [0, 36, -14, 0], y: [0, 18, -10, 0], scale: [1, 1.08, 0.98, 1], opacity: [0.78, 1, 0.8] }}
         transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
       />
       <motion.div
-        className="pointer-events-none absolute right-[-8%] top-10 h-[22rem] w-[30rem] rounded-full bg-[radial-gradient(circle,rgba(14,182,255,0.2),rgba(14,182,255,0.03)_56%,transparent_74%)] blur-3xl"
-        animate={reducedMotion ? undefined : { x: [0, -28, 10, 0], y: [0, -14, 12, 0], scale: [1.02, 0.96, 1.04, 1.02] }}
+        className="pointer-events-none absolute right-[-8%] top-10 h-[22rem] w-[30rem] rounded-full bg-[radial-gradient(circle,rgba(14,182,255,0.26),rgba(14,182,255,0.06)_56%,transparent_74%)] blur-3xl"
+        animate={reducedMotion ? undefined : { x: [0, -28, 10, 0], y: [0, -14, 12, 0], scale: [1.02, 0.96, 1.04, 1.02], opacity: [0.72, 0.96, 0.74] }}
         transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
       />
       <motion.div
-        className="pointer-events-none absolute inset-x-[15%] top-24 h-[34rem] rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.22),rgba(22,104,255,0.05)_42%,transparent_72%)] blur-3xl"
+        className="pointer-events-none absolute inset-x-[15%] top-24 h-[34rem] rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.24),rgba(22,104,255,0.08)_42%,rgba(111,86,255,0.06)_58%,transparent_72%)] blur-3xl"
         animate={reducedMotion ? undefined : { opacity: [0.72, 1, 0.82], scale: [1, 1.06, 1] }}
         transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <motion.div
+        className="pointer-events-none absolute right-[10%] top-[20%] h-[16rem] w-[16rem] rounded-full bg-[radial-gradient(circle,rgba(236,72,153,0.14),rgba(236,72,153,0.03)_56%,transparent_72%)] blur-3xl"
+        animate={reducedMotion ? undefined : { x: [0, -16, 8, 0], y: [0, 8, -12, 0], opacity: [0.42, 0.74, 0.48] }}
+        transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
       />
 
       <div className="container-shell relative">
@@ -373,10 +428,10 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
             >
               Every investigator event.
               <motion.span
-                className="mt-2 block bg-[linear-gradient(90deg,#0f172a_0%,#1668ff_46%,#10b8ff_72%,#6f56ff_100%)] bg-clip-text text-transparent"
-                animate={reducedMotion ? undefined : { backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
-                transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-                style={{ backgroundSize: '180% 180%' }}
+                className="mt-2 block bg-[linear-gradient(92deg,#155eef_0%,#10b8ff_28%,#7c3aed_58%,#ec4899_86%,#22d3ee_100%)] bg-clip-text text-transparent"
+                animate={reducedMotion ? undefined : { backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'], filter: ['drop-shadow(0 0 0 rgba(56,189,248,0))', 'drop-shadow(0 0 18px rgba(56,189,248,0.18))', 'drop-shadow(0 0 0 rgba(56,189,248,0))'] }}
+                transition={{ duration: 6.8, repeat: Infinity, ease: 'easeInOut' }}
+                style={{ backgroundSize: '220% 220%' }}
               >
                 One global calendar.
               </motion.span>
@@ -414,8 +469,8 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               {stats.map((item) => (
                 <motion.div
                   key={item.label}
-                  className="rounded-[1.7rem] border border-white/80 bg-white/78 px-4 py-4 shadow-[0_26px_72px_-44px_rgba(15,23,42,0.18)] backdrop-blur-xl"
-                  whileHover={{ y: -6, scale: 1.02, boxShadow: '0 36px 80px -42px rgba(36,76,170,0.28)' }}
+                  className="rounded-[1.7rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.86),rgba(244,248,255,0.72))] px-4 py-4 shadow-[0_26px_72px_-44px_rgba(15,23,42,0.18)] backdrop-blur-xl"
+                  whileHover={{ y: -8, scale: 1.025, boxShadow: '0 42px 92px -42px rgba(76,90,255,0.3)' }}
                 >
                   <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">{item.label}</p>
                   <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-slate-950">{item.value}</p>
@@ -433,8 +488,8 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
             <motion.div
               className="relative mx-auto aspect-[1.05/1] w-full max-w-[46rem]"
               style={{ perspective: 1600 }}
-              animate={reducedMotion ? undefined : { rotateX: -pointer.y * 6, rotateY: pointer.x * 8 }}
-              transition={{ type: 'spring', stiffness: 90, damping: 18, mass: 0.8 }}
+              animate={reducedMotion ? undefined : { rotateX: -pointer.y * 5.2, rotateY: pointer.x * 7.2 }}
+              transition={{ type: 'spring', stiffness: 76, damping: 20, mass: 0.9 }}
               onPointerMove={(event) => {
                 const bounds = event.currentTarget.getBoundingClientRect();
                 const x = (event.clientX - bounds.left) / bounds.width;
@@ -443,8 +498,16 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               }}
               onPointerLeave={() => setPointer({ x: 0, y: 0 })}
             >
-              <div className="absolute inset-[8%] rounded-full bg-[radial-gradient(circle,rgba(79,70,229,0.18),rgba(14,165,233,0.14)_34%,transparent_68%)] blur-3xl" />
-              <div className="absolute inset-x-[14%] bottom-[8%] h-[16%] rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.26),rgba(22,104,255,0.06)_52%,transparent_76%)] blur-2xl" />
+              <motion.div
+                className="absolute inset-[8%] rounded-full bg-[radial-gradient(circle,rgba(79,70,229,0.24),rgba(14,165,233,0.18)_34%,rgba(236,72,153,0.08)_56%,transparent_68%)] blur-3xl"
+                animate={reducedMotion ? undefined : { opacity: [0.66, 0.94, 0.7], scale: [1, 1.04, 1] }}
+                transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+              />
+              <motion.div
+                className="absolute inset-x-[14%] bottom-[8%] h-[16%] rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.32),rgba(22,104,255,0.08)_52%,transparent_76%)] blur-2xl"
+                animate={reducedMotion ? undefined : { x: [0, 12, -8, 0], opacity: [0.64, 0.96, 0.68] }}
+                transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+              />
               <motion.div
                 className="absolute left-[18%] top-[18%] h-[12rem] w-[12rem] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.72),rgba(255,255,255,0.02)_68%)] blur-2xl"
                 animate={reducedMotion ? undefined : { x: [0, 12, -10, 0], y: [0, -12, 8, 0], opacity: [0.66, 0.96, 0.7] }}
@@ -452,8 +515,8 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               />
 
               <motion.div
-                className="absolute inset-[10%] rounded-[3rem] border border-white/70 bg-[linear-gradient(145deg,rgba(255,255,255,0.82),rgba(241,247,255,0.36))] shadow-[0_48px_150px_-64px_rgba(27,61,145,0.42)] backdrop-blur-2xl"
-                animate={reducedMotion ? undefined : { y: [0, -5, 0, 4, 0], rotateZ: [0, 0.35, 0, -0.2, 0] }}
+                className="absolute inset-[10%] rounded-[3rem] border border-white/70 bg-[linear-gradient(145deg,rgba(255,255,255,0.84),rgba(241,247,255,0.36))] shadow-[0_52px_162px_-64px_rgba(49,66,180,0.46)] backdrop-blur-2xl"
+                animate={reducedMotion ? undefined : { y: [0, -6, 0, 4, 0], rotateZ: [0, 0.38, 0, -0.22, 0] }}
                 transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
               />
 

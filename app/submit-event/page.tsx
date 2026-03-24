@@ -42,9 +42,11 @@ export default function SubmitEventPage({
   return (
     <section className="section-pad relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_14%,rgba(22,104,255,0.08),transparent_24%),radial-gradient(circle_at_86%_20%,rgba(20,184,255,0.08),transparent_20%)]" />
+      <div className="pointer-events-none absolute right-[8%] top-[12%] h-48 w-48 rounded-full bg-[radial-gradient(circle,rgba(111,86,255,0.1),transparent_72%)] blur-3xl" />
       <div className="container-shell relative space-y-8">
         <Reveal>
           <header className="overflow-hidden rounded-[2.4rem] border border-white/80 bg-[linear-gradient(135deg,#ffffff_0%,#eff6ff_54%,#f4fbff_100%)] p-6 shadow-[0_34px_84px_-52px_rgba(15,23,42,0.16)] sm:p-8 lg:p-10">
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.24),rgba(255,255,255,0)_28%,rgba(255,255,255,0.1)_56%,rgba(255,255,255,0)_100%)]" />
             <div className="grid gap-8 lg:grid-cols-[1.02fr_0.98fr] lg:items-end">
               <div>
                 <p className="eyebrow">Submit Event</p>
@@ -55,15 +57,15 @@ export default function SubmitEventPage({
               </div>
 
               <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4">
+                <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] transition duration-500 hover:-translate-y-1">
                   <p className="text-[10px] uppercase tracking-[0.18em] text-blue-700">Free listing</p>
                   <p className="mt-2 text-sm text-slate-700">No charge to submit or browse.</p>
                 </div>
-                <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4">
+                <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] transition duration-500 hover:-translate-y-1">
                   <p className="text-[10px] uppercase tracking-[0.18em] text-cyan-700">Reviewed</p>
                   <p className="mt-2 text-sm text-slate-700">Every submission is checked before it goes live.</p>
                 </div>
-                <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4">
+                <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] transition duration-500 hover:-translate-y-1">
                   <p className="text-[10px] uppercase tracking-[0.18em] text-violet-700">Fast turnaround</p>
                   <p className="mt-2 text-sm text-slate-700">Most submissions reviewed within 48 hours.</p>
                 </div>
@@ -74,7 +76,8 @@ export default function SubmitEventPage({
 
         <Reveal delay={0.05}>
           <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-            <article className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white p-6 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.16)] sm:p-8">
+            <article className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-6 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.16)] sm:p-8">
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.22),rgba(255,255,255,0)_30%,rgba(255,255,255,0.08)_56%,rgba(255,255,255,0)_100%)]" />
               <p className="text-xs uppercase tracking-[0.2em] text-blue-700">Submission form</p>
               <h2 className="mt-3 font-[var(--font-serif)] text-3xl text-slate-950">Event details</h2>
 
@@ -90,7 +93,7 @@ export default function SubmitEventPage({
                 </p>
               ) : null}
 
-              <form action={submitEventAction} className="mt-6 grid gap-4 sm:grid-cols-2">
+              <form action={submitEventAction} className="relative mt-6 grid gap-4 sm:grid-cols-2">
                 <label className="text-sm text-slate-700">
                   Event name
                   <input name="eventName" required className="field-input" />
@@ -189,12 +192,12 @@ export default function SubmitEventPage({
               </datalist>
             </article>
 
-            <article className="rounded-[2rem] border border-white/80 bg-white p-6 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.16)] sm:p-7">
+            <article className="rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-6 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.16)] sm:p-7">
               <p className="text-xs uppercase tracking-[0.2em] text-blue-700">FAQ</p>
               <h2 className="mt-3 font-[var(--font-serif)] text-3xl text-slate-950">Before you submit</h2>
               <div className="mt-6 space-y-3">
                 {faqs.map((faq) => (
-                  <div key={faq.question} className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+                  <div key={faq.question} className="rounded-[1.5rem] border border-slate-200/80 bg-slate-50/90 p-4 transition duration-300 hover:-translate-y-0.5">
                     <p className="text-sm font-semibold text-slate-950">{faq.question}</p>
                     <p className="mt-2 text-sm leading-relaxed text-slate-600">{faq.answer}</p>
                   </div>

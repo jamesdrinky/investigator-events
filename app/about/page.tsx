@@ -21,6 +21,7 @@ export default async function AboutPage() {
       <div className="container-shell relative space-y-8">
         <Reveal>
           <header className="overflow-hidden rounded-[2.4rem] border border-white/80 bg-[linear-gradient(135deg,#ffffff_0%,#eff6ff_54%,#f4fbff_100%)] p-6 shadow-[0_34px_84px_-52px_rgba(15,23,42,0.16)] sm:p-8 lg:p-10">
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.24),rgba(255,255,255,0)_28%,rgba(255,255,255,0.1)_56%,rgba(255,255,255,0)_100%)]" />
             <div className="grid gap-8 lg:grid-cols-[1.02fr_0.98fr] lg:items-end">
               <div>
                 <p className="eyebrow">About</p>
@@ -39,15 +40,15 @@ export default async function AboutPage() {
               </div>
 
               <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4">
+                <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] transition duration-500 hover:-translate-y-1">
                   <p className="text-[10px] uppercase tracking-[0.18em] text-blue-700">Countries</p>
                   <p className="mt-2 font-[var(--font-serif)] text-4xl text-slate-950">{coverage.totalCountries}</p>
                 </div>
-                <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4">
+                <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] transition duration-500 hover:-translate-y-1">
                   <p className="text-[10px] uppercase tracking-[0.18em] text-cyan-700">Live events</p>
                   <p className="mt-2 font-[var(--font-serif)] text-4xl text-slate-950">{coverage.totalEvents}</p>
                 </div>
-                <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4">
+                <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] transition duration-500 hover:-translate-y-1">
                   <p className="text-[10px] uppercase tracking-[0.18em] text-violet-700">Regions</p>
                   <p className="mt-2 font-[var(--font-serif)] text-4xl text-slate-950">{coverage.regions.length}</p>
                 </div>
@@ -59,7 +60,7 @@ export default async function AboutPage() {
         <Reveal delay={0.04}>
           <section className="grid gap-4 md:grid-cols-3">
             {pillars.map((item) => (
-              <article key={item} className="rounded-[1.9rem] border border-white/80 bg-white p-6 shadow-[0_22px_48px_-34px_rgba(15,23,42,0.16)]">
+              <article key={item} className="rounded-[1.9rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-6 shadow-[0_22px_48px_-34px_rgba(15,23,42,0.16)] transition duration-500 hover:-translate-y-1 hover:shadow-[0_34px_76px_-38px_rgba(36,76,170,0.2)]">
                 <p className="text-sm leading-relaxed text-slate-700">{item}</p>
               </article>
             ))}
@@ -68,23 +69,23 @@ export default async function AboutPage() {
 
         <Reveal delay={0.08}>
           <section className="grid gap-6 lg:grid-cols-[1fr_1fr]">
-            <article className="rounded-[2rem] border border-white/80 bg-white p-7 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.16)] sm:p-8">
+            <article className="rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-7 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.16)] sm:p-8">
               <p className="eyebrow">What The Platform Does</p>
               <h2 className="mt-4 font-[var(--font-serif)] text-3xl text-slate-950">A discovery product first.</h2>
               <div className="mt-6 grid gap-3">
-                <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+                <div className="rounded-[1.5rem] border border-slate-200/80 bg-slate-50/90 p-4 text-sm text-slate-700">
                   Shows live dates and event detail pages instead of long marketing explanation blocks.
                 </div>
-                <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+                <div className="rounded-[1.5rem] border border-slate-200/80 bg-slate-50/90 p-4 text-sm text-slate-700">
                   Gives associations visible identity through logos, network browsing, and linked event views.
                 </div>
-                <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+                <div className="rounded-[1.5rem] border border-slate-200/80 bg-slate-50/90 p-4 text-sm text-slate-700">
                   Makes listing free, while keeping public quality through review before publication.
                 </div>
               </div>
             </article>
 
-            <article className="rounded-[2rem] border border-white/80 bg-white p-7 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.16)] sm:p-8">
+            <article className="rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-7 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.16)] sm:p-8">
               <p className="eyebrow">Founded By</p>
               <h2 className="mt-4 font-[var(--font-serif)] text-3xl text-slate-950">Founder credentials</h2>
               <div className="mt-6 rounded-[1.7rem] border border-slate-200 bg-slate-50 p-5">

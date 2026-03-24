@@ -74,7 +74,7 @@ export function EventCard({ event, onSelect }: EventCardProps) {
   );
 
   const className =
-    'group relative flex w-full flex-col gap-4 overflow-hidden rounded-[2.25rem] border border-white/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] p-4 text-left shadow-[0_30px_64px_-38px_rgba(15,23,42,0.18)] transition duration-500 hover:-translate-y-1.5 hover:shadow-[0_42px_84px_-38px_rgba(22,104,255,0.22)] sm:p-5';
+    'group relative flex w-full flex-col gap-4 overflow-hidden rounded-[2.25rem] border border-white/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] p-4 text-left shadow-[0_30px_64px_-38px_rgba(15,23,42,0.18)] transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:shadow-[0_48px_96px_-38px_rgba(22,104,255,0.24)] sm:p-5';
 
   if (onSelect) {
     return (

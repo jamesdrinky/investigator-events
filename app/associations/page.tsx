@@ -19,9 +19,11 @@ export default async function AssociationsPage() {
   return (
     <section className="section-pad relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_14%,rgba(22,104,255,0.08),transparent_24%),radial-gradient(circle_at_86%_20%,rgba(20,184,255,0.08),transparent_20%)]" />
+      <div className="pointer-events-none absolute left-[6%] top-[10%] h-44 w-44 rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.12),transparent_72%)] blur-3xl" />
       <div className="container-shell relative">
         <Reveal>
           <header className="mb-6 overflow-hidden rounded-[2.4rem] border border-white/80 bg-[linear-gradient(135deg,#ffffff_0%,#eff6ff_54%,#f4fbff_100%)] p-6 shadow-[0_34px_84px_-52px_rgba(15,23,42,0.16)] sm:p-8 lg:p-10">
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.24),rgba(255,255,255,0)_28%,rgba(255,255,255,0.1)_56%,rgba(255,255,255,0)_100%)]" />
             <div className="grid gap-6 lg:grid-cols-[1.08fr_0.92fr] lg:items-end">
               <div>
                 <p className="eyebrow">Associations</p>
@@ -32,15 +34,15 @@ export default async function AssociationsPage() {
               </div>
 
               <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4">
+                <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] transition duration-500 hover:-translate-y-1 hover:shadow-[0_28px_64px_-36px_rgba(36,76,170,0.18)]">
                   <p className="text-[10px] uppercase tracking-[0.18em] text-blue-700">Credible network</p>
                   <p className="mt-2 text-sm text-slate-700">Real associations, visible logos, direct links, and linked event counts.</p>
                 </div>
-                <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4">
+                <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] transition duration-500 hover:-translate-y-1 hover:shadow-[0_28px_64px_-36px_rgba(36,76,170,0.18)]">
                   <p className="text-[10px] uppercase tracking-[0.18em] text-cyan-700">Browse faster</p>
                   <p className="mt-2 text-sm text-slate-700">Filter by region or country before opening the connected calendar view.</p>
                 </div>
-                <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4">
+                <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] transition duration-500 hover:-translate-y-1 hover:shadow-[0_28px_64px_-36px_rgba(36,76,170,0.18)]">
                   <p className="text-[10px] uppercase tracking-[0.18em] text-violet-700">Global signal</p>
                   <p className="mt-2 text-sm text-slate-700">The network view helps the platform feel international, not local or isolated.</p>
                 </div>

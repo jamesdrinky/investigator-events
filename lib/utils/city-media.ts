@@ -22,6 +22,18 @@ const curatedCityHeroSlugMap: Record<string, string | null> = {
 
 const blockedCityHeroSlugs = new Set<string>();
 
+function normalizeLookup(value: string): string {
+  return value
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
+const normalizedCuratedCityHeroSlugMap = new Map(
+  Object.entries(curatedCityHeroSlugMap).map(([key, value]) => [normalizeLookup(key), value])
+);
+
 export function getCitySlug(city: string): string {
   return city
     .normalize('NFKD')
@@ -42,7 +54,7 @@ export function getCityHeroImageUrl(city: string): string | null {
 }
 
 export function getTrustedCityHeroSlug(city: string): string | null {
-  const mapped = curatedCityHeroSlugMap[city];
+  const mapped = curatedCityHeroSlugMap[city] ?? normalizedCuratedCityHeroSlugMap.get(normalizeLookup(city));
 
   if (mapped === null) {
     return null;

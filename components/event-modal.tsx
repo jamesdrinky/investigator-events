@@ -59,6 +59,8 @@ export function EventModal({ event, onClose }: EventModalProps) {
                 category={event.category}
                 coverImage={event.coverImage}
                 coverImageAlt={event.coverImageAlt}
+                associationName={event.association ?? event.organiser}
+                featured={event.featured}
                 compact
               />
             </div>

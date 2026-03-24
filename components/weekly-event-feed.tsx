@@ -16,43 +16,43 @@ interface WeeklyEventFeedProps {
 
 export function WeeklyEventFeed({ title, eyebrow, events, emptyText }: WeeklyEventFeedProps) {
   return (
-    <section className="surface-flat relative overflow-hidden p-4 sm:p-5">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(77,163,255,0.14),transparent_26%)]" />
+    <section className="relative overflow-hidden rounded-[1.7rem] border border-slate-200 bg-white p-4 shadow-[0_18px_36px_-30px_rgba(15,23,42,0.18)] sm:p-5">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(77,163,255,0.08),transparent_26%)]" />
       <div className="relative">
         {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
-        <h2 className="mt-3 font-[var(--font-serif)] text-3xl text-white">{title}</h2>
+        <h2 className="mt-3 font-[var(--font-serif)] text-3xl text-slate-950">{title}</h2>
 
         {events.length === 0 ? (
-          <p className="mt-5 text-sm text-slate-300">{emptyText}</p>
+          <p className="mt-5 text-sm text-slate-600">{emptyText}</p>
         ) : (
           <div className="mt-4 grid gap-3">
             {events.map((event) => (
               <article
                 key={event.id}
-                className="surface-elevated group rounded-[1.45rem] px-4 py-4"
+                className="group rounded-[1.45rem] border border-slate-200 bg-slate-50 px-4 py-4"
               >
                 <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_10rem]">
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2 text-slate-400">
-                      <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-slate-300">
+                    <div className="flex items-center gap-2 text-slate-500">
+                      <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white text-slate-600 shadow-[0_10px_20px_-16px_rgba(15,23,42,0.25)]">
                         <CategoryIcon category={event.category} />
                       </span>
                       <span className="text-[10px] uppercase tracking-[0.18em]">{event.category}</span>
                     </div>
-                    <h3 className="mt-3 text-lg font-semibold text-white transition-colors duration-300 group-hover:text-accent2">
+                    <h3 className="mt-3 text-lg font-semibold text-slate-950 transition-colors duration-300 group-hover:text-sky-700">
                       {event.title}
                     </h3>
-                    <p className="mt-2 text-sm text-slate-300">{formatEventDate(event)}</p>
-                    <p className="mt-2 text-sm text-slate-400">{event.city}, {event.country}</p>
+                    <p className="mt-2 text-sm font-medium text-sky-700">{formatEventDate(event)}</p>
+                    <p className="mt-2 text-sm text-slate-600">{event.city}, {event.country}</p>
                     <div className="mt-3 flex flex-wrap items-center gap-2">
-                      <span className="country-chip">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-emerald-700">
                         <span>{getCountryFlag(event.country)}</span>
                         <span>{event.country}</span>
                       </span>
                       <SaveDateLinks event={event} compact />
                       <Link
                         href={`/events/${getEventSlug(event)}`}
-                        className="inline-flex rounded-full border border-white/12 px-3 py-1.5 text-xs uppercase tracking-[0.16em] text-slate-200 transition hover:border-white/20 hover:bg-white/[0.06]"
+                        className="inline-flex rounded-full bg-sky-600 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-white transition hover:bg-sky-700"
                       >
                         Open event
                       </Link>
@@ -67,14 +67,15 @@ export function WeeklyEventFeed({ title, eyebrow, events, emptyText }: WeeklyEve
                       category={event.category}
                       coverImage={event.coverImage}
                       coverImageAlt={event.coverImageAlt}
+                      associationName={event.association ?? event.organiser}
                       compact
                     />
                   </div>
                 </div>
                 {event.description ? (
-                  <p className="mt-3 text-sm leading-relaxed text-slate-300">{event.description}</p>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-600">{event.description}</p>
                 ) : (
-                  <p className="mt-3 text-sm leading-relaxed text-slate-300">
+                  <p className="mt-3 text-sm leading-relaxed text-slate-600">
                     Open the event record for dates, location, organiser information, and the official source link.
                   </p>
                 )}

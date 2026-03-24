@@ -18,34 +18,34 @@ interface AssociationsDirectoryProps {
 
 const regionAccent: Record<string, { glow: string; line: string; badge: string }> = {
   Europe: {
-    glow: 'from-signal/18 via-transparent to-transparent',
-    line: 'from-signal/90 to-cyan-300/80',
-    badge: 'bg-signal/16 text-signal2 border-signal/20'
+    glow: 'from-sky-100 via-transparent to-transparent',
+    line: 'from-sky-500/80 to-cyan-400/70',
+    badge: 'border-sky-200 bg-sky-50 text-sky-700'
   },
   'Middle East': {
-    glow: 'from-cyan-400/18 via-transparent to-transparent',
-    line: 'from-cyan-300/90 to-blue-300/80',
-    badge: 'bg-cyan-300/12 text-cyan-100 border-cyan-200/20'
+    glow: 'from-cyan-100 via-transparent to-transparent',
+    line: 'from-cyan-500/80 to-blue-400/70',
+    badge: 'border-cyan-200 bg-cyan-50 text-cyan-700'
   },
   'North America': {
-    glow: 'from-globe/18 via-transparent to-transparent',
-    line: 'from-globe/90 to-emerald-300/80',
-    badge: 'bg-globe/12 text-globe2 border-globe/20'
+    glow: 'from-emerald-100 via-transparent to-transparent',
+    line: 'from-emerald-500/80 to-sky-500/70',
+    badge: 'border-emerald-200 bg-emerald-50 text-emerald-700'
   },
   'Asia-Pacific': {
-    glow: 'from-atlas/18 via-transparent to-transparent',
-    line: 'from-atlas/90 to-violet-300/80',
-    badge: 'bg-atlas/12 text-violet-100 border-atlas/20'
+    glow: 'from-violet-100 via-transparent to-transparent',
+    line: 'from-violet-500/80 to-sky-500/70',
+    badge: 'border-violet-200 bg-violet-50 text-violet-700'
   },
   'Latin America': {
-    glow: 'from-violet-400/18 via-transparent to-transparent',
-    line: 'from-violet-400/90 to-blue-300/80',
-    badge: 'bg-violet-400/12 text-violet-100 border-violet-300/20'
+    glow: 'from-violet-100 via-transparent to-transparent',
+    line: 'from-violet-500/80 to-blue-400/70',
+    badge: 'border-violet-200 bg-violet-50 text-violet-700'
   },
   Africa: {
-    glow: 'from-green-400/18 via-transparent to-transparent',
-    line: 'from-green-400/90 to-emerald-300/80',
-    badge: 'bg-green-400/12 text-green-100 border-green-300/20'
+    glow: 'from-green-100 via-transparent to-transparent',
+    line: 'from-green-500/80 to-emerald-400/70',
+    badge: 'border-green-200 bg-green-50 text-green-700'
   }
 };
 
@@ -108,14 +108,13 @@ export function AssociationsDirectory({ associations, stats }: AssociationsDirec
   return (
     <div className="space-y-6 sm:space-y-8">
       {featuredAssociation ? (
-        <section className="surface-cinematic relative p-6 sm:p-8">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_18%,rgba(54,168,255,0.16),transparent_20%),radial-gradient(circle_at_83%_24%,rgba(255,177,74,0.14),transparent_18%),linear-gradient(180deg,rgba(255,255,255,0.03),transparent_44%,rgba(255,255,255,0.015))]" />
-          <div className="pointer-events-none absolute inset-0 geo-grid opacity-[0.06]" />
+        <section className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_18%,rgba(54,168,255,0.08),transparent_20%),radial-gradient(circle_at_83%_24%,rgba(168,85,247,0.06),transparent_18%)]" />
           <div className="relative grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
             <div>
               <p className="eyebrow">Association Network</p>
               <h2 className="section-title">A stronger visual read on the bodies shaping the investigator events market</h2>
-              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-300 sm:text-base">
+              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
                 A curated view of the associations behind the ecosystem, organised by country and region so the platform
                 reads as a live international network rather than a simple event list.
               </p>
@@ -128,22 +127,22 @@ export function AssociationsDirectory({ associations, stats }: AssociationsDirec
               </div>
             </div>
 
-            <div className="surface-elevated p-5">
+            <div className="rounded-[1.7rem] border border-slate-200 bg-slate-50 p-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400">Featured signal</p>
-                  <h3 className="mt-2 font-[var(--font-serif)] text-3xl text-white">{featuredAssociation.name}</h3>
-                  <p className="mt-2 text-sm text-slate-300">
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-sky-700">Featured signal</p>
+                  <h3 className="mt-2 font-[var(--font-serif)] text-3xl text-slate-950">{featuredAssociation.name}</h3>
+                  <p className="mt-2 text-sm text-slate-600">
                     {featuredAssociation.country} · {featuredAssociation.region}
                   </p>
                 </div>
-                <span className={`rounded-full border px-3 py-1 text-[11px] uppercase tracking-[0.16em] ${regionAccent[featuredAssociation.region]?.badge ?? 'border-white/15 bg-white/[0.06] text-white'}`}>
+                <span className={`rounded-full border px-3 py-1 text-[11px] uppercase tracking-[0.16em] ${regionAccent[featuredAssociation.region]?.badge ?? 'border-slate-200 bg-white text-slate-700'}`}>
                   {featuredAssociation.region}
                 </span>
               </div>
 
-              <div className="mt-5 rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(241,245,249,0.92))] p-4">
-                <div className="flex h-28 items-center justify-center rounded-[1.1rem] border border-slate-200/80 bg-[radial-gradient(circle_at_50%_12%,rgba(15,23,42,0.07),transparent_52%),linear-gradient(180deg,rgba(255,255,255,0.96),rgba(234,239,246,0.92))] px-6">
+              <div className="mt-5 rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-sm">
+                <div className="flex h-28 items-center justify-center rounded-[1.1rem] border border-slate-200 bg-white px-6">
                   {featuredAssociation.logoSrc ? (
                     <Image
                       src={featuredAssociation.logoSrc}
@@ -164,7 +163,7 @@ export function AssociationsDirectory({ associations, stats }: AssociationsDirec
                 {featuredAssociation.eventCount > 0 ? (
                   <span className="city-chip">{featuredAssociation.eventCount} linked event{featuredAssociation.eventCount === 1 ? '' : 's'}</span>
                 ) : null}
-                <div className="h-px flex-1 bg-[linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,0.16),rgba(255,255,255,0))]" />
+                <div className="h-px flex-1 bg-[linear-gradient(90deg,rgba(148,163,184,0),rgba(148,163,184,0.35),rgba(148,163,184,0))]" />
               </div>
 
               <div className="mt-5 flex flex-wrap gap-3">
@@ -180,20 +179,20 @@ export function AssociationsDirectory({ associations, stats }: AssociationsDirec
         </section>
       ) : null}
 
-      <section className="surface-flat relative overflow-hidden p-5 sm:p-6">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,rgba(52,179,255,0.12),transparent_22%),radial-gradient(circle_at_82%_18%,rgba(41,211,163,0.12),transparent_18%)]" />
+      <section className="relative overflow-hidden rounded-[1.8rem] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,rgba(52,179,255,0.08),transparent_22%),radial-gradient(circle_at_82%_18%,rgba(41,211,163,0.06),transparent_18%)]" />
         <div className="relative">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
-              <p className="text-[10px] uppercase tracking-[0.22em] text-slate-500">Association brands</p>
-              <p className="mt-1 text-sm text-slate-300">A first read on the organisations already represented on the platform.</p>
+              <p className="text-[10px] uppercase tracking-[0.22em] text-sky-700">Association brands</p>
+              <p className="mt-1 text-sm text-slate-600">A first read on the organisations already represented on the platform.</p>
             </div>
             <span className="global-chip">network view</span>
           </div>
           <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-6">
             {logoWall.map((association) => (
-              <div key={association.slug} className="surface-flat rounded-[1.3rem] p-3">
-                <div className="flex h-20 items-center justify-center rounded-[0.95rem] bg-[linear-gradient(180deg,rgba(18,34,52,0.74),rgba(11,22,34,0.82))] px-4">
+              <div key={association.slug} className="rounded-[1.3rem] border border-slate-200 bg-slate-50 p-3">
+                <div className="flex h-20 items-center justify-center rounded-[0.95rem] border border-slate-200 bg-white px-4">
                   {association.logoSrc ? (
                     <Image
                       src={association.logoSrc}
@@ -225,23 +224,22 @@ export function AssociationsDirectory({ associations, stats }: AssociationsDirec
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.3, delay: index * 0.04, ease: [0.22, 1, 0.36, 1] }}
-            className="surface-elevated relative overflow-hidden px-5 py-5"
+            className="relative overflow-hidden rounded-[1.6rem] border border-slate-200 bg-white px-5 py-5 shadow-sm"
           >
-            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent_42%,rgba(54,168,255,0.04))]" />
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),transparent_42%,rgba(54,168,255,0.03))]" />
             <div className="relative">
               <p className="text-[10px] uppercase tracking-[0.22em] text-slate-500">{item.label}</p>
               <div className="mt-3 flex items-end justify-between gap-3">
-                <p className="font-[var(--font-serif)] text-4xl leading-none text-white">{item.value}</p>
-                <div className="h-8 w-8 rounded-full border border-white/10 bg-white/[0.04]" />
+                <p className="font-[var(--font-serif)] text-4xl leading-none text-slate-950">{item.value}</p>
+                <div className="h-8 w-8 rounded-full border border-slate-200 bg-sky-50" />
               </div>
-              <p className="mt-3 text-sm text-slate-300">{item.note}</p>
+              <p className="mt-3 text-sm text-slate-600">{item.note}</p>
             </div>
           </motion.article>
         ))}
       </section>
 
-      <section className="surface-flat relative overflow-hidden p-4 sm:p-5">
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),transparent_40%,rgba(255,255,255,0.02))]" />
+      <section className="relative overflow-hidden rounded-[1.8rem] border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
         <div className="relative flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex flex-1 flex-col gap-3 lg:flex-row">
             <label className="flex-1">
@@ -279,12 +277,12 @@ export function AssociationsDirectory({ associations, stats }: AssociationsDirec
               type="button"
               onClick={() => setLiveOnly((current) => !current)}
               className={`inline-flex items-center rounded-full border px-4 py-2 text-sm transition ${
-                liveOnly ? 'border-signal/35 bg-signal/14 text-white' : 'border-white/12 bg-white/[0.03] text-slate-300 hover:border-white/20 hover:text-white'
+                liveOnly ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-white text-slate-600 hover:border-sky-200 hover:text-sky-700'
               }`}
             >
               {liveOnly ? 'Live-linked only' : 'Show live-linked only'}
             </button>
-            <div className="rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-[11px] uppercase tracking-[0.18em] text-slate-400">
+            <div className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-[11px] uppercase tracking-[0.18em] text-slate-500">
               {filteredAssociations.length} visible
             </div>
           </div>
@@ -293,9 +291,9 @@ export function AssociationsDirectory({ associations, stats }: AssociationsDirec
 
       <section className="flex flex-wrap gap-2.5">
         {representedRegions.map((item) => (
-          <div key={item.name} className="country-chip bg-white/[0.04]">
+          <div key={item.name} className="country-chip border-slate-200 bg-white">
             <span>{item.name}</span>
-            <span className="text-slate-300">{item.count}</span>
+            <span className="text-slate-500">{item.count}</span>
           </div>
         ))}
       </section>
@@ -311,13 +309,12 @@ export function AssociationsDirectory({ associations, stats }: AssociationsDirec
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.15 }}
               transition={{ duration: 0.32, delay: index * 0.025, ease: [0.22, 1, 0.36, 1] }}
-              className="surface-elevated group relative flex min-h-[24rem] flex-col overflow-hidden p-5 transition duration-300"
+              className="group relative flex min-h-[24rem] flex-col overflow-hidden rounded-[1.8rem] border border-slate-200 bg-white p-5 shadow-sm transition duration-300"
             >
               <div className={`pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b ${accent.glow}`} />
-              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),transparent_32%,rgba(255,255,255,0.01))]" />
               <div className="relative flex h-full flex-col">
-                <div className="surface-flat rounded-[1.6rem] p-4">
-                  <div className="flex h-36 items-center justify-center rounded-[1.15rem] bg-[radial-gradient(circle_at_50%_12%,rgba(15,23,42,0.18),transparent_56%),linear-gradient(180deg,rgba(18,34,52,0.76),rgba(11,22,34,0.88))] px-6 py-5">
+                <div className="rounded-[1.6rem] border border-slate-200 bg-slate-50 p-4">
+                  <div className="flex h-36 items-center justify-center rounded-[1.15rem] border border-slate-200 bg-white px-6 py-5">
                     {association.logoSrc ? (
                       <Image
                         src={association.logoSrc}
@@ -327,10 +324,10 @@ export function AssociationsDirectory({ associations, stats }: AssociationsDirec
                         className="h-full w-full object-contain transition duration-300 group-hover:scale-[1.02]"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center rounded-[0.95rem] bg-[linear-gradient(180deg,rgba(18,34,52,0.82),rgba(11,22,34,0.92))]">
+                      <div className="flex h-full w-full items-center justify-center rounded-[0.95rem] border border-slate-200 bg-white">
                         <div className="text-center">
-                          <p className="text-xl font-semibold tracking-[0.22em] text-white">{getInitials(association.shortName)}</p>
-                          <p className="mt-2 text-[10px] uppercase tracking-[0.22em] text-slate-400">Association</p>
+                          <p className="text-xl font-semibold tracking-[0.22em] text-slate-800">{getInitials(association.shortName)}</p>
+                          <p className="mt-2 text-[10px] uppercase tracking-[0.22em] text-slate-500">Association</p>
                         </div>
                       </div>
                     )}
@@ -340,27 +337,27 @@ export function AssociationsDirectory({ associations, stats }: AssociationsDirec
                 <div className="mt-5 flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-[10px] uppercase tracking-[0.22em] text-slate-500">{association.shortName}</p>
-                    <h3 className="mt-2 text-[1.65rem] font-semibold leading-tight text-white">{association.name}</h3>
+                    <h3 className="mt-2 text-[1.65rem] font-semibold leading-tight text-slate-950">{association.name}</h3>
                   </div>
                   <span className={`shrink-0 rounded-full border px-3 py-1 text-[11px] uppercase tracking-[0.16em] ${accent.badge}`}>
                     {association.region}
                   </span>
                 </div>
 
-                <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-slate-300">
+                <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-slate-600">
                   <span>{association.country}</span>
-                  <span className="text-slate-600">/</span>
+                  <span className="text-slate-400">/</span>
                   <span>{association.region}</span>
                   {association.eventCount > 0 ? (
                     <>
-                      <span className="text-slate-600">/</span>
+                      <span className="text-slate-400">/</span>
                       <span className="city-chip">{association.eventCount} linked</span>
                     </>
                   ) : null}
                 </div>
 
                 <div className="mt-auto pt-6">
-                  <div className={`mb-4 h-px bg-gradient-to-r ${accent.line} via-white/20 to-transparent`} />
+                  <div className={`mb-4 h-px bg-gradient-to-r ${accent.line} via-slate-200 to-transparent`} />
                   <div className="flex flex-wrap gap-3">
                     <a href={association.website} target="_blank" rel="noreferrer" className="btn-primary px-5 py-2.5">
                       Visit site
@@ -377,9 +374,9 @@ export function AssociationsDirectory({ associations, stats }: AssociationsDirec
       </section>
 
       {filteredAssociations.length === 0 ? (
-        <section className="surface-flat p-8 text-center">
-          <h3 className="font-[var(--font-serif)] text-3xl text-white">No associations match the current view</h3>
-          <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-300">
+        <section className="rounded-[1.8rem] border border-slate-200 bg-white p-8 text-center shadow-sm">
+          <h3 className="font-[var(--font-serif)] text-3xl text-slate-950">No associations match the current view</h3>
+          <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-600">
             Try widening the search or switching back to all regions to restore the full network snapshot.
           </p>
         </section>

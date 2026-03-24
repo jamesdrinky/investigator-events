@@ -81,6 +81,8 @@ export function DayPreviewModal({ date, events, onClose, onPreviewEvent }: DayPr
                       category={event.category}
                       coverImage={event.coverImage}
                       coverImageAlt={event.coverImageAlt}
+                      associationName={event.association ?? event.organiser}
+                      featured={event.featured}
                       compact
                       priorityLabel={event.featured ? 'Featured event' : event.category}
                     />

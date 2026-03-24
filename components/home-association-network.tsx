@@ -12,8 +12,7 @@ export function HomeAssociationNetwork({ associations }: HomeAssociationNetworkP
   const remaining = associations.slice(1, 5);
 
   return (
-    <section className="relative overflow-hidden bg-[linear-gradient(180deg,rgba(8,15,26,0),rgba(17,24,42,0.32)_24%,rgba(8,15,26,0)_100%)] py-24 sm:py-28 lg:py-32">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_14%_26%,rgba(122,104,255,0.14),transparent_20%)]" />
+    <section className="relative overflow-hidden py-24 sm:py-28 lg:py-32">
       <div className="container-shell">
         <div className="grid gap-10 lg:grid-cols-[0.86fr_1.14fr] lg:items-start">
           <div>
@@ -23,11 +22,10 @@ export function HomeAssociationNetwork({ associations }: HomeAssociationNetworkP
           </div>
 
           {leadAssociation ? (
-            <article className="surface-cinematic relative p-6 sm:p-8">
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(42,155,255,0.18),transparent_22%)]" />
+            <article className="global-panel p-6 sm:p-8">
               <div className="relative">
                 <div className="flex flex-wrap items-start justify-between gap-6">
-                  <div className="flex h-28 w-44 items-center justify-center rounded-[1.4rem] bg-[linear-gradient(180deg,rgba(9,19,31,0.62),rgba(9,19,31,0.3))] px-6">
+                  <div className="flex h-28 w-44 items-center justify-center rounded-xl border border-gray-200 bg-slate-50 px-6">
                     {leadAssociation.logoSrc ? (
                       <Image
                         src={leadAssociation.logoSrc}
@@ -37,13 +35,13 @@ export function HomeAssociationNetwork({ associations }: HomeAssociationNetworkP
                         className="h-full w-full object-contain"
                       />
                     ) : (
-                      <span className="text-sm font-semibold uppercase tracking-[0.22em] text-white">{leadAssociation.shortName}</span>
+                      <span className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-700">{leadAssociation.shortName}</span>
                     )}
                   </div>
                   <span className="global-chip">{leadAssociation.region}</span>
                 </div>
-                <h3 className="mt-6 font-[var(--font-serif)] text-4xl leading-[0.96] text-white">{leadAssociation.canonicalName}</h3>
-                <p className="mt-5 max-w-lg text-base leading-relaxed text-slate-300">
+                <h3 className="mt-6 font-[var(--font-serif)] text-4xl leading-[0.96] text-slate-950">{leadAssociation.canonicalName}</h3>
+                <p className="mt-5 max-w-lg text-base leading-relaxed text-slate-600">
                   {leadAssociation.eventCount} live event{leadAssociation.eventCount === 1 ? '' : 's'} across {leadAssociation.countryCount}{' '}
                   countr{leadAssociation.countryCount === 1 ? 'y' : 'ies'}, with activity currently concentrated in{' '}
                   {leadAssociation.cities.join(' · ')}.
@@ -81,7 +79,7 @@ export function HomeAssociationNetwork({ associations }: HomeAssociationNetworkP
                 key={association.name}
                 className="surface-elevated relative overflow-hidden p-5"
               >
-                <div className="flex min-h-[5.5rem] items-center justify-center rounded-[1rem] bg-[linear-gradient(180deg,rgba(9,19,31,0.56),rgba(9,19,31,0.22))] px-4">
+                <div className="flex min-h-[5.5rem] items-center justify-center rounded-xl border border-gray-200 bg-slate-50 px-4">
                       {association.logoSrc ? (
                         <Image
                           src={association.logoSrc}
@@ -91,14 +89,14 @@ export function HomeAssociationNetwork({ associations }: HomeAssociationNetworkP
                           className="h-full w-full object-contain"
                         />
                       ) : (
-                        <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white">{association.shortName}</span>
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-700">{association.shortName}</span>
                       )}
                 </div>
-                <p className="mt-4 truncate text-lg font-semibold text-white">{association.canonicalName}</p>
-                <p className="mt-1 text-sm text-slate-400">{association.region}</p>
+                <p className="mt-4 truncate text-lg font-semibold text-slate-950">{association.canonicalName}</p>
+                <p className="mt-1 text-sm text-slate-500">{association.region}</p>
                 <div className="mt-3 flex items-center justify-between gap-3">
                   <span className="city-chip">{association.eventCount}</span>
-                  <Link href={`/calendar?association=${encodeURIComponent(association.calendarAssociation)}`} className="text-sm text-signal2 hover:text-white">
+                  <Link href={`/calendar?association=${encodeURIComponent(association.calendarAssociation)}`} className="text-sm font-medium text-blue-600 hover:text-blue-700">
                     View events
                   </Link>
                 </div>

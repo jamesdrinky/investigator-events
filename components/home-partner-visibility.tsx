@@ -20,11 +20,8 @@ const partnerGroups = ['OSINT tools', 'Training providers', 'Investigative softw
 export function HomePartnerVisibility() {
   return (
     <section className="section-pad relative overflow-hidden pt-4">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_20%,rgba(54,168,255,0.08),transparent_18%),linear-gradient(180deg,rgba(255,255,255,0.02),transparent_28%,rgba(255,255,255,0.015))]" />
       <div className="container-shell">
-        <div className="global-panel relative overflow-hidden p-6 sm:p-8 lg:p-10">
-          <div className="pointer-events-none absolute inset-0 geo-grid opacity-[0.08]" />
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),transparent_34%,rgba(255,255,255,0.01))]" />
+        <div className="global-panel p-6 sm:p-8 lg:p-10">
           <div className="relative grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
             <div>
               <p className="eyebrow">Sponsors & Partners</p>
@@ -35,7 +32,7 @@ export function HomePartnerVisibility() {
               </p>
               <div className="mt-6 flex flex-wrap gap-2">
                 {partnerGroups.map((group) => (
-                  <span key={group} className="rounded-full border border-white/12 bg-white/[0.04] px-3 py-1.5 text-xs text-slate-200">
+                  <span key={group} className="rounded-full bg-slate-100 px-3 py-1.5 text-xs text-slate-600">
                     {group}
                   </span>
                 ))}
@@ -49,14 +46,14 @@ export function HomePartnerVisibility() {
 
             <div className="grid gap-3">
               {placements.map((placement) => (
-                <article key={placement.title} className="rounded-[1.35rem] border border-white/10 bg-white/[0.03] p-5">
+                <article key={placement.title} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-400">{placement.title}</p>
-                  <p className="mt-3 text-base text-white">{placement.text}</p>
+                  <p className="mt-3 text-base text-slate-700">{placement.text}</p>
                 </article>
               ))}
-              <article className="rounded-[1.35rem] border border-emerald-300/16 bg-[linear-gradient(180deg,rgba(41,211,163,0.08),rgba(255,255,255,0.02))] p-5">
-                <p className="text-xs uppercase tracking-[0.18em] text-emerald-100">Phase 1 structure</p>
-                <p className="mt-3 text-base text-white">
+              <article className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                <p className="text-xs uppercase tracking-[0.18em] text-emerald-600">Phase 1 structure</p>
+                <p className="mt-3 text-base text-slate-700">
                   Associations page visibility, featured event treatment, weekly brief mentions, and advertiser inquiry
                   flow are already part of the product foundation.
                 </p>

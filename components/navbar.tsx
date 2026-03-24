@@ -19,6 +19,7 @@ export function Navbar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const isHome = pathname === '/';
+  const newsletterHref: Route | '/#newsletter' = '/#newsletter';
 
   useEffect(() => {
     setIsOpen(false);
@@ -29,7 +30,7 @@ export function Navbar() {
       className={`sticky top-0 z-50 ${
         isHome
           ? 'border-b border-white/8 bg-[linear-gradient(180deg,rgba(4,10,18,0.78),rgba(4,10,18,0.44))] backdrop-blur-xl'
-          : 'border-b border-white/8 bg-[linear-gradient(180deg,rgba(6,15,25,0.96),rgba(6,15,25,0.92))]'
+          : 'border-b border-gray-200 bg-white/95 backdrop-blur-xl'
       }`}
     >
       <div className="container-shell flex h-18 items-center justify-between gap-4">
@@ -38,13 +39,13 @@ export function Navbar() {
             className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-sm font-semibold text-white transition-transform duration-300 group-hover:scale-105 ${
               isHome
                 ? 'bg-[linear-gradient(135deg,rgba(55,132,255,0.96),rgba(110,112,255,0.82),rgba(17,199,232,0.92))] shadow-[0_18px_40px_-22px_rgba(74,183,255,0.7)]'
-                : 'bg-[linear-gradient(135deg,#1f8cff,#11c7e8)]'
+                : 'bg-[linear-gradient(135deg,#2563eb,#22c55e)]'
             }`}
           >
             IE
           </span>
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold tracking-[0.24em] text-slate-100 sm:text-sm">INVESTIGATOR EVENTS</p>
+            <p className={`text-[11px] font-semibold tracking-[0.24em] sm:text-sm ${isHome ? 'text-slate-100' : 'text-slate-950'}`}>INVESTIGATOR EVENTS</p>
             <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">Global industry platform</p>
           </div>
         </Link>
@@ -58,14 +59,14 @@ export function Navbar() {
                 href={item.href}
                 className={`relative py-2 text-sm transition ${
                   active
-                    ? 'text-white'
-                    : 'text-slate-300 hover:text-white'
+                    ? isHome ? 'text-white' : 'text-slate-950'
+                    : isHome ? 'text-slate-300 hover:text-white' : 'text-slate-500 hover:text-slate-950'
                 }`}
               >
                 {item.label}
                 <span
                   className={`absolute inset-x-0 -bottom-[1px] h-px origin-left transition ${
-                    active ? 'scale-x-100 bg-cyan-300 shadow-[0_0_16px_rgba(17,199,232,0.42)]' : 'scale-x-0 bg-white/0'
+                    active ? 'scale-x-100 bg-blue-500' : 'scale-x-0 bg-white/0'
                   }`}
                 />
               </Link>
@@ -74,6 +75,9 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <Link href={newsletterHref} className={`hidden rounded-full px-4 py-2 text-sm font-medium transition md:inline-flex ${isHome ? 'border border-white/12 bg-white/[0.06] text-slate-100 hover:bg-white/[0.1]' : 'border border-gray-200 bg-white text-slate-700 hover:bg-slate-50'}`}>
+            Weekly Updates
+          </Link>
           <Link href="/submit-event" className="btn-secondary hidden px-4 py-2 md:inline-flex">
             Submit Event
           </Link>
@@ -84,7 +88,7 @@ export function Navbar() {
             aria-expanded={isOpen}
             aria-label="Toggle mobile menu"
             onClick={() => setIsOpen((current) => !current)}
-            className="inline-flex items-center rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-xs font-medium text-slate-100 transition hover:bg-white/10 md:hidden"
+            className={`inline-flex items-center rounded-xl px-3 py-2 text-xs font-medium transition md:hidden ${isHome ? 'border border-white/15 bg-white/5 text-slate-100 hover:bg-white/10' : 'border border-gray-200 bg-white text-slate-700 hover:bg-slate-50'}`}
           >
             {isOpen ? 'Close' : 'Menu'}
           </button>
@@ -94,7 +98,7 @@ export function Navbar() {
       <div
         id="mobile-nav"
         className={`md:hidden ${
-          isOpen ? 'max-h-80 border-t border-white/10 opacity-100' : 'max-h-0 opacity-0'
+          isOpen ? `max-h-80 ${isHome ? 'border-t border-white/10' : 'border-t border-gray-200'} opacity-100` : 'max-h-0 opacity-0'
         } overflow-hidden transition-all duration-300`}
       >
         <nav aria-label="Mobile navigation" className="container-shell space-y-2 py-4">
@@ -105,13 +109,22 @@ export function Navbar() {
                 key={item.href}
                 href={item.href}
                 className={`block rounded-lg px-3 py-2 text-sm ${
-                  active ? 'bg-[linear-gradient(135deg,rgba(52,179,255,0.2),rgba(41,211,163,0.2))] text-white' : 'text-slate-300 hover:bg-white/[0.04] hover:text-white'
+                  active
+                    ? isHome
+                      ? 'bg-[linear-gradient(135deg,rgba(52,179,255,0.2),rgba(41,211,163,0.2))] text-white'
+                      : 'bg-blue-50 text-blue-700'
+                    : isHome
+                      ? 'text-slate-300 hover:bg-white/[0.04] hover:text-white'
+                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950'
                 }`}
               >
                 {item.label}
               </Link>
             );
           })}
+          <Link href={newsletterHref} className={`block rounded-lg px-3 py-2 text-sm ${isHome ? 'text-slate-300 hover:bg-white/[0.04] hover:text-white' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950'}`}>
+            Weekly Updates
+          </Link>
           <Link href="/submit-event" className="btn-primary mt-2 inline-flex w-full px-4 py-2">
             Submit Event
           </Link>

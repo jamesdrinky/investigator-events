@@ -40,6 +40,7 @@ export function CalendarView({ events, initialAssociation }: CalendarViewProps) 
   );
 
   const [filters, setFilters] = useState({
+    search: '',
     country: 'All',
     region: 'All',
     month: 'All',
@@ -66,8 +67,15 @@ export function CalendarView({ events, initialAssociation }: CalendarViewProps) 
       const matchesCategory = filters.category === 'All' || event.category === filters.category;
       const matchesAssociation =
         filters.association === 'All' || (event.association ?? event.organiser) === filters.association;
+      const searchNeedle = filters.search.trim().toLowerCase();
+      const matchesSearch =
+        searchNeedle.length === 0 ||
+        [event.title, event.city, event.country, event.region, event.category, event.association ?? '', event.organiser]
+          .join(' ')
+          .toLowerCase()
+          .includes(searchNeedle);
 
-      return matchesScope && matchesCountry && matchesRegion && matchesCategory && matchesAssociation;
+      return matchesScope && matchesCountry && matchesRegion && matchesCategory && matchesAssociation && matchesSearch;
     });
   }, [filters, scope, sortedEvents]);
 
@@ -93,7 +101,7 @@ export function CalendarView({ events, initialAssociation }: CalendarViewProps) 
   );
 
   const monthOptions = monthKeys.map((monthKey) => formatMonthLabel(monthKey));
-  const hasActiveFilters = Object.values(filters).some((value) => value !== 'All');
+  const hasActiveFilters = Object.entries(filters).some(([key, value]) => (key === 'search' ? value.trim().length > 0 : value !== 'All'));
   const eventScopeLabel = scope === 'main' ? 'Major conferences and flagship meetings' : 'Full event view including secondary listings';
   const activeMonth = calendarMonthKey;
   const activeMonthEvents = activeMonth ? baseFilteredEvents.filter((event) => getMonthKey(event.date) === activeMonth) : [];
@@ -132,40 +140,40 @@ export function CalendarView({ events, initialAssociation }: CalendarViewProps) 
   return (
     <div className="space-y-5">
       <motion.section
-        className="surface-flat relative overflow-hidden p-5 sm:p-6"
+        className="relative overflow-hidden rounded-[1.9rem] border border-slate-200 bg-white p-5 shadow-[0_20px_36px_-30px_rgba(15,23,42,0.16)] sm:p-6"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent_24%,rgba(36,212,199,0.035))]" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent_24%,rgba(34,197,94,0.03))]" />
         <div className="relative">
           <p className="eyebrow">Calendar Overview</p>
-          <p className="section-copy mt-3 max-w-4xl">
+          <p className="mt-3 max-w-4xl text-sm leading-relaxed text-slate-600 sm:text-base">
             Compare live dates across countries, associations, and categories. The calendar starts with major events, then
             opens up to secondary meetings when you need the wider schedule.
           </p>
 
           <div className="mt-4 grid gap-3 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="surface-flat p-4">
+            <div className="rounded-[1.4rem] bg-slate-50 p-4">
               <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Current view</p>
-              <p className="mt-2 text-base text-white">{eventScopeLabel}</p>
-              <p className="mt-2 text-sm text-slate-300">
+              <p className="mt-2 text-base font-medium text-slate-900">{eventScopeLabel}</p>
+              <p className="mt-2 text-sm text-slate-600">
                 Filter by association or organiser to isolate one network, then scan by month to spot collisions or open
                 windows.
               </p>
             </div>
-            <div className="surface-flat p-4">
+            <div className="rounded-[1.4rem] bg-sky-50/80 p-4">
               <div className="flex flex-wrap gap-2">
                 {highlightedCountries.map((country) => (
-                  <span key={country} className="city-chip">
+                  <span key={country} className="inline-flex items-center rounded-full bg-white px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-slate-700 shadow-[0_10px_18px_-16px_rgba(15,23,42,0.25)]">
                     {country}
                   </span>
                 ))}
-                {highlightedCountries.length > 0 ? <span className="global-chip">global coverage scan</span> : null}
+                {highlightedCountries.length > 0 ? <span className="global-chip bg-emerald-100 text-emerald-700">global coverage scan</span> : null}
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
                 {activeAssociations.map((association) => (
-                  <span key={association} className="rounded-full border border-white/12 bg-white/[0.04] px-3 py-1 text-[11px] uppercase tracking-[0.15em] text-slate-300">
+                  <span key={association} className="rounded-full bg-white px-3 py-1 text-[11px] uppercase tracking-[0.15em] text-slate-600 shadow-[0_10px_18px_-16px_rgba(15,23,42,0.25)]">
                     {association}
                   </span>
                 ))}
@@ -190,6 +198,7 @@ export function CalendarView({ events, initialAssociation }: CalendarViewProps) 
         onChangeView={setView}
         onReset={() =>
           setFilters({
+            search: '',
             country: 'All',
             region: 'All',
             month: 'All',
@@ -209,8 +218,8 @@ export function CalendarView({ events, initialAssociation }: CalendarViewProps) 
                   <section key={monthKey} className="space-y-3">
                     <div className="flex flex-wrap items-end justify-between gap-3">
                       <div>
-                        <h3 className="font-[var(--font-serif)] text-2xl text-white">{formatMonthLabel(monthKey)}</h3>
-                        <p className="mt-1 text-sm text-slate-400">
+                        <h3 className="font-[var(--font-serif)] text-2xl text-slate-950">{formatMonthLabel(monthKey)}</h3>
+                        <p className="mt-1 text-sm text-slate-500">
                           {monthEvents.length} live {monthEvents.length === 1 ? 'event' : 'events'} in this timeline group
                         </p>
                       </div>
@@ -224,17 +233,19 @@ export function CalendarView({ events, initialAssociation }: CalendarViewProps) 
                             <article
                               key={event.id}
                               className={`relative overflow-hidden rounded-[1.9rem] p-4 transition duration-300 sm:p-5 ${
-                                event.featured ? 'surface-cinematic' : 'surface-elevated'
+                                event.featured
+                                  ? 'border border-sky-100 bg-[linear-gradient(135deg,rgba(239,248,255,0.98),rgba(223,245,255,0.96)_36%,rgba(242,252,246,0.98)) shadow-[0_28px_52px_-36px_rgba(42,155,255,0.22)]'
+                                  : 'border border-slate-200 bg-white shadow-[0_20px_40px_-34px_rgba(15,23,42,0.18)]'
                               }`}
                             >
-                              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),transparent_26%,rgba(36,212,199,0.03))]" />
+                              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent_26%,rgba(34,197,94,0.03))]" />
                               <div className="relative grid gap-4 lg:grid-cols-[11rem_minmax(0,1fr)_12rem] lg:items-start">
-                                <div className="surface-flat rounded-[1.45rem] px-4 py-4">
+                                <div className="rounded-[1.45rem] bg-slate-50 px-4 py-4">
                                   <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">{formatMonthLabel(monthKey)}</p>
-                                  <p className="mt-3 text-lg font-semibold text-white">{formatEventDate(event)}</p>
+                                  <p className="mt-3 text-lg font-semibold text-slate-900">{formatEventDate(event)}</p>
                                   <div className="mt-4 flex flex-wrap gap-2">
-                                    <span className="global-chip">{event.region}</span>
-                                    <span className="city-chip">
+                                    <span className="global-chip bg-sky-100 text-sky-700">{event.region}</span>
+                                    <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] uppercase tracking-[0.14em] text-emerald-700">
                                       {durationDays} day{durationDays === 1 ? '' : 's'}
                                     </span>
                                   </div>
@@ -243,12 +254,12 @@ export function CalendarView({ events, initialAssociation }: CalendarViewProps) 
                                 <div className="min-w-0 space-y-4">
                                   <div className="flex items-start justify-between gap-3">
                                     <div className="min-w-0">
-                                      <h4 className="text-2xl font-semibold leading-tight text-white">{event.title}</h4>
-                                      <p className="mt-2 text-sm text-slate-300">
+                                      <h4 className="text-2xl font-semibold leading-tight text-slate-950">{event.title}</h4>
+                                      <p className="mt-2 text-sm text-slate-600">
                                         {event.city}, {event.country}
                                       </p>
                                     </div>
-                                    <span className="country-chip shrink-0">
+                                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-emerald-700">
                                       <span>{getCountryFlag(event.country)}</span>
                                       <span>{event.country}</span>
                                     </span>
@@ -256,17 +267,17 @@ export function CalendarView({ events, initialAssociation }: CalendarViewProps) 
 
                                   <div className="flex flex-wrap gap-2">
                                     <span className="city-chip">{event.association ?? event.organiser}</span>
-                                    <span className="city-chip">{event.category}</span>
-                                    {event.featured ? <span className="global-chip">Featured</span> : null}
+                                    <span className="global-chip bg-sky-100 text-sky-700">{event.category}</span>
+                                    {event.featured ? <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] uppercase tracking-[0.14em] text-emerald-700">Featured</span> : null}
                                   </div>
 
-                                  <p className="text-sm leading-relaxed text-slate-300">
+                                  <p className="text-sm leading-relaxed text-slate-600">
                                     {event.description || 'Open the event record for organiser details, dates, and the official source link.'}
                                   </p>
 
                                   <div className="flex flex-wrap items-center gap-3 pt-1">
                                     <SaveDateLinks event={event} compact />
-                                    <span className="text-xs uppercase tracking-[0.16em] text-slate-500">Keep the date in your own calendar</span>
+                                    <span className="text-xs uppercase tracking-[0.16em] text-slate-400">Keep the date in your own calendar</span>
                                   </div>
                                 </div>
 
@@ -279,6 +290,8 @@ export function CalendarView({ events, initialAssociation }: CalendarViewProps) 
                                     category={event.category}
                                     coverImage={event.coverImage}
                                     coverImageAlt={event.coverImageAlt}
+                                    associationName={event.association ?? event.organiser}
+                                    featured={event.featured}
                                     compact
                                     className="w-full lg:w-[11rem]"
                                     priorityLabel={event.featured ? 'Featured event' : event.category}
@@ -310,13 +323,13 @@ export function CalendarView({ events, initialAssociation }: CalendarViewProps) 
           <motion.div key="calendar" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.22 }}>
             {activeMonth ? (
               <section className="space-y-4">
-                <div className="surface-elevated relative overflow-hidden p-4 sm:p-5">
-                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.028),transparent_44%,rgba(255,255,255,0.018))]" />
+                <div className="relative overflow-hidden rounded-[1.8rem] border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(59,130,246,0.08),transparent_24%),radial-gradient(circle_at_78%_24%,rgba(34,197,94,0.05),transparent_20%)]" />
                   <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div>
-                    <p className="eyebrow">Month Overview</p>
-                      <p className="mt-3 font-[var(--font-serif)] text-3xl text-white">{formatMonthLabel(activeMonth)}</p>
-                      <p className="mt-2 text-sm text-slate-300">
+                      <p className="eyebrow">Month Overview</p>
+                      <p className="mt-3 font-[var(--font-serif)] text-3xl text-slate-950">{formatMonthLabel(activeMonth)}</p>
+                      <p className="mt-2 text-sm text-slate-600">
                         Scan the full month, then open any live date for a richer event preview.
                       </p>
                     </div>
@@ -332,7 +345,7 @@ export function CalendarView({ events, initialAssociation }: CalendarViewProps) 
                               setFilters({ ...filters, month: 'All' });
                             }
                           }}
-                          className="inline-flex min-h-14 flex-1 items-center justify-center rounded-[1.2rem] border border-white/12 bg-white/[0.035] px-5 text-sm font-medium text-white transition duration-200 hover:-translate-y-0.5 hover:border-white/22 hover:bg-white/[0.06] active:translate-y-0"
+                          className="inline-flex min-h-14 flex-1 items-center justify-center rounded-[1.2rem] border border-slate-200 bg-slate-50 px-5 text-sm font-medium text-slate-700 transition duration-200 hover:-translate-y-0.5 hover:border-sky-200 hover:bg-sky-50 active:translate-y-0"
                         >
                           Previous month
                         </button>
@@ -345,14 +358,14 @@ export function CalendarView({ events, initialAssociation }: CalendarViewProps) 
                               setFilters({ ...filters, month: 'All' });
                             }
                           }}
-                          className="inline-flex min-h-14 flex-1 items-center justify-center rounded-[1.2rem] border border-signal/22 bg-[linear-gradient(180deg,rgba(54,168,255,0.14),rgba(255,255,255,0.05))] px-5 text-sm font-medium text-white transition duration-200 hover:-translate-y-0.5 hover:border-signal/34 hover:bg-[linear-gradient(180deg,rgba(54,168,255,0.18),rgba(255,255,255,0.07))] active:translate-y-0"
+                          className="inline-flex min-h-14 flex-1 items-center justify-center rounded-[1.2rem] border border-sky-600 bg-sky-600 px-5 text-sm font-medium text-white transition duration-200 hover:-translate-y-0.5 hover:bg-sky-700 active:translate-y-0"
                         >
                           Next month
                         </button>
                       </div>
 
                       <div className="flex flex-wrap gap-2 sm:justify-end">
-                        <span className="rounded-full border border-white/12 bg-white/[0.035] px-3 py-1 text-[11px] uppercase tracking-[0.15em] text-slate-300">
+                        <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] uppercase tracking-[0.15em] text-slate-500">
                           {activeMonthEvents.length} this month
                         </span>
                         {activeRegions.map((region) => (
@@ -378,11 +391,11 @@ export function CalendarView({ events, initialAssociation }: CalendarViewProps) 
       </AnimatePresence>
 
       {shouldShowEmptyState && (
-        <motion.div className="surface-flat relative overflow-hidden p-8 text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <h3 className="text-lg font-semibold text-white">
+        <motion.div className="relative overflow-hidden rounded-[1.8rem] border border-slate-200 bg-white p-8 text-center shadow-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <h3 className="text-lg font-semibold text-slate-950">
             {events.length === 0 ? 'No live events yet' : 'No events match this view'}
           </h3>
-          <p className="mt-2 text-sm text-slate-300">
+          <p className="mt-2 text-sm text-slate-600">
             {events.length === 0
               ? 'Approved events will appear here once they have been added to the live calendar.'
               : scope === 'main' && !hasActiveFilters
@@ -394,6 +407,7 @@ export function CalendarView({ events, initialAssociation }: CalendarViewProps) 
               type="button"
               onClick={() => {
                 setFilters({
+                  search: '',
                   country: 'All',
                   region: 'All',
                   month: 'All',

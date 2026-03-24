@@ -1,10 +1,12 @@
 import { getCountryFlag, getRegionPalette } from '@/lib/utils/location';
+import { AssociationLogoBadge } from '@/components/association-logo-badge';
 
 interface LocationSpotlightImageProps {
   city: string;
   country: string;
   region: string;
   title?: string;
+  associationName?: string;
   compact?: boolean;
   className?: string;
 }
@@ -50,6 +52,7 @@ export function LocationSpotlightImage({
   country,
   region,
   title,
+  associationName,
   compact = false,
   className = ''
 }: LocationSpotlightImageProps) {
@@ -105,19 +108,21 @@ export function LocationSpotlightImage({
       <div className="absolute inset-x-0 bottom-0 h-[42%] bg-[linear-gradient(to_top,rgba(3,16,24,0.92),rgba(3,16,24,0.28),transparent)]" />
 
       <div className="relative flex h-full flex-col justify-between p-4 sm:p-5">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="country-chip">
-            <span>{getCountryFlag(country)}</span>
-            <span>{country}</span>
-          </span>
-          <span className="global-chip">{region}</span>
-          <span className="city-chip">destination focus</span>
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="country-chip">
+              <span>{getCountryFlag(country)}</span>
+              <span>{country}</span>
+            </span>
+            <span className="global-chip">{region}</span>
+          </div>
+          <AssociationLogoBadge associationName={associationName} compact className="max-w-[10rem]" />
         </div>
 
         <div>
           {title ? <p className="text-[11px] uppercase tracking-[0.24em] text-slate-300">{title}</p> : null}
           <p className={`mt-2 font-[var(--font-serif)] leading-none text-white ${compact ? 'text-3xl' : 'text-4xl sm:text-5xl'}`}>{city}</p>
-          <p className="mt-2 max-w-md text-sm uppercase tracking-[0.26em] text-slate-300">
+          <p className="mt-2 max-w-md text-sm uppercase tracking-[0.22em] text-slate-200">
             Curated city signal
           </p>
         </div>

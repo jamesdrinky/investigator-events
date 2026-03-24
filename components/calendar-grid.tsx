@@ -103,8 +103,8 @@ export function CalendarGrid({ events, monthKey, selectedDate, onSelectDate }: C
   const weeks = buildWeekCells(year, month);
 
   return (
-    <section className="surface-elevated relative overflow-hidden p-5 sm:p-6" aria-label="Calendar month overview">
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.022),transparent_18%,transparent_82%,rgba(255,255,255,0.012))]" />
+    <section className="relative overflow-hidden rounded-[1.9rem] border border-slate-200 bg-white p-5 shadow-sm sm:p-6" aria-label="Calendar month overview">
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),transparent_18%,transparent_82%,rgba(34,197,94,0.02))]" />
 
       <div className="relative space-y-5">
         <div className="grid min-w-[66rem] grid-cols-[6.75rem_repeat(7,minmax(8rem,1fr))] gap-4 px-1">
@@ -131,13 +131,13 @@ export function CalendarGrid({ events, monthKey, selectedDate, onSelectDate }: C
                   key={`week-${weekIndex}`}
                   className="grid grid-cols-[6.75rem_repeat(7,minmax(8rem,1fr))] gap-4 rounded-[1.8rem] p-4"
                 >
-                  <div className="surface-flat flex min-h-[12.75rem] flex-col justify-between rounded-[1.35rem] px-3 py-3.5">
+                  <div className="flex min-h-[12.75rem] flex-col justify-between rounded-[1.35rem] border border-slate-200 bg-slate-50 px-3 py-3.5">
                     <div>
                       <p className="text-[10px] uppercase tracking-[0.22em] text-slate-500">Week {weekIndex + 1}</p>
-                      <p className="mt-2 text-sm font-medium text-slate-100">{formatWeekRange(week) || 'Outside month'}</p>
+                      <p className="mt-2 text-sm font-medium text-slate-900">{formatWeekRange(week) || 'Outside month'}</p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-xs text-slate-300">
+                      <p className="text-xs text-slate-600">
                         {activeDayCount} active day{activeDayCount === 1 ? '' : 's'}
                       </p>
                       <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">
@@ -163,13 +163,13 @@ export function CalendarGrid({ events, monthKey, selectedDate, onSelectDate }: C
                         className={`relative min-h-[12.75rem] overflow-hidden rounded-[1.35rem] border px-4 py-4 text-left transition duration-200 ${
                           cell.inMonth
                             ? selected
-                              ? 'border-signal/30 bg-[linear-gradient(180deg,rgba(54,168,255,0.16),rgba(255,255,255,0.06))] shadow-[0_18px_34px_-24px_rgba(54,168,255,0.75)]'
+                              ? 'border-sky-300 bg-sky-50 shadow-[0_18px_34px_-24px_rgba(54,168,255,0.35)]'
                               : isActive
                                 ? tone === 'major'
-                                  ? 'border-amber-200/20 bg-[linear-gradient(180deg,rgba(255,176,50,0.18),rgba(33,150,255,0.14))] shadow-[0_20px_36px_-28px_rgba(59,130,246,0.5)] hover:-translate-y-0.5 hover:border-white/24 hover:shadow-[0_24px_46px_-28px_rgba(59,130,246,0.56)]'
-                                  : 'border-white/12 bg-[linear-gradient(180deg,rgba(15,23,42,0.95),rgba(255,255,255,0.05))] hover:-translate-y-0.5 hover:border-white/22 hover:bg-[linear-gradient(180deg,rgba(30,41,59,0.98),rgba(255,255,255,0.07))]'
-                                : 'cursor-default border-white/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.016),rgba(255,255,255,0.008))]'
-                            : 'border-white/5 bg-[linear-gradient(180deg,rgba(255,255,255,0.01),rgba(255,255,255,0.004))]'
+                                  ? 'border-amber-200 bg-amber-50 shadow-[0_20px_36px_-28px_rgba(245,158,11,0.25)] hover:-translate-y-0.5 hover:border-sky-200'
+                                  : 'border-slate-200 bg-white hover:-translate-y-0.5 hover:border-sky-200 hover:bg-sky-50/40'
+                                : 'cursor-default border-slate-200 bg-slate-50'
+                            : 'border-slate-200/70 bg-slate-50/70'
                         }`}
                       >
                         {isActive ? (
@@ -198,7 +198,7 @@ export function CalendarGrid({ events, monthKey, selectedDate, onSelectDate }: C
                                   ? isActive
                                     ? 'text-slate-400'
                                     : 'text-slate-600'
-                                  : 'text-slate-700'
+                                  : 'text-slate-500'
                               }`}
                             >
                               {weekDays[dayIndex]}
@@ -207,9 +207,9 @@ export function CalendarGrid({ events, monthKey, selectedDate, onSelectDate }: C
                               className={`mt-2 text-[2rem] font-semibold leading-none ${
                                 cell.inMonth
                                   ? isActive
-                                    ? 'text-white'
-                                    : 'text-slate-400'
-                                  : 'text-slate-700'
+                                    ? 'text-slate-950'
+                                    : 'text-slate-500'
+                                  : 'text-slate-400'
                               }`}
                             >
                               {cell.day ?? ''}
@@ -217,7 +217,7 @@ export function CalendarGrid({ events, monthKey, selectedDate, onSelectDate }: C
                           </div>
 
                           {cell.inMonth && dayEvents.length > 0 ? (
-                            <span className="rounded-full border border-white/12 bg-black/30 px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+                            <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-slate-700 shadow-sm">
                               {dayEvents.length} live
                             </span>
                           ) : null}
@@ -231,14 +231,14 @@ export function CalendarGrid({ events, monthKey, selectedDate, onSelectDate }: C
                                   className="h-2 w-2 rounded-full"
                                   style={{ backgroundColor: palette?.line ?? 'rgba(184,228,255,0.78)' }}
                                 />
-                                <p className="text-[10px] uppercase tracking-[0.18em] text-slate-300">
+                                <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">
                                   {leadEvent?.featured ? 'Featured lead' : leadEvent?.category ?? 'Live event'}
                                 </p>
                               </div>
 
                               {leadEvent ? (
                                 <div className="space-y-2.5">
-                                  <p className="line-clamp-3 text-[13px] font-medium leading-snug text-white">
+                                  <p className="line-clamp-3 text-[13px] font-medium leading-snug text-slate-900">
                                     {leadEvent.title}
                                   </p>
                                 </div>
@@ -252,7 +252,7 @@ export function CalendarGrid({ events, monthKey, selectedDate, onSelectDate }: C
                             </div>
                           ) : (
                             <div className="mt-10">
-                              <p className="text-[10px] uppercase tracking-[0.22em] text-slate-700">Open date</p>
+                              <p className="text-[10px] uppercase tracking-[0.22em] text-slate-500">Open date</p>
                             </div>
                           )
                         ) : null}

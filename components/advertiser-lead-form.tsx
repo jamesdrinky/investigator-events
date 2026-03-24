@@ -6,7 +6,7 @@ import { submitAdvertiserLead } from '@/app/advertise/actions';
 import { advertiserInitialState } from '@/app/advertise/form-state';
 
 function inputClasses() {
-  return 'mt-1.5 w-full rounded-xl border border-white/15 bg-black/20 px-4 py-2.5 text-slate-100 outline-none transition duration-300 focus:border-accent focus:bg-white/[0.07]';
+  return 'mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-slate-900 outline-none transition duration-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-100';
 }
 
 function SubmitButton() {
@@ -29,16 +29,16 @@ export function AdvertiserLeadForm() {
   return (
     <motion.form
       action={formAction}
-      className="lux-panel relative space-y-4 overflow-hidden p-6 sm:p-8"
+      className="relative space-y-4 overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
       aria-label="Advertise form"
       initial={{ opacity: 0, y: 18 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.55 }}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(139,169,255,0.08),transparent_24%),radial-gradient(circle_at_82%_20%,rgba(127,228,199,0.06),transparent_20%)]" />
-      <h2 className="relative font-[var(--font-serif)] text-3xl text-white">Advertising Inquiry</h2>
-      <p className="relative text-sm text-slate-300">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(139,169,255,0.06),transparent_24%),radial-gradient(circle_at_82%_20%,rgba(127,228,199,0.05),transparent_20%)]" />
+      <h2 className="relative font-[var(--font-serif)] text-3xl text-slate-950">Advertising Inquiry</h2>
+      <p className="relative text-sm text-slate-600">
         Tell us who you want to reach, what kind of placement you are considering, and which markets matter most.
       </p>
 
@@ -52,30 +52,30 @@ export function AdvertiserLeadForm() {
       )}
 
       <div className="relative grid gap-4 sm:grid-cols-2">
-        <label className="block text-sm text-slate-300">
+        <label className="block text-sm text-slate-700">
           Company Name
           <input type="text" name="companyName" required className={inputClasses()} placeholder="Your company" />
         </label>
 
-        <label className="block text-sm text-slate-300">
+        <label className="block text-sm text-slate-700">
           Contact Name
           <input type="text" name="contactName" required className={inputClasses()} placeholder="Full name" />
         </label>
       </div>
 
       <div className="relative grid gap-4 sm:grid-cols-2">
-        <label className="block text-sm text-slate-300">
+        <label className="block text-sm text-slate-700">
           Email
           <input type="email" name="email" required className={inputClasses()} placeholder="you@company.com" />
         </label>
 
-        <label className="block text-sm text-slate-300">
+        <label className="block text-sm text-slate-700">
           Website
           <input type="text" name="website" inputMode="url" className={inputClasses()} placeholder="example.com" />
         </label>
       </div>
 
-      <label className="relative block text-sm text-slate-300">
+      <label className="relative block text-sm text-slate-700">
         Inquiry Type
         <select name="inquiryType" required defaultValue="" className={inputClasses()}>
           <option value="" disabled>
@@ -88,7 +88,7 @@ export function AdvertiserLeadForm() {
         </select>
       </label>
 
-      <label className="relative block text-sm text-slate-300">
+      <label className="relative block text-sm text-slate-700">
         Region or Audience
         <input
           type="text"
@@ -98,7 +98,7 @@ export function AdvertiserLeadForm() {
         />
       </label>
 
-      <label className="relative block text-sm text-slate-300">
+      <label className="relative block text-sm text-slate-700">
         Message
         <textarea
           name="message"
@@ -110,7 +110,7 @@ export function AdvertiserLeadForm() {
       </label>
 
       <SubmitButton />
-      <p className="relative text-xs text-slate-400">Inquiries are stored securely and reviewed internally before any follow-up.</p>
+      <p className="relative text-xs text-slate-500">Inquiries are stored securely and reviewed internally before any follow-up.</p>
     </motion.form>
   );
 }

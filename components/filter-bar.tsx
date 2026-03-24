@@ -11,6 +11,7 @@ interface FilterBarProps {
   scope: 'main' | 'all';
   view: 'calendar' | 'list';
   values: {
+    search: string;
     country: string;
     region: string;
     month: string;
@@ -25,7 +26,7 @@ interface FilterBarProps {
 }
 
 function selectClasses() {
-  return 'h-10 min-w-[9rem] rounded-full border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.1),rgba(255,255,255,0.04))] px-4 text-sm text-slate-100 outline-none transition duration-200 focus:border-globe';
+  return 'h-11 min-w-[9rem] rounded-full border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition duration-200 focus:border-sky-400 focus:ring-2 focus:ring-sky-100';
 }
 
 export function FilterBar({
@@ -45,22 +46,22 @@ export function FilterBar({
 }: FilterBarProps) {
   return (
     <motion.section
-      className="relative overflow-hidden rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(14,26,41,0.8),rgba(255,255,255,0.03))] p-4"
+      className="relative overflow-hidden rounded-[1.8rem] border border-slate-200 bg-white p-4 shadow-[0_20px_36px_-30px_rgba(15,23,42,0.18)]"
       aria-label="Event filters"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),transparent_32%,rgba(41,211,163,0.03))]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent_32%,rgba(34,197,94,0.03))]" />
       <div className="relative flex flex-col gap-3">
         <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex flex-wrap items-center gap-2">
-            <div className="inline-flex items-center overflow-hidden rounded-full border border-white/12 bg-white/[0.06] p-1">
+            <div className="inline-flex items-center overflow-hidden rounded-full border border-slate-200 bg-slate-50 p-1">
               <button
                 type="button"
                 onClick={() => onChangeScope('main')}
                 className={`rounded-full px-4 py-2 text-sm transition ${
-                  scope === 'main' ? 'bg-[linear-gradient(135deg,#34b3ff,#29d3a3)] text-white' : 'text-slate-300 hover:text-white'
+                  scope === 'main' ? 'bg-[linear-gradient(135deg,#2a9bff,#22c55e)] text-white' : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 Main
@@ -69,12 +70,24 @@ export function FilterBar({
                 type="button"
                 onClick={() => onChangeScope('all')}
                 className={`rounded-full px-4 py-2 text-sm transition ${
-                  scope === 'all' ? 'bg-[linear-gradient(135deg,#34b3ff,#29d3a3)] text-white' : 'text-slate-300 hover:text-white'
+                  scope === 'all' ? 'bg-[linear-gradient(135deg,#2a9bff,#22c55e)] text-white' : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 All
               </button>
             </div>
+
+            <label className="sr-only" htmlFor="search-filter">
+              Search events
+            </label>
+            <input
+              id="search-filter"
+              type="search"
+              placeholder="Search events, cities, associations"
+              className="h-11 min-w-[16rem] flex-1 rounded-full border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition duration-200 focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
+              value={values.search}
+              onChange={(e) => onChange({ ...values, search: e.target.value })}
+            />
 
             <label className="sr-only" htmlFor="association-filter">
               Association / organiser
@@ -157,18 +170,18 @@ export function FilterBar({
               <button
                 type="button"
                 onClick={onReset}
-                className="rounded-full border border-white/14 px-4 py-2 text-sm text-slate-200 transition hover:border-white/24 hover:bg-white/[0.04]"
+                className="rounded-full border border-slate-200 px-4 py-2 text-sm text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
               >
                 Reset
               </button>
             ) : null}
 
-            <div className="inline-flex items-center overflow-hidden rounded-full border border-white/12 bg-white/[0.06] p-1">
+            <div className="inline-flex items-center overflow-hidden rounded-full border border-slate-200 bg-slate-50 p-1">
               <button
                 type="button"
                 onClick={() => onChangeView('list')}
                 className={`relative shrink-0 rounded-full px-4 py-2 text-sm transition ${
-                  view === 'list' ? 'bg-[linear-gradient(135deg,#34b3ff,#29d3a3)] text-white' : 'text-slate-300 hover:text-white'
+                  view === 'list' ? 'bg-[linear-gradient(135deg,#2a9bff,#22c55e)] text-white' : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 Timeline
@@ -177,7 +190,7 @@ export function FilterBar({
                 type="button"
                 onClick={() => onChangeView('calendar')}
                 className={`relative shrink-0 rounded-full px-4 py-2 text-sm transition ${
-                  view === 'calendar' ? 'bg-[linear-gradient(135deg,#34b3ff,#29d3a3)] text-white' : 'text-slate-300 hover:text-white'
+                  view === 'calendar' ? 'bg-[linear-gradient(135deg,#2a9bff,#22c55e)] text-white' : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 Month
@@ -186,7 +199,8 @@ export function FilterBar({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-1 text-[11px] uppercase tracking-[0.16em] text-slate-500">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-1 text-[11px] uppercase tracking-[0.16em] text-slate-400">
+          <span>Search</span>
           <span>Filters</span>
           <span>Association</span>
           <span>Region</span>

@@ -1,4 +1,3 @@
-import { PageAtmosphere } from '@/components/global/page-atmosphere';
 import { Reveal } from '@/components/motion/reveal';
 import type { CountryActivity, RegionCoverage } from '@/lib/utils/coverage';
 import { getCountryFlag } from '@/lib/utils/location';
@@ -22,7 +21,6 @@ export function GlobalAssociationSection({ regions, countries }: GlobalAssociati
 
   return (
     <section className="relative overflow-hidden">
-      <PageAtmosphere className="opacity-25" />
       <div>
         <Reveal className="mb-10 max-w-3xl">
           <p className="eyebrow">Association Network</p>
@@ -35,20 +33,18 @@ export function GlobalAssociationSection({ regions, countries }: GlobalAssociati
 
         <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
           <Reveal>
-            <div className="global-panel relative overflow-hidden p-5 sm:p-7">
-              <div className="pointer-events-none absolute inset-0 geo-grid opacity-[0.08]" />
-              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),transparent_40%,rgba(255,255,255,0.015))]" />
+            <div className="global-panel p-6">
               <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Regional Activity</p>
               <div className="relative mt-4 grid gap-3 sm:grid-cols-2">
                 {regions.map((region) => (
-                  <article key={region.name} className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                  <article key={region.name} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="text-xs uppercase tracking-[0.15em] text-slate-400">{region.name}</p>
-                        <p className="mt-2 font-[var(--font-serif)] text-2xl text-white">{region.eventCount}</p>
+                        <p className="mt-2 font-[var(--font-serif)] text-2xl text-slate-950">{region.eventCount}</p>
                         <p className="text-xs text-slate-400">listed events</p>
                       </div>
-                      <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-globe/20 bg-globe/10 text-[10px] tracking-[0.12em] text-globe2">
+                      <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-[10px] tracking-[0.12em] text-blue-700">
                         {initials(region.name)}
                       </span>
                     </div>
@@ -59,9 +55,7 @@ export function GlobalAssociationSection({ regions, countries }: GlobalAssociati
           </Reveal>
 
           <Reveal delay={0.1}>
-            <div className="global-panel relative overflow-hidden p-5 sm:p-7">
-              <div className="pointer-events-none absolute inset-0 geo-grid opacity-[0.08]" />
-              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),transparent_40%,rgba(255,255,255,0.015))]" />
+            <div className="global-panel p-6">
               <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Most Active Countries</p>
               <div className="relative mt-4 flex flex-wrap gap-2">
                 {topCountries.map((country) => (

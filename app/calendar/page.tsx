@@ -18,19 +18,19 @@ export default async function CalendarPage({
     <section className="section-pad relative overflow-hidden">
       <div className="container-shell">
         <Reveal>
-          <header className="mb-6 relative overflow-hidden rounded-[2.2rem] border border-slate-900/80 bg-[linear-gradient(135deg,#14396a,#0f1b2f_38%,#0f5d5b_100%)] p-6 shadow-[0_30px_80px_-48px_rgba(15,23,42,0.55)] sm:p-8 lg:p-10">
+          <header className="mb-6 relative overflow-hidden rounded-[2.2rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-8 lg:p-10">
             <div className="pointer-events-none absolute inset-0 geo-grid opacity-[0.08]" />
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(96,165,250,0.22),transparent_30%),radial-gradient(circle_at_82%_22%,rgba(34,197,94,0.14),transparent_24%)]" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(96,165,250,0.14),transparent_30%),radial-gradient(circle_at_82%_22%,rgba(34,197,94,0.1),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.02),rgba(239,246,255,0.45))]" />
             <div className="relative">
               <p className="eyebrow">Global Calendar</p>
-              <h1 className="font-[var(--font-serif)] text-4xl leading-tight text-white sm:text-5xl">
+              <h1 className="font-[var(--font-serif)] text-4xl leading-tight text-slate-950 sm:text-5xl">
                 Investigator Events Calendar
               </h1>
-              <p className="mt-4 max-w-3xl text-base leading-relaxed text-slate-200">
+              <p className="mt-4 max-w-3xl text-base leading-relaxed text-slate-600">
                 The default timeline is built for fast scanning and comparison. Month view stays available as a cleaner
                 secondary planning overview when you need date pattern visibility.
               </p>
-              <p className="mt-3 max-w-3xl text-sm text-slate-300">
+              <p className="mt-3 max-w-3xl text-sm text-slate-500">
                 The public calendar starts with major conferences and flagship meetings. Switch to all events when you need
                 the wider picture, including webinars, training sessions, and smaller network gatherings.
               </p>

@@ -50,17 +50,17 @@ export function DayPreviewModal({ date, events, onClose, onPreviewEvent }: DayPr
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="eyebrow">Day Preview</p>
-                <h3 className="mt-3 font-[var(--font-serif)] text-3xl text-white">
+                <h3 className="mt-3 font-[var(--font-serif)] text-3xl text-slate-950">
                   {date ? dayDetailFormatter.format(new Date(`${date}T00:00:00Z`)) : ''}
                 </h3>
-                <p className="mt-2 text-sm text-slate-300">
+                <p className="mt-2 text-sm text-slate-600">
                   {events.length} live {events.length === 1 ? 'event' : 'events'} active on this date
                 </p>
               </div>
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-full border border-white/16 px-3 py-1.5 text-sm text-slate-200 transition hover:bg-white/[0.06]"
+                className="rounded-full border border-slate-200 px-3 py-1.5 text-sm text-slate-600 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
               >
                 Close
               </button>
@@ -91,7 +91,7 @@ export function DayPreviewModal({ date, events, onClose, onPreviewEvent }: DayPr
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <p className="text-[11px] uppercase tracking-[0.16em] text-slate-400">{formatEventDate(event)}</p>
-                          <h4 className="mt-2 text-2xl font-semibold leading-tight text-white">{event.title}</h4>
+                          <h4 className="mt-2 text-2xl font-semibold leading-tight text-slate-950">{event.title}</h4>
                         </div>
                         <span className="country-chip shrink-0">
                           <span>{getCountryFlag(event.country)}</span>
@@ -106,7 +106,7 @@ export function DayPreviewModal({ date, events, onClose, onPreviewEvent }: DayPr
                         <span className="city-chip">{event.category}</span>
                       </div>
 
-                      <p className="mt-4 text-sm leading-relaxed text-slate-300">
+                      <p className="mt-4 text-sm leading-relaxed text-slate-600">
                         {event.description || 'Open the full event record for organiser details, dates, and the official source link.'}
                       </p>
 
@@ -121,7 +121,7 @@ export function DayPreviewModal({ date, events, onClose, onPreviewEvent }: DayPr
                           href={event.website}
                           target="_blank"
                           rel="noreferrer"
-                          className="rounded-full border border-white/16 px-5 py-2.5 text-sm text-slate-200 transition hover:bg-white/[0.06]"
+                          className="rounded-full border border-slate-200 px-5 py-2.5 text-sm text-slate-600 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
                         >
                           Visit website
                         </a>

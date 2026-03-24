@@ -29,9 +29,9 @@ function pathForLink(from: { x: number; y: number }, to: { x: number; y: number 
 
 export function GlobalNetworkVisual({ regions }: GlobalNetworkVisualProps) {
   return (
-    <div className="relative overflow-hidden rounded-xl border border-white/12 bg-[linear-gradient(180deg,rgba(8,26,44,0.94),rgba(4,16,24,0.92)_52%,rgba(4,26,20,0.9))] p-3">
-      <div className="pointer-events-none absolute inset-0 geo-grid opacity-[0.18]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_22%,rgba(77,163,255,0.16),transparent_24%),radial-gradient(circle_at_82%_20%,rgba(52,211,153,0.14),transparent_22%),radial-gradient(circle_at_50%_90%,rgba(184,228,255,0.07),transparent_40%)]" />
+    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+      <div className="pointer-events-none absolute inset-0 geo-grid opacity-[0.1]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_22%,rgba(77,163,255,0.1),transparent_24%),radial-gradient(circle_at_82%_20%,rgba(52,211,153,0.08),transparent_22%),radial-gradient(circle_at_50%_90%,rgba(184,228,255,0.05),transparent_40%)]" />
       <svg viewBox="0 0 100 68" className="relative h-32 w-full sm:h-36" aria-hidden="true">
         <defs>
           <linearGradient id="networkLine" x1="0" y1="0" x2="1" y2="1">
@@ -40,13 +40,13 @@ export function GlobalNetworkVisual({ regions }: GlobalNetworkVisualProps) {
             <stop offset="100%" stopColor="rgba(52,211,153,0.2)" />
           </linearGradient>
           <radialGradient id="networkGlow" cx="50%" cy="42%" r="54%">
-            <stop offset="0%" stopColor="rgba(184,228,255,0.14)" />
+            <stop offset="0%" stopColor="rgba(184,228,255,0.18)" />
             <stop offset="100%" stopColor="rgba(255,255,255,0)" />
           </radialGradient>
         </defs>
 
         <ellipse cx="50" cy="38" rx="39" ry="20" fill="url(#networkGlow)" opacity="0.9" />
-        <g fill="none" stroke="rgba(184,228,255,0.16)" strokeWidth="0.22">
+        <g fill="none" stroke="rgba(148,163,184,0.24)" strokeWidth="0.22">
           <ellipse cx="50" cy="38" rx="35" ry="18" />
           <path d="M15 38H85" />
           <path d="M21 32C31 35 40 36 50 36C60 36 69 35 79 32" />
@@ -84,7 +84,7 @@ export function GlobalNetworkVisual({ regions }: GlobalNetworkVisualProps) {
                 cx={point.x}
                 cy={point.y}
                 r={3.8 + region.share * 1.6}
-                fill="rgba(77,163,255,0.12)"
+                fill="rgba(77,163,255,0.14)"
                 animate={{ opacity: [0.08, 0.22, 0.08], scale: [1, 1.2, 1] }}
                 transition={{ duration: 3.4, repeat: Infinity, ease: 'easeInOut' }}
               />
@@ -92,7 +92,7 @@ export function GlobalNetworkVisual({ regions }: GlobalNetworkVisualProps) {
                 cx={point.x}
                 cy={point.y}
                 r={1.6 + region.share * 1.8}
-                fill="rgba(210,255,236,0.92)"
+                fill="rgba(5,150,105,0.9)"
                 animate={{ opacity: [0.45, 0.95, 0.45], scale: [1, intensity, 1] }}
                 transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
               />
@@ -100,7 +100,7 @@ export function GlobalNetworkVisual({ regions }: GlobalNetworkVisualProps) {
               <text
                 x={point.x + 2}
                 y={point.y - 2.5}
-                fill="rgba(226,232,240,0.8)"
+                fill="rgba(51,65,85,0.8)"
                 fontSize="2.3"
                 letterSpacing="0.4"
                 className="uppercase"

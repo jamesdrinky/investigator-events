@@ -38,13 +38,13 @@ export function EventModal({ event, onClose }: EventModalProps) {
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <span className="rounded-full border border-white/20 bg-white/5 px-2.5 py-1 text-xs text-slate-200">{event.category}</span>
-                <h3 className="mt-3 font-[var(--font-serif)] text-3xl leading-tight text-white">{event.title}</h3>
+                <span className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-xs text-sky-700">{event.category}</span>
+                <h3 className="mt-3 font-[var(--font-serif)] text-3xl leading-tight text-slate-950">{event.title}</h3>
               </div>
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-full border border-white/20 px-3 py-1 text-sm text-slate-200 hover:bg-white/10"
+                className="rounded-full border border-slate-200 px-3 py-1 text-sm text-slate-600 hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
               >
                 Close
               </button>
@@ -65,7 +65,7 @@ export function EventModal({ event, onClose }: EventModalProps) {
               />
             </div>
 
-            <dl className="mt-6 grid gap-3 text-sm text-slate-300 sm:grid-cols-2">
+            <dl className="mt-6 grid gap-3 text-sm text-slate-600 sm:grid-cols-2">
               <div>
                 <dt className="text-xs uppercase tracking-wide text-slate-400">Dates</dt>
                 <dd>{formatEventDate(event)}</dd>
@@ -87,9 +87,9 @@ export function EventModal({ event, onClose }: EventModalProps) {
             </dl>
 
             {event.description ? (
-              <p className="mt-5 text-sm leading-relaxed text-slate-200">{event.description}</p>
+              <p className="mt-5 text-sm leading-relaxed text-slate-600">{event.description}</p>
             ) : (
-              <p className="mt-5 text-sm leading-relaxed text-slate-200">
+              <p className="mt-5 text-sm leading-relaxed text-slate-600">
                 Open the full event page for the official source link and the rest of the live event record.
               </p>
             )}
@@ -98,13 +98,13 @@ export function EventModal({ event, onClose }: EventModalProps) {
                 href={event.website}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex rounded-full border border-accent/50 bg-accent/10 px-5 py-2 text-sm font-medium text-accent2 hover:bg-accent2/10"
+                className="inline-flex rounded-full border border-sky-200 bg-sky-50 px-5 py-2 text-sm font-medium text-sky-700 hover:bg-sky-100"
               >
                 Open Official Website
               </a>
               <Link
                 href={`/events/${getEventSlug(event)}`}
-                className="inline-flex rounded-full border border-white/20 px-5 py-2 text-sm text-slate-200 hover:bg-white/10"
+                className="inline-flex rounded-full border border-slate-200 px-5 py-2 text-sm text-slate-600 hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
               >
                 Open Event Page
               </Link>

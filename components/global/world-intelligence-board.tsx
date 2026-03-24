@@ -40,23 +40,23 @@ export function WorldIntelligenceBoard({ regions }: WorldIntelligenceBoardProps)
   const visibleRegions = regions.filter((region) => region.eventCount > 0).slice(0, 4);
 
   return (
-    <div className="relative min-h-[34rem] overflow-hidden rounded-[2.2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(8,20,40,0.96),rgba(2,7,16,0.99))] p-5 shadow-[0_48px_120px_-72px_rgba(42,155,255,0.42)] sm:min-h-[40rem] sm:p-7">
-      <div className="pointer-events-none absolute inset-0 geo-grid opacity-[0.07]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_14%_18%,rgba(42,155,255,0.26),transparent_22%),radial-gradient(circle_at_82%_18%,rgba(122,104,255,0.12),transparent_18%),radial-gradient(circle_at_52%_80%,rgba(26,215,241,0.1),transparent_26%)]" />
-      <div className="pointer-events-none absolute left-[6%] top-[6%] h-[54%] w-[88%] opacity-[0.14]">
+    <div className="relative min-h-[34rem] overflow-hidden rounded-[2.2rem] border border-slate-200 bg-white p-5 shadow-[0_34px_90px_-60px_rgba(37,99,235,0.22)] sm:min-h-[40rem] sm:p-7">
+      <div className="pointer-events-none absolute inset-0 geo-grid opacity-[0.08]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_14%_18%,rgba(42,155,255,0.12),transparent_22%),radial-gradient(circle_at_82%_18%,rgba(122,104,255,0.08),transparent_18%),radial-gradient(circle_at_52%_80%,rgba(26,215,241,0.06),transparent_26%)]" />
+      <div className="pointer-events-none absolute left-[6%] top-[6%] h-[54%] w-[88%] opacity-[0.08]">
         <WorldMapMotif />
       </div>
 
       <svg viewBox="0 0 100 62" className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true">
         <defs>
           <linearGradient id="board-route" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="rgba(77,163,255,0.18)" />
-            <stop offset="48%" stopColor="rgba(214,236,255,0.78)" />
-            <stop offset="100%" stopColor="rgba(26,215,241,0.3)" />
+            <stop offset="0%" stopColor="rgba(37,99,235,0.18)" />
+            <stop offset="48%" stopColor="rgba(96,165,250,0.68)" />
+            <stop offset="100%" stopColor="rgba(20,184,166,0.28)" />
           </linearGradient>
         </defs>
 
-        <g fill="none" stroke="rgba(184,228,255,0.12)" strokeWidth="0.12">
+        <g fill="none" stroke="rgba(148,163,184,0.18)" strokeWidth="0.12">
           <path d="M8 31H92" />
           <path d="M16 22C28 25 39 26 50 26C61 26 72 25 84 22" />
           <path d="M16 40C28 37 39 36 50 36C61 36 72 37 84 40" />
@@ -85,7 +85,7 @@ export function WorldIntelligenceBoard({ regions }: WorldIntelligenceBoardProps)
               <motion.path
                 d={path}
                 fill="none"
-                stroke="rgba(210,255,236,0.82)"
+                stroke="rgba(14,165,233,0.76)"
                 strokeWidth={index === 0 || index === 3 ? '0.82' : '0.68'}
                 pathLength={0.14}
                 initial={{ pathOffset: 1, opacity: 0 }}
@@ -118,7 +118,7 @@ export function WorldIntelligenceBoard({ regions }: WorldIntelligenceBoardProps)
                 cx={point.x}
                 cy={point.y}
                 r={0.65 + share * 1.8}
-                fill="rgba(210,238,255,0.94)"
+                fill="rgba(15,23,42,0.9)"
                 animate={reduceMotion ? undefined : { opacity: [0.42, 1, 0.42] }}
                 transition={reduceMotion ? undefined : { duration: 2.8 + index * 0.22, repeat: Infinity, ease: 'easeInOut' }}
               />
@@ -127,35 +127,35 @@ export function WorldIntelligenceBoard({ regions }: WorldIntelligenceBoardProps)
         })}
       </svg>
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[28%] bg-[linear-gradient(to_top,rgba(3,10,16,0.94),rgba(3,10,16,0.18),transparent)]" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[28%] bg-[linear-gradient(to_top,rgba(248,250,252,0.98),rgba(248,250,252,0.55),transparent)]" />
 
       <div className="relative flex h-full flex-col justify-between">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.24em] text-slate-300">World Event Intelligence</p>
-            <p className="mt-2 max-w-xs text-sm leading-relaxed text-slate-400">
+            <p className="text-[11px] uppercase tracking-[0.24em] text-sky-700">World Event Intelligence</p>
+            <p className="mt-2 max-w-xs text-sm leading-relaxed text-slate-600">
               Cross-region visibility across flagship events, coverage density, and coordination windows.
             </p>
           </div>
-          <div className="rounded-full border border-signal/20 bg-signal/10 px-4 py-2 text-[11px] uppercase tracking-[0.22em] text-signal2">
+          <div className="rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-[11px] uppercase tracking-[0.22em] text-emerald-700">
             Live routing
           </div>
         </div>
 
         <div className="mt-10 grid gap-3 sm:grid-cols-2">
           {visibleRegions.map((region) => (
-              <div key={region.name} className="rounded-[1.4rem] border border-white/10 bg-black/22 px-4 py-4 backdrop-blur-md">
+              <div key={region.name} className="rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">{region.name}</p>
-                    <p className="mt-2 font-[var(--font-serif)] text-3xl leading-none text-white">{region.eventCount}</p>
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">{region.name}</p>
+                    <p className="mt-2 font-[var(--font-serif)] text-3xl leading-none text-slate-950">{region.eventCount}</p>
                     <p className="mt-2 text-xs uppercase tracking-[0.18em] text-slate-500">{region.countryCount} countries active</p>
                   </div>
-                  <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-slate-200">
+                  <div className="rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-slate-600">
                     {Math.round(region.share * 100)}%
                   </div>
                 </div>
-                <div className="mt-4 h-1.5 rounded-full bg-white/[0.06]">
+                <div className="mt-4 h-1.5 rounded-full bg-slate-200">
                   <div
                     className="h-full rounded-full"
                     style={{ width: `${Math.max(8, Math.round(region.share * 100))}%`, backgroundColor: regionColors[region.name] }}

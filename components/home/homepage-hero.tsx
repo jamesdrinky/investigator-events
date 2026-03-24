@@ -1,0 +1,498 @@
+'use client';
+
+import Link from 'next/link';
+import { motion, useReducedMotion } from 'framer-motion';
+import { useEffect, useMemo, useState } from 'react';
+import { AssociationLogoBadge } from '@/components/association-logo-badge';
+import type { EventItem } from '@/lib/data/events';
+import { formatEventDate } from '@/lib/utils/date';
+import { getEventSlug } from '@/lib/utils/event-slugs';
+
+interface HomepageHeroProps {
+  events: EventItem[];
+  stats: Array<{ label: string; value: string | number }>;
+}
+
+interface GlobePoint {
+  lat: number;
+  lon: number;
+}
+
+interface GlobeEventNode extends GlobePoint {
+  id: string;
+  title: string;
+  city: string;
+  country: string;
+  date: string;
+  associationName?: string;
+  coverImage?: string;
+}
+
+const CITY_COORDINATES: Record<string, GlobePoint> = {
+  amsterdam: { lat: 52.3676, lon: 4.9041 },
+  athens: { lat: 37.9838, lon: 23.7275 },
+  bangkok: { lat: 13.7563, lon: 100.5018 },
+  barcelona: { lat: 41.3874, lon: 2.1686 },
+  berlin: { lat: 52.52, lon: 13.405 },
+  birmingham: { lat: 52.4862, lon: -1.8904 },
+  brussels: { lat: 50.8503, lon: 4.3517 },
+  chicago: { lat: 41.8781, lon: -87.6298 },
+  copenhagen: { lat: 55.6761, lon: 12.5683 },
+  dallas: { lat: 32.7767, lon: -96.797 },
+  denver: { lat: 39.7392, lon: -104.9903 },
+  doha: { lat: 25.2854, lon: 51.531 },
+  dubai: { lat: 25.2048, lon: 55.2708 },
+  dublin: { lat: 53.3498, lon: -6.2603 },
+  frankfurt: { lat: 50.1109, lon: 8.6821 },
+  geneva: { lat: 46.2044, lon: 6.1432 },
+  'hong kong': { lat: 22.3193, lon: 114.1694 },
+  houston: { lat: 29.7604, lon: -95.3698 },
+  'las vegas': { lat: 36.1699, lon: -115.1398 },
+  lisbon: { lat: 38.7223, lon: -9.1393 },
+  london: { lat: 51.5072, lon: -0.1276 },
+  'los angeles': { lat: 34.0522, lon: -118.2437 },
+  madrid: { lat: 40.4168, lon: -3.7038 },
+  manchester: { lat: 53.4808, lon: -2.2426 },
+  melbourne: { lat: -37.8136, lon: 144.9631 },
+  'mexico city': { lat: 19.4326, lon: -99.1332 },
+  miami: { lat: 25.7617, lon: -80.1918 },
+  milan: { lat: 45.4642, lon: 9.19 },
+  montreal: { lat: 45.5017, lon: -73.5673 },
+  munich: { lat: 48.1351, lon: 11.582 },
+  'new york': { lat: 40.7128, lon: -74.006 },
+  paris: { lat: 48.8566, lon: 2.3522 },
+  prague: { lat: 50.0755, lon: 14.4378 },
+  rome: { lat: 41.9028, lon: 12.4964 },
+  'san francisco': { lat: 37.7749, lon: -122.4194 },
+  seattle: { lat: 47.6062, lon: -122.3321 },
+  seoul: { lat: 37.5665, lon: 126.978 },
+  singapore: { lat: 1.3521, lon: 103.8198 },
+  stockholm: { lat: 59.3293, lon: 18.0686 },
+  sydney: { lat: -33.8688, lon: 151.2093 },
+  tokyo: { lat: 35.6762, lon: 139.6503 },
+  toronto: { lat: 43.6532, lon: -79.3832 },
+  vienna: { lat: 48.2082, lon: 16.3738 },
+  warsaw: { lat: 52.2297, lon: 21.0122 },
+  washington: { lat: 38.9072, lon: -77.0369 },
+  zurich: { lat: 47.3769, lon: 8.5417 }
+};
+
+const COUNTRY_COORDINATES: Record<string, GlobePoint> = {
+  Australia: { lat: -25.2744, lon: 133.7751 },
+  Austria: { lat: 47.5162, lon: 14.5501 },
+  Belgium: { lat: 50.5039, lon: 4.4699 },
+  Canada: { lat: 56.1304, lon: -106.3468 },
+  Denmark: { lat: 56.2639, lon: 9.5018 },
+  France: { lat: 46.2276, lon: 2.2137 },
+  Germany: { lat: 51.1657, lon: 10.4515 },
+  Ireland: { lat: 53.1424, lon: -7.6921 },
+  Italy: { lat: 41.8719, lon: 12.5674 },
+  Japan: { lat: 36.2048, lon: 138.2529 },
+  Mexico: { lat: 23.6345, lon: -102.5528 },
+  Netherlands: { lat: 52.1326, lon: 5.2913 },
+  Portugal: { lat: 39.3999, lon: -8.2245 },
+  Qatar: { lat: 25.3548, lon: 51.1839 },
+  'Saudi Arabia': { lat: 23.8859, lon: 45.0792 },
+  Singapore: { lat: 1.3521, lon: 103.8198 },
+  Spain: { lat: 40.4637, lon: -3.7492 },
+  Sweden: { lat: 60.1282, lon: 18.6435 },
+  Switzerland: { lat: 46.8182, lon: 8.2275 },
+  'United Arab Emirates': { lat: 23.4241, lon: 53.8478 },
+  'United Kingdom': { lat: 55.3781, lon: -3.436 },
+  'United States': { lat: 39.8283, lon: -98.5795 }
+};
+
+const REGION_COORDINATES: Record<string, GlobePoint> = {
+  'Asia-Pacific': { lat: 7, lon: 114 },
+  Europe: { lat: 50, lon: 12 },
+  'Middle East': { lat: 24, lon: 46 },
+  'North America': { lat: 39, lon: -98 }
+};
+
+function normalizeKey(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function safeCoverImage(coverImage?: string) {
+  return coverImage && /^(\/(cities|events|images|associations)\/|https?:\/\/)/.test(coverImage) ? coverImage : undefined;
+}
+
+function getEventCoordinate(event: EventItem): GlobePoint {
+  const cityMatch = CITY_COORDINATES[normalizeKey(event.city)];
+  if (cityMatch) {
+    return cityMatch;
+  }
+
+  const countryMatch = COUNTRY_COORDINATES[event.country];
+  if (countryMatch) {
+    return countryMatch;
+  }
+
+  return REGION_COORDINATES[event.region] ?? { lat: 18, lon: 18 };
+}
+
+function buildDotField() {
+  const dots: Array<GlobePoint> = [];
+
+  for (let lat = -70; lat <= 70; lat += 10) {
+    for (let lon = -180; lon < 180; lon += 12) {
+      const wave = Math.sin((lat + 90) * 0.16 + lon * 0.08);
+      dots.push({
+        lat: lat + wave * 1.6,
+        lon: lon + Math.cos(lon * 0.12 + lat * 0.1) * 1.8
+      });
+    }
+  }
+
+  return dots;
+}
+
+function projectPoint(point: GlobePoint, rotation: number, radiusX: number, radiusY: number) {
+  const lat = (point.lat * Math.PI) / 180;
+  const lon = (point.lon * Math.PI) / 180 + rotation;
+  const x = Math.cos(lat) * Math.sin(lon);
+  const y = Math.sin(lat);
+  const z = Math.cos(lat) * Math.cos(lon);
+
+  return {
+    x: x * radiusX,
+    y: y * radiusY,
+    z
+  };
+}
+
+function buildArcPath(from: ReturnType<typeof projectPoint>, to: ReturnType<typeof projectPoint>) {
+  const curve = Math.max(24, 84 - Math.abs(from.x - to.x) * 0.12);
+  const controlX = (from.x + to.x) / 2;
+  const controlY = Math.min(from.y, to.y) - curve;
+  return `M ${from.x} ${from.y} Q ${controlX} ${controlY} ${to.x} ${to.y}`;
+}
+
+function HeroEventCard({
+  event,
+  className,
+  delay,
+  compact = false
+}: {
+  event: GlobeEventNode;
+  className: string;
+  delay: number;
+  compact?: boolean;
+}) {
+  const image = safeCoverImage(event.coverImage);
+
+  return (
+    <motion.article
+      className={`pointer-events-auto absolute overflow-hidden rounded-[1.9rem] border border-white/75 bg-white/84 shadow-[0_40px_120px_-48px_rgba(36,76,170,0.42)] backdrop-blur-2xl ${className}`}
+      initial={{ opacity: 0, y: 32, scale: 0.96 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.9, delay, ease: [0.16, 1, 0.3, 1] }}
+      whileHover={{ y: -8, rotateX: compact ? 0 : 4, rotateY: compact ? 0 : -5, scale: compact ? 1.015 : 1.02 }}
+    >
+      <div className={`relative ${compact ? 'min-h-[10rem]' : 'min-h-[14rem]'}`}>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(34,117,255,0.26),transparent_28%),radial-gradient(circle_at_82%_16%,rgba(14,182,255,0.24),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.62),rgba(255,255,255,0.18))]" />
+        {image ? (
+          <>
+            <img src={image} alt={`${event.title} image`} className="absolute inset-0 h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,17,31,0.06),rgba(9,17,31,0.24)_38%,rgba(6,12,22,0.82))]" />
+          </>
+        ) : null}
+
+        <div className="absolute left-4 top-4">
+          <AssociationLogoBadge associationName={event.associationName} compact />
+        </div>
+
+        <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
+          <p className={`max-w-[18rem] font-semibold tracking-[-0.03em] ${compact ? 'text-base' : 'text-xl'} ${image ? 'text-white' : 'text-slate-950'}`}>
+            {event.title}
+          </p>
+          <div className={`mt-3 flex flex-wrap items-center gap-2 text-[11px] font-medium uppercase tracking-[0.18em] ${image ? 'text-sky-100' : 'text-blue-700'}`}>
+            <span>{event.date}</span>
+            <span className={image ? 'text-white/50' : 'text-slate-300'}>/</span>
+            <span>
+              {event.city}, {event.country}
+            </span>
+          </div>
+        </div>
+      </div>
+    </motion.article>
+  );
+}
+
+export function HomepageHero({ events, stats }: HomepageHeroProps) {
+  const reducedMotion = useReducedMotion();
+  const [rotation, setRotation] = useState(0.45);
+  const [pointer, setPointer] = useState({ x: 0, y: 0 });
+
+  const dotField = useMemo(() => buildDotField(), []);
+  const globeEvents = useMemo<GlobeEventNode[]>(
+    () =>
+      events.slice(0, 4).map((event) => {
+        const coordinate = getEventCoordinate(event);
+
+        return {
+          id: event.id,
+          title: event.title,
+          city: event.city,
+          country: event.country,
+          date: formatEventDate(event),
+          associationName: event.association ?? event.organiser,
+          coverImage: event.coverImage,
+          ...coordinate
+        };
+      }),
+    [events]
+  );
+
+  useEffect(() => {
+    if (reducedMotion) {
+      return undefined;
+    }
+
+    let frame = 0;
+    let last = performance.now();
+
+    const animate = (now: number) => {
+      const delta = now - last;
+      last = now;
+      setRotation((current) => (current + delta * 0.00018) % (Math.PI * 2));
+      frame = window.requestAnimationFrame(animate);
+    };
+
+    frame = window.requestAnimationFrame(animate);
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [reducedMotion]);
+
+  const projectedDots = useMemo(
+    () =>
+      dotField.map((point, index) => {
+        const projection = projectPoint(point, rotation, 178, 204);
+        return {
+          ...projection,
+          id: index,
+          radius: projection.z > 0 ? 1.5 + projection.z * 1.8 : 0.95,
+          opacity: projection.z > 0 ? 0.24 + projection.z * 0.56 : 0.06 + (projection.z + 1) * 0.08
+        };
+      }),
+    [dotField, rotation]
+  );
+
+  const projectedNodes = useMemo(
+    () =>
+      globeEvents.map((event) => {
+        const projection = projectPoint(event, rotation, 178, 204);
+        return {
+          ...event,
+          ...projection
+        };
+      }),
+    [globeEvents, rotation]
+  );
+
+  const routePaths = useMemo(() => {
+    if (projectedNodes.length < 2) {
+      return [];
+    }
+
+    return projectedNodes.slice(0, -1).map((node, index) => {
+      const next = projectedNodes[index + 1];
+      return {
+        id: `${node.id}-${next.id}`,
+        d: buildArcPath(node, next),
+        opacity: Math.max(0.2, (node.z + next.z + 2) / 4)
+      };
+    });
+  }, [projectedNodes]);
+
+  return (
+    <section className="relative overflow-hidden pb-20 pt-10 sm:pb-24 sm:pt-14 lg:pb-28">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(33,118,255,0.18),transparent_22%),radial-gradient(circle_at_88%_14%,rgba(0,196,255,0.16),transparent_18%),radial-gradient(circle_at_56%_62%,rgba(111,86,255,0.12),transparent_30%),linear-gradient(180deg,#fbfdff_0%,#f4f8ff_46%,#f8fbff_100%)]" />
+      <div className="pointer-events-none absolute inset-x-[15%] top-24 h-[34rem] rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.22),rgba(22,104,255,0.05)_42%,transparent_72%)] blur-3xl" />
+
+      <div className="container-shell relative">
+        <div className="grid gap-14 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-center">
+          <motion.div
+            initial={reducedMotion ? false : { opacity: 0, y: 22 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+            className="relative z-10 max-w-[36rem]"
+          >
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/86 px-3 py-1.5 shadow-[0_24px_60px_-34px_rgba(15,23,42,0.2)] backdrop-blur-xl">
+              <span className="h-2.5 w-2.5 rounded-full bg-cyan-400 shadow-[0_0_0_8px_rgba(34,211,238,0.12)]" />
+              <span className="text-[11px] font-semibold uppercase tracking-[0.26em] text-slate-700">Global investigator calendar</span>
+            </div>
+
+            <motion.h1
+              className="mt-8 max-w-[10ch] text-5xl font-semibold leading-[0.9] tracking-[-0.06em] text-slate-950 sm:text-6xl lg:text-[5.6rem]"
+              initial={reducedMotion ? false : { opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+            >
+              Every investigator event.
+              <span className="mt-2 block bg-[linear-gradient(90deg,#0f172a_0%,#1668ff_46%,#10b8ff_72%,#6f56ff_100%)] bg-clip-text text-transparent">
+                One global calendar.
+              </span>
+            </motion.h1>
+
+            <motion.p
+              className="mt-6 max-w-xl text-lg leading-relaxed text-slate-600"
+              initial={reducedMotion ? false : { opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.14, ease: [0.16, 1, 0.3, 1] }}
+            >
+              Discover conferences, training, and association gatherings through one beautifully organised global calendar built to feel alive from the first second.
+            </motion.p>
+
+            <motion.div
+              className="mt-8 flex flex-col gap-3 sm:flex-row"
+              initial={reducedMotion ? false : { opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <Link href="/calendar" className="btn-primary min-h-[3.5rem] px-7 text-[15px]">
+                Explore the calendar
+              </Link>
+              <Link href="/submit-event" className="btn-secondary min-h-[3.5rem] px-7 text-[15px]">
+                List an event
+              </Link>
+            </motion.div>
+
+            <motion.div
+              className="mt-8 grid gap-3 sm:grid-cols-3"
+              initial={reducedMotion ? false : { opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.85, delay: 0.26, ease: [0.16, 1, 0.3, 1] }}
+            >
+              {stats.map((item) => (
+                <div
+                  key={item.label}
+                  className="rounded-[1.7rem] border border-white/80 bg-white/78 px-4 py-4 shadow-[0_26px_72px_-44px_rgba(15,23,42,0.18)] backdrop-blur-xl"
+                >
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">{item.label}</p>
+                  <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-slate-950">{item.value}</p>
+                </div>
+              ))}
+            </motion.div>
+          </motion.div>
+
+          <motion.div
+            className="relative"
+            initial={reducedMotion ? false : { opacity: 0, scale: 0.96, y: 18 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 1.05, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <motion.div
+              className="relative mx-auto aspect-[1.05/1] w-full max-w-[46rem]"
+              style={{ perspective: 1600 }}
+              animate={reducedMotion ? undefined : { rotateX: -pointer.y * 6, rotateY: pointer.x * 8 }}
+              transition={{ type: 'spring', stiffness: 90, damping: 18, mass: 0.8 }}
+              onPointerMove={(event) => {
+                const bounds = event.currentTarget.getBoundingClientRect();
+                const x = (event.clientX - bounds.left) / bounds.width;
+                const y = (event.clientY - bounds.top) / bounds.height;
+                setPointer({ x: (x - 0.5) * 2, y: (y - 0.5) * 2 });
+              }}
+              onPointerLeave={() => setPointer({ x: 0, y: 0 })}
+            >
+              <div className="absolute inset-[8%] rounded-full bg-[radial-gradient(circle,rgba(79,70,229,0.18),rgba(14,165,233,0.14)_34%,transparent_68%)] blur-3xl" />
+              <div className="absolute inset-x-[14%] bottom-[8%] h-[16%] rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.26),rgba(22,104,255,0.06)_52%,transparent_76%)] blur-2xl" />
+
+              <motion.div
+                className="absolute inset-[10%] rounded-[3rem] border border-white/70 bg-[linear-gradient(145deg,rgba(255,255,255,0.82),rgba(241,247,255,0.36))] shadow-[0_48px_150px_-64px_rgba(27,61,145,0.42)] backdrop-blur-2xl"
+                animate={reducedMotion ? undefined : { y: [0, -5, 0, 4, 0] }}
+                transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+              />
+
+              <svg viewBox="-300 -270 600 540" className="absolute inset-0 h-full w-full overflow-visible">
+                <defs>
+                  <radialGradient id="hero-globe-shell" cx="50%" cy="42%" r="70%">
+                    <stop offset="0%" stopColor="rgba(255,255,255,0.96)" />
+                    <stop offset="58%" stopColor="rgba(226,240,255,0.86)" />
+                    <stop offset="100%" stopColor="rgba(199,223,255,0.26)" />
+                  </radialGradient>
+                  <radialGradient id="hero-node-glow" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="#a5f3fc" />
+                    <stop offset="45%" stopColor="#38bdf8" />
+                    <stop offset="100%" stopColor="rgba(56,189,248,0)" />
+                  </radialGradient>
+                  <linearGradient id="hero-route-stroke" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="rgba(45,125,255,0.1)" />
+                    <stop offset="45%" stopColor="rgba(64,201,255,0.95)" />
+                    <stop offset="100%" stopColor="rgba(133,92,255,0.95)" />
+                  </linearGradient>
+                </defs>
+
+                <ellipse cx="0" cy="204" rx="164" ry="28" fill="rgba(76,127,255,0.12)" />
+                <circle cx="0" cy="0" r="190" fill="url(#hero-globe-shell)" opacity="0.82" />
+                <circle cx="0" cy="0" r="190" fill="none" stroke="rgba(255,255,255,0.82)" strokeWidth="1.5" />
+                <ellipse cx="0" cy="0" rx="188" ry="76" fill="none" stroke="rgba(84,130,255,0.12)" strokeWidth="1" />
+                <ellipse cx="0" cy="0" rx="188" ry="128" fill="none" stroke="rgba(84,130,255,0.08)" strokeWidth="1" />
+
+                {projectedDots
+                  .filter((dot) => dot.z <= 0)
+                  .map((dot) => (
+                    <circle
+                      key={`back-${dot.id}`}
+                      cx={dot.x}
+                      cy={dot.y}
+                      r={dot.radius}
+                      fill="rgba(74,127,255,0.42)"
+                      opacity={dot.opacity}
+                    />
+                  ))}
+
+                {routePaths.map((route) => (
+                  <g key={route.id} opacity={route.opacity}>
+                    <path d={route.d} fill="none" stroke="rgba(95,135,255,0.16)" strokeWidth="4.4" strokeLinecap="round" />
+                    <path d={route.d} fill="none" stroke="url(#hero-route-stroke)" strokeWidth="2.1" strokeLinecap="round" strokeDasharray="10 14" />
+                  </g>
+                ))}
+
+                {projectedDots
+                  .filter((dot) => dot.z > 0)
+                  .map((dot) => (
+                    <circle
+                      key={`front-${dot.id}`}
+                      cx={dot.x}
+                      cy={dot.y}
+                      r={dot.radius}
+                      fill={dot.z > 0.7 ? '#e0f2fe' : '#60a5fa'}
+                      opacity={dot.opacity}
+                    />
+                  ))}
+
+                {projectedNodes.map((node) => (
+                  <g key={node.id} opacity={node.z > -0.22 ? 1 : 0.34}>
+                    <circle cx={node.x} cy={node.y} r="18" fill="url(#hero-node-glow)" opacity="0.88" />
+                    <circle cx={node.x} cy={node.y} r="5.8" fill="#f8fdff" />
+                    <circle cx={node.x} cy={node.y} r="9" fill="none" stroke="rgba(125,211,252,0.8)" strokeWidth="1.4" />
+                  </g>
+                ))}
+              </svg>
+
+              {globeEvents[0] ? (
+                <HeroEventCard event={globeEvents[0]} delay={0.24} className="left-[2%] top-[9%] w-[52%] max-w-[22rem]" />
+              ) : null}
+              {globeEvents[1] ? (
+                <HeroEventCard event={globeEvents[1]} delay={0.34} compact className="right-[4%] top-[14%] w-[34%] min-w-[12rem]" />
+              ) : null}
+              {globeEvents[2] ? (
+                <HeroEventCard event={globeEvents[2]} delay={0.42} compact className="right-[10%] bottom-[8%] w-[38%] min-w-[13rem]" />
+              ) : null}
+
+              {globeEvents[0] ? (
+                <Link
+                  href={`/events/${getEventSlug(events[0])}`}
+                  className="absolute bottom-[13%] left-[6%] inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/88 px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-[0_26px_70px_-42px_rgba(15,23,42,0.26)] backdrop-blur-xl transition hover:-translate-y-0.5"
+                >
+                  Open featured event
+                </Link>
+              ) : null}
+            </motion.div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}

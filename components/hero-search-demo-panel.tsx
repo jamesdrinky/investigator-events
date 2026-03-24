@@ -1,8 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion, useMotionTemplate, useMotionValue, useReducedMotion, useSpring } from 'framer-motion';
+import { geoNaturalEarth1, geoPath } from 'd3-geo';
+import { feature } from 'topojson-client';
 import { useEffect, useMemo, useState } from 'react';
+import landData from 'world-atlas/land-110m.json';
 import { EventCoverMedia } from '@/components/event-cover-media';
 import type { EventItem } from '@/lib/data/events';
 import { formatEventDate } from '@/lib/utils/date';
@@ -15,11 +18,71 @@ interface HeroSearchDemoPanelProps {
   }>;
 }
 
+const WIDTH = 1060;
+const HEIGHT = 760;
+
+const landFeature = feature((landData as any), (landData as any).objects.land) as any;
+const projection = geoNaturalEarth1().fitExtent(
+  [
+    [66, 96],
+    [WIDTH - 58, HEIGHT - 116]
+  ],
+  landFeature
+);
+const pathGenerator = geoPath(projection);
+const landPath = pathGenerator(landFeature) ?? '';
+
+const cityCoordinates: Record<string, [number, number]> = {
+  'new york': [-74.006, 40.7128],
+  london: [-0.1276, 51.5072],
+  munich: [11.582, 48.1351],
+  paris: [2.3522, 48.8566],
+  dubai: [55.2708, 25.2048],
+  singapore: [103.8198, 1.3521],
+  sydney: [151.2093, -33.8688],
+  prague: [14.4378, 50.0755],
+  venice: [12.3155, 45.4408],
+  cannes: [7.0174, 43.5528],
+  orlando: [-81.3792, 28.5383],
+  philadelphia: [-75.1652, 39.9526],
+  'san jose': [-121.8863, 37.3382],
+  'new delhi': [77.1025, 28.7041]
+};
+
+function projectPoint([lon, lat]: [number, number]) {
+  const point = projection([lon, lat]);
+  return point ? { x: point[0], y: point[1] } : { x: 0, y: 0 };
+}
+
+function getCityPoint(city: string, index: number) {
+  const normalized = city.trim().toLowerCase();
+  const direct = cityCoordinates[normalized];
+
+  if (direct) {
+    return projectPoint(direct);
+  }
+
+  const fallbackPoints = [
+    projectPoint([-74.006, 40.7128]),
+    projectPoint([-0.1276, 51.5072]),
+    projectPoint([55.2708, 25.2048]),
+    projectPoint([103.8198, 1.3521])
+  ];
+
+  return fallbackPoints[index % fallbackPoints.length];
+}
+
 export function HeroSearchDemoPanel({ demos }: HeroSearchDemoPanelProps) {
   const reduceMotion = useReducedMotion();
   const [demoIndex, setDemoIndex] = useState(0);
   const [typedLength, setTypedLength] = useState(0);
   const [showResult, setShowResult] = useState(false);
+
+  const rotateX = useSpring(0, { stiffness: 150, damping: 18, mass: 0.45 });
+  const rotateY = useSpring(0, { stiffness: 150, damping: 18, mass: 0.45 });
+  const glowX = useMotionValue(50);
+  const glowY = useMotionValue(50);
+  const reflectiveGlow = useMotionTemplate`radial-gradient(circle at ${glowX}% ${glowY}%, rgba(255,255,255,0.72), rgba(255,255,255,0) 34%)`;
 
   const activeDemo = demos.length > 0 ? demos[demoIndex % demos.length] : null;
   const typedQuery = activeDemo?.query.slice(0, typedLength) ?? '';
@@ -30,12 +93,12 @@ export function HeroSearchDemoPanel({ demos }: HeroSearchDemoPanelProps) {
     }
 
     if (typedLength < activeDemo.query.length) {
-      const timeout = window.setTimeout(() => setTypedLength((length) => length + 1), 40);
+      const timeout = window.setTimeout(() => setTypedLength((length) => length + 1), 34);
       return () => window.clearTimeout(timeout);
     }
 
     if (!showResult) {
-      const timeout = window.setTimeout(() => setShowResult(true), 280);
+      const timeout = window.setTimeout(() => setShowResult(true), 180);
       return () => window.clearTimeout(timeout);
     }
 
@@ -43,22 +106,33 @@ export function HeroSearchDemoPanel({ demos }: HeroSearchDemoPanelProps) {
       setShowResult(false);
       setTypedLength(0);
       setDemoIndex((index) => (index + 1) % demos.length);
-    }, 2000);
+    }, 2200);
 
     return () => window.clearTimeout(timeout);
   }, [activeDemo, demos.length, showResult, typedLength]);
 
-  const networkNodes = useMemo(
-    () => [
-      { left: '14%', top: '22%', color: 'bg-blue-500' },
-      { left: '34%', top: '18%', color: 'bg-violet-500' },
-      { left: '56%', top: '28%', color: 'bg-cyan-500' },
-      { left: '78%', top: '24%', color: 'bg-pink-500' },
-      { left: '68%', top: '58%', color: 'bg-emerald-500' },
-      { left: '40%', top: '64%', color: 'bg-sky-500' },
-      { left: '22%', top: '56%', color: 'bg-blue-500' }
-    ],
-    []
+  const networkPoints = useMemo(
+    () =>
+      demos.map((demo, index) => ({
+        ...getCityPoint(demo.event.city, index),
+        label: demo.event.city
+      })),
+    [demos]
+  );
+
+  const routePairs = useMemo(
+    () =>
+      networkPoints.slice(0, -1).map((point, index) => {
+        const next = networkPoints[index + 1];
+        const midX = (point.x + next.x) / 2;
+        const midY = (point.y + next.y) / 2;
+
+        return {
+          id: `${point.label}-${next.label}`,
+          d: `M ${point.x} ${point.y} Q ${midX} ${midY - 76 + index * 10} ${next.x} ${next.y}`
+        };
+      }),
+    [networkPoints]
   );
 
   if (!activeDemo) {
@@ -66,9 +140,9 @@ export function HeroSearchDemoPanel({ demos }: HeroSearchDemoPanelProps) {
   }
 
   return (
-    <div className="relative min-h-[34rem] rounded-[2.4rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.84),rgba(241,247,255,0.94)_48%,rgba(247,250,255,0.98))] p-5 shadow-[0_44px_110px_-56px_rgba(37,99,235,0.3)] backdrop-blur-sm sm:min-h-[38rem] sm:p-6">
+    <div className="relative min-h-[34rem] sm:min-h-[38rem]">
       <motion.div
-        className="pointer-events-none absolute inset-0 rounded-[2.4rem]"
+        className="absolute inset-0 rounded-[2.6rem]"
         animate={
           reduceMotion
             ? undefined
@@ -76,140 +150,204 @@ export function HeroSearchDemoPanel({ demos }: HeroSearchDemoPanelProps) {
                 backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
               }
         }
-        transition={reduceMotion ? undefined : { duration: 14, repeat: Infinity, ease: 'easeInOut' }}
+        transition={reduceMotion ? undefined : { duration: 16, repeat: Infinity, ease: 'easeInOut' }}
         style={{
-          backgroundImage:
-            'radial-gradient(circle at 16% 18%, rgba(37,99,235,0.14), transparent 20%), radial-gradient(circle at 82% 18%, rgba(124,58,237,0.12), transparent 18%), radial-gradient(circle at 80% 70%, rgba(6,182,212,0.12), transparent 18%), radial-gradient(circle at 50% 100%, rgba(236,72,153,0.1), transparent 18%)',
+          background:
+            'radial-gradient(circle at 18% 20%, rgba(22,104,255,0.16), transparent 26%), radial-gradient(circle at 82% 18%, rgba(20,184,255,0.14), transparent 24%), radial-gradient(circle at 76% 78%, rgba(100,91,255,0.12), transparent 22%), linear-gradient(180deg, #ffffff 0%, #f3f8ff 46%, #eef7ff 100%)',
           backgroundSize: '160% 160%'
         }}
       />
 
-      <div className="pointer-events-none absolute inset-5 rounded-[2rem] border border-white/70 bg-white/38" />
-      <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[2.4rem]">
-        <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full opacity-60" aria-hidden="true">
+      <div className="absolute inset-0 overflow-hidden rounded-[2.6rem] border border-[#d9e7fb] shadow-[0_44px_110px_-62px_rgba(22,104,255,0.28)]">
+        <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="absolute inset-0 h-full w-full" aria-hidden="true">
           <defs>
-            <linearGradient id="demo-grid-line" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="rgba(37,99,235,0.12)" />
-              <stop offset="100%" stopColor="rgba(6,182,212,0.12)" />
+            <linearGradient id="hero-land-stroke-crisp" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="rgba(22,104,255,0.12)" />
+              <stop offset="50%" stopColor="rgba(22,104,255,0.3)" />
+              <stop offset="100%" stopColor="rgba(20,184,255,0.18)" />
+            </linearGradient>
+            <linearGradient id="hero-route-crisp" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="rgba(22,104,255,0.2)" />
+              <stop offset="50%" stopColor="rgba(20,184,255,0.74)" />
+              <stop offset="100%" stopColor="rgba(100,91,255,0.28)" />
             </linearGradient>
           </defs>
-          <path d="M12 24 Q34 8 56 28 T84 24" fill="none" stroke="url(#demo-grid-line)" strokeWidth="0.5" />
-          <path d="M18 58 Q42 44 66 58 T88 52" fill="none" stroke="url(#demo-grid-line)" strokeWidth="0.5" />
-          <path d="M22 28 Q32 54 42 66 T72 62" fill="none" stroke="url(#demo-grid-line)" strokeWidth="0.5" />
-        </svg>
 
-        {networkNodes.map((node, index) => (
-          <motion.span
-            key={`${node.left}-${node.top}`}
-            className={`absolute h-3 w-3 rounded-full ${node.color} shadow-[0_0_26px_rgba(37,99,235,0.55)]`}
-            style={{ left: node.left, top: node.top }}
-            animate={reduceMotion ? undefined : { scale: [1, 1.35, 1], opacity: [0.45, 0.95, 0.45] }}
-            transition={reduceMotion ? undefined : { duration: 2.8 + index * 0.16, repeat: Infinity, ease: 'easeInOut' }}
-          />
-        ))}
+          <path d={landPath} fill="rgba(255,255,255,0.76)" stroke="url(#hero-land-stroke-crisp)" strokeWidth="1" opacity="1" />
+
+          <g fill="none" stroke="rgba(191,219,254,0.55)" strokeWidth="0.55">
+            <ellipse cx="530" cy="382" rx="378" ry="160" />
+            <ellipse cx="530" cy="382" rx="324" ry="132" />
+            <path d="M152 382H908" />
+          </g>
+
+          {Array.from({ length: 160 }).map((_, index) => {
+            const x = 80 + ((index * 61) % 900);
+            const y = 108 + ((index * 43) % 520);
+
+            return <circle key={index} cx={x} cy={y} r="1.2" fill="rgba(148,163,184,0.36)" />;
+          })}
+
+          {routePairs.map((route, index) => (
+            <g key={route.id}>
+              <path d={route.d} fill="none" stroke="url(#hero-route-crisp)" strokeWidth="2.3" opacity="0.72" strokeLinecap="round" />
+              <motion.path
+                d={route.d}
+                fill="none"
+                stroke="rgba(255,255,255,0.98)"
+                strokeWidth="4.6"
+                strokeLinecap="round"
+                pathLength={0.16}
+                initial={{ pathOffset: 1, opacity: 0 }}
+                animate={
+                  reduceMotion ? { pathOffset: 0.2, opacity: 0.34 } : { pathOffset: [1, 0.2, 0], opacity: [0, 0.95, 0] }
+                }
+                transition={
+                  reduceMotion
+                    ? { duration: 1, ease: 'easeOut' }
+                    : { duration: 4 + index * 0.45, delay: index * 0.22, repeat: Infinity, ease: 'easeInOut' }
+                }
+              />
+            </g>
+          ))}
+
+          {networkPoints.map((point, index) => (
+            <g key={`${point.label}-${index}`}>
+              <motion.circle
+                cx={point.x}
+                cy={point.y}
+                r="16"
+                fill="rgba(22,104,255,0.16)"
+                animate={reduceMotion ? undefined : { opacity: [0.22, 0.46, 0.22], scale: [1, 1.32, 1] }}
+                transition={reduceMotion ? undefined : { duration: 3.2 + index * 0.18, repeat: Infinity, ease: 'easeInOut' }}
+              />
+              <circle cx={point.x} cy={point.y} r="5.2" fill="rgba(22,104,255,0.98)" />
+              <circle cx={point.x} cy={point.y} r="9.2" fill="none" stroke="rgba(20,184,255,0.72)" strokeWidth="1.4" />
+            </g>
+          ))}
+        </svg>
       </div>
 
-      <div className="relative z-10 flex h-full min-h-[30rem] flex-col justify-between">
-        <div>
-          <div className="flex items-center justify-between gap-3 rounded-[1.5rem] border border-white/80 bg-white/88 px-4 py-3 shadow-[0_20px_40px_-30px_rgba(15,23,42,0.22)]">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">Live search</span>
-            <span className="rounded-full bg-[linear-gradient(135deg,#2563eb,#7c3aed,#06b6d4)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white">
-              Interactive demo
+      <div className="relative z-10 flex h-full min-h-[34rem] flex-col justify-between p-4 sm:min-h-[38rem] sm:p-6">
+        <div className="max-w-[21rem] rounded-[1.8rem] border border-[#d7e4f7] bg-white px-4 py-4 shadow-[0_24px_54px_-38px_rgba(15,23,42,0.16)]">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-blue-700">Search demo</p>
+          <div className="mt-3 rounded-full border border-slate-200 bg-slate-50 px-4 py-3 shadow-[inset_0_0_0_1px_rgba(226,232,240,0.85)]">
+            <span className="text-sm text-slate-400">Search</span>
+            <span className="ml-3 min-h-[1.5rem] text-sm font-medium text-slate-800">
+              {typedQuery}
+              <motion.span
+                className="ml-0.5 inline-block h-4 w-px bg-slate-500 align-middle"
+                animate={reduceMotion ? undefined : { opacity: [1, 0, 1] }}
+                transition={reduceMotion ? undefined : { duration: 0.9, repeat: Infinity }}
+              />
             </span>
-          </div>
-
-          <div className="mt-4 rounded-[1.6rem] border border-white/80 bg-white/90 p-4 shadow-[0_24px_56px_-36px_rgba(15,23,42,0.18)]">
-            <div className="flex items-center gap-3 rounded-full border border-slate-200 bg-slate-50 px-4 py-3">
-              <span className="text-sm text-slate-400">Search</span>
-              <span className="min-h-[1.5rem] text-sm font-medium text-slate-700">
-                {typedQuery}
-                <motion.span
-                  className="ml-0.5 inline-block h-4 w-px bg-slate-500 align-middle"
-                  animate={reduceMotion ? undefined : { opacity: [1, 0, 1] }}
-                  transition={reduceMotion ? undefined : { duration: 0.9, repeat: Infinity }}
-                />
-              </span>
-            </div>
           </div>
         </div>
 
-        <AnimatePresence mode="wait">
-          {showResult ? (
-            <motion.div
-              key={activeDemo.query}
-              initial={{ opacity: 0, y: 24, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -12, scale: 0.98 }}
-              transition={{ duration: 0.46, ease: [0.22, 1, 0.36, 1] }}
-              className="mt-6 rounded-[1.9rem] border border-white/85 bg-white/92 p-4 shadow-[0_34px_80px_-44px_rgba(15,23,42,0.2)]"
-            >
-              <div className="grid gap-4 md:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)]">
-                <EventCoverMedia
-                  title={activeDemo.event.title}
-                  city={activeDemo.event.city}
-                  country={activeDemo.event.country}
-                  region={activeDemo.event.region}
-                  category={activeDemo.event.category}
-                  coverImage={activeDemo.event.coverImage}
-                  coverImageAlt={activeDemo.event.coverImageAlt}
-                  associationName={activeDemo.event.association ?? activeDemo.event.organiser}
-                  featured={activeDemo.event.featured}
-                  compact
-                  className="h-[15rem]"
-                />
-                <div className="flex flex-col justify-between">
-                  <div>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="rounded-full bg-blue-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-blue-700">
-                        {activeDemo.event.category}
-                      </span>
-                      <span className="rounded-full bg-violet-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-700">
-                        {activeDemo.event.region}
-                      </span>
-                    </div>
-                    <h3 className="mt-4 font-[var(--font-serif)] text-3xl leading-[0.96] text-slate-950">
-                      {activeDemo.event.title}
-                    </h3>
-                    <p className="mt-3 text-sm font-medium uppercase tracking-[0.16em] text-blue-700">
-                      {formatEventDate(activeDemo.event)}
-                    </p>
-                    <p className="mt-2 text-sm text-slate-600">
-                      {activeDemo.event.city}, {activeDemo.event.country}
-                    </p>
-                    <p className="mt-4 text-sm leading-relaxed text-slate-600">
-                      Association-led event discovery surfaced through one premium search interface.
-                    </p>
-                  </div>
+        <div className="flex justify-end">
+          <AnimatePresence mode="wait">
+            {showResult ? (
+              <motion.div
+                key={activeDemo.query}
+                initial={{ opacity: 0, y: 36, scale: 0.94 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -16, scale: 0.985 }}
+                transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                className="w-full max-w-[31rem]"
+                onMouseMove={(event) => {
+                  if (reduceMotion) {
+                    return;
+                  }
 
-                  <div className="mt-6 flex flex-wrap gap-3">
-                    <Link
-                      href={`/events/${getEventSlug(activeDemo.event)}`}
-                      className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(135deg,#2563eb,#7c3aed,#06b6d4)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_16px_28px_-18px_rgba(37,99,235,0.48)]"
-                    >
-                      Open event
-                    </Link>
-                    <Link
-                      href="/calendar"
-                      className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700"
-                    >
-                      View all results
-                    </Link>
+                  const rect = event.currentTarget.getBoundingClientRect();
+                  const x = (event.clientX - rect.left) / rect.width;
+                  const y = (event.clientY - rect.top) / rect.height;
+
+                  rotateY.set((x - 0.5) * 8);
+                  rotateX.set((0.5 - y) * 8);
+                  glowX.set(x * 100);
+                  glowY.set(y * 100);
+                }}
+                onMouseLeave={() => {
+                  rotateX.set(0);
+                  rotateY.set(0);
+                  glowX.set(50);
+                  glowY.set(50);
+                }}
+              >
+                <motion.div
+                  style={{
+                    rotateX: reduceMotion ? 0 : rotateX,
+                    rotateY: reduceMotion ? 0 : rotateY,
+                    transformStyle: 'preserve-3d'
+                  }}
+                  animate={reduceMotion ? { y: [0, -6, 0] } : { y: [0, -8, 0] }}
+                  transition={{ duration: 4.6, repeat: Infinity, ease: 'easeInOut' }}
+                  className="relative rounded-[2.3rem] border border-[#dbe7f7] bg-white p-4 shadow-[0_42px_96px_-50px_rgba(15,23,42,0.28)] sm:p-5"
+                >
+                  <motion.div className="pointer-events-none absolute inset-0 rounded-[2.3rem]" style={{ background: reflectiveGlow, opacity: 0.34 }} />
+
+                  <div className="relative space-y-4">
+                    <div style={{ transform: 'translateZ(16px)' }}>
+                      <EventCoverMedia
+                        title={activeDemo.event.title}
+                        city={activeDemo.event.city}
+                        country={activeDemo.event.country}
+                        region={activeDemo.event.region}
+                        category={activeDemo.event.category}
+                        coverImage={activeDemo.event.coverImage}
+                        coverImageAlt={activeDemo.event.coverImageAlt}
+                        associationName={activeDemo.event.association ?? activeDemo.event.organiser}
+                        featured={activeDemo.event.featured}
+                        compact
+                        className="h-[16.5rem]"
+                      />
+                    </div>
+
+                    <div className="space-y-3" style={{ transform: 'translateZ(24px)' }}>
+                      <div className="flex flex-wrap gap-2">
+                        <span className="rounded-full bg-blue-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-blue-700">
+                          {activeDemo.event.category}
+                        </span>
+                        <span className="rounded-full bg-cyan-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-700">
+                          {activeDemo.event.region}
+                        </span>
+                      </div>
+                      <h3 className="font-[var(--font-serif)] text-[2rem] leading-[0.94] text-slate-950 sm:text-[2.35rem]">
+                        {activeDemo.event.title}
+                      </h3>
+                      <p className="text-sm font-medium uppercase tracking-[0.16em] text-blue-700">
+                        {formatEventDate(activeDemo.event)}
+                      </p>
+                      <p className="text-sm text-slate-600">
+                        {activeDemo.event.city}, {activeDemo.event.country}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-3" style={{ transform: 'translateZ(30px)' }}>
+                      <Link href={`/events/${getEventSlug(activeDemo.event)}`} className="btn-primary px-5 py-2.5">
+                        Open event
+                      </Link>
+                      <Link href="/calendar" className="btn-secondary px-5 py-2.5">
+                        View all results
+                      </Link>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="placeholder"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="mt-6 rounded-[1.8rem] border border-dashed border-slate-200 bg-white/60 p-8 text-center text-sm text-slate-500"
-            >
-              Typing search query and preparing a highlighted result...
-            </motion.div>
-          )}
-        </AnimatePresence>
+                </motion.div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="placeholder"
+                initial={{ opacity: 0, y: 12, scale: 0.985 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="w-full max-w-[31rem] rounded-[2rem] border border-dashed border-[#dbe7f7] bg-white px-8 py-10 text-center text-sm text-slate-500"
+              >
+                Preparing next event result...
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );

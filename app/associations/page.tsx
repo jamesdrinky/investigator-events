@@ -18,40 +18,37 @@ export default async function AssociationsPage() {
 
   return (
     <section className="section-pad relative overflow-hidden">
-      <div className="container-shell">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_14%,rgba(22,104,255,0.08),transparent_24%),radial-gradient(circle_at_86%_20%,rgba(20,184,255,0.08),transparent_20%)]" />
+      <div className="container-shell relative">
         <Reveal>
-          <header className="mb-6 relative overflow-hidden rounded-[2.2rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-8 lg:p-10">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(59,130,246,0.1),transparent_30%),radial-gradient(circle_at_82%_22%,rgba(139,92,246,0.08),transparent_24%),radial-gradient(circle_at_62%_84%,rgba(34,197,94,0.07),transparent_24%)]" />
-            <div className="relative grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+          <header className="mb-6 overflow-hidden rounded-[2.4rem] border border-white/80 bg-[linear-gradient(135deg,#ffffff_0%,#eff6ff_54%,#f4fbff_100%)] p-6 shadow-[0_34px_84px_-52px_rgba(15,23,42,0.16)] sm:p-8 lg:p-10">
+            <div className="grid gap-6 lg:grid-cols-[1.08fr_0.92fr] lg:items-end">
               <div>
                 <p className="eyebrow">Associations</p>
-                <h1 className="section-title">A global network of investigator associations and professional bodies</h1>
-                <p className="mt-4 max-w-3xl text-base leading-relaxed text-slate-600">
-                  Browse the organisations behind the events, grouped by region and country so the network feels branded,
-                  connected, and easy to understand.
+                <h1 className="section-title">The organisations behind the calendar.</h1>
+                <p className="section-copy max-w-3xl">
+                  Browse investigator associations by region and country, then jump straight to the events each network is linked to.
                 </p>
               </div>
 
-              <div className="rounded-[1.8rem] border border-slate-200 bg-slate-50 p-5">
-                <p className="text-[11px] uppercase tracking-[0.2em] text-sky-700">Platform read</p>
-                <div className="mt-4 grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                  <div className="rounded-2xl border border-sky-100 bg-white px-4 py-3 shadow-sm">
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-sky-700">Global</p>
-                    <p className="mt-1 text-sm text-slate-700">Country and region-led network view</p>
-                  </div>
-                  <div className="rounded-2xl border border-violet-100 bg-white px-4 py-3 shadow-sm">
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-violet-700">Credible</p>
-                    <p className="mt-1 text-sm text-slate-700">Real associations with branded identity</p>
-                  </div>
-                  <div className="rounded-2xl border border-emerald-100 bg-white px-4 py-3 shadow-sm">
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-emerald-700">Connected</p>
-                    <p className="mt-1 text-sm text-slate-700">Direct paths to sites and linked events</p>
-                  </div>
+              <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+                <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-blue-700">Credible network</p>
+                  <p className="mt-2 text-sm text-slate-700">Real associations, visible logos, direct links, and linked event counts.</p>
+                </div>
+                <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-cyan-700">Browse faster</p>
+                  <p className="mt-2 text-sm text-slate-700">Filter by region or country before opening the connected calendar view.</p>
+                </div>
+                <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-violet-700">Global signal</p>
+                  <p className="mt-2 text-sm text-slate-700">The network view helps the platform feel international, not local or isolated.</p>
                 </div>
               </div>
             </div>
           </header>
         </Reveal>
+
         <AssociationsDirectory associations={associations} stats={stats} />
       </div>
     </section>

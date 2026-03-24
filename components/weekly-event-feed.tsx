@@ -16,10 +16,10 @@ interface WeeklyEventFeedProps {
 
 export function WeeklyEventFeed({ title, eyebrow, events, emptyText }: WeeklyEventFeedProps) {
   return (
-    <section className="relative overflow-hidden rounded-[1.7rem] border border-slate-200 bg-white p-4 shadow-[0_18px_36px_-30px_rgba(15,23,42,0.18)] sm:p-5">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(77,163,255,0.08),transparent_26%)]" />
+    <section className="relative overflow-hidden rounded-[1.9rem] border border-slate-200 bg-white/96 p-4 shadow-[0_24px_54px_-34px_rgba(15,23,42,0.18)] sm:p-5">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(77,163,255,0.1),transparent_26%),linear-gradient(180deg,rgba(255,255,255,0),rgba(224,242,254,0.24))]" />
       <div className="relative">
-        {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
+        {eyebrow ? <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-sky-700">{eyebrow}</p> : null}
         <h2 className="mt-3 font-[var(--font-serif)] text-3xl text-slate-950">{title}</h2>
 
         {events.length === 0 ? (
@@ -29,12 +29,12 @@ export function WeeklyEventFeed({ title, eyebrow, events, emptyText }: WeeklyEve
             {events.map((event) => (
               <article
                 key={event.id}
-                className="group rounded-[1.45rem] border border-slate-200 bg-slate-50 px-4 py-4"
+                className="group rounded-[1.5rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f0f9ff_100%)] px-4 py-4 shadow-[0_18px_40px_-34px_rgba(14,116,144,0.18)]"
               >
                 <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_10rem]">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 text-slate-500">
-                      <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white text-slate-600 shadow-[0_10px_20px_-16px_rgba(15,23,42,0.25)]">
+                      <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-950 text-white shadow-[0_14px_24px_-16px_rgba(15,23,42,0.42)]">
                         <CategoryIcon category={event.category} />
                       </span>
                       <span className="text-[10px] uppercase tracking-[0.18em]">{event.category}</span>

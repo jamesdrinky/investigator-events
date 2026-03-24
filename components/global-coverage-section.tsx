@@ -20,7 +20,7 @@ export function GlobalCoverageSection({ regions }: GlobalCoverageSectionProps) {
         </Reveal>
 
         <Reveal>
-          <div className="global-panel p-6">
+          <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-[linear-gradient(135deg,rgba(37,99,235,0.08),rgba(255,255,255,0.95)_46%,rgba(20,184,166,0.08))] p-6 shadow-[0_30px_62px_-44px_rgba(37,99,235,0.16)]">
             <div className="relative grid gap-4 md:grid-cols-2">
               {regions.map((region) => (
                 <article key={region.name} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">

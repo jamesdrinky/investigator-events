@@ -13,14 +13,18 @@ const initialState: NewsletterFormState = {
 };
 
 function inputClasses() {
-  return 'h-11 rounded-full border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition duration-200 focus:border-sky-400 focus:ring-2 focus:ring-sky-100';
+  return 'h-12 rounded-full border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition duration-200 focus:border-sky-400 focus:ring-2 focus:ring-sky-100';
 }
 
 function SubmitButton() {
   const { pending } = useFormStatus();
 
   return (
-    <button type="submit" disabled={pending} className="btn-primary px-5 py-2.5 disabled:cursor-not-allowed disabled:opacity-70">
+    <button
+      type="submit"
+      disabled={pending}
+      className="inline-flex h-12 items-center justify-center rounded-full bg-[linear-gradient(135deg,#1668ff,#14b8ff,#645bff)] px-5 py-2.5 text-sm font-semibold text-white transition duration-300 hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
+    >
       {pending ? 'Subscribing...' : 'Subscribe'}
     </button>
   );
@@ -30,9 +34,8 @@ export function NewsletterSignupForm() {
   const [state, formAction] = useFormState(subscribeToNewsletter, initialState);
 
   return (
-    <form action={formAction} className="grid gap-3 rounded-[1.6rem] border border-slate-200 bg-white p-4 shadow-[0_18px_36px_-30px_rgba(15,23,42,0.16)] sm:p-5">
-      <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Subscriber preferences</p>
-      <div className="grid gap-3 md:grid-cols-[minmax(0,1.2fr)_minmax(0,0.7fr)_minmax(0,0.9fr)_auto]">
+    <form action={formAction} className="grid gap-4 rounded-[1.9rem] border border-white/80 bg-white p-5 shadow-[0_24px_52px_-34px_rgba(15,23,42,0.12)] sm:p-6">
+      <div className="grid gap-3 md:grid-cols-[minmax(0,1.2fr)_minmax(0,0.75fr)_minmax(0,0.9fr)_auto]">
         <input type="email" name="email" required placeholder="Email address" className={inputClasses()} />
         <select name="region" defaultValue="" className={inputClasses()}>
           <option value="">Preferred region</option>
@@ -52,15 +55,13 @@ export function NewsletterSignupForm() {
         <SubmitButton />
       </div>
 
-      <p className="text-xs text-slate-500">
-        We currently use your email, preferred region, and main interest to shape future updates and event alerts.
-      </p>
+      <p className="text-xs text-slate-500">Weekly updates focused on new events, approaching dates, and one standout event.</p>
 
       {state.status === 'success' ? (
-        <p className="rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-200">{state.message}</p>
+        <p className="rounded-2xl border border-emerald-400/30 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{state.message}</p>
       ) : null}
       {state.status === 'error' ? (
-        <p className="rounded-2xl border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-sm text-rose-200">{state.message}</p>
+        <p className="rounded-2xl border border-rose-400/30 bg-rose-50 px-4 py-3 text-sm text-rose-700">{state.message}</p>
       ) : null}
     </form>
   );

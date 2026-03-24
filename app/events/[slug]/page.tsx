@@ -1,14 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { EventCoverMedia } from '@/components/event-cover-media';
 import { EventCard } from '@/components/event-card';
-import { LocationSignature } from '@/components/location-signature';
+import { EventCoverMedia } from '@/components/event-cover-media';
 import { Reveal } from '@/components/motion/reveal';
 import { SaveDateLinks } from '@/components/save-date-links';
 import { fetchAllEvents, fetchEventBySlug } from '@/lib/data/events';
 import { formatEventDate, parseDate } from '@/lib/utils/date';
-import { getCityHeroDownloadMeta, hasCityHeroImage } from '@/lib/utils/city-media.server';
 import { getCountryFlag } from '@/lib/utils/location';
 
 export const dynamic = 'force-dynamic';
@@ -17,6 +15,20 @@ async function resolveEvent(slug: string) {
   const [event, events] = await Promise.all([fetchEventBySlug(slug), fetchAllEvents()]);
 
   return { event, events };
+}
+
+function buildAudienceCopy(category: string) {
+  const normalized = category.toLowerCase();
+
+  if (normalized.includes('training')) {
+    return 'Best for investigators, analysts, and teams looking for practical development, certification, or specialist upskilling.';
+  }
+
+  if (normalized.includes('association')) {
+    return 'Best for members, leadership teams, and professionals following association activity and industry coordination.';
+  }
+
+  return 'Best for investigators, organisers, suppliers, and industry professionals tracking major dates and network activity.';
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
@@ -53,16 +65,14 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
         Math.abs(parseDate(b.date).getTime() - parseDate(event.date).getTime())
     )
     .slice(0, 3);
-  const hasCityImage = await hasCityHeroImage(event.city);
-  const heroDownload = !event.coverImage && hasCityImage ? getCityHeroDownloadMeta(event.city) : null;
 
   return (
     <section className="section-pad relative overflow-hidden">
-      <div className="container-shell space-y-8">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_14%,rgba(22,104,255,0.08),transparent_24%),radial-gradient(circle_at_84%_20%,rgba(20,184,255,0.08),transparent_20%)]" />
+      <div className="container-shell relative space-y-8">
         <Reveal>
-          <header className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-8 lg:p-10">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,rgba(37,99,235,0.1),transparent_24%),radial-gradient(circle_at_84%_20%,rgba(34,197,94,0.08),transparent_22%)]" />
-            <div className="relative grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+          <header className="overflow-hidden rounded-[2.5rem] border border-white/80 bg-[linear-gradient(135deg,#ffffff_0%,#eef6ff_48%,#f5fbff_100%)] p-6 shadow-[0_36px_96px_-56px_rgba(15,23,42,0.18)] sm:p-8 lg:p-10">
+            <div className="grid gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-start">
               <div>
                 <div className="flex flex-wrap gap-2">
                   <span className="city-chip">{event.category}</span>
@@ -71,133 +81,130 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
                     <span>{getCountryFlag(event.country)}</span>
                     <span>{event.country}</span>
                   </span>
-                  <span className="city-chip">{event.association ?? event.organiser}</span>
                 </div>
-                <div className="mt-5 max-w-4xl">
-                  <EventCoverMedia
-                    title={event.title}
-                    city={event.city}
-                    country={event.country}
-                    region={event.region}
-                    category={event.category}
-                    coverImage={event.coverImage}
-                    coverImageAlt={event.coverImageAlt}
-                    associationName={event.association ?? event.organiser}
-                    featured={event.featured}
-                  />
-                </div>
-                <div className="mt-5 max-w-3xl">
-                  <LocationSignature city={event.city} country={event.country} region={event.region} />
-                </div>
-                <h1 className="mt-6 max-w-4xl font-[var(--font-serif)] text-4xl leading-tight text-slate-950 sm:text-5xl">
+
+                <h1 className="mt-6 max-w-4xl font-[var(--font-serif)] text-4xl leading-[0.94] text-slate-950 sm:text-5xl lg:text-[4rem]">
                   {event.title}
                 </h1>
-                {event.description ? <p className="mt-4 max-w-3xl text-base leading-relaxed text-slate-600">{event.description}</p> : null}
+                <p className="mt-4 max-w-3xl text-base leading-relaxed text-slate-600">
+                  {event.description || 'Official event details, organiser information, location, dates, and save links in one clean record.'}
+                </p>
+
+                <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-[1.5rem] border border-white/90 bg-white/90 p-4">
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Dates</p>
+                    <p className="mt-2 text-sm font-medium text-slate-950">{formatEventDate(event)}</p>
+                  </div>
+                  <div className="rounded-[1.5rem] border border-white/90 bg-white/90 p-4">
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Location</p>
+                    <p className="mt-2 text-sm font-medium text-slate-950">
+                      {event.city}, {event.country}
+                    </p>
+                  </div>
+                  <div className="rounded-[1.5rem] border border-white/90 bg-white/90 p-4">
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Organiser</p>
+                    <p className="mt-2 text-sm font-medium text-slate-950">{event.association ?? event.organiser}</p>
+                  </div>
+                </div>
 
                 <div className="mt-6 flex flex-wrap gap-3">
                   <a href={event.website} target="_blank" rel="noreferrer" className="btn-primary px-5 py-2.5">
-                    Open Official Website
+                    Official website
                   </a>
                   <Link href="/calendar" className="btn-secondary px-5 py-2.5">
-                    Return to Calendar
+                    Back to calendar
                   </Link>
                   <SaveDateLinks event={event} />
-                  {heroDownload ? (
-                    <a href={heroDownload.url} download={heroDownload.filename} className="btn-secondary px-5 py-2.5">
-                      Download Event Media
-                    </a>
-                  ) : null}
                 </div>
               </div>
 
-              <article className="rounded-[1.7rem] border border-slate-200 bg-slate-50 p-5 sm:p-6">
-                <p className="text-xs uppercase tracking-[0.2em] text-sky-700">Event record</p>
-                <dl className="mt-5 grid gap-4 text-sm text-slate-600">
-                  <div className="grid gap-1">
-                    <dt className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Dates</dt>
-                    <dd className="text-base text-slate-950">{formatEventDate(event)}</dd>
-                  </div>
-                  <div className="grid gap-1">
-                    <dt className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Location</dt>
-                    <dd className="text-base text-slate-950">
-                      {event.city}, {event.country}
-                    </dd>
-                  </div>
-                  <div className="grid gap-1">
-                    <dt className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Organiser</dt>
-                    <dd className="text-base text-slate-950">{event.organiser}</dd>
-                  </div>
-                  {event.association ? (
-                    <div className="grid gap-1">
-                      <dt className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Association</dt>
-                      <dd className="text-base text-slate-950">{event.association}</dd>
-                    </div>
-                  ) : null}
-                  <div className="grid gap-1">
-                    <dt className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Category</dt>
-                    <dd className="text-base text-slate-950">{event.category}</dd>
-                  </div>
-                  <div className="grid gap-1">
-                    <dt className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Coverage region</dt>
-                    <dd className="text-base text-slate-950">{event.region}</dd>
-                  </div>
-                </dl>
-              </article>
+              <EventCoverMedia
+                title={event.title}
+                city={event.city}
+                country={event.country}
+                region={event.region}
+                category={event.category}
+                coverImage={event.coverImage}
+                coverImageAlt={event.coverImageAlt}
+                associationName={event.association ?? event.organiser}
+                featured={event.featured}
+                className="h-[20rem] lg:h-[27rem]"
+              />
             </div>
           </header>
         </Reveal>
 
-        <Reveal delay={0.05}>
-          <section className="grid gap-6 xl:grid-cols-[0.84fr_1.16fr]">
-            <article className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
-              <p className="eyebrow">Event Summary</p>
-              <h2 className="mt-4 font-[var(--font-serif)] text-3xl text-slate-950">What is confirmed here</h2>
+        <Reveal delay={0.04}>
+          <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+            <article className="rounded-[2rem] border border-white/80 bg-white p-6 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.16)] sm:p-7">
+              <p className="eyebrow">Why Open This</p>
+              <h2 className="mt-4 font-[var(--font-serif)] text-3xl text-slate-950">A useful event record, not just a title and date.</h2>
               <div className="mt-6 grid gap-3">
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-sky-700">Confirmed details</p>
-                  <p className="mt-2 text-sm text-slate-700">
-                    Dates, organiser, and location are listed here so this event can be checked quickly against the rest of
-                    the live calendar.
+                <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-blue-700">Who it is for</p>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-700">{buildAudienceCopy(event.category)}</p>
+                </div>
+                <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-cyan-700">Why it matters</p>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-700">
+                    This record brings together the key facts people need before they decide to travel, register, submit, sponsor, or monitor timing.
                   </p>
                 </div>
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-emerald-700">Official source</p>
-                  <p className="mt-2 text-sm text-slate-700">
-                    Use the official website link above for registration, agenda details, venue updates, and organiser
-                    notices.
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-violet-700">Calendar context</p>
-                  <p className="mt-2 text-sm text-slate-700">
-                    The category and region tags make it easier to compare this event with other live meetings in the same
-                    part of the calendar.
+                <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-violet-700">What to do next</p>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-700">
+                    Use the official website for registration and agenda details, then save the dates to your own calendar.
                   </p>
                 </div>
               </div>
             </article>
 
-            <article className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="eyebrow">Related Events</p>
-                  <h2 className="mt-4 font-[var(--font-serif)] text-3xl text-slate-950">Other live main events to compare</h2>
+            <article className="rounded-[2rem] border border-white/80 bg-white p-6 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.16)] sm:p-7">
+              <p className="eyebrow">Event Summary</p>
+              <h2 className="mt-4 font-[var(--font-serif)] text-3xl text-slate-950">Confirmed details</h2>
+              <dl className="mt-6 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+                  <dt className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Event type</dt>
+                  <dd className="mt-2 text-base text-slate-950">{event.category}</dd>
                 </div>
-                <Link href="/submit-event" className="btn-secondary px-5 py-2.5">
-                  Submit an Event
-                </Link>
-              </div>
-
-              {relatedEvents.length > 0 ? (
-                <div className="mt-6 grid gap-4">
-                  {relatedEvents.map((relatedEvent) => (
-                    <EventCard key={relatedEvent.id} event={relatedEvent} />
-                  ))}
+                <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+                  <dt className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Coverage region</dt>
+                  <dd className="mt-2 text-base text-slate-950">{event.region}</dd>
                 </div>
-              ) : (
-                <p className="mt-6 text-sm text-slate-600">No closely related live main events are available to compare right now.</p>
-              )}
+                <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+                  <dt className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Host organisation</dt>
+                  <dd className="mt-2 text-base text-slate-950">{event.organiser}</dd>
+                </div>
+                <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+                  <dt className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Association</dt>
+                  <dd className="mt-2 text-base text-slate-950">{event.association ?? 'Not specified separately'}</dd>
+                </div>
+              </dl>
             </article>
+          </section>
+        </Reveal>
+
+        <Reveal delay={0.08}>
+          <section className="rounded-[2rem] border border-white/80 bg-white p-6 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.16)] sm:p-7">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="eyebrow">Related Events</p>
+                <h2 className="mt-4 font-[var(--font-serif)] text-3xl text-slate-950">Other major events to compare</h2>
+              </div>
+              <Link href="/submit-event" className="btn-secondary px-5 py-2.5">
+                Submit an event
+              </Link>
+            </div>
+
+            {relatedEvents.length > 0 ? (
+              <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {relatedEvents.map((relatedEvent) => (
+                  <EventCard key={relatedEvent.id} event={relatedEvent} />
+                ))}
+              </div>
+            ) : (
+              <p className="mt-6 text-sm text-slate-600">No closely related major events are available right now.</p>
+            )}
           </section>
         </Reveal>
       </div>

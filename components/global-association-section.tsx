@@ -33,7 +33,7 @@ export function GlobalAssociationSection({ regions, countries }: GlobalAssociati
 
         <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
           <Reveal>
-            <div className="global-panel p-6">
+            <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-[linear-gradient(135deg,rgba(124,58,237,0.08),rgba(255,255,255,0.95)_44%,rgba(37,99,235,0.08))] p-6 shadow-[0_30px_62px_-44px_rgba(124,58,237,0.16)]">
               <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Regional Activity</p>
               <div className="relative mt-4 grid gap-3 sm:grid-cols-2">
                 {regions.map((region) => (
@@ -55,7 +55,7 @@ export function GlobalAssociationSection({ regions, countries }: GlobalAssociati
           </Reveal>
 
           <Reveal delay={0.1}>
-            <div className="global-panel p-6">
+            <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-[linear-gradient(135deg,rgba(20,184,166,0.08),rgba(255,255,255,0.95)_44%,rgba(124,58,237,0.08))] p-6 shadow-[0_30px_62px_-44px_rgba(20,184,166,0.16)]">
               <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Most Active Countries</p>
               <div className="relative mt-4 flex flex-wrap gap-2">
                 {topCountries.map((country) => (

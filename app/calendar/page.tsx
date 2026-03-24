@@ -8,83 +8,56 @@ export const dynamic = 'force-dynamic';
 export default async function CalendarPage({
   searchParams
 }: {
-  searchParams?: { association?: string };
+  searchParams?: { association?: string; search?: string; region?: string; month?: string };
 }) {
   const events = await fetchAllEvents();
   const coverage = getCoverageMetrics(events);
   const initialAssociation = searchParams?.association ? decodeURIComponent(searchParams.association) : undefined;
+  const initialSearch = searchParams?.search ? decodeURIComponent(searchParams.search) : undefined;
+  const initialRegion = searchParams?.region ? decodeURIComponent(searchParams.region) : undefined;
+  const initialMonth = searchParams?.month ? decodeURIComponent(searchParams.month) : undefined;
 
   return (
     <section className="section-pad relative overflow-hidden">
-      <div className="container-shell">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_14%,rgba(22,104,255,0.08),transparent_24%),radial-gradient(circle_at_86%_18%,rgba(20,184,255,0.08),transparent_20%)]" />
+      <div className="container-shell relative">
         <Reveal>
-          <header className="mb-6 relative overflow-hidden rounded-[2.2rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-8 lg:p-10">
-            <div className="pointer-events-none absolute inset-0 geo-grid opacity-[0.08]" />
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(96,165,250,0.14),transparent_30%),radial-gradient(circle_at_82%_22%,rgba(34,197,94,0.1),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.02),rgba(239,246,255,0.45))]" />
-            <div className="relative">
-              <p className="eyebrow">Global Calendar</p>
-              <h1 className="font-[var(--font-serif)] text-4xl leading-tight text-slate-950 sm:text-5xl">
-                Investigator Events Calendar
-              </h1>
-              <p className="mt-4 max-w-3xl text-base leading-relaxed text-slate-600">
-                The default timeline is built for fast scanning and comparison. Month view stays available as a cleaner
-                secondary planning overview when you need date pattern visibility.
-              </p>
-              <p className="mt-3 max-w-3xl text-sm text-slate-500">
-                The public calendar starts with major conferences and flagship meetings. Switch to all events when you need
-                the wider picture, including webinars, training sessions, and smaller network gatherings.
-              </p>
+          <header className="mb-6 overflow-hidden rounded-[2.4rem] border border-white/80 bg-[linear-gradient(135deg,#ffffff_0%,#eff6ff_54%,#f4fbff_100%)] p-6 shadow-[0_34px_80px_-50px_rgba(15,23,42,0.16)] sm:p-8 lg:p-10">
+            <div className="pointer-events-none absolute inset-0 geo-grid opacity-[0.16]" />
+            <div className="relative grid gap-6 lg:grid-cols-[1.08fr_0.92fr] lg:items-end">
+              <div>
+                <p className="eyebrow">Global Calendar</p>
+                <h1 className="section-title">The live investigator events calendar.</h1>
+                <p className="section-copy max-w-3xl">
+                  Search by month, region, country, association, or event type. Start with major events, then widen the view when you need every approved listing.
+                </p>
+              </div>
 
-              <div className="mt-4 flex flex-wrap gap-2">
-                <span className="city-chip">{coverage.totalCountries} countries</span>
-                <span className="city-chip">{coverage.totalSubregions} subregions</span>
-                <span className="city-chip">{coverage.totalEvents} live events</span>
-                <span className="global-chip">worldwide scan view</span>
+              <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+                <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-blue-700">Coverage</p>
+                  <p className="mt-2 text-sm text-slate-700">{coverage.totalEvents} live events across {coverage.totalCountries} countries.</p>
+                </div>
+                <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-cyan-700">Major Events</p>
+                  <p className="mt-2 text-sm text-slate-700">Flagship conferences and anchor meetings with the strongest international draw.</p>
+                </div>
+                <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-violet-700">All Events</p>
+                  <p className="mt-2 text-sm text-slate-700">Adds training, webinars, seminars, and smaller approved gatherings.</p>
+                </div>
               </div>
             </div>
           </header>
         </Reveal>
 
-        <Reveal delay={0.04}>
-          <section className="mb-6 grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
-            <article className="relative overflow-hidden rounded-[1.8rem] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_18%,rgba(59,130,246,0.08),transparent_28%),radial-gradient(circle_at_80%_68%,rgba(34,197,94,0.06),transparent_24%)]" />
-              <div className="relative">
-                <p className="text-xs uppercase tracking-[0.2em] text-sky-700">Filter Logic</p>
-                <h2 className="mt-3 font-[var(--font-serif)] text-2xl text-slate-950">
-                  Navigate by region, country, month, and association
-                </h2>
-                <p className="mt-3 text-sm leading-relaxed text-slate-600">
-                  Start with the broad event picture, then narrow into country, category, association, and month when you
-                  need a tighter planning view.
-                </p>
-                <div className="signal-divider mt-5" />
-                <p className="mt-5 text-xs uppercase tracking-[0.22em] text-slate-500">
-                  Built for comparing international coverage without sacrificing month-view readability.
-                </p>
-              </div>
-            </article>
-
-            <article className="relative overflow-hidden rounded-[1.8rem] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-              <div className="relative grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                <div className="rounded-xl border border-sky-100 bg-sky-50 p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-sky-700">Region-first view</p>
-                  <p className="mt-2 text-sm text-slate-700">See where live event activity is concentrated before drilling into specific countries.</p>
-                </div>
-                <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-emerald-700">Timing clarity</p>
-                  <p className="mt-2 text-sm text-slate-700">Compare months to reduce clashes and spot high-density windows.</p>
-                </div>
-                <div className="rounded-xl border border-violet-100 bg-violet-50 p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-violet-700">Main by default</p>
-                  <p className="mt-2 text-sm text-slate-700">The public view starts with major conferences and flagship meetings, with an option to widen the scope.</p>
-                </div>
-              </div>
-            </article>
-          </section>
-        </Reveal>
-
-        <CalendarView events={events} initialAssociation={initialAssociation} />
+        <CalendarView
+          events={events}
+          initialAssociation={initialAssociation}
+          initialSearch={initialSearch}
+          initialRegion={initialRegion}
+          initialMonth={initialMonth}
+        />
       </div>
     </section>
   );

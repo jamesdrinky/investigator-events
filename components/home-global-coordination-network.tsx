@@ -25,8 +25,8 @@ export function HomeGlobalCoordinationNetwork({ stats, regions }: HomeGlobalCoor
   };
 
   return (
-    <section className="relative overflow-hidden py-24 sm:py-28 lg:py-32">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_20%,rgba(42,155,255,0.08),transparent_18%),radial-gradient(circle_at_86%_26%,rgba(122,104,255,0.06),transparent_16%)]" />
+    <section className="relative overflow-hidden bg-[linear-gradient(180deg,#f8fafc_0%,#e0f2fe_18%,#ecfeff_44%,#eff6ff_100%)] py-24 sm:py-28 lg:py-32">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_20%,rgba(42,155,255,0.12),transparent_18%),radial-gradient(circle_at_86%_26%,rgba(122,104,255,0.08),transparent_16%),radial-gradient(circle_at_54%_80%,rgba(20,184,166,0.08),transparent_18%)]" />
       <div className="container-shell relative">
         <div className="grid gap-10 lg:grid-cols-[minmax(0,0.62fr)_minmax(520px,1.38fr)] lg:items-center">
           <div className="max-w-xl pt-4 sm:pt-6 lg:pt-10">

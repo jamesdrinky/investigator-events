@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { EventCoverMedia } from '@/components/event-cover-media';
+import { WhyUseSection } from '@/components/home/WhyUseSection';
 import { HomepageHero } from '@/components/home/homepage-hero';
 import { NewsletterSignupForm } from '@/components/newsletter-signup-form';
 import { Reveal } from '@/components/motion/reveal';
@@ -37,6 +38,7 @@ export default async function HomePage() {
   return (
     <>
       <HomepageHero events={heroEvents} stats={heroStats} />
+      <WhyUseSection />
 
       <section className="relative overflow-hidden py-24 sm:py-28">
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0),rgba(234,244,255,0.84)_32%,rgba(255,255,255,0))]" />

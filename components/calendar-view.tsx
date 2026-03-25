@@ -119,12 +119,27 @@ function getMonthFeedGroups(events: EventItem[]) {
 function SignalItem({
   event,
   active,
-  onHighlight
+  onHighlight,
+  variant = 'default'
 }: {
   event: EventItem;
   active: boolean;
   onHighlight: (eventId: string | null) => void;
+  variant?: 'default' | 'support' | 'accent';
 }) {
+  const variantClasses =
+    variant === 'accent'
+      ? active
+        ? 'border-violet-300 bg-[linear-gradient(135deg,rgba(248,250,255,1),rgba(255,255,255,0.98))]'
+        : 'border-violet-100 bg-[linear-gradient(135deg,rgba(248,250,255,1),rgba(255,255,255,0.98))]'
+      : variant === 'support'
+        ? active
+          ? 'border-sky-300 bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(255,255,255,0.98))]'
+          : 'border-slate-200 bg-[linear-gradient(135deg,rgba(248,250,255,1),rgba(255,255,255,0.98))]'
+        : active
+          ? 'border-sky-300 bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(255,255,255,0.98))]'
+          : 'border-slate-200 bg-white';
+
   return (
     <button
       type="button"
@@ -135,8 +150,8 @@ function SignalItem({
       onClick={() => onHighlight(active ? null : event.id)}
       className={`group relative min-w-[17rem] overflow-hidden rounded-[1.1rem] border px-4 py-3 text-left transition duration-300 ${
         active
-          ? 'border-sky-300 bg-[linear-gradient(135deg,rgba(239,246,255,0.99),rgba(255,255,255,0.98))] shadow-[0_18px_42px_-28px_rgba(37,99,235,0.22)]'
-          : 'border-slate-200 bg-white shadow-[0_12px_30px_-24px_rgba(15,23,42,0.12)] hover:border-sky-200 hover:shadow-[0_18px_38px_-28px_rgba(15,23,42,0.16)]'
+          ? `${variantClasses} shadow-[0_18px_42px_-28px_rgba(37,99,235,0.22)]`
+          : `${variantClasses} shadow-[0_12px_30px_-24px_rgba(15,23,42,0.12)] hover:border-sky-200 hover:shadow-[0_18px_38px_-28px_rgba(15,23,42,0.16)]`
       }`}
     >
       <div className="flex min-h-[5.7rem] items-start gap-3">
@@ -266,6 +281,14 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
     setPreviewDate(null);
   }, [calendarMonthKey]);
 
+  useEffect(() => {
+    if (view !== 'calendar') return;
+    setCalendarExpanded(true);
+    requestAnimationFrame(() => {
+      calendarRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, [view]);
+
   return (
     <div className="space-y-8">
       <section className="relative overflow-visible rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_32px_90px_-56px_rgba(15,23,42,0.18)] sm:p-6 lg:p-7">
@@ -293,7 +316,7 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
               global event intelligence surface.
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
-              Browse association-owned conferences, training signals, and premium investigator gatherings through a luminous editorial feed.
+              Browse association-owned conferences, training events, and investigator gatherings across the year.
             </p>
           </div>
 
@@ -321,17 +344,23 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
       <section className="space-y-3">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Live global signal strip</p>
-            <p className="mt-1 text-sm text-slate-600">A cleaner scan of association activity, timing, and cities before you drop into the full chronology.</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Global event activity</p>
+            <p className="mt-1 text-sm text-slate-600">A quick scan of upcoming dates, locations, and associations before you move into the full event list.</p>
           </div>
-          <p className="hidden text-[11px] uppercase tracking-[0.18em] text-slate-400 md:block">Signal view</p>
+          <p className="hidden text-[11px] uppercase tracking-[0.18em] text-slate-400 md:block">Activity strip</p>
         </div>
 
         <div className="hidden rounded-[1.35rem] border border-slate-200 bg-white p-3 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] md:block">
           <div className="signal-marquee">
             <div className="signal-marquee-track py-1">
               {[...visibleEvents.slice(0, 6), ...visibleEvents.slice(0, 6)].map((event, index) => (
-                <SignalItem key={`${event.id}-${index}`} event={event} active={highlightedEventId === event.id} onHighlight={setHighlightedEventId} />
+                <SignalItem
+                  key={`${event.id}-${index}`}
+                  event={event}
+                  active={highlightedEventId === event.id}
+                  onHighlight={setHighlightedEventId}
+                  variant={index % 3 === 0 ? 'accent' : index % 3 === 1 ? 'support' : 'default'}
+                />
               ))}
             </div>
           </div>
@@ -381,12 +410,10 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
         <section className="space-y-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Featured event composition</p>
-              <h2 className="mt-1 text-[1.9rem] font-semibold tracking-[-0.05em] text-slate-950 sm:text-[2.5rem]">
-                The strongest global signals right now.
-              </h2>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Featured events</p>
+              <h2 className="mt-1 text-[1.9rem] font-semibold tracking-[-0.05em] text-slate-950 sm:text-[2.5rem]">Featured events</h2>
             </div>
-            <p className="max-w-xl text-sm leading-6 text-slate-600">One dominant hero event, two supporting highlights, and a sharper editorial rhythm.</p>
+            <p className="max-w-xl text-sm leading-6 text-slate-600">A closer look at key upcoming events, with a global activity map for the lead feature.</p>
           </div>
 
           <div className="hidden gap-4 md:grid xl:grid-cols-[minmax(0,1.36fr)_minmax(0,0.9fr)]">
@@ -430,10 +457,10 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
       <section ref={listRef} className="space-y-5" id="event-list">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Main event feed</p>
-            <h2 className="mt-1 text-[1.9rem] font-semibold tracking-[-0.045em] text-slate-950 sm:text-[2.25rem]">Scan the year month by month.</h2>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Upcoming events</p>
+            <h2 className="mt-1 text-[1.9rem] font-semibold tracking-[-0.045em] text-slate-950 sm:text-[2.25rem]">Events by month</h2>
           </div>
-          <p className="max-w-xl text-sm leading-6 text-slate-600">After the featured highlights, the feed now settles into a clearer monthly cadence so users can move through the calendar without losing chronology.</p>
+          <p className="max-w-xl text-sm leading-6 text-slate-600">Browse the rest of the year in clear monthly groups.</p>
         </div>
 
         {!shouldShowEmptyState ? (
@@ -442,7 +469,7 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
               <section key={group.monthKey} className="space-y-4">
                 <div className="flex flex-col gap-3 rounded-[1.3rem] border border-slate-200 bg-[linear-gradient(180deg,rgba(255,255,255,1),rgba(248,250,255,0.98))] px-4 py-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.14)] sm:flex-row sm:items-end sm:justify-between sm:px-5">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-700">Month grouping</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-700">Events by month</p>
                     <h3 className="mt-1 text-[1.45rem] font-semibold tracking-[-0.04em] text-slate-950 sm:text-[1.78rem]">{group.label}</h3>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.17em] text-slate-500">
@@ -488,12 +515,19 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
         <div className="relative space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Calendar intelligence tool</p>
-              <h2 className="mt-1 text-[1.75rem] font-semibold tracking-[-0.05em] text-slate-950 sm:text-[2.15rem]">Scan clusters, overlaps, and hot dates.</h2>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Calendar</p>
+              <h2 className="mt-1 text-[1.75rem] font-semibold tracking-[-0.05em] text-slate-950 sm:text-[2.15rem]">Calendar view</h2>
             </div>
             <div className="flex items-center gap-2">
               <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700">{formatMonthLabel(calendarMonthKey)}</span>
-              <button type="button" onClick={() => setCalendarExpanded((current) => !current)} className="inline-flex items-center rounded-2xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 md:hidden">
+              <button
+                type="button"
+                onClick={() => {
+                  setCalendarExpanded((current) => !current);
+                  setView('calendar');
+                }}
+                className="inline-flex items-center rounded-2xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 md:hidden"
+              >
                 {calendarExpanded ? 'Hide' : 'Show'}
               </button>
             </div>
@@ -501,7 +535,7 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
 
           <div className={`space-y-4 ${calendarExpanded || view === 'calendar' ? 'block' : 'hidden md:block'}`}>
             <div className="flex flex-col gap-3 rounded-[1.1rem] border border-slate-200 bg-slate-50/90 p-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-slate-600">Tap active days to reveal the leading event, ownership badge, and extra activity on that date.</p>
+              <p className="text-sm text-slate-600">Select a date to see the lead event, association, and any other activity on that day.</p>
               <div className="flex items-center gap-2">
                 <button
                   type="button"

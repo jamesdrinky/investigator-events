@@ -350,12 +350,23 @@ export function CalendarGrid({ events, monthKey, selectedDate, onSelectDate }: C
                                     {density === 'high' ? 'Hot date' : leadEvent.country.slice(0, 10)}
                                   </span>
                                 </div>
-                                <AssociationLogoBadge
-                                  associationName={leadEvent.association ?? leadEvent.organiser}
-                                  mini
-                                  overlay
-                                  tone={today && hasEvents && !selected ? 'dark' : 'light'}
-                                />
+                                <div className="flex items-center gap-1.5">
+                                  <AssociationLogoBadge
+                                    associationName={leadEvent.association ?? leadEvent.organiser}
+                                    mini
+                                    overlay
+                                    tone={today && hasEvents && !selected ? 'dark' : 'light'}
+                                  />
+                                  {dayEvents.length > 1 ? (
+                                    <span
+                                      className={`rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] ${
+                                        today && hasEvents && !selected ? 'bg-white/10 text-white/82' : 'bg-slate-100 text-slate-500'
+                                      }`}
+                                    >
+                                      overlap
+                                    </span>
+                                  ) : null}
+                                </div>
                               </>
                             ) : null}
 

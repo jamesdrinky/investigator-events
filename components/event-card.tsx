@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { EventCoverMedia } from '@/components/event-cover-media';
+import { FeaturedEventMiniMap } from '@/components/featured-event-mini-map';
 import type { EventItem } from '@/lib/data/events';
 import { formatEventDate } from '@/lib/utils/date';
 import { getEventSlug } from '@/lib/utils/event-slugs';
@@ -53,58 +54,62 @@ export function EventCard({ event, priority = 'default', isSignalActive = false,
         }
       />
 
-      <div className={`flex flex-1 flex-col ${hero ? 'gap-4 p-5 sm:p-6' : featured ? 'gap-3.5 p-4 sm:p-5' : 'gap-3.5 p-4 sm:p-5'}`}>
-        <h3
-          className={`text-slate-950 transition-colors duration-200 group-hover:text-sky-700 ${
-            hero ? 'text-[1.85rem] font-semibold leading-[1.06] tracking-[-0.045em]' : featured ? 'text-[1.42rem] font-semibold leading-[1.1] tracking-[-0.04em]' : 'text-[1.28rem] font-semibold leading-[1.12] tracking-[-0.035em]'
-          }`}
-          style={{
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden'
-          }}
-        >
-          {event.title}
-        </h3>
-
-        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] font-medium uppercase tracking-[0.16em] text-slate-500">
-          <span className="text-sky-700">{formatEventDate(event)}</span>
-          <span className="h-1 w-1 rounded-full bg-slate-300" />
-          <span>{event.city}, {event.country}</span>
-          <span className="h-1 w-1 rounded-full bg-slate-300" />
-          <span>{event.region}</span>
-        </div>
-
-        {description ? (
-          <p
-            className="text-sm leading-6 text-slate-600"
+      <div className={`${hero ? 'flex flex-1 flex-col gap-4 p-5 sm:p-6' : 'flex flex-1 flex-col gap-3.5 p-4 sm:p-5'}`}>
+        <div className={`${hero ? 'flex min-w-0 flex-1 flex-col gap-4' : 'flex min-w-0 flex-1 flex-col gap-3.5'}`}>
+          <h3
+            className={`text-slate-950 transition-colors duration-200 group-hover:text-sky-700 ${
+              hero ? 'text-[1.85rem] font-semibold leading-[1.06] tracking-[-0.045em]' : featured ? 'text-[1.42rem] font-semibold leading-[1.1] tracking-[-0.04em]' : 'text-[1.28rem] font-semibold leading-[1.12] tracking-[-0.035em]'
+            }`}
             style={{
               display: '-webkit-box',
-              WebkitLineClamp: hero ? 3 : 2,
+              WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
               overflow: 'hidden'
             }}
           >
-            {description}
-          </p>
-        ) : null}
+            {event.title}
+          </h3>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-600">
-            {hostLabel}
-          </span>
-          <span className="rounded-full border border-sky-100 bg-sky-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-sky-700">
-            {event.category}
-          </span>
+          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] font-medium uppercase tracking-[0.16em] text-slate-500">
+            <span className="text-sky-700">{formatEventDate(event)}</span>
+            <span className="h-1 w-1 rounded-full bg-slate-300" />
+            <span>{event.city}, {event.country}</span>
+            <span className="h-1 w-1 rounded-full bg-slate-300" />
+            <span>{event.region}</span>
+          </div>
+
+          {description ? (
+            <p
+              className="text-sm leading-6 text-slate-600"
+              style={{
+                display: '-webkit-box',
+                WebkitLineClamp: hero ? 3 : 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden'
+              }}
+            >
+              {description}
+            </p>
+          ) : null}
+
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-600">
+              {hostLabel}
+            </span>
+            <span className="rounded-full border border-sky-100 bg-sky-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-sky-700">
+              {event.category}
+            </span>
+          </div>
+
+          <div className="mt-auto pt-1">
+            <span className="inline-flex items-center text-sm font-semibold text-sky-700 transition duration-300 group-hover:text-sky-600">
+              Explore event
+              <span className="ml-1 transition-transform duration-200 group-hover:translate-x-1.5">→</span>
+            </span>
+          </div>
         </div>
 
-        <div className="mt-auto pt-1">
-          <span className="inline-flex items-center text-sm font-semibold text-sky-700 transition duration-300 group-hover:text-sky-600">
-            Explore event
-            <span className="ml-1 transition-transform duration-200 group-hover:translate-x-1.5">→</span>
-          </span>
-        </div>
+        {hero ? <FeaturedEventMiniMap city={event.city} country={event.country} region={event.region} className="mt-1 hidden h-[20rem] w-full lg:block xl:h-[20.5rem]" /> : null}
       </div>
     </Link>
   );

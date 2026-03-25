@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import type { Route } from 'next';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 import { AssociationLogoBadge } from '@/components/association-logo-badge';
@@ -426,15 +427,12 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
             >
-              Every investigator event.
-              <motion.span
-                className="mt-2 block bg-[linear-gradient(92deg,#155eef_0%,#10b8ff_28%,#7c3aed_58%,#ec4899_86%,#22d3ee_100%)] bg-clip-text text-transparent"
-                animate={reducedMotion ? undefined : { backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'], filter: ['drop-shadow(0 0 0 rgba(56,189,248,0))', 'drop-shadow(0 0 18px rgba(56,189,248,0.18))', 'drop-shadow(0 0 0 rgba(56,189,248,0))'] }}
-                transition={{ duration: 6.8, repeat: Infinity, ease: 'easeInOut' }}
-                style={{ backgroundSize: '220% 220%' }}
-              >
-                One global calendar.
-              </motion.span>
+              <span className="block bg-[linear-gradient(92deg,#155eef_0%,#10b8ff_34%,#7c3aed_72%,#ec4899_100%)] bg-clip-text text-transparent">
+                Never Miss
+              </span>
+              <span className="mt-2 block max-w-[11ch] text-[0.78em] font-medium leading-[0.94] tracking-[-0.055em] text-slate-900 sm:text-[0.8em]">
+                Another Industry Event
+              </span>
             </motion.h1>
 
             <motion.p
@@ -443,7 +441,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.14, ease: [0.16, 1, 0.3, 1] }}
             >
-              Discover conferences, training, and association gatherings through one beautifully organised global calendar built to feel alive from the first second.
+              The global calendar for investigators, associations, and conference organisers, all in one place. Plan your year. List your event for free. Stop the clashes.
             </motion.p>
 
             <motion.div
@@ -452,11 +450,11 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             >
-              <Link href="/calendar" className="btn-primary min-h-[3.5rem] px-7 text-[15px]">
-                Explore the calendar
+              <Link href={"/events" as Route} className="btn-primary min-h-[3.5rem] px-7 text-[15px]">
+                Browse Events
               </Link>
-              <Link href="/submit-event" className="btn-secondary min-h-[3.5rem] px-7 text-[15px]">
-                List an event
+              <Link href={"/list-your-event" as Route} className="btn-secondary min-h-[3.5rem] px-7 text-[15px]">
+                List Your Event Free
               </Link>
             </motion.div>
 

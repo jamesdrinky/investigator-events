@@ -1,6 +1,5 @@
 import type { EventItem } from '@/lib/data/events';
 import { parseDate } from '@/lib/utils/date';
-import { getRegionPalette } from '@/lib/utils/location';
 
 interface CalendarGridProps {
   events: EventItem[];
@@ -52,24 +51,8 @@ function getEventsForDate(events: EventItem[], isoDate: string) {
   return events.filter((event) => {
     const start = parseDate(event.date).getTime();
     const end = (event.endDate ? parseDate(event.endDate) : parseDate(event.date)).getTime();
-
     return start <= current && end >= current;
   });
-}
-
-function formatWeekRange(week: WeekCell[]) {
-  const inMonthCells = week.filter((cell) => cell.inMonth);
-
-  if (inMonthCells.length === 0) {
-    return '';
-  }
-
-  const first = inMonthCells[0];
-  const last = inMonthCells[inMonthCells.length - 1];
-  const firstLabel = first.date.toLocaleString('en-GB', { month: 'short', day: 'numeric', timeZone: 'UTC' });
-  const lastLabel = last.date.toLocaleString('en-GB', { month: 'short', day: 'numeric', timeZone: 'UTC' });
-
-  return `${firstLabel} - ${lastLabel}`;
 }
 
 function getLeadEvent(dayEvents: EventItem[]) {
@@ -86,16 +69,8 @@ function getLeadEvent(dayEvents: EventItem[]) {
   })[0] ?? null;
 }
 
-function getDayTone(dayEvents: EventItem[], leadEvent: EventItem | null) {
-  if (!dayEvents.length) {
-    return 'idle';
-  }
-
-  if (leadEvent?.featured || leadEvent?.eventScope === 'main') {
-    return 'major';
-  }
-
-  return 'active';
+function isToday(isoDate: string) {
+  return isoDate === new Date().toISOString().slice(0, 10);
 }
 
 export function CalendarGrid({ events, monthKey, selectedDate, onSelectDate }: CalendarGridProps) {
@@ -103,166 +78,103 @@ export function CalendarGrid({ events, monthKey, selectedDate, onSelectDate }: C
   const weeks = buildWeekCells(year, month);
 
   return (
-    <section className="relative overflow-hidden rounded-[1.9rem] border border-slate-200 bg-white p-5 shadow-sm sm:p-6" aria-label="Calendar month overview">
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),transparent_18%,transparent_82%,rgba(34,197,94,0.02))]" />
+    <section aria-label="Calendar month overview" className="rounded-[1rem] border border-slate-200 bg-white p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] sm:p-4">
+      <div className="overflow-x-auto">
+        <div className="min-w-[42rem] space-y-2">
+          <div className="grid grid-cols-7 gap-2">
+            {weekDays.map((day) => (
+              <div
+                key={day}
+                className="px-2 py-1 text-center text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-600"
+              >
+                {day}
+              </div>
+            ))}
+          </div>
 
-      <div className="relative space-y-5">
-        <div className="grid min-w-[66rem] grid-cols-[6.75rem_repeat(7,minmax(8rem,1fr))] gap-4 px-1">
-          <div />
-          {weekDays.map((day) => (
-            <div
-              key={day}
-              className="px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500"
-            >
-              {day}
-            </div>
-          ))}
-        </div>
+          {weeks.map((week, weekIndex) => (
+            <div key={`week-${weekIndex}`} className="grid grid-cols-7 gap-2">
+              {week.map((cell, dayIndex) => {
+                const dayEvents = cell.inMonth ? getEventsForDate(events, cell.iso) : [];
+                const leadEvent = getLeadEvent(dayEvents);
+                const selected = cell.iso === selectedDate;
+                const hasEvents = dayEvents.length > 0;
+                const today = cell.inMonth && isToday(cell.iso);
 
-        <div className="overflow-x-auto pb-1">
-          <div className="min-w-[66rem] space-y-5">
-            {weeks.map((week, weekIndex) => {
-              const weekEvents = week.flatMap((cell) => (cell.inMonth ? getEventsForDate(events, cell.iso) : []));
-              const uniqueWeekEventIds = new Set(weekEvents.map((event) => event.id));
-              const activeDayCount = week.filter((cell) => cell.inMonth && getEventsForDate(events, cell.iso).length > 0).length;
-
-              return (
-                <div
-                  key={`week-${weekIndex}`}
-                  className="grid grid-cols-[6.75rem_repeat(7,minmax(8rem,1fr))] gap-4 rounded-[1.8rem] p-4"
-                >
-                  <div className="flex min-h-[12.75rem] flex-col justify-between rounded-[1.35rem] border border-slate-200 bg-slate-50 px-3 py-3.5">
-                    <div>
-                      <p className="text-[10px] uppercase tracking-[0.22em] text-slate-500">Week {weekIndex + 1}</p>
-                      <p className="mt-2 text-sm font-medium text-slate-900">{formatWeekRange(week) || 'Outside month'}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-xs text-slate-600">
-                        {activeDayCount} active day{activeDayCount === 1 ? '' : 's'}
-                      </p>
-                      <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">
-                        {uniqueWeekEventIds.size} live event{uniqueWeekEventIds.size === 1 ? '' : 's'}
-                      </p>
-                    </div>
-                  </div>
-
-                  {week.map((cell, dayIndex) => {
-                    const dayEvents = cell.inMonth ? getEventsForDate(events, cell.iso) : [];
-                    const selected = cell.iso === selectedDate;
-                    const leadEvent = getLeadEvent(dayEvents);
-                    const palette = leadEvent ? getRegionPalette(leadEvent.region) : null;
-                    const tone = getDayTone(dayEvents, leadEvent);
-                    const isActive = dayEvents.length > 0;
-
-                    return (
-                      <button
-                        key={`${weekIndex}-${dayIndex}`}
-                        type="button"
-                        disabled={!cell.inMonth || !isActive}
-                        onClick={() => isActive && onSelectDate(cell.iso)}
-                        className={`relative min-h-[12.75rem] overflow-hidden rounded-[1.35rem] border px-4 py-4 text-left transition duration-200 ${
-                          cell.inMonth
-                            ? selected
-                              ? 'border-sky-300 bg-sky-50 shadow-[0_18px_34px_-24px_rgba(54,168,255,0.35)]'
-                              : isActive
-                                ? tone === 'major'
-                                  ? 'border-amber-200 bg-amber-50 shadow-[0_20px_36px_-28px_rgba(245,158,11,0.25)] hover:-translate-y-0.5 hover:border-sky-200'
-                                  : 'border-slate-200 bg-white hover:-translate-y-0.5 hover:border-sky-200 hover:bg-sky-50/40'
-                                : 'cursor-default border-slate-200 bg-slate-50'
-                            : 'border-slate-200/70 bg-slate-50/70'
-                        }`}
-                      >
-                        {isActive ? (
-                          <>
-                            <div
-                              className="pointer-events-none absolute inset-x-0 top-0 h-px"
-                              style={{ backgroundColor: palette?.line ?? 'rgba(184,228,255,0.45)' }}
-                            />
-                            <div
-                              className="pointer-events-none absolute inset-0 opacity-100"
-                              style={{
-                                background:
-                                  tone === 'major'
-                                    ? `radial-gradient(circle at 14% 12%, ${palette?.glow ?? 'rgba(54,168,255,0.18)'}, transparent 32%)`
-                                    : `radial-gradient(circle at 14% 12%, ${palette?.glow ?? 'rgba(54,168,255,0.12)'}, transparent 26%)`
-                              }}
-                            />
-                          </>
-                        ) : null}
-
-                        <div className="flex items-start justify-between gap-3">
+                return (
+                  <button
+                    key={`${weekIndex}-${dayIndex}`}
+                    type="button"
+                    disabled={!cell.inMonth}
+                    onClick={() => cell.inMonth && onSelectDate(cell.iso)}
+                    className={`min-h-[5.6rem] rounded-[0.9rem] border px-2.5 py-2 text-left transition duration-150 sm:min-h-[6.4rem] ${
+                      !cell.inMonth
+                        ? 'cursor-default border-transparent bg-slate-50/70 text-slate-300'
+                        : selected
+                          ? 'border-sky-500 bg-sky-100 shadow-[0_14px_28px_-18px_rgba(14,165,233,0.5)]'
+                          : today
+                            ? hasEvents
+                              ? 'border-sky-700 bg-sky-700 text-white shadow-[0_14px_28px_-18px_rgba(2,132,199,0.55)]'
+                              : 'border-slate-900 bg-slate-100'
+                            : hasEvents
+                              ? 'border-sky-300 bg-sky-50 hover:border-sky-400 hover:bg-sky-100/80 hover:shadow-[0_12px_24px_-20px_rgba(14,165,233,0.4)]'
+                              : 'border-slate-200 bg-white hover:border-slate-400 hover:shadow-sm'
+                    }`}
+                  >
+                    {cell.inMonth ? (
+                      <div className="flex h-full flex-col">
+                        <div className="flex items-start justify-between gap-2">
                           <div>
                             <p
-                              className={`text-[10px] uppercase tracking-[0.18em] ${
-                                cell.inMonth
-                                  ? isActive
-                                    ? 'text-slate-400'
-                                    : 'text-slate-600'
-                                  : 'text-slate-500'
+                              className={`text-[9px] font-semibold uppercase tracking-[0.16em] ${
+                                today && hasEvents && !selected ? 'text-sky-100' : 'text-slate-600'
                               }`}
                             >
                               {weekDays[dayIndex]}
                             </p>
-                            <p
-                              className={`mt-2 text-[2rem] font-semibold leading-none ${
-                                cell.inMonth
-                                  ? isActive
-                                    ? 'text-slate-950'
-                                    : 'text-slate-500'
-                                  : 'text-slate-400'
-                              }`}
-                            >
-                              {cell.day ?? ''}
+                            <p className={`mt-1 text-lg font-semibold leading-none ${today && hasEvents && !selected ? 'text-white' : 'text-slate-950'}`}>
+                              {cell.day}
                             </p>
                           </div>
 
-                          {cell.inMonth && dayEvents.length > 0 ? (
-                            <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-slate-700 shadow-sm">
-                              {dayEvents.length} live
+                          {hasEvents ? (
+                            <span
+                              className={`rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] ${
+                                today && hasEvents && !selected
+                                  ? 'bg-white/16 text-white'
+                                  : 'border border-sky-300 bg-white text-sky-700'
+                              }`}
+                            >
+                              {dayEvents.length}
                             </span>
                           ) : null}
                         </div>
 
-                        {cell.inMonth ? (
-                          dayEvents.length > 0 ? (
-                            <div className="mt-6 space-y-4">
-                              <div className="flex items-center gap-2">
-                                <span
-                                  className="h-2 w-2 rounded-full"
-                                  style={{ backgroundColor: palette?.line ?? 'rgba(184,228,255,0.78)' }}
-                                />
-                                <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">
-                                  {leadEvent?.featured ? 'Featured lead' : leadEvent?.category ?? 'Live event'}
-                                </p>
-                              </div>
-
-                              {leadEvent ? (
-                                <div className="space-y-2.5">
-                                  <p className="line-clamp-3 text-[13px] font-medium leading-snug text-slate-900">
-                                    {leadEvent.title}
-                                  </p>
-                                </div>
-                              ) : null}
-
-                              {dayEvents.length > 1 ? (
-                                <p className="text-[11px] uppercase tracking-[0.16em] text-slate-400">
-                                  +{dayEvents.length - 1} more
-                                </p>
-                              ) : null}
-                            </div>
-                          ) : (
-                            <div className="mt-10">
-                              <p className="text-[10px] uppercase tracking-[0.22em] text-slate-500">Open date</p>
-                            </div>
-                          )
-                        ) : null}
-                      </button>
-                    );
-                  })}
-                </div>
-              );
-            })}
-          </div>
+                        {hasEvents ? (
+                          <div className="mt-2 min-w-0">
+                            <p
+                              className={`truncate text-[11px] font-medium ${
+                                today && hasEvents && !selected ? 'text-white' : 'text-slate-900'
+                              }`}
+                            >
+                              {leadEvent?.title}
+                            </p>
+                            {dayEvents.length > 1 ? (
+                              <p className={`mt-1 text-[10px] ${today && hasEvents && !selected ? 'text-sky-100' : 'text-slate-600'}`}>
+                                +{dayEvents.length - 1} events
+                              </p>
+                            ) : null}
+                          </div>
+                        ) : (
+                          <div className="mt-auto" />
+                        )}
+                      </div>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
         </div>
       </div>
     </section>

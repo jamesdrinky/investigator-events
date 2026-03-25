@@ -52,38 +52,27 @@ export function EventCoverMedia({
 
   return (
     <div
-      className={`group/media relative overflow-hidden rounded-[1.7rem] border border-white/70 bg-slate-100 shadow-[0_30px_70px_-44px_rgba(22,104,255,0.34)] transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1 group-hover:shadow-[0_42px_110px_-46px_rgba(22,104,255,0.42)] ${
-        compact ? 'h-[12rem]' : 'h-[18rem] sm:h-[20rem]'
+      className={`group/media relative overflow-hidden rounded-[1rem] border border-slate-200 bg-slate-100 shadow-[0_18px_38px_-28px_rgba(15,23,42,0.22)] transition duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:shadow-[0_28px_56px_-28px_rgba(15,23,42,0.26)] ${
+        compact ? 'h-[13rem] sm:h-[13.5rem]' : 'h-[18rem] sm:h-[20rem]'
       } ${className}`}
     >
-      <div className="pointer-events-none absolute inset-0 rounded-[1.7rem] ring-1 ring-white/50" />
+      <div className="pointer-events-none absolute inset-0 rounded-[1rem] ring-1 ring-white/40" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-[2px] bg-[linear-gradient(90deg,rgba(14,165,233,0.1),rgba(14,165,233,0.9),rgba(139,92,246,0.9),rgba(139,92,246,0.1))]" />
       <img
         src={safeCoverImage}
         alt={coverImageAlt ?? `${title} cover image`}
-        className="h-full w-full object-cover transition duration-700 ease-out group-hover:scale-[1.07] group-hover/media:scale-[1.05]"
+        className="h-full w-full object-cover transition duration-500 ease-out group-hover/media:scale-[1.02]"
         onError={() => setHasError(true)}
       />
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(9,17,31,0.02),rgba(9,17,31,0.12)_34%,rgba(5,12,22,0.78))]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(22,104,255,0.22),transparent_26%),radial-gradient(circle_at_82%_24%,rgba(20,184,255,0.16),transparent_22%),radial-gradient(circle_at_68%_88%,rgba(100,91,255,0.14),transparent_26%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.22),rgba(255,255,255,0)_34%,rgba(255,255,255,0.1)_60%,rgba(255,255,255,0)_100%)] opacity-80 transition duration-500 group-hover/media:opacity-100" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.02),rgba(2,6,23,0)_48%,rgba(2,6,23,0.08))]" />
 
-      <div className="absolute left-4 top-4 z-10">
-        <AssociationLogoBadge associationName={associationName} compact={compact} />
+      <div className="absolute left-3 top-3 z-10 sm:left-4 sm:top-4">
+        <AssociationLogoBadge associationName={associationName} compact className="max-w-[9rem] sm:max-w-[10.5rem]" />
       </div>
-      <div className="absolute right-4 top-4 z-10">
-        <span className="rounded-full border border-white/40 bg-[linear-gradient(135deg,rgba(22,104,255,0.92),rgba(20,184,255,0.9),rgba(100,91,255,0.88))] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white shadow-[0_14px_28px_-18px_rgba(22,104,255,0.52)]">
+      <div className="absolute right-3 top-3 z-10 sm:right-4 sm:top-4">
+        <span className="rounded-full border border-white/80 bg-white/92 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-700 shadow-[0_14px_28px_-18px_rgba(15,23,42,0.32)] backdrop-blur-sm sm:px-3 sm:text-[10px]">
           {featured ? 'Featured' : priorityLabel ?? category ?? city}
         </span>
-      </div>
-
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[48%] bg-[linear-gradient(to_top,rgba(4,12,22,0.95),rgba(4,12,22,0.26),transparent)]" />
-      <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-4">
-        <div className="min-w-0">
-          <p className={`truncate font-[var(--font-serif)] leading-none tracking-[-0.04em] text-white ${compact ? 'text-3xl' : 'text-4xl sm:text-5xl'}`}>
-            {city}
-          </p>
-          <p className="mt-2 text-sm uppercase tracking-[0.2em] text-slate-100">{country}</p>
-        </div>
       </div>
     </div>
   );

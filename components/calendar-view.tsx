@@ -1,17 +1,14 @@
 'use client';
 
-import { AnimatePresence, motion } from 'framer-motion';
-import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { CalendarGrid } from '@/components/calendar-grid';
 import { DayPreviewModal } from '@/components/day-preview-modal';
-import { EventCoverMedia } from '@/components/event-cover-media';
+import { EventCard } from '@/components/event-card';
 import { EventModal } from '@/components/event-modal';
 import { FilterBar } from '@/components/filter-bar';
-import { SaveDateLinks } from '@/components/save-date-links';
 import type { EventItem } from '@/lib/data/events';
-import { formatEventDate, formatMonthLabel, getEventDurationDays, getMonthKey, sortEventsByDate } from '@/lib/utils/date';
-import { getEventSlug } from '@/lib/utils/event-slugs';
+import { formatMonthLabel, getMonthKey, parseDate, sortEventsByDate } from '@/lib/utils/date';
 
 interface CalendarViewProps {
   events: EventItem[];
@@ -31,10 +28,174 @@ function shiftMonthKey(monthKey: string, direction: -1 | 1) {
   return date.toISOString().slice(0, 7);
 }
 
+function isUpcoming(event: EventItem) {
+  const today = new Date().toISOString().slice(0, 10);
+  return (event.endDate ?? event.date) >= today;
+}
+
+function getTimeContext(event: EventItem) {
+  const today = new Date().toISOString().slice(0, 10);
+  const todayTime = parseDate(today).getTime();
+  const start = parseDate(event.date).getTime();
+  const end = parseDate(event.endDate ?? event.date).getTime();
+
+  if (start <= todayTime && end >= todayTime) {
+    return 'Live';
+  }
+
+  const diffDays = Math.round((start - todayTime) / (24 * 60 * 60 * 1000));
+  if (diffDays <= 0) {
+    return 'Today';
+  }
+  if (diffDays <= 2) {
+    return `${Math.max(diffDays, 0)} days`;
+  }
+
+  return 'Upcoming';
+}
+
+function getMonthInsights(events: EventItem[], monthKey: string) {
+  const monthEvents = events.filter((event) => getMonthKey(event.date) === monthKey);
+  const countries = Array.from(new Set(monthEvents.map((event) => event.country)));
+  const regions = Array.from(new Set(monthEvents.map((event) => event.region))).slice(0, 3);
+
+  return {
+    monthEvents,
+    countries,
+    regions
+  };
+}
+
+function MonthSignalPanel({
+  monthLabel,
+  eventCount,
+  countryCount,
+  regions
+}: {
+  monthLabel: string;
+  eventCount: number;
+  countryCount: number;
+  regions: string[];
+}) {
+  return (
+    <section className="space-y-3 border-b border-slate-200 pb-4">
+      <motion.div
+        className="h-px w-full origin-left bg-[linear-gradient(90deg,rgba(14,165,233,0.95),rgba(139,92,246,0.92),rgba(236,72,153,0.72),rgba(236,72,153,0))]"
+        initial={{ scaleX: 0.72, opacity: 0.75 }}
+        animate={{ scaleX: 1, opacity: 1 }}
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+      />
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-700">Live global event signal</p>
+          <h2 className="mt-1 text-3xl font-semibold tracking-[-0.05em] text-slate-950 sm:text-4xl">{monthLabel}</h2>
+        </div>
+        <div className="space-y-1 text-sm text-slate-600 sm:text-base">
+          <p className="font-medium text-slate-900">
+            {eventCount} events across {countryCount} countries
+          </p>
+          <p>Key regions: {regions.length ? regions.join(', ') : 'Global coverage'}</p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SignalStrip({
+  events,
+  highlightedEventId,
+  onHighlight
+}: {
+  events: EventItem[];
+  highlightedEventId: string | null;
+  onHighlight: (eventId: string | null) => void;
+}) {
+  const signalEvents = events.slice(0, 8);
+  const loopEvents = [...signalEvents, ...signalEvents];
+
+  if (!signalEvents.length) {
+    return null;
+  }
+
+  return (
+    <section className="space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Signal strip</p>
+        <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Hover cards to sync the feed</p>
+      </div>
+
+      <div className="md:hidden">
+        <div className="flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {signalEvents.map((event, index) => {
+            const active = highlightedEventId === event.id;
+            return (
+              <button
+                key={event.id}
+                type="button"
+                onMouseEnter={() => onHighlight(event.id)}
+                onMouseLeave={() => onHighlight(null)}
+                onFocus={() => onHighlight(event.id)}
+                onBlur={() => onHighlight(null)}
+                className={`flex min-w-[17rem] shrink-0 items-center gap-3 rounded-[1rem] border px-3 py-3 text-left transition ${
+                  active ? 'border-sky-300 bg-sky-50 shadow-[0_14px_30px_-22px_rgba(14,165,233,0.4)]' : 'border-slate-200 bg-white'
+                }`}
+              >
+                <span className={`h-2.5 w-2.5 rounded-full ${index % 3 === 0 ? 'bg-sky-500' : index % 3 === 1 ? 'bg-violet-500' : 'bg-pink-500'} animate-pulse`} />
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-slate-950">{event.city}</p>
+                  <p className="truncate text-xs uppercase tracking-[0.16em] text-slate-500">
+                    {event.category} • {getTimeContext(event)}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="hidden overflow-hidden rounded-[1.05rem] border border-slate-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,250,252,0.92))] shadow-[0_16px_40px_-30px_rgba(15,23,42,0.16)] md:block">
+        <motion.div
+          className="flex w-max gap-3 px-3 py-3"
+          animate={{ x: ['0%', '-50%'] }}
+          transition={{ duration: 30, ease: 'linear', repeat: Infinity }}
+        >
+          {loopEvents.map((event, index) => {
+            const active = highlightedEventId === event.id;
+
+            return (
+              <button
+                key={`${event.id}-${index}`}
+                type="button"
+                onMouseEnter={() => onHighlight(event.id)}
+                onMouseLeave={() => onHighlight(null)}
+                onFocus={() => onHighlight(event.id)}
+                onBlur={() => onHighlight(null)}
+                className={`flex min-w-[18rem] items-center gap-3 rounded-[0.95rem] border px-3.5 py-3 text-left transition ${
+                  active
+                    ? 'border-sky-300 bg-sky-50 shadow-[0_16px_32px_-24px_rgba(14,165,233,0.45)]'
+                    : 'border-slate-200 bg-white/94 hover:border-slate-300'
+                }`}
+              >
+                <span className={`relative flex h-2.5 w-2.5 shrink-0 rounded-full ${index % 3 === 0 ? 'bg-sky-500' : index % 3 === 1 ? 'bg-violet-500' : 'bg-pink-500'} animate-pulse`} />
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-slate-950">{event.city}</p>
+                  <p className="truncate text-xs uppercase tracking-[0.16em] text-slate-500">
+                    {event.category} • {getTimeContext(event)}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
 export function CalendarView({ events, initialAssociation, initialSearch, initialRegion, initialMonth }: CalendarViewProps) {
   const sortedEvents = useMemo(() => sortEventsByDate(events), [events]);
-  const countries = useMemo(() => Array.from(new Set(sortedEvents.map((event) => event.country))), [sortedEvents]);
-  const categories = useMemo(() => Array.from(new Set(sortedEvents.map((event) => event.category))), [sortedEvents]);
+  const countries = useMemo(() => Array.from(new Set(sortedEvents.map((event) => event.country))).sort(), [sortedEvents]);
+  const categories = useMemo(() => Array.from(new Set(sortedEvents.map((event) => event.category))).sort(), [sortedEvents]);
   const monthKeys = useMemo(() => Array.from(new Set(sortedEvents.map((event) => getMonthKey(event.date)))), [sortedEvents]);
   const associations = useMemo(
     () => Array.from(new Set(sortedEvents.map((event) => event.association ?? event.organiser))).sort((a, b) => a.localeCompare(b)),
@@ -53,12 +214,17 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
   const [view, setView] = useState<'calendar' | 'list'>('list');
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
   const [previewDate, setPreviewDate] = useState<string | null>(null);
+  const [highlightedEventId, setHighlightedEventId] = useState<string | null>(null);
   const [calendarMonthKey, setCalendarMonthKey] = useState<string>(() => monthKeys[0] ?? getCurrentMonthKey());
+  const [calendarExpanded, setCalendarExpanded] = useState(false);
+  const listRef = useRef<HTMLElement | null>(null);
+  const calendarRef = useRef<HTMLElement | null>(null);
+  const hasMounted = useRef(false);
 
   const regions = useMemo(() => {
     const filteredByCountry =
       filters.country === 'All' ? sortedEvents : sortedEvents.filter((event) => event.country === filters.country);
-    return Array.from(new Set(filteredByCountry.map((event) => event.region)));
+    return Array.from(new Set(filteredByCountry.map((event) => event.region))).sort();
   }, [filters.country, sortedEvents]);
 
   const baseFilteredEvents = useMemo(() => {
@@ -89,35 +255,34 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
     return baseFilteredEvents.filter((event) => formatMonthLabel(getMonthKey(event.date)) === filters.month);
   }, [baseFilteredEvents, filters.month]);
 
-  const groupedListEvents = useMemo(() => {
-    return filteredEvents.reduce<Record<string, EventItem[]>>((acc, event) => {
-      const key = getMonthKey(event.date);
-      acc[key] = acc[key] ? [...acc[key], event] : [event];
-      return acc;
-    }, {});
-  }, [filteredEvents]);
-
-  const monthOptions = monthKeys.map((monthKey) => formatMonthLabel(monthKey));
-  const hasActiveFilters = Object.entries(filters).some(([key, value]) => (key === 'search' ? value.trim().length > 0 : value !== 'All'));
-  const eventScopeLabel = scope === 'main' ? 'Major conferences and flagship meetings' : 'All approved listings including training and smaller gatherings';
+  const upcomingEvents = useMemo(() => filteredEvents.filter(isUpcoming), [filteredEvents]);
+  const visibleEvents = useMemo(() => (upcomingEvents.length > 0 ? upcomingEvents : filteredEvents).slice(0, 12), [filteredEvents, upcomingEvents]);
+  const visibleEventIds = useMemo(() => new Set(visibleEvents.map((event) => event.id)), [visibleEvents]);
+  const signalMonthKey = visibleEvents[0] ? getMonthKey(visibleEvents[0].date) : getCurrentMonthKey();
+  const signalMonthInsights = useMemo(() => getMonthInsights(filteredEvents, signalMonthKey), [filteredEvents, signalMonthKey]);
   const activeMonth = calendarMonthKey;
-  const activeMonthEvents = activeMonth ? baseFilteredEvents.filter((event) => getMonthKey(event.date) === activeMonth) : [];
-  const activeAssociations = Array.from(new Set(filteredEvents.map((event) => event.association ?? event.organiser))).slice(0, 4);
-  const activeRegions = Array.from(new Set(activeMonthEvents.map((event) => event.region))).slice(0, 4);
-  const shouldShowEmptyState = view === 'list' ? filteredEvents.length === 0 : baseFilteredEvents.length === 0;
+  const activeMonthEvents = useMemo(
+    () => (activeMonth ? baseFilteredEvents.filter((event) => getMonthKey(event.date) === activeMonth) : []),
+    [activeMonth, baseFilteredEvents]
+  );
   const previewDateEvents = useMemo(() => {
     if (!previewDate) {
       return [];
     }
 
-    const current = new Date(`${previewDate}T00:00:00Z`).getTime();
-
+    const current = parseDate(previewDate).getTime();
     return activeMonthEvents.filter((event) => {
-      const start = new Date(`${event.date}T00:00:00Z`).getTime();
-      const end = new Date(`${(event.endDate ?? event.date)}T00:00:00Z`).getTime();
+      const start = parseDate(event.date).getTime();
+      const end = parseDate(event.endDate ?? event.date).getTime();
       return start <= current && end >= current;
     });
   }, [activeMonthEvents, previewDate]);
+
+  const hasActiveFilters = Object.entries(filters).some(([key, value]) => (key === 'search' ? value.trim().length > 0 : value !== 'All'));
+  const shouldShowEmptyState = filteredEvents.length === 0;
+  const monthOptions = monthKeys.map((monthKey) => formatMonthLabel(monthKey));
+  const activeMonthVisibleCount = activeMonthEvents.filter(isUpcoming).length || activeMonthEvents.length;
+  const selectedMonthLabel = formatMonthLabel(activeMonth);
 
   useEffect(() => {
     if (filters.month === 'All') {
@@ -134,50 +299,23 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
     setPreviewDate(null);
   }, [activeMonth]);
 
+  useEffect(() => {
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+      return;
+    }
+
+    if (view === 'calendar') {
+      setCalendarExpanded(true);
+      calendarRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+
+    listRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [view]);
+
   return (
-    <div className="space-y-5">
-      <motion.section
-        className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(244,248,255,0.92))] p-5 shadow-[0_30px_70px_-34px_rgba(15,23,42,0.16)] sm:p-6"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_20%,rgba(22,104,255,0.07),transparent_24%),radial-gradient(circle_at_84%_20%,rgba(20,184,255,0.06),transparent_20%)]" />
-        <div className="relative grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="rounded-[1.6rem] border border-white/70 bg-white/72 p-4 shadow-[0_18px_44px_-34px_rgba(15,23,42,0.12)]">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Current view</p>
-            <p className="mt-2 text-base font-medium text-slate-950">{eventScopeLabel}</p>
-            <p className="mt-2 text-sm text-slate-600">
-              Use search and filters to narrow by association, region, month, country, or category without losing the wider calendar context.
-            </p>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-[1.6rem] border border-white/70 bg-[linear-gradient(145deg,rgba(239,246,255,0.96),rgba(255,255,255,0.92))] p-4 shadow-[0_18px_44px_-34px_rgba(36,76,170,0.12)]">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-blue-700">Major vs all</p>
-              <p className="mt-2 text-sm text-slate-700">Major Events is the quicker planning view. All Events is the wider industry scan.</p>
-            </div>
-            <div className="rounded-[1.6rem] border border-white/70 bg-[linear-gradient(145deg,rgba(236,254,255,0.96),rgba(255,255,255,0.92))] p-4 shadow-[0_18px_44px_-34px_rgba(14,165,233,0.12)]">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-cyan-700">Fast scanning</p>
-              <p className="mt-2 text-sm text-slate-700">Timeline for detail, month view for date clustering and collision checks.</p>
-            </div>
-          </div>
-
-          <div className="lg:col-span-2 flex flex-wrap gap-2">
-            {activeAssociations.map((association) => (
-              <span key={association} className="city-chip">
-                {association}
-              </span>
-            ))}
-            {activeRegions.map((region) => (
-              <span key={region} className="global-chip">
-                {region}
-              </span>
-            ))}
-          </div>
-        </div>
-      </motion.section>
-
+    <div className="space-y-7">
       <FilterBar
         countries={countries}
         regions={regions}
@@ -187,6 +325,8 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
         scope={scope}
         view={view}
         values={filters}
+        resultCount={filteredEvents.length}
+        upcomingCount={upcomingEvents.length}
         hasActiveFilters={hasActiveFilters}
         onChange={setFilters}
         onChangeScope={setScope}
@@ -203,192 +343,217 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
         }
       />
 
-      <AnimatePresence mode="wait">
-        {view === 'list' ? (
-          <motion.div key="list" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.22 }}>
-            <div className="space-y-7">
-              {Object.entries(groupedListEvents)
-                .sort(([a], [b]) => a.localeCompare(b))
-                .map(([monthKey, monthEvents]) => (
-                  <section key={monthKey} className="space-y-4">
-                    <div className="flex flex-wrap items-end justify-between gap-3">
-                      <div>
-                        <h3 className="font-[var(--font-serif)] text-3xl text-slate-950">{formatMonthLabel(monthKey)}</h3>
-                        <p className="mt-1 text-sm text-slate-500">
-                          {monthEvents.length} live {monthEvents.length === 1 ? 'event' : 'events'} in this month
-                        </p>
-                      </div>
-                    </div>
+      <section className="relative space-y-5">
+        <div className="pointer-events-none absolute -left-10 top-20 h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(14,165,233,0.12),transparent_72%)]" />
+        <div className="pointer-events-none absolute right-0 top-6 h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.1),transparent_72%)]" />
+        <div className="relative space-y-5">
+          <MonthSignalPanel
+            monthLabel={formatMonthLabel(signalMonthKey)}
+            eventCount={signalMonthInsights.monthEvents.length}
+            countryCount={signalMonthInsights.countries.length}
+            regions={signalMonthInsights.regions}
+          />
 
-                    <div className="space-y-4">
-                      {monthEvents.map((event) => {
-                        const durationDays = getEventDurationDays(event);
+          <SignalStrip events={visibleEvents} highlightedEventId={highlightedEventId} onHighlight={setHighlightedEventId} />
+        </div>
+      </section>
 
-                        return (
-                          <article
-                            key={event.id}
-                            className={`group relative overflow-hidden rounded-[2rem] p-4 transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 sm:p-5 ${
-                              event.featured
-                                ? 'border border-blue-100 bg-[linear-gradient(135deg,#ffffff_0%,#eff6ff_52%,#f4fbff_100%)] shadow-[0_30px_60px_-36px_rgba(22,104,255,0.2)] hover:shadow-[0_42px_88px_-40px_rgba(22,104,255,0.26)]'
-                                : 'border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.9))] shadow-[0_22px_48px_-34px_rgba(15,23,42,0.16)] hover:shadow-[0_36px_76px_-36px_rgba(15,23,42,0.2)]'
-                            }`}
-                          >
-                            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_14%_18%,rgba(22,104,255,0.07),transparent_22%),radial-gradient(circle_at_86%_76%,rgba(20,184,255,0.05),transparent_18%),linear-gradient(135deg,rgba(255,255,255,0.22),rgba(255,255,255,0)_30%,rgba(255,255,255,0.08)_56%,rgba(255,255,255,0)_100%)]" />
-                            <div className="relative grid gap-4 lg:grid-cols-[13rem_minmax(0,1fr)_auto] lg:items-start">
-                              <EventCoverMedia
-                                title={event.title}
-                                city={event.city}
-                                country={event.country}
-                                region={event.region}
-                                category={event.category}
-                                coverImage={event.coverImage}
-                                coverImageAlt={event.coverImageAlt}
-                                associationName={event.association ?? event.organiser}
-                                featured={event.featured}
-                                compact
-                                className="h-[13rem] w-full"
-                              />
+      <section
+        ref={listRef}
+        className="relative space-y-5 rounded-[1.4rem] border border-slate-200/90 bg-white p-4 shadow-[0_24px_70px_-44px_rgba(15,23,42,0.2)] sm:p-5 lg:p-6"
+        id="event-list"
+      >
+        <div className="pointer-events-none absolute inset-0 rounded-[1.4rem] bg-[radial-gradient(circle_at_18%_0%,rgba(14,165,233,0.08),transparent_28%),radial-gradient(circle_at_82%_0%,rgba(139,92,246,0.08),transparent_26%)]" />
+        <div className="relative flex flex-col gap-3 border-b border-slate-200 pb-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-700">Primary surface</p>
+            <h2 className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-slate-950 sm:text-3xl">Upcoming events</h2>
+            <p className="mt-2 max-w-3xl text-sm text-slate-600">
+              Scan the next events, open the full record, and use the calendar only when you need date clustering.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-600">
+            <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 shadow-[0_8px_20px_-18px_rgba(15,23,42,0.3)]">
+              Showing {visibleEvents.length} of {filteredEvents.length}
+            </span>
+            <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 shadow-[0_8px_20px_-18px_rgba(15,23,42,0.3)]">
+              {scope === 'main' ? 'Major events' : 'All approved events'}
+            </span>
+          </div>
+        </div>
 
-                              <div className="min-w-0">
-                                <div className="flex flex-wrap gap-2">
-                                  <span className="city-chip">{formatMonthLabel(monthKey)}</span>
-                                  <span className="global-chip">{event.region}</span>
-                                  <span className="rounded-full bg-violet-50 px-2.5 py-1 text-[11px] uppercase tracking-[0.14em] text-violet-700">
-                                    {event.category}
-                                  </span>
-                                </div>
-                                <h4 className="mt-4 text-2xl font-semibold leading-tight tracking-[-0.03em] text-slate-950 transition duration-300 group-hover:text-blue-700">
-                                  {event.title}
-                                </h4>
-                                <p className="mt-3 text-sm font-medium uppercase tracking-[0.16em] text-blue-700">
-                                  {formatEventDate(event)}
-                                </p>
-                                <p className="mt-2 text-sm text-slate-600">
-                                  {event.city}, {event.country} · Hosted by {event.association ?? event.organiser}
-                                </p>
-                                <p className="mt-4 text-sm leading-relaxed text-slate-600">
-                                  {event.description || 'Open the event record for the official website, organiser details, and saving options.'}
-                                </p>
-                              </div>
+        {!shouldShowEmptyState ? (
+          <>
+            <div className="relative grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
+              {visibleEvents.map((event, index) => {
+                const priority = index < 2 ? 'featured' : 'default';
+                const wrapperClass =
+                  index === 0 ? 'md:col-span-2 2xl:col-span-2' : index === 1 ? '2xl:col-span-2' : '';
 
-                              <div className="flex flex-col gap-3 lg:min-w-[12rem] lg:items-end">
-                                <span className="rounded-full bg-emerald-50 px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-emerald-700">
-                                  {durationDays} day{durationDays === 1 ? '' : 's'}
-                                </span>
-                                <button type="button" onClick={() => setSelectedEvent(event)} className="btn-primary w-full px-5 py-2.5 lg:w-auto">
-                                  Preview
-                                </button>
-                                <Link href={`/events/${getEventSlug(event)}`} className="btn-secondary w-full px-5 py-2.5 lg:w-auto">
-                                  Open page
-                                </Link>
-                                <SaveDateLinks event={event} compact />
-                              </div>
-                            </div>
-                          </article>
-                        );
-                      })}
-                    </div>
-                  </section>
-                ))}
+                return (
+                  <motion.div
+                    key={event.id}
+                    className={wrapperClass}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.24, delay: index * 0.04 }}
+                  >
+                    <EventCard
+                      event={event}
+                      priority={priority}
+                      isSignalActive={highlightedEventId === event.id}
+                      onHoverChange={(active) => setHighlightedEventId(active ? event.id : null)}
+                    />
+                  </motion.div>
+                );
+              })}
             </div>
-          </motion.div>
+
+            {filteredEvents.length > visibleEvents.length ? (
+              <div className="rounded-[1rem] border border-slate-200 bg-slate-50/90 px-4 py-3 text-sm text-slate-700">
+                {filteredEvents.length - visibleEvents.length} more matching events remain in the dataset. Tighten filters or use the
+                calendar below to narrow the schedule.
+              </div>
+            ) : null}
+          </>
         ) : (
-          <motion.div key="calendar" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.22 }}>
-            {activeMonth ? (
-              <section className="space-y-4">
-                <div className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(245,249,255,0.92))] p-4 shadow-[0_24px_52px_-30px_rgba(15,23,42,0.15)] sm:p-5">
-                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(22,104,255,0.07),transparent_24%),radial-gradient(circle_at_78%_24%,rgba(20,184,255,0.06),transparent_20%)]" />
-                  <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                    <div>
-                      <p className="eyebrow">Month View</p>
-                      <p className="mt-3 font-[var(--font-serif)] text-3xl text-slate-950">{formatMonthLabel(activeMonth)}</p>
-                      <p className="mt-2 text-sm text-slate-600">Open any date to see which events are active across that day.</p>
-                    </div>
-
-                    <div className="flex flex-col gap-3 sm:items-end">
-                      <div className="inline-flex w-full items-stretch gap-2 sm:w-auto">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const previousMonth = shiftMonthKey(activeMonth, -1);
-                            setCalendarMonthKey(previousMonth);
-                            if (filters.month !== 'All') {
-                              setFilters({ ...filters, month: 'All' });
-                            }
-                          }}
-                          className="inline-flex min-h-12 flex-1 items-center justify-center rounded-[1.2rem] border border-white/85 bg-white/92 px-5 text-sm font-medium text-slate-700 shadow-[0_18px_34px_-28px_rgba(15,23,42,0.14)] transition duration-300 hover:-translate-y-0.5 hover:border-sky-200 hover:bg-sky-50"
-                        >
-                          Previous
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const nextMonth = shiftMonthKey(activeMonth, 1);
-                            setCalendarMonthKey(nextMonth);
-                            if (filters.month !== 'All') {
-                              setFilters({ ...filters, month: 'All' });
-                            }
-                          }}
-                          className="inline-flex min-h-12 flex-1 items-center justify-center rounded-[1.2rem] border border-sky-600 bg-[linear-gradient(135deg,#1668ff,#14b8ff)] px-5 text-sm font-medium text-white shadow-[0_24px_48px_-28px_rgba(22,104,255,0.46)] transition duration-300 hover:-translate-y-0.5 hover:brightness-105"
-                        >
-                          Next
-                        </button>
-                      </div>
-
-                      <div className="flex flex-wrap gap-2 sm:justify-end">
-                        <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] uppercase tracking-[0.15em] text-slate-500">
-                          {activeMonthEvents.length} this month
-                        </span>
-                        {activeRegions.map((region) => (
-                          <span key={region} className="global-chip">
-                            {region}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <CalendarGrid events={activeMonthEvents} monthKey={activeMonth} selectedDate={previewDate} onSelectDate={setPreviewDate} />
-              </section>
+          <motion.div className="rounded-[1rem] border border-slate-200 bg-slate-50/90 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <h3 className="text-lg font-semibold text-slate-950">
+              {events.length === 0 ? 'No live events yet' : 'No events match this view'}
+            </h3>
+            <p className="mt-2 text-sm text-slate-600">
+              {events.length === 0
+                ? 'Approved events will appear here once they have been added to the live calendar.'
+                : scope === 'main' && !hasActiveFilters
+                  ? 'No major events are visible in the current dataset. Switch to All to widen the scan.'
+                  : 'Try broadening your filters to explore more regions, months, and event categories.'}
+            </p>
+            {(hasActiveFilters || scope === 'main') && events.length > 0 ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setFilters({
+                    search: '',
+                    country: 'All',
+                    region: 'All',
+                    month: 'All',
+                    category: 'All',
+                    association: 'All'
+                  });
+                  setScope('all');
+                }}
+                className="mt-4 inline-flex rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900"
+              >
+                View all live events
+              </button>
             ) : null}
           </motion.div>
         )}
-      </AnimatePresence>
+      </section>
 
-      {shouldShowEmptyState && (
-        <motion.div className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(245,249,255,0.92))] p-8 text-center shadow-[0_24px_52px_-30px_rgba(15,23,42,0.14)]" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <h3 className="text-lg font-semibold text-slate-950">
-            {events.length === 0 ? 'No live events yet' : 'No events match this view'}
-          </h3>
-          <p className="mt-2 text-sm text-slate-600">
-            {events.length === 0
-              ? 'Approved events will appear here once they have been added to the live calendar.'
-              : scope === 'main' && !hasActiveFilters
-                ? 'No major events are visible in the current dataset. Switch to All Events to widen the calendar.'
-                : 'Try broadening your filters to explore more regions, months, and event categories.'}
-          </p>
-          {(hasActiveFilters || scope === 'main') && events.length > 0 && (
+      <section
+        ref={calendarRef}
+        className="space-y-4 rounded-[1.35rem] border border-slate-200 bg-[linear-gradient(180deg,rgba(248,250,252,0.88),rgba(255,255,255,0.98))] p-4 shadow-[0_18px_50px_-42px_rgba(15,23,42,0.18)] sm:p-5 lg:p-6"
+        id="calendar-grid"
+      >
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Secondary planning tool</p>
+            <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-slate-950 sm:text-2xl">Calendar</h2>
+            <p className="mt-2 max-w-3xl text-sm text-slate-600">
+              Use the month grid to spot collisions, multi-day overlaps, and quiet dates after you have a shortlist.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full border border-slate-300 bg-white/90 px-3 py-1.5 text-sm text-slate-700">
+              {selectedMonthLabel}
+            </span>
+            <span className="rounded-full border border-slate-300 bg-white/90 px-3 py-1.5 text-sm text-slate-700">
+              {activeMonthVisibleCount} events
+            </span>
             <button
               type="button"
-              onClick={() => {
-                setFilters({
-                  search: '',
-                  country: 'All',
-                  region: 'All',
-                  month: 'All',
-                  category: 'All',
-                  association: 'All'
-                });
-                setScope('all');
-              }}
-              className="mt-5 inline-flex rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-900"
+              onClick={() => setCalendarExpanded((current) => !current)}
+              className="inline-flex items-center rounded-xl border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 md:hidden"
             >
-              View all live events
+              {calendarExpanded ? 'Hide calendar' : 'Show calendar'}
             </button>
-          )}
+          </div>
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.18 }}
+          className={`space-y-4 ${calendarExpanded || view === 'calendar' ? 'block' : 'hidden md:block'}`}
+        >
+          <div className="flex flex-col gap-3 rounded-[1rem] border border-slate-200 bg-white/90 p-3 shadow-[0_12px_26px_-22px_rgba(15,23,42,0.25)] sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-900">{selectedMonthLabel}</p>
+              <p className="text-sm text-slate-600">Tap a date to preview which events are active.</p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const previousMonth = shiftMonthKey(activeMonth, -1);
+                  setCalendarMonthKey(previousMonth);
+                  if (filters.month !== 'All') {
+                    setFilters({ ...filters, month: 'All' });
+                  }
+                }}
+                className="inline-flex h-10 items-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 transition hover:border-sky-300 hover:text-slate-950"
+              >
+                Previous
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const nextMonth = shiftMonthKey(activeMonth, 1);
+                  setCalendarMonthKey(nextMonth);
+                  if (filters.month !== 'All') {
+                    setFilters({ ...filters, month: 'All' });
+                  }
+                }}
+                className="inline-flex h-10 items-center rounded-xl border border-sky-600 bg-sky-600 px-4 text-sm font-semibold text-white shadow-[0_16px_30px_-18px_rgba(2,132,199,0.55)] transition hover:bg-sky-500"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+
+          <CalendarGrid events={activeMonthEvents} monthKey={activeMonth} selectedDate={previewDate} onSelectDate={setPreviewDate} />
+
+          {previewDateEvents.length > 0 ? (
+            <div className="rounded-[1rem] border border-slate-200 bg-white p-4 shadow-[0_12px_30px_-24px_rgba(15,23,42,0.2)]">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Selected day</p>
+                  <p className="mt-1 text-lg font-semibold text-slate-950">{previewDate}</p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {previewDateEvents.slice(0, 3).map((event) => (
+                    <button
+                      key={event.id}
+                      type="button"
+                      onClick={() => setSelectedEvent(event)}
+                      className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${
+                        visibleEventIds.has(event.id)
+                          ? 'border-sky-200 bg-sky-50 text-sky-700'
+                          : 'border-slate-200 text-slate-700 hover:border-slate-300'
+                      }`}
+                    >
+                      {event.title}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : null}
         </motion.div>
-      )}
+      </section>
 
       <DayPreviewModal
         date={previewDate}

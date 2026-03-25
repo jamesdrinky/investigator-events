@@ -18,7 +18,7 @@ export function AssociationLogoBadge({ associationName, className = '', compact 
 
   return (
     <div
-      className={`inline-flex max-w-full items-center gap-2 rounded-[1rem] border border-white/90 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] text-slate-800 shadow-[0_22px_44px_-28px_rgba(8,17,32,0.34)] backdrop-blur-xl ${
+      className={`inline-flex max-w-full items-center gap-2 rounded-[0.85rem] border border-white/70 bg-white/78 text-slate-800 shadow-[0_18px_36px_-24px_rgba(8,17,32,0.3)] backdrop-blur-md ${
         compact ? 'max-w-[10rem] px-2.5 py-1.5' : 'px-3 py-2'
       } ${className}`}
     >

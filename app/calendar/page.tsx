@@ -1,5 +1,4 @@
 import { CalendarView } from '@/components/calendar-view';
-import { Reveal } from '@/components/motion/reveal';
 import { fetchAllEvents } from '@/lib/data/events';
 
 export const dynamic = 'force-dynamic';
@@ -16,19 +15,9 @@ export default async function CalendarPage({
   const initialMonth = searchParams?.month ? decodeURIComponent(searchParams.month) : undefined;
 
   return (
-    <section className="section-pad relative overflow-hidden bg-white">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_14%_10%,rgba(37,99,235,0.1),transparent_22%),radial-gradient(circle_at_86%_8%,rgba(124,58,237,0.1),transparent_20%)]" />
+    <section className="section-pad relative overflow-hidden bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_38%,#ffffff_100%)]">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_8%,rgba(37,99,235,0.1),transparent_18%),radial-gradient(circle_at_84%_6%,rgba(124,58,237,0.08),transparent_16%)]" />
       <div className="container-shell relative">
-        <Reveal>
-          <header className="mb-6 border-b border-slate-200/90 pb-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-700">Events</p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-[-0.05em] text-slate-950 sm:text-4xl">Events</h1>
-            <p className="mt-2 max-w-3xl text-sm text-slate-600 sm:text-base">
-              Discover upcoming investigator conferences, training sessions, and association events, then use the calendar to plan around them.
-            </p>
-          </header>
-        </Reveal>
-
         <CalendarView
           events={events}
           initialAssociation={initialAssociation}

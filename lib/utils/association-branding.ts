@@ -41,3 +41,22 @@ export function getAssociationBrandLogoSrc(label: string) {
   const association = findAssociationBranding(label);
   return association?.logoFileName ? `/associations/${association.logoFileName}` : undefined;
 }
+
+export function getAssociationBadgeLabel(label: string) {
+  const association = findAssociationBranding(label);
+  if (association?.shortName) {
+    return association.shortName;
+  }
+
+  const words = label
+    .split(/[\s/&,-]+/)
+    .map((word) => word.trim())
+    .filter(Boolean);
+
+  const acronym = words
+    .slice(0, 4)
+    .map((word) => word[0]?.toUpperCase() ?? '')
+    .join('');
+
+  return acronym || label.slice(0, 3).toUpperCase();
+}

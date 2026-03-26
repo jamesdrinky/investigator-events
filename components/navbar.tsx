@@ -6,11 +6,11 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 const navItems: Array<{ href: Route; label: string }> = [
-  { href: '/', label: 'Home' },
-  { href: '/calendar', label: 'Calendar' },
+  { href: '/calendar', label: 'Events' },
+  { href: '/list-your-event' as Route, label: 'List Your Event' },
+  { href: '/conference-tips' as Route, label: 'Conference Tips' },
   { href: '/associations', label: 'Associations' },
-  { href: '/weekly', label: 'Weekly' },
-  { href: '/submit-event', label: 'List Event' },
+  { href: '/subscribe' as Route, label: 'Subscribe / Alerts' },
   { href: '/about', label: 'About' }
 ];
 
@@ -59,11 +59,11 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Link href="/#newsletter" className="hidden rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.18)] transition hover:-translate-y-0.5 hover:text-slate-950 md:inline-flex">
-            Newsletter
+          <Link href={"/list-your-event" as Route} className="hidden rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.18)] transition hover:-translate-y-0.5 hover:text-slate-950 md:inline-flex">
+            List Your Event
           </Link>
-          <Link href="/submit-event" className="btn-primary hidden px-4 py-2 md:inline-flex">
-            Submit Event
+          <Link href={"/list-your-event" as Route} className="btn-primary hidden px-4 py-2 md:inline-flex">
+            List Your Event
           </Link>
           <button
             type="button"
@@ -103,11 +103,11 @@ export function Navbar() {
             );
           })}
           <div className="grid gap-2 pt-2">
-            <Link href="/#newsletter" className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
-              Newsletter
+            <Link href={"/list-your-event" as Route} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
+              List Your Event
             </Link>
-            <Link href="/submit-event" className="btn-primary w-full px-4 py-3">
-              Submit Event
+            <Link href={"/list-your-event" as Route} className="btn-primary w-full px-4 py-3">
+              List Your Event
             </Link>
           </div>
         </nav>

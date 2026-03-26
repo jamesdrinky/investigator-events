@@ -430,8 +430,11 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               <span className="block bg-[linear-gradient(92deg,#155eef_0%,#10b8ff_34%,#7c3aed_72%,#ec4899_100%)] bg-clip-text text-transparent">
                 Never Miss
               </span>
-              <span className="mt-2 block max-w-[11ch] text-[0.78em] font-medium leading-[0.94] tracking-[-0.055em] text-slate-900 sm:text-[0.8em]">
-                Another Industry Event
+              <span className="mt-1.5 block max-w-[10ch] font-semibold leading-[0.88] tracking-[-0.065em] text-slate-950">
+                Another Industry
+              </span>
+              <span className="block font-semibold leading-[0.88] tracking-[-0.065em] text-slate-950">
+                Event
               </span>
             </motion.h1>
 

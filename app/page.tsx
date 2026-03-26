@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { EventCoverMedia } from '@/components/event-cover-media';
+import { FounderQuoteSection } from '@/components/home/FounderQuoteSection';
 import { WhyUseSection } from '@/components/home/WhyUseSection';
 import { HomepageHero } from '@/components/home/homepage-hero';
 import { NewsletterSignupForm } from '@/components/newsletter-signup-form';
@@ -39,6 +40,7 @@ export default async function HomePage() {
     <>
       <HomepageHero events={heroEvents} stats={heroStats} />
       <WhyUseSection />
+      <FounderQuoteSection />
 
       <section className="relative overflow-hidden py-24 sm:py-28">
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0),rgba(234,244,255,0.84)_32%,rgba(255,255,255,0))]" />
@@ -283,20 +285,20 @@ export default async function HomePage() {
                 <div className="max-w-xl">
                   <p className="eyebrow">Newsletter</p>
                   <h2 className="mt-4 max-w-[10ch] text-4xl font-semibold leading-[0.94] tracking-[-0.05em] text-slate-950 sm:text-5xl lg:text-[4rem]">
-                    One sharp weekly signal.
+                    Get monthly event alerts, free
                   </h2>
                   <p className="mt-5 text-base leading-relaxed text-slate-600">
-                    New additions, approaching dates, and one standout event worth your attention. Clean, useful, and easy to stay ahead with.
+                    New events, approaching dates, and key conferences delivered straight to your inbox. No spam. Unsubscribe at any time.
                   </p>
                   <div className="mt-8 flex flex-wrap gap-3">
                     <span className="rounded-full border border-white/85 bg-white/88 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-700 shadow-[0_18px_40px_-30px_rgba(36,76,170,0.16)]">
-                      New listings
+                      New events
                     </span>
                     <span className="rounded-full border border-white/85 bg-white/88 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-700 shadow-[0_18px_40px_-30px_rgba(36,76,170,0.16)]">
-                      Approaching dates
+                      Upcoming dates
                     </span>
                     <span className="rounded-full border border-white/85 bg-white/88 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-700 shadow-[0_18px_40px_-30px_rgba(36,76,170,0.16)]">
-                      Standout event
+                      Featured events
                     </span>
                   </div>
                 </div>

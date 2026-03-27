@@ -125,7 +125,7 @@ export function CalendarGrid({ events, monthKey, selectedDate, onSelectDate }: C
   return (
     <section
       aria-label="Calendar month overview"
-      className="rounded-[1.25rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] p-3 shadow-[0_20px_46px_-34px_rgba(15,23,42,0.14)] sm:p-4"
+      className="rounded-[1.1rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] p-2.5 shadow-[0_20px_46px_-34px_rgba(15,23,42,0.14)] sm:rounded-[1.25rem] sm:p-4"
     >
       <div className="mb-4 hidden items-center justify-between rounded-[1.05rem] border border-slate-200 bg-white/90 px-4 py-3 shadow-[0_12px_30px_-26px_rgba(15,23,42,0.12)] md:flex">
         <div>
@@ -148,7 +148,7 @@ export function CalendarGrid({ events, monthKey, selectedDate, onSelectDate }: C
         </div>
       </div>
 
-      <div className="space-y-3 md:hidden">
+      <div className="space-y-2.5 md:hidden">
         {mobileDays.length > 0 ? (
           mobileDays.map((cell) => {
             const leadEvent = getLeadEvent(cell.dayEvents);
@@ -174,7 +174,7 @@ export function CalendarGrid({ events, monthKey, selectedDate, onSelectDate }: C
                     <p className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${today && !selected ? 'text-white/65' : 'text-slate-500'}`}>
                       {cell.date.toLocaleString('en-GB', { weekday: 'short', timeZone: 'UTC' })}
                     </p>
-                    <p className={`mt-1 text-2xl font-semibold tracking-[-0.04em] ${today && !selected ? 'text-white' : 'text-slate-950'}`}>
+                    <p className={`mt-1 text-xl font-semibold tracking-[-0.04em] ${today && !selected ? 'text-white' : 'text-slate-950'}`}>
                       {cell.day}
                     </p>
                   </div>
@@ -188,7 +188,7 @@ export function CalendarGrid({ events, monthKey, selectedDate, onSelectDate }: C
                 </div>
 
                 {leadEvent ? (
-                  <div className="relative mt-3 space-y-3">
+                  <div className="relative mt-3 space-y-2.5">
                     <div className="flex flex-wrap items-center gap-2">
                       <span
                         className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] ${

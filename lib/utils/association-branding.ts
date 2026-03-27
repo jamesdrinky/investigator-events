@@ -6,6 +6,17 @@ type AssociationBrandingRecord = {
 };
 
 const associationBrandingRecords: AssociationBrandingRecord[] = [
+  {
+    name: 'Association of British Investigators',
+    shortName: 'ABI',
+    aliases: ['Association of British Investigators', 'Association of British Investigators (ABI)', 'ABI']
+  },
+  { name: 'WAD', shortName: 'WAD', aliases: ['WAD', 'World Association of Detectives'] },
+  {
+    name: 'IKD',
+    shortName: 'IKD',
+    aliases: ['IKD', 'Internationale Kommission der Detektiv-Verbande', 'Internationale Kommission der Detektiv-Verbände']
+  },
   { name: 'ODV', shortName: 'ODV', aliases: ['ODV', 'ÖDV', 'OEDV'], logoFileName: 'oedv.png' },
   { name: 'EURODET', shortName: 'EURODET', aliases: ['EURODET'], logoFileName: 'eurodet.png' },
   { name: 'CKDS', shortName: 'CKDS', aliases: ['CKDS'], logoFileName: 'ckds.png' },
@@ -59,4 +70,8 @@ export function getAssociationBadgeLabel(label: string) {
     .join('');
 
   return acronym || label.slice(0, 3).toUpperCase();
+}
+
+export function getAssociationDisplayName(label: string) {
+  return findAssociationBranding(label)?.shortName ?? label;
 }

@@ -152,8 +152,8 @@ export function FilterBar({
                 value={scope}
                 onChange={(next) => onChangeScope(next as 'main' | 'all')}
                 options={[
-                  { value: 'main', label: 'Major' },
-                  { value: 'all', label: 'All' }
+                  { value: 'main', label: 'Flagship Events' },
+                  { value: 'all', label: 'All Events' }
                 ]}
               />
               <Segmented
@@ -181,8 +181,8 @@ export function FilterBar({
                   value={scope}
                   onChange={(next) => onChangeScope(next as 'main' | 'all')}
                   options={[
-                    { value: 'main', label: 'Major' },
-                    { value: 'all', label: 'All' }
+                    { value: 'main', label: 'Flagship Events' },
+                    { value: 'all', label: 'All Events' }
                   ]}
                 />
               </div>
@@ -243,8 +243,8 @@ export function FilterBar({
                 value={scope}
                 onChange={(next) => onChangeScope(next as 'main' | 'all')}
                 options={[
-                  { value: 'main', label: 'Major' },
-                  { value: 'all', label: 'All' }
+                  { value: 'main', label: 'Flagship Events' },
+                  { value: 'all', label: 'All Events' }
                 ]}
               />
             </div>
@@ -273,13 +273,13 @@ export function FilterBar({
 
               <div className="mb-3">
                 <Segmented
-                  value={scope}
-                  onChange={(next) => onChangeScope(next as 'main' | 'all')}
-                  options={[
-                    { value: 'main', label: 'Major' },
-                    { value: 'all', label: 'All' }
-                  ]}
-                />
+                    value={scope}
+                    onChange={(next) => onChangeScope(next as 'main' | 'all')}
+                    options={[
+                      { value: 'main', label: 'Flagship Events' },
+                      { value: 'all', label: 'All Events' }
+                    ]}
+                  />
               </div>
 
               <FieldGroup

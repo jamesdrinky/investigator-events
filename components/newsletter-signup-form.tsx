@@ -1,24 +1,17 @@
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
-import { subscribeToNewsletter } from '@/app/actions/newsletter';
+import { useState } from 'react';
 
-export interface NewsletterFormState {
-  status: 'idle' | 'success' | 'error';
+type NewsletterFormState = {
+  status: 'idle' | 'loading' | 'success' | 'error';
   message?: string;
-}
-
-const initialState: NewsletterFormState = {
-  status: 'idle'
 };
 
 function inputClasses() {
   return 'h-13 rounded-[1.15rem] border border-white/80 bg-white/92 px-4 text-sm text-slate-800 outline-none shadow-[0_18px_40px_-34px_rgba(15,23,42,0.16),inset_0_1px_0_rgba(255,255,255,0.8)] transition duration-300 focus:border-sky-400 focus:ring-2 focus:ring-sky-100';
 }
 
-function SubmitButton() {
-  const { pending } = useFormStatus();
-
+function SubmitButton({ pending }: { pending: boolean }) {
   return (
     <button
       type="submit"
@@ -31,45 +24,73 @@ function SubmitButton() {
 }
 
 export function NewsletterSignupForm() {
-  const [state, formAction] = useFormState(subscribeToNewsletter, initialState);
+  const [email, setEmail] = useState('');
+  const [state, setState] = useState<NewsletterFormState>({ status: 'idle' });
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (state.status === 'loading') {
+      return;
+    }
+
+    setState({ status: 'loading' });
+
+    try {
+      const response = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email })
+      });
+
+      const payload = (await response.json().catch(() => null)) as { message?: string; error?: string } | null;
+
+      if (!response.ok) {
+        setState({
+          status: 'error',
+          message: payload?.error ?? 'Unable to subscribe right now. Please try again shortly.'
+        });
+        return;
+      }
+
+      setState({
+        status: 'success',
+        message: payload?.message ?? 'Subscribed successfully'
+      });
+      setEmail('');
+    } catch {
+      setState({
+        status: 'error',
+        message: 'Unable to subscribe right now. Please try again shortly.'
+      });
+    }
+  }
 
   return (
     <form
-      action={formAction}
+      onSubmit={handleSubmit}
       className="relative grid gap-5 rounded-[2.3rem] border border-white/85 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-5 shadow-[0_34px_96px_-54px_rgba(15,23,42,0.16)] sm:p-6 lg:p-7"
     >
       <div className="pointer-events-none absolute inset-0 rounded-[2.3rem] bg-[linear-gradient(135deg,rgba(255,255,255,0.28),rgba(255,255,255,0)_26%,rgba(255,255,255,0.1)_54%,rgba(255,255,255,0)_100%)]" />
-      <div className="grid gap-3 lg:grid-cols-2">
-        <label className="grid gap-2 text-sm text-slate-600">
-          <span>Email</span>
-          <input type="email" name="email" required placeholder="Email address" className={inputClasses()} />
-        </label>
-        <label className="grid gap-2 text-sm text-slate-600">
-          <span>Preferred region</span>
-          <select name="region" defaultValue="" className={inputClasses()}>
-            <option value="">Choose region</option>
-            <option value="Global">Global</option>
-            <option value="North America">North America</option>
-            <option value="Europe">Europe</option>
-            <option value="Middle East">Middle East</option>
-            <option value="Asia-Pacific">Asia-Pacific</option>
-          </select>
-        </label>
-      </div>
-
       <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
         <label className="grid gap-2 text-sm text-slate-600">
-          <span>Primary interest</span>
-          <select name="interests" defaultValue="" className={inputClasses()}>
-            <option value="">Choose focus</option>
-            <option value="Conferences">Conferences</option>
-            <option value="Training">Training</option>
-            <option value="Association events">Association events</option>
-            <option value="Industry updates">Industry updates</option>
-          </select>
+          <span>Email</span>
+          <input
+            type="email"
+            name="email"
+            required
+            autoComplete="email"
+            placeholder="Email address"
+            className={inputClasses()}
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            disabled={state.status === 'loading'}
+          />
         </label>
         <div className="flex items-end">
-          <SubmitButton />
+          <SubmitButton pending={state.status === 'loading'} />
         </div>
       </div>
 

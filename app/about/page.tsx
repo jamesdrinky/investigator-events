@@ -1,9 +1,15 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import { Reveal } from '@/components/motion/reveal';
 import { fetchAllEvents } from '@/lib/data/events';
 import { getCoverageMetrics } from '@/lib/utils/coverage';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'About',
+  description: 'Why Investigator Events exists, how the calendar works, and who is behind the platform.'
+};
 
 const pillars = [
   'One place to browse investigator conferences, training, and association meetings worldwide.',

@@ -1,5 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import type { Metadata } from 'next';
+import { AssociationLogoBadge } from '@/components/association-logo-badge';
 import { EventCoverMedia } from '@/components/event-cover-media';
 import { FounderQuoteSection } from '@/components/home/FounderQuoteSection';
 import { WhyUseSection } from '@/components/home/WhyUseSection';
@@ -8,17 +10,38 @@ import { NewsletterSignupForm } from '@/components/newsletter-signup-form';
 import { Reveal } from '@/components/motion/reveal';
 import { fetchAllEvents, fetchFeaturedEvents } from '@/lib/data/events';
 import { getCoverageMetrics } from '@/lib/utils/coverage';
+import { getAssociationSummaries, type AssociationSummary } from '@/lib/utils/associations';
 import { formatEventDate, parseDate, sortEventsByDate } from '@/lib/utils/date';
 import { getEventSlug } from '@/lib/utils/event-slugs';
-import { getHomepageAssociationNetwork } from '@/lib/utils/associations';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: {
+    absolute: 'Investigator Events — Global PI Conference & Events Calendar'
+  },
+  description: 'Confirmed private investigator conferences, AGMs, training events, and association meetings in one global calendar.'
+};
+
+function formatCount(label: 'event' | 'country', count: number) {
+  const plural = label === 'country' ? 'countries' : 'events';
+  return `${count} ${count === 1 ? label : plural}`;
+}
+
+function selectFeaturedAssociation(summaries: AssociationSummary[]) {
+  const preferred = summaries.filter((association) => {
+    const name = association.canonicalName.toLowerCase();
+    return name.includes('world association of detectives') || name === 'wad' || name.includes('association of british investigators') || name.includes('(abi)');
+  });
+
+  return preferred[0] ?? summaries[0] ?? null;
+}
 
 export default async function HomePage() {
   const [featuredEvents, allEvents] = await Promise.all([fetchFeaturedEvents(6), fetchAllEvents()]);
   const mainEvents = sortEventsByDate(allEvents.filter((event) => event.eventScope === 'main'));
   const coverage = getCoverageMetrics(mainEvents);
-  const network = getHomepageAssociationNetwork(mainEvents, 8);
+  const liveAssociationSummaries = getAssociationSummaries(mainEvents, Number.MAX_SAFE_INTEGER);
   const now = new Date();
   const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   const upcomingEvents = mainEvents.filter((event) => parseDate(event.date).getTime() >= today.getTime());
@@ -27,13 +50,16 @@ export default async function HomePage() {
   const featuredRail = (featuredEvents.length > 0 ? featuredEvents : upcomingEvents).slice(0, 3);
   const leadEvent = featuredRail[0] ?? upcomingEvents[0] ?? mainEvents[0] ?? null;
   const supportEvents = featuredRail.slice(1);
-  const featuredAssociation = network[0] ?? null;
-  const secondaryAssociations = network.slice(1, 7);
+  const featuredAssociation = selectFeaturedAssociation(liveAssociationSummaries);
+  const secondaryAssociations = liveAssociationSummaries
+    .filter((association) => association.calendarAssociation !== featuredAssociation?.calendarAssociation)
+    .slice(0, 6);
+  const activeCountries = Array.from(new Set(mainEvents.map((event) => event.country))).sort();
 
   const heroStats = [
-    { label: 'Live events', value: coverage.totalEvents },
     { label: 'Countries', value: coverage.totalCountries },
-    { label: 'Associations', value: network.length > 0 ? `${network.length}+` : 0 }
+    { label: 'Live events', value: coverage.totalEvents },
+    { label: 'Associations', value: liveAssociationSummaries.length }
   ];
 
   return (
@@ -190,11 +216,24 @@ export default async function HomePage() {
               <p className="mt-4 text-base leading-relaxed text-slate-600 sm:mt-6">
                 Associations are clearly linked to the events they run, so you can see who is behind each date.
               </p>
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-600">
+                Supported by the ABI, WAD, and IKD, representing investigator associations in 30+ countries.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {activeCountries.map((country) => (
+                  <span
+                    key={country}
+                    className="rounded-full border border-white/90 bg-white/90 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-600 shadow-[0_12px_28px_-22px_rgba(15,23,42,0.12)]"
+                  >
+                    {country}
+                  </span>
+                ))}
+              </div>
 
               <div className="mt-6 grid grid-cols-3 gap-2.5 sm:mt-8 sm:gap-3">
                 <div className="rounded-[1.7rem] border border-white/80 bg-white/88 px-5 py-5 shadow-[0_22px_60px_-40px_rgba(15,23,42,0.16)] transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-[0_34px_72px_-40px_rgba(36,76,170,0.22)]">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">Visible bodies</p>
-                  <p className="mt-2 text-3xl font-semibold tracking-[-0.05em] text-slate-950">{network.length}</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">Linked hosts</p>
+                  <p className="mt-2 text-3xl font-semibold tracking-[-0.05em] text-slate-950">{liveAssociationSummaries.length}</p>
                 </div>
                 <div className="rounded-[1.7rem] border border-white/80 bg-white/88 px-5 py-5 shadow-[0_22px_60px_-40px_rgba(15,23,42,0.16)] transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-[0_34px_72px_-40px_rgba(36,76,170,0.22)]">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">Countries</p>
@@ -217,7 +256,7 @@ export default async function HomePage() {
                   <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-blue-700">Featured network</p>
                   <p className="mt-2 text-base font-semibold text-slate-950">{featuredAssociation.canonicalName}</p>
                   <p className="mt-1 text-sm text-slate-600">
-                    {featuredAssociation.eventCount} linked events across {featuredAssociation.countryCount} countries.
+                    {featuredAssociation.canonicalName} - {formatCount('event', featuredAssociation.eventCount)} across {formatCount('country', featuredAssociation.countryCount)}
                   </p>
                 </div>
               ) : null}
@@ -244,11 +283,13 @@ export default async function HomePage() {
                             priority={index < 3}
                           />
                         ) : (
-                          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">{association.shortName}</span>
+                          <AssociationLogoBadge associationName={association.calendarAssociation} compact labelHidden className="max-w-[4.5rem]" />
                         )}
                       </div>
-                      <p className="mt-4 text-sm font-semibold leading-tight text-slate-950">{association.shortName}</p>
-                      <p className="mt-1 text-xs text-slate-500">{association.countries[0] ?? association.region}</p>
+                      <p className="mt-4 text-sm font-semibold leading-tight text-slate-950">{association.canonicalName}</p>
+                      <p className="mt-2 text-xs leading-relaxed text-slate-600">
+                        {formatCount('event', association.eventCount)} across {formatCount('country', association.countryCount)}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -272,7 +313,7 @@ export default async function HomePage() {
                       <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-blue-700">Featured network</p>
                       <h3 className="mt-3 text-3xl font-semibold leading-tight tracking-[-0.04em] text-slate-950">{featuredAssociation.canonicalName}</h3>
                       <p className="mt-3 text-sm leading-relaxed text-slate-600">
-                        Currently linked to {featuredAssociation.eventCount} events across {featuredAssociation.countryCount} countries.
+                        {featuredAssociation.canonicalName} - {formatCount('event', featuredAssociation.eventCount)} across {formatCount('country', featuredAssociation.countryCount)}
                       </p>
                       <div className="mt-5 flex flex-wrap gap-3">
                         <Link

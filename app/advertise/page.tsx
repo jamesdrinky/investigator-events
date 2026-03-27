@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { AdvertiserLeadForm } from '@/components/advertiser-lead-form';
 import { Reveal } from '@/components/motion/reveal';
 
@@ -29,6 +30,11 @@ const reasons = [
   'Reviewed placements rather than open ad inventory',
   'Global relevance across core private investigation markets'
 ];
+
+export const metadata: Metadata = {
+  title: 'Advertise',
+  description: 'Advertising and partnership options for relevant suppliers, sponsors, and event organisers in the investigator events market.'
+};
 
 export default function AdvertisePage() {
   return (

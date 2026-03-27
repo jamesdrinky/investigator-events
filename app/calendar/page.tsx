@@ -1,7 +1,13 @@
+import type { Metadata } from 'next';
 import { CalendarView } from '@/components/calendar-view';
 import { fetchAllEvents } from '@/lib/data/events';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'Calendar',
+  description: 'Browse confirmed PI conferences, AGMs, training, and association events by month, region, country, and organiser.'
+};
 
 export default async function CalendarPage({
   searchParams

@@ -16,8 +16,11 @@ const serif = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: 'Investigator Events',
-  description: 'The global calendar for private investigator events.'
+  title: {
+    default: 'Investigator Events',
+    template: '%s | Investigator Events'
+  },
+  description: 'Confirmed conferences, AGMs, training events, and association meetings across the private investigations sector.'
 };
 
 export default function RootLayout({

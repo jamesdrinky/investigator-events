@@ -27,7 +27,7 @@ export function AssociationLogoBadge({
   const associationRecord = findAssociationBranding(associationName);
   const logoSrc = getAssociationBrandLogoSrc(associationName);
   const badgeLabel = getAssociationBadgeLabel(associationName);
-  const shouldShowLogo = Boolean(logoSrc && associationRecord?.shortName && associationRecord.shortName.length <= 6 && !mini);
+  const shouldShowLogo = Boolean(logoSrc && !mini);
   const shellClasses =
     tone === 'dark'
       ? 'border-slate-950/18 bg-[rgba(15,23,42,0.82)] text-white shadow-[0_24px_44px_-28px_rgba(15,23,42,0.72)] backdrop-blur-md'
@@ -49,17 +49,25 @@ export function AssociationLogoBadge({
     >
       <span
         className={`inline-flex shrink-0 items-center justify-center rounded-[0.8rem] border ${tokenClasses} ${
-          mini ? 'h-6 min-w-6 px-1.5 text-[9px]' : compact ? 'h-7 min-w-7 px-2 text-[10px]' : 'h-8 min-w-8 px-2 text-[11px]'
+          mini
+            ? 'h-6 min-w-6 px-1.5 text-[9px]'
+            : shouldShowLogo
+              ? compact
+                ? 'h-7 min-w-[3.35rem] px-2.5'
+                : 'h-8 min-w-[3.9rem] px-3'
+              : compact
+                ? 'h-7 min-w-7 px-2 text-[10px]'
+                : 'h-8 min-w-8 px-2 text-[11px]'
         } font-semibold uppercase tracking-[0.16em]`}
       >
         {shouldShowLogo ? (
           <Image
             src={logoSrc!}
             alt={`${associationRecord?.name ?? associationName} logo`}
-            width={compact ? 44 : 52}
-            height={compact ? 18 : 22}
-            className={`w-auto object-contain grayscale ${tone === 'dark' ? 'brightness-[3.4] contrast-200' : 'contrast-125'} ${
-              compact ? 'h-4' : 'h-[1.05rem]'
+            width={compact ? 68 : 84}
+            height={compact ? 24 : 28}
+            className={`w-auto object-contain ${tone === 'dark' ? 'brightness-[3.2] contrast-125' : 'contrast-110 saturate-110'} ${
+              compact ? 'h-[1.05rem] max-w-[2.7rem]' : 'h-[1.2rem] max-w-[3.3rem]'
             }`}
           />
         ) : (

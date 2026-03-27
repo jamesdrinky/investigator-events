@@ -22,7 +22,11 @@ function escapeIcs(value: string) {
 }
 
 export function getEventLocation(event: EventItem) {
-  return `${event.city}, ${event.country}`;
+  return [event.city?.trim(), event.country?.trim()].filter(Boolean).join(', ');
+}
+
+export function canGenerateCalendarLinks(event: Pick<EventItem, 'title' | 'date' | 'city' | 'country'>) {
+  return Boolean(event.title?.trim() && event.date?.trim() && event.city?.trim() && event.country?.trim());
 }
 
 export function getGoogleCalendarUrl(event: EventItem) {
@@ -33,7 +37,7 @@ export function getGoogleCalendarUrl(event: EventItem) {
     action: 'TEMPLATE',
     text: event.title,
     dates: `${start}/${end}`,
-    details: event.description || `Official event page: ${event.website}`,
+    details: event.description || (event.website ? `Official event page: ${event.website}` : 'Event listing from Investigator Events.'),
     location: getEventLocation(event),
     ctz: 'UTC'
   });
@@ -58,9 +62,9 @@ export function getIcsHref(event: EventItem) {
     `DTSTART;VALUE=DATE:${toAllDayStamp(startDate)}`,
     `DTEND;VALUE=DATE:${toAllDayStamp(endDateExclusive)}`,
     `SUMMARY:${escapeIcs(event.title)}`,
-    `DESCRIPTION:${escapeIcs(event.description || `Official event page: ${event.website}`)}`,
+    `DESCRIPTION:${escapeIcs(event.description || (event.website ? `Official event page: ${event.website}` : 'Event listing from Investigator Events.'))}`,
     `LOCATION:${escapeIcs(getEventLocation(event))}`,
-    `URL:${event.website}`,
+    ...(event.website ? [`URL:${event.website}`] : []),
     'END:VEVENT',
     'END:VCALENDAR'
   ];

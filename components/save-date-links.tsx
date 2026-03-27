@@ -1,7 +1,7 @@
 'use client';
 
 import type { EventItem } from '@/lib/data/events';
-import { getGoogleCalendarUrl, getIcsHref } from '@/lib/utils/calendar-links';
+import { canGenerateCalendarLinks, getGoogleCalendarUrl, getIcsHref } from '@/lib/utils/calendar-links';
 
 interface SaveDateLinksProps {
   event: EventItem;
@@ -9,6 +9,20 @@ interface SaveDateLinksProps {
 }
 
 export function SaveDateLinks({ event, compact = false }: SaveDateLinksProps) {
+  const canSave = canGenerateCalendarLinks(event);
+
+  if (!canSave) {
+    if (compact) {
+      return null;
+    }
+
+    return (
+      <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-medium text-slate-500" aria-disabled="true">
+        Calendar export unavailable
+      </span>
+    );
+  }
+
   return (
     <details className="group relative">
       <summary
@@ -16,7 +30,7 @@ export function SaveDateLinks({ event, compact = false }: SaveDateLinksProps) {
           compact ? 'px-3 py-1.5 text-xs uppercase tracking-[0.16em]' : 'px-4 py-2 text-sm font-medium'
         }`}
       >
-        Save date
+        {compact ? 'Calendar' : 'Add to calendar'}
       </summary>
       <div className="absolute left-0 top-[calc(100%+0.6rem)] z-20 min-w-[12rem] rounded-[1rem] border border-slate-200 bg-white p-2 shadow-[0_18px_36px_-24px_rgba(15,23,42,0.18)] sm:left-auto sm:right-0">
         <a

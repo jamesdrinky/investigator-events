@@ -380,7 +380,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
   }, [projectedNodes]);
 
   return (
-    <section className="relative overflow-hidden pb-20 pt-10 sm:pb-24 sm:pt-14 lg:pb-28">
+    <section className="relative overflow-hidden pb-14 pt-2 sm:pb-24 sm:pt-10 lg:pb-28 lg:pt-14">
       <motion.div
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(33,118,255,0.26),transparent_22%),radial-gradient(circle_at_88%_14%,rgba(0,196,255,0.22),transparent_18%),radial-gradient(circle_at_56%_62%,rgba(111,86,255,0.18),transparent_30%),radial-gradient(circle_at_82%_42%,rgba(236,72,153,0.1),transparent_24%),linear-gradient(180deg,#fbfdff_0%,#f4f8ff_46%,#f8fbff_100%)]"
         animate={reducedMotion ? undefined : { backgroundPosition: ['0% 0%', '100% 60%', '0% 0%'] }}
@@ -388,28 +388,28 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
         style={{ backgroundSize: '140% 140%' }}
       />
       <motion.div
-        className="pointer-events-none absolute left-[-10%] top-14 h-[26rem] w-[34rem] rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.28),rgba(22,104,255,0.06)_58%,transparent_72%)] blur-3xl"
+        className="pointer-events-none absolute left-[-24%] top-6 h-[18rem] w-[24rem] rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.28),rgba(22,104,255,0.06)_58%,transparent_72%)] blur-3xl sm:left-[-10%] sm:top-14 sm:h-[26rem] sm:w-[34rem]"
         animate={reducedMotion ? undefined : { x: [0, 36, -14, 0], y: [0, 18, -10, 0], scale: [1, 1.08, 0.98, 1], opacity: [0.78, 1, 0.8] }}
         transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
       />
       <motion.div
-        className="pointer-events-none absolute right-[-8%] top-10 h-[22rem] w-[30rem] rounded-full bg-[radial-gradient(circle,rgba(14,182,255,0.26),rgba(14,182,255,0.06)_56%,transparent_74%)] blur-3xl"
+        className="pointer-events-none absolute right-[-18%] top-6 h-[16rem] w-[20rem] rounded-full bg-[radial-gradient(circle,rgba(14,182,255,0.26),rgba(14,182,255,0.06)_56%,transparent_74%)] blur-3xl sm:right-[-8%] sm:top-10 sm:h-[22rem] sm:w-[30rem]"
         animate={reducedMotion ? undefined : { x: [0, -28, 10, 0], y: [0, -14, 12, 0], scale: [1.02, 0.96, 1.04, 1.02], opacity: [0.72, 0.96, 0.74] }}
         transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
       />
       <motion.div
-        className="pointer-events-none absolute inset-x-[15%] top-24 h-[34rem] rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.24),rgba(22,104,255,0.08)_42%,rgba(111,86,255,0.06)_58%,transparent_72%)] blur-3xl"
+        className="pointer-events-none absolute inset-x-[12%] top-20 h-[20rem] rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.24),rgba(22,104,255,0.08)_42%,rgba(111,86,255,0.06)_58%,transparent_72%)] blur-3xl sm:inset-x-[15%] sm:top-24 sm:h-[34rem]"
         animate={reducedMotion ? undefined : { opacity: [0.72, 1, 0.82], scale: [1, 1.06, 1] }}
         transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
       />
       <motion.div
-        className="pointer-events-none absolute right-[10%] top-[20%] h-[16rem] w-[16rem] rounded-full bg-[radial-gradient(circle,rgba(236,72,153,0.14),rgba(236,72,153,0.03)_56%,transparent_72%)] blur-3xl"
+        className="pointer-events-none absolute right-[4%] top-[24%] h-[11rem] w-[11rem] rounded-full bg-[radial-gradient(circle,rgba(236,72,153,0.14),rgba(236,72,153,0.03)_56%,transparent_72%)] blur-3xl sm:right-[10%] sm:top-[20%] sm:h-[16rem] sm:w-[16rem]"
         animate={reducedMotion ? undefined : { x: [0, -16, 8, 0], y: [0, 8, -12, 0], opacity: [0.42, 0.74, 0.48] }}
         transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
       />
 
       <div className="container-shell relative">
-        <div className="grid gap-14 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-center">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-center lg:gap-14">
           <motion.div
             initial={reducedMotion ? false : { opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
@@ -418,20 +418,23 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
           >
             <div className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/86 px-3 py-1.5 shadow-[0_24px_60px_-34px_rgba(15,23,42,0.2)] backdrop-blur-xl">
               <span className="h-2.5 w-2.5 rounded-full bg-cyan-400 shadow-[0_0_0_8px_rgba(34,211,238,0.12)]" />
-              <span className="text-[11px] font-semibold uppercase tracking-[0.26em] text-slate-700">Global investigator calendar</span>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.26em] text-slate-700">Global events calendar</span>
             </div>
 
             <motion.h1
-              className="mt-8 max-w-[10ch] text-5xl font-semibold leading-[0.88] tracking-[-0.065em] text-slate-950 sm:text-6xl lg:text-[5.6rem]"
+              className="mt-5 max-w-[10ch] text-[2.9rem] font-semibold leading-[0.88] tracking-[-0.065em] text-slate-950 sm:mt-6 sm:text-6xl lg:mt-8 lg:text-[5.6rem]"
               initial={reducedMotion ? false : { opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
             >
-              <span className="block bg-[linear-gradient(92deg,#155eef_0%,#10b8ff_34%,#7c3aed_72%,#ec4899_100%)] bg-clip-text text-transparent">
-                Never Miss
+              <span className="block">
+                <span className="bg-[linear-gradient(92deg,#155eef_0%,#10b8ff_34%,#7c3aed_72%,#ec4899_100%)] bg-clip-text text-transparent">
+                  Never
+                </span>{' '}
+                <span className="text-slate-950">Miss Another</span>
               </span>
               <span className="mt-1.5 block max-w-[10ch] font-semibold leading-[0.88] tracking-[-0.065em] text-slate-950">
-                Another Industry
+                Industry
               </span>
               <span className="block font-semibold leading-[0.88] tracking-[-0.065em] text-slate-950">
                 Event
@@ -439,21 +442,21 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
             </motion.h1>
 
             <motion.p
-              className="mt-6 max-w-xl text-lg leading-relaxed text-slate-600"
+              className="mt-4 max-w-xl text-[0.98rem] leading-relaxed text-slate-600 sm:mt-6 sm:text-lg"
               initial={reducedMotion ? false : { opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.14, ease: [0.16, 1, 0.3, 1] }}
             >
-              The global calendar for investigators, associations, and conference organisers, all in one place. Plan your year. List your event for free. Stop the clashes.
+              The global calendar for investigators, associations, and organisers. Plan the year, list events for free, and avoid date clashes.
             </motion.p>
 
             <motion.div
-              className="mt-8 flex flex-col gap-3 sm:flex-row"
+              className="mt-5 flex flex-col gap-3 sm:mt-8 sm:flex-row"
               initial={reducedMotion ? false : { opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             >
-              <Link href={"/events" as Route} className="btn-primary min-h-[3.5rem] px-7 text-[15px]">
+              <Link href="/calendar" className="btn-primary min-h-[3.5rem] px-7 text-[15px]">
                 Browse Events
               </Link>
               <Link href={"/list-your-event" as Route} className="btn-secondary min-h-[3.5rem] px-7 text-[15px]">
@@ -462,7 +465,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
             </motion.div>
 
             <motion.div
-              className="mt-8 grid gap-3 sm:grid-cols-3"
+              className="mt-6 grid grid-cols-2 gap-2.5 sm:mt-8 sm:grid-cols-3 sm:gap-3"
               initial={reducedMotion ? false : { opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.85, delay: 0.26, ease: [0.16, 1, 0.3, 1] }}
@@ -470,24 +473,24 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               {stats.map((item) => (
                 <motion.div
                   key={item.label}
-                  className="rounded-[1.7rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.86),rgba(244,248,255,0.72))] px-4 py-4 shadow-[0_26px_72px_-44px_rgba(15,23,42,0.18)] backdrop-blur-xl"
+                  className="rounded-[1.35rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.86),rgba(244,248,255,0.72))] px-3.5 py-3.5 shadow-[0_26px_72px_-44px_rgba(15,23,42,0.18)] backdrop-blur-xl last:col-span-2 sm:rounded-[1.7rem] sm:px-4 sm:py-4 sm:last:col-span-1"
                   whileHover={{ y: -8, scale: 1.025, boxShadow: '0 42px 92px -42px rgba(76,90,255,0.3)' }}
                 >
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">{item.label}</p>
-                  <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-slate-950">{item.value}</p>
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500 sm:text-[10px] sm:tracking-[0.2em]">{item.label}</p>
+                  <p className="mt-1.5 text-[1.35rem] font-semibold tracking-[-0.04em] text-slate-950 sm:mt-2 sm:text-2xl">{item.value}</p>
                 </motion.div>
               ))}
             </motion.div>
           </motion.div>
 
           <motion.div
-            className="relative"
+            className="relative mx-auto w-full max-w-[24rem] lg:max-w-none"
             initial={reducedMotion ? false : { opacity: 0, scale: 0.96, y: 18 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 1.05, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
           >
             <motion.div
-              className="relative mx-auto aspect-[1.05/1] w-full max-w-[46rem]"
+              className="relative mx-auto aspect-[1/1.02] w-full max-w-[24rem] sm:aspect-[1.05/1] sm:max-w-[46rem]"
               style={{ perspective: 1600 }}
               animate={reducedMotion ? undefined : { rotateX: -pointer.y * 5.2, rotateY: pointer.x * 7.2 }}
               transition={{ type: 'spring', stiffness: 76, damping: 20, mass: 0.9 }}
@@ -617,19 +620,19 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               </svg>
 
               {globeEvents[0] ? (
-                <HeroEventCard event={globeEvents[0]} delay={0.24} className="left-[2%] top-[9%] w-[52%] max-w-[22rem]" />
+                <HeroEventCard event={globeEvents[0]} delay={0.24} className="left-[6%] top-[12%] w-[64%] max-w-[16.5rem] sm:left-[2%] sm:top-[9%] sm:w-[52%] sm:max-w-[22rem]" />
               ) : null}
               {globeEvents[1] ? (
-                <HeroEventCard event={globeEvents[1]} delay={0.34} compact className="right-[4%] top-[14%] w-[34%] min-w-[12rem]" />
+                <HeroEventCard event={globeEvents[1]} delay={0.34} compact className="right-[4%] top-[14%] hidden w-[34%] min-w-[12rem] sm:block" />
               ) : null}
               {globeEvents[2] ? (
-                <HeroEventCard event={globeEvents[2]} delay={0.42} compact className="right-[10%] bottom-[8%] w-[38%] min-w-[13rem]" />
+                <HeroEventCard event={globeEvents[2]} delay={0.42} compact className="right-[10%] bottom-[8%] hidden w-[38%] min-w-[13rem] sm:block" />
               ) : null}
 
               {globeEvents[0] ? (
                 <Link
                   href={`/events/${getEventSlug(events[0])}`}
-                  className="absolute bottom-[13%] left-[6%] inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/88 px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-[0_26px_70px_-42px_rgba(15,23,42,0.26)] backdrop-blur-xl transition duration-500 hover:-translate-y-1 hover:shadow-[0_34px_78px_-42px_rgba(36,76,170,0.3)]"
+                  className="absolute bottom-[8%] left-[6%] inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/88 px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-[0_26px_70px_-42px_rgba(15,23,42,0.26)] backdrop-blur-xl transition duration-500 hover:-translate-y-1 hover:shadow-[0_34px_78px_-42px_rgba(36,76,170,0.3)] sm:bottom-[13%]"
                 >
                   Open featured event
                 </Link>

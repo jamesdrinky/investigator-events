@@ -172,41 +172,47 @@ export function AssociationsDirectory({ associations, stats }: AssociationsDirec
       ) : null}
 
       <section className="rounded-[2.5rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(245,249,255,0.92))] p-5 shadow-[0_28px_64px_-40px_rgba(15,23,42,0.16)] sm:p-6">
-        <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 xl:grid-cols-4">
-          {filteredAssociations.map((association) => (
-            <article
-              key={association.slug}
-              className="group rounded-[1.75rem] border border-white/85 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.9))] px-3 py-4 transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:bg-white hover:shadow-[0_28px_64px_-32px_rgba(22,104,255,0.22)]"
-            >
-              <div className="flex h-18 items-center justify-center rounded-[1.1rem] bg-[linear-gradient(145deg,#ffffff,#f6f9ff)] px-4 shadow-[inset_0_0_0_1px_rgba(226,232,240,0.9)]">
-                {association.logoSrc ? (
-                  <Image
-                    src={association.logoSrc}
-                    alt={`${association.name} logo`}
-                    width={180}
-                    height={72}
-                    className="h-full w-full object-contain"
-                  />
-                ) : (
-                  <span className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-700">{getInitials(association.shortName)}</span>
-                )}
-              </div>
-              <p className="mt-3 line-clamp-2 text-sm font-semibold leading-tight text-slate-950">{association.shortName}</p>
-              <p className="mt-1 text-xs text-slate-500">{association.country}</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <span className="text-[11px] uppercase tracking-[0.14em] text-blue-700">{association.eventCount} events</span>
-              </div>
-              <div className="mt-4 flex flex-wrap gap-3">
-                <Link
-                  href={`/calendar?association=${encodeURIComponent(association.calendarAssociation)}`}
-                  className="premium-link text-xs font-semibold uppercase tracking-[0.14em] text-slate-900"
-                >
-                  View events
-                </Link>
-              </div>
-            </article>
-          ))}
-        </div>
+        {filteredAssociations.length > 0 ? (
+          <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 xl:grid-cols-4">
+            {filteredAssociations.map((association) => (
+              <article
+                key={association.slug}
+                className="group rounded-[1.75rem] border border-white/85 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.9))] px-3 py-4 transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:bg-white hover:shadow-[0_28px_64px_-32px_rgba(22,104,255,0.22)]"
+              >
+                <div className="flex h-18 items-center justify-center rounded-[1.1rem] bg-[linear-gradient(145deg,#ffffff,#f6f9ff)] px-4 shadow-[inset_0_0_0_1px_rgba(226,232,240,0.9)]">
+                  {association.logoSrc ? (
+                    <Image
+                      src={association.logoSrc}
+                      alt={`${association.name} logo`}
+                      width={180}
+                      height={72}
+                      className="h-full w-full object-contain"
+                    />
+                  ) : (
+                    <span className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-700">{getInitials(association.shortName)}</span>
+                  )}
+                </div>
+                <p className="mt-3 line-clamp-2 text-sm font-semibold leading-tight text-slate-950">{association.shortName}</p>
+                <p className="mt-1 text-xs text-slate-500">{association.country}</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <span className="text-[11px] uppercase tracking-[0.14em] text-blue-700">{association.eventCount} events</span>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <Link
+                    href={`/calendar?association=${encodeURIComponent(association.calendarAssociation)}`}
+                    className="premium-link text-xs font-semibold uppercase tracking-[0.14em] text-slate-900"
+                  >
+                    View events
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-[1.5rem] border border-slate-200 bg-white p-5 text-sm leading-relaxed text-slate-600">
+            No associations match this search yet. Try a broader region, a different country, or clear the search field.
+          </div>
+        )}
       </section>
     </div>
   );

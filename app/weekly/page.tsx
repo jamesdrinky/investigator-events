@@ -28,9 +28,9 @@ export default async function WeeklyPage() {
             <div className="relative grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
               <div>
                 <p className="eyebrow">Weekly Brief</p>
-                <h1 className="section-title">The weekly briefing for newly added events, approaching dates, and standout conferences</h1>
+                <h1 className="section-title">A simple weekly read on new and upcoming events.</h1>
                 <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate-600">
-                  A cleaner editorial read on what changed, what is coming up next, and which events deserve attention.
+                  Use this page to check what was added recently, what is coming up soon, and which event is worth opening next.
                 </p>
                 <div className="mt-5 flex flex-wrap gap-3">
                   <div className="rounded-2xl border border-sky-100 bg-[linear-gradient(145deg,rgba(239,246,255,0.96),rgba(255,255,255,0.9))] px-4 py-4 shadow-[0_18px_42px_-34px_rgba(36,76,170,0.12)]">
@@ -105,22 +105,20 @@ export default async function WeeklyPage() {
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_18%,rgba(41,211,163,0.06),transparent_24%)]" />
                 <div className="relative">
                   <p className="eyebrow">Why it matters</p>
-                  <h2 className="mt-4 font-[var(--font-serif)] text-3xl text-slate-950">This page is the fast weekly read on what changed</h2>
+                  <h2 className="mt-4 font-[var(--font-serif)] text-3xl text-slate-950">A faster way to scan the calendar.</h2>
                   <p className="mt-4 text-sm leading-relaxed text-slate-600">
-                    Use the weekly brief to check fresh listings, scan the next important date windows, and keep a running
-                    view of where association and training activity is gathering.
+                    Check this page when you do not want to browse the full calendar. It is the quickest way to see fresh listings, near-term dates, and where activity is building.
                   </p>
                 </div>
               </article>
 
-              <article className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-6 shadow-[0_24px_54px_-34px_rgba(15,23,42,0.16)] sm:p-7">
+              <article id="signup" className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-6 shadow-[0_24px_54px_-34px_rgba(15,23,42,0.16)] sm:p-7">
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(52,179,255,0.08),transparent_24%),radial-gradient(circle_at_80%_70%,rgba(123,124,255,0.07),transparent_22%)]" />
                 <div className="relative">
-                  <p className="eyebrow">Inbox Version</p>
-                  <h2 className="mt-4 font-[var(--font-serif)] text-3xl text-slate-950">Get the brief by email when new events and key dates are added</h2>
+                  <p className="eyebrow">Email Updates</p>
+                  <h2 className="mt-4 font-[var(--font-serif)] text-3xl text-slate-950">Get the weekly update by email.</h2>
                   <p className="mt-4 text-sm leading-relaxed text-slate-600">
-                    If you want the update pushed to you instead of checking manually, subscribe with your region and main
-                    interest so the platform can shape future alerts more usefully.
+                    If you would rather receive the update than check manually, subscribe here. The email focuses on new events, approaching dates, and the most useful listing to open next.
                   </p>
                   <div className="mt-6">
                     <NewsletterSignupForm />

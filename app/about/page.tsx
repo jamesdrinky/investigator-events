@@ -7,8 +7,8 @@ export const dynamic = 'force-dynamic';
 
 const pillars = [
   'One place to browse investigator conferences, training, and association meetings worldwide.',
-  'A clearer planning surface for organisers trying to avoid clashes and understand the wider calendar.',
-  'A stronger public network layer for the associations behind the events.'
+  'A clearer planning view for organisers trying to avoid date clashes.',
+  'Clear links between events and the associations or organisers behind them.'
 ];
 
 export default async function AboutPage() {
@@ -25,13 +25,13 @@ export default async function AboutPage() {
             <div className="grid gap-8 lg:grid-cols-[1.02fr_0.98fr] lg:items-end">
               <div>
                 <p className="eyebrow">About</p>
-                <h1 className="section-title">Built to make the global investigator events market easier to see.</h1>
+                <h1 className="section-title">What Investigator Events is, and why it exists.</h1>
                 <p className="section-copy max-w-3xl">
-                  Investigator Events brings conferences, training, and association activity into one place so people can discover what is on, compare timing, and understand who is behind the calendar.
+                  Investigator Events is a practical calendar for the private investigations sector. It brings live conferences, training, and association events into one place so people can check dates, compare timing, and see who is behind each listing.
                 </p>
                 <div className="mt-6 flex flex-wrap gap-3">
                   <Link href="/calendar" className="btn-primary px-5 py-2.5">
-                    Explore calendar
+                    Browse events
                   </Link>
                   <Link href="/associations" className="btn-secondary px-5 py-2.5">
                     View associations
@@ -71,29 +71,32 @@ export default async function AboutPage() {
           <section className="grid gap-6 lg:grid-cols-[1fr_1fr]">
             <article className="rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-7 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.16)] sm:p-8">
               <p className="eyebrow">What The Platform Does</p>
-              <h2 className="mt-4 font-[var(--font-serif)] text-3xl text-slate-950">A discovery product first.</h2>
+              <h2 className="mt-4 font-[var(--font-serif)] text-3xl text-slate-950">What you can expect from the site.</h2>
               <div className="mt-6 grid gap-3">
                 <div className="rounded-[1.5rem] border border-slate-200/80 bg-slate-50/90 p-4 text-sm text-slate-700">
-                  Shows live dates and event detail pages instead of long marketing explanation blocks.
+                  Live event listings with clear dates, locations, and organiser details.
                 </div>
                 <div className="rounded-[1.5rem] border border-slate-200/80 bg-slate-50/90 p-4 text-sm text-slate-700">
-                  Gives associations visible identity through logos, network browsing, and linked event views.
+                  Clear links between events and the association or organiser behind them.
                 </div>
                 <div className="rounded-[1.5rem] border border-slate-200/80 bg-slate-50/90 p-4 text-sm text-slate-700">
-                  Makes listing free, while keeping public quality through review before publication.
+                  Free submissions, with review before publication so the calendar stays credible.
                 </div>
               </div>
             </article>
 
             <article className="rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-7 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.16)] sm:p-8">
-              <p className="eyebrow">Founded By</p>
-              <h2 className="mt-4 font-[var(--font-serif)] text-3xl text-slate-950">Founder credentials</h2>
+              <p className="eyebrow">Why Trust It</p>
+              <h2 className="mt-4 font-[var(--font-serif)] text-3xl text-slate-950">Built by someone who knows the industry.</h2>
               <div className="mt-6 rounded-[1.7rem] border border-slate-200 bg-slate-50 p-5">
                 <p className="text-sm leading-relaxed text-slate-700">
-                  This section has been prepared for founder and industry credential detail, but no verified founder biography is present in the current repository content.
+                  Mike LaCorte has spent over 25 years working at the sharp end of international private sector investigations. As CEO of Conflict International, he has led cross-border casework spanning Europe, the Americas, Asia, and the Middle East.
                 </p>
                 <p className="mt-3 text-sm leading-relaxed text-slate-600">
-                  Add the founder name, relevant investigator industry background, and any association or event credentials here to complete the credibility layer.
+                  He currently serves as President of the Association of British Investigators, Secretary General of the IKD (Internationale Kommission der Detektiv-Verbande), and is a former President of the World Association of Detectives. His forthcoming book, A Guide to Conducting Successful Private Sector International Investigations, is published by Taylor & Francis / CRC Press.
+                </p>
+                <p className="mt-3 text-sm leading-relaxed text-slate-600">
+                  Investigator Events was built because there was no neutral, genuinely useful global calendar for this space. The aim is simple: make it easier to find legitimate events and easier to understand who is running them.
                 </p>
               </div>
             </article>

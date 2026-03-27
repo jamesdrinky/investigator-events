@@ -290,14 +290,14 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
   }, [view]);
 
   return (
-    <div className="space-y-8">
-      <section className="relative overflow-visible rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_32px_90px_-56px_rgba(15,23,42,0.18)] sm:p-6 lg:p-7">
+    <div className="space-y-6 sm:space-y-8">
+      <section className="relative overflow-visible rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-[0_32px_90px_-56px_rgba(15,23,42,0.18)] sm:rounded-[2rem] sm:p-6 lg:p-7">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_12%,rgba(37,99,235,0.1),transparent_24%),radial-gradient(circle_at_88%_8%,rgba(124,58,237,0.08),transparent_18%)]" />
-        <div className="relative grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.95fr)] lg:items-start">
+        <div className="relative grid gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.95fr)] lg:items-start">
           <div className="overflow-visible">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-700">Events</p>
-            <h1 className="mt-3 max-w-3xl overflow-visible text-[2.35rem] font-semibold leading-[0.98] tracking-[-0.055em] text-slate-950 sm:text-[3.6rem]">
-              A{' '}
+            <h1 className="mt-2.5 max-w-3xl overflow-visible text-[1.95rem] font-semibold leading-[0.98] tracking-[-0.05em] text-slate-950 sm:mt-3 sm:text-[3.6rem] sm:tracking-[-0.055em]">
+              The{' '}
               <span className="relative inline-flex px-[0.16em] py-[0.08em]">
                 <motion.span
                   aria-hidden="true"
@@ -313,14 +313,14 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
                   live
                 </motion.span>
               </span>{' '}
-              global event intelligence surface.
+              global events calendar.
             </h1>
-            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
-              Browse association-owned conferences, training events, and investigator gatherings across the year.
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 sm:mt-4 sm:text-base">
+              Browse conferences, training, and association events in one place, then filter quickly by month, region, or organiser.
             </p>
           </div>
 
-          <div className="grid auto-rows-fr gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-2 auto-rows-fr gap-3 sm:grid-cols-2">
             <StatCard
               label="Events this month"
               value={`${signalMonthInsights.monthEvents.length}`}
@@ -345,7 +345,7 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Global event activity</p>
-            <p className="mt-1 text-sm text-slate-600">A quick scan of upcoming dates, locations, and associations before you move into the full event list.</p>
+            <p className="mt-1 text-sm text-slate-600">See upcoming dates, locations, and associations before you browse the full list.</p>
           </div>
           <p className="hidden text-[11px] uppercase tracking-[0.18em] text-slate-400 md:block">Activity strip</p>
         </div>
@@ -367,9 +367,9 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
         </div>
 
         <div className="md:hidden">
-          <div className="flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {visibleEvents.slice(0, 8).map((event) => (
-              <div key={event.id} className="w-[84vw] min-w-[17.5rem] max-w-[20rem] shrink-0">
+              <div key={event.id} className="w-[82vw] min-w-[15.5rem] max-w-[18.5rem] shrink-0">
                 <SignalItem event={event} active={highlightedEventId === event.id} onHighlight={setHighlightedEventId} />
               </div>
             ))}
@@ -413,7 +413,7 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Featured events</p>
               <h2 className="mt-1 text-[1.9rem] font-semibold tracking-[-0.05em] text-slate-950 sm:text-[2.5rem]">Featured events</h2>
             </div>
-            <p className="max-w-xl text-sm leading-6 text-slate-600">A closer look at key upcoming events, with a global activity map for the lead feature.</p>
+            <p className="max-w-xl text-sm leading-6 text-slate-600">A quick view of the events most likely to shape the calendar.</p>
           </div>
 
           <div className="hidden gap-4 md:grid xl:grid-cols-[minmax(0,1.36fr)_minmax(0,0.9fr)]">
@@ -439,9 +439,9 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
             </div>
           </div>
 
-          <div className="flex gap-4 overflow-x-auto pb-2 md:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex gap-3 overflow-x-auto pb-2 md:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {featuredEvents.map((event, index) => (
-              <div key={event.id} className={`${index === 0 ? 'w-[88vw] max-w-[24rem]' : 'w-[76vw] max-w-[20rem]'} shrink-0`}>
+              <div key={event.id} className={`${index === 0 ? 'w-[90vw] max-w-[22rem]' : 'w-[80vw] max-w-[18rem]'} shrink-0`}>
                 <EventCard
                   event={event}
                   priority={index === 0 ? 'hero' : 'featured'}
@@ -454,7 +454,7 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
         </section>
       ) : null}
 
-      <section ref={listRef} className="space-y-5" id="event-list">
+      <section ref={listRef} className="space-y-4 sm:space-y-5" id="event-list">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Upcoming events</p>
@@ -464,15 +464,15 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
         </div>
 
         {!shouldShowEmptyState ? (
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             {monthFeedGroups.map((group, groupIndex) => (
-              <section key={group.monthKey} className="space-y-4">
-                <div className="flex flex-col gap-3 rounded-[1.3rem] border border-slate-200 bg-[linear-gradient(180deg,rgba(255,255,255,1),rgba(248,250,255,0.98))] px-4 py-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.14)] sm:flex-row sm:items-end sm:justify-between sm:px-5">
+              <section key={group.monthKey} className="space-y-3.5 sm:space-y-4">
+                <div className="flex flex-col gap-3 rounded-[1.1rem] border border-slate-200 bg-[linear-gradient(180deg,rgba(255,255,255,1),rgba(248,250,255,0.98))] px-4 py-3.5 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.14)] sm:rounded-[1.3rem] sm:flex-row sm:items-end sm:justify-between sm:px-5 sm:py-4">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-700">Events by month</p>
-                    <h3 className="mt-1 text-[1.45rem] font-semibold tracking-[-0.04em] text-slate-950 sm:text-[1.78rem]">{group.label}</h3>
+                    <h3 className="mt-1 text-[1.28rem] font-semibold tracking-[-0.04em] text-slate-950 sm:text-[1.78rem]">{group.label}</h3>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.17em] text-slate-500">
+                  <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 sm:gap-2 sm:text-[11px] sm:tracking-[0.17em]">
                     <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-700">{group.monthEvents.length} events</span>
                     <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-700">
                       {group.countries.length} countries
@@ -483,7 +483,7 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
                   </div>
                 </div>
 
-                <div className="grid gap-5 md:grid-cols-2 2xl:grid-cols-3">
+                <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
                   {group.monthEvents.map((event, index) => (
                     <motion.div
                       key={event.id}
@@ -510,7 +510,7 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
         )}
       </section>
 
-      <section ref={calendarRef} className="relative overflow-hidden rounded-[1.7rem] border border-slate-200 bg-white p-4 shadow-[0_26px_70px_-46px_rgba(15,23,42,0.16)] sm:p-5 lg:p-6" id="calendar-grid">
+      <section ref={calendarRef} className="relative overflow-hidden rounded-[1.45rem] border border-slate-200 bg-white p-4 shadow-[0_26px_70px_-46px_rgba(15,23,42,0.16)] sm:rounded-[1.7rem] sm:p-5 lg:p-6" id="calendar-grid">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_0%,rgba(37,99,235,0.08),transparent_24%),radial-gradient(circle_at_85%_0%,rgba(124,58,237,0.08),transparent_20%)]" />
         <div className="relative space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -536,14 +536,14 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
           <div className={`space-y-4 ${calendarExpanded || view === 'calendar' ? 'block' : 'hidden md:block'}`}>
             <div className="flex flex-col gap-3 rounded-[1.1rem] border border-slate-200 bg-slate-50/90 p-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-slate-600">Select a date to see the lead event, association, and any other activity on that day.</p>
-              <div className="flex items-center gap-2">
+              <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
                 <button
                   type="button"
                   onClick={() => {
                     setCalendarMonthKey(shiftMonthKey(calendarMonthKey, -1));
                     if (filters.month !== 'All') setFilters({ ...filters, month: 'All' });
                   }}
-                  className="inline-flex h-10 items-center rounded-2xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700"
+                  className="inline-flex h-10 items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700"
                 >
                   Previous
                 </button>
@@ -553,7 +553,7 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
                     setCalendarMonthKey(shiftMonthKey(calendarMonthKey, 1));
                     if (filters.month !== 'All') setFilters({ ...filters, month: 'All' });
                   }}
-                  className="inline-flex h-10 items-center rounded-2xl border border-slate-900 bg-slate-900 px-4 text-sm font-semibold text-white"
+                  className="inline-flex h-10 items-center justify-center rounded-2xl border border-slate-900 bg-slate-900 px-4 text-sm font-semibold text-white"
                 >
                   Next
                 </button>

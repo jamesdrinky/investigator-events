@@ -66,19 +66,21 @@ export function verifyAdminSessionToken(token: string | undefined): boolean {
 export function setAdminSessionCookie(token: string) {
   cookies().set(ADMIN_SESSION_COOKIE, token, {
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: 'strict',
     secure: process.env.NODE_ENV === 'production',
     path: '/',
-    maxAge: ADMIN_SESSION_DURATION_SECONDS
+    maxAge: ADMIN_SESSION_DURATION_SECONDS,
+    priority: 'high'
   });
 }
 
 export function clearAdminSessionCookie() {
   cookies().set(ADMIN_SESSION_COOKIE, '', {
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: 'strict',
     secure: process.env.NODE_ENV === 'production',
     path: '/',
+    priority: 'high',
     expires: new Date(0)
   });
 }

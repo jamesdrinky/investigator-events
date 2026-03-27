@@ -218,7 +218,7 @@ export default async function AdminPage({
                 {searchParams.error === 'invalid' && 'Invalid password. Please try again.'}
                 {searchParams.error === 'auth' && 'Your admin session has expired. Please log in again.'}
                 {searchParams.error !== 'invalid' && searchParams.error !== 'auth' &&
-                  'Admin configuration is incomplete. Check ADMIN_PASSWORD and ADMIN_SESSION_SECRET.'}
+                  'Admin access is temporarily unavailable. Please contact the site administrator.'}
               </p>
             )}
 

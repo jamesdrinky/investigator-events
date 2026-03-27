@@ -18,7 +18,7 @@ export function SaveDateLinks({ event, compact = false }: SaveDateLinksProps) {
       >
         Save date
       </summary>
-      <div className="absolute right-0 top-[calc(100%+0.6rem)] z-20 min-w-[12rem] rounded-[1rem] border border-slate-200 bg-white p-2 shadow-[0_18px_36px_-24px_rgba(15,23,42,0.18)]">
+      <div className="absolute left-0 top-[calc(100%+0.6rem)] z-20 min-w-[12rem] rounded-[1rem] border border-slate-200 bg-white p-2 shadow-[0_18px_36px_-24px_rgba(15,23,42,0.18)] sm:left-auto sm:right-0">
         <a
           href={getGoogleCalendarUrl(event)}
           target="_blank"

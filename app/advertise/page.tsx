@@ -12,21 +12,21 @@ const advertiserTypes = [
 const placementOptions = [
   {
     title: 'Featured event support',
-    text: 'Additional visibility for major conferences, training programmes, or association-led gatherings.'
+    text: 'Extra visibility for major conferences, training programmes, or association-led gatherings already relevant to the audience.'
   },
   {
     title: 'Supplier visibility',
-    text: 'Relevant tools and services placed beside the calendar, weekly brief, and related event discovery surfaces.'
+    text: 'Relevant tools and services placed beside the calendar, weekly page, and related event discovery surfaces.'
   },
   {
-    title: 'Newsletter and brief sponsorship',
-    text: 'Future premium placement around the recurring update for subscribers who want to hear about new events.'
+    title: 'Email update sponsorship',
+    text: 'Limited sponsorship around the weekly email update for subscribers who want new events and approaching dates.'
   }
 ];
 
 const reasons = [
   'Specialist audience of investigators, organisers, and associations',
-  'Commercially focused placements with premium product context',
+  'Reviewed placements rather than open ad inventory',
   'Global relevance across core private investigation markets'
 ];
 
@@ -41,10 +41,9 @@ export default function AdvertisePage() {
             <div className="relative grid gap-8 lg:grid-cols-[1fr_0.9fr] lg:items-end">
               <div>
                 <p className="eyebrow">Advertising & Partnerships</p>
-                <h1 className="section-title">A premium visibility layer for sponsors, suppliers, and promoted conferences</h1>
+                <h1 className="section-title">Advertising for relevant industry partners.</h1>
                 <p className="mt-4 max-w-3xl text-base leading-relaxed text-slate-600">
-                  Investigator Events gives relevant commercial partners a cleaner way to appear in front of the
-                  investigator industry, inside a product built around real event planning and association activity.
+                  This page is for suppliers, sponsors, and event organisers who want visibility in a real industry calendar. We review every enquiry manually so placements stay relevant and the site stays trustworthy.
                 </p>
               </div>
 
@@ -64,16 +63,14 @@ export default function AdvertisePage() {
             <section className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-6 shadow-[0_24px_54px_-34px_rgba(15,23,42,0.16)] sm:p-7">
               <div className="relative">
                 <p className="text-xs uppercase tracking-[0.18em] text-sky-700">Partner Intelligence</p>
-                <h2 className="mt-3 font-[var(--font-serif)] text-3xl text-slate-950">Visibility sits inside a specialist industry product</h2>
+                <h2 className="mt-3 font-[var(--font-serif)] text-3xl text-slate-950">What you are actually buying into.</h2>
                 <p className="mt-3 text-sm leading-relaxed text-slate-600">
-                  Placements sit beside event discovery, calendar planning, weekly updates, and the associations layer, so
-                  exposure feels relevant instead of random.
+                  Placements appear inside pages people already use to browse events, compare timing, and follow associations. That keeps the context useful instead of feeling like generic display advertising.
                 </p>
                 <div className="mt-5 rounded-[1.4rem] border border-emerald-100 bg-[linear-gradient(145deg,rgba(236,253,245,0.98),rgba(255,255,255,0.92))] p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-emerald-700">Phase 1 reality</p>
+                  <p className="text-xs uppercase tracking-[0.18em] text-emerald-700">Current scope</p>
                   <p className="mt-2 text-sm text-slate-700">
-                    The current product already supports association visibility, featured event treatment, advertiser
-                    inquiry capture, and a clear path toward sponsored newsletter placement.
+                    Current options are limited to relevant partnerships, featured event support, and supplier visibility. This is not an open self-serve ad platform.
                   </p>
                 </div>
               </div>
@@ -94,7 +91,7 @@ export default function AdvertisePage() {
                 </article>
                 <article className="rounded-xl border border-slate-200/80 bg-slate-50/90 p-4">
                   <p className="text-xs uppercase tracking-[0.16em] text-violet-700">Format options</p>
-                  <p className="mt-2 text-sm text-slate-700">Featured conference support, supplier visibility, and newsletter sponsorship direction.</p>
+                  <p className="mt-2 text-sm text-slate-700">Featured conference support, supplier visibility, and weekly email sponsorship.</p>
                 </article>
               </div>
             </section>
@@ -106,10 +103,9 @@ export default function AdvertisePage() {
             <Reveal>
               <section className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-7 shadow-[0_24px_54px_-34px_rgba(15,23,42,0.16)] sm:p-8">
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(52,179,255,0.06),transparent_24%)]" />
-                <h2 className="font-[var(--font-serif)] text-3xl text-slate-950">Who Advertises Here</h2>
+                <h2 className="font-[var(--font-serif)] text-3xl text-slate-950">Who this page is for.</h2>
                 <p className="mt-3 text-sm leading-relaxed text-slate-600">
-                  We work with businesses that support investigative professionals and want focused exposure in a trusted,
-                  professional environment.
+                  We work with businesses and organisers that serve investigative professionals and want focused exposure in a trusted, professional setting.
                 </p>
 
                 <div className="mt-5 flex flex-wrap gap-2.5">
@@ -125,10 +121,9 @@ export default function AdvertisePage() {
             <Reveal delay={0.1}>
               <section className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-7 shadow-[0_24px_54px_-34px_rgba(15,23,42,0.16)] sm:p-8">
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_20%,rgba(41,211,163,0.08),transparent_24%),radial-gradient(circle_at_18%_80%,rgba(123,124,255,0.06),transparent_22%)]" />
-                <h2 className="font-[var(--font-serif)] text-3xl text-slate-950">Visibility Opportunities</h2>
+                <h2 className="font-[var(--font-serif)] text-3xl text-slate-950">Ways to appear on the site.</h2>
                 <p className="mt-3 text-sm leading-relaxed text-slate-600">
-                  Use the inquiry form to start a direct commercial conversation. We review each request manually so the
-                  platform stays useful for investigators and credible for partners.
+                  Use the enquiry form to start a direct conversation. We review each request manually so the platform stays useful for visitors and credible for partners.
                 </p>
                 <div className="mt-5 space-y-3">
                   {placementOptions.map((option) => (

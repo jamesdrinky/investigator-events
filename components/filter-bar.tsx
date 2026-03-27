@@ -131,7 +131,7 @@ export function FilterBar({
 
   return (
     <>
-      <section className="relative overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white p-4 shadow-[0_18px_50px_-38px_rgba(15,23,42,0.16)] sm:p-5">
+      <section className="relative top-0 z-20 overflow-hidden rounded-[1.15rem] border border-slate-200 bg-white p-3.5 shadow-[0_18px_50px_-38px_rgba(15,23,42,0.16)] sm:rounded-[1.35rem] sm:p-5 md:sticky md:top-[5.2rem]">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_0%,rgba(34,211,238,0.08),transparent_22%),radial-gradient(circle_at_90%_0%,rgba(37,99,235,0.08),transparent_20%)]" />
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -141,7 +141,7 @@ export function FilterBar({
                 id="event-search"
                 type="search"
                 placeholder="Search events, cities, or associations"
-                className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-700 outline-none transition focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-100"
+                className="h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-700 outline-none transition focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-100 sm:h-12"
                 value={values.search}
                 onChange={(e) => onChange({ ...values, search: e.target.value })}
               />
@@ -175,19 +175,31 @@ export function FilterBar({
               ) : null}
             </div>
 
-            <div className="grid grid-cols-[1fr_auto] gap-2 lg:hidden">
-              <Segmented
-                value={view}
-                onChange={(next) => onChangeView(next as 'calendar' | 'list')}
-                options={[
-                  { value: 'list', label: 'Feed' },
-                  { value: 'calendar', label: 'Calendar' }
-                ]}
-              />
+            <div className="flex gap-2 overflow-x-auto pb-1 lg:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="shrink-0">
+                <Segmented
+                  value={scope}
+                  onChange={(next) => onChangeScope(next as 'main' | 'all')}
+                  options={[
+                    { value: 'main', label: 'Major' },
+                    { value: 'all', label: 'All' }
+                  ]}
+                />
+              </div>
+              <div className="shrink-0">
+                <Segmented
+                  value={view}
+                  onChange={(next) => onChangeView(next as 'calendar' | 'list')}
+                  options={[
+                    { value: 'list', label: 'Feed' },
+                    { value: 'calendar', label: 'Calendar' }
+                  ]}
+                />
+              </div>
               <button
                 type="button"
                 onClick={() => setDrawerOpen(true)}
-                className="inline-flex h-12 items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700"
+                className="inline-flex h-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700"
               >
                 Filters
               </button>

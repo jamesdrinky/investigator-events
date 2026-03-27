@@ -43,12 +43,12 @@ export function AdvertiserLeadForm() {
       </p>
 
       {state.status === 'success' && (
-        <p className="relative rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-200">
+        <p className="relative rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
           {state.message}
         </p>
       )}
       {state.status === 'error' && (
-        <p className="relative rounded-xl border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-sm text-rose-200">{state.message}</p>
+        <p className="relative rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{state.message}</p>
       )}
 
       <div className="relative grid gap-4 sm:grid-cols-2">
@@ -72,6 +72,7 @@ export function AdvertiserLeadForm() {
         <label className="block text-sm text-slate-700">
           Website
           <input type="text" name="website" inputMode="url" className={inputClasses()} placeholder="example.com" />
+          <span className="mt-1 block text-xs text-slate-500">Company or product URL is fine.</span>
         </label>
       </div>
 

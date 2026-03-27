@@ -27,24 +27,24 @@ export default async function AssociationsPage() {
             <div className="grid gap-6 lg:grid-cols-[1.08fr_0.92fr] lg:items-end">
               <div>
                 <p className="eyebrow">Associations</p>
-                <h1 className="section-title">The organisations behind the calendar.</h1>
+                <h1 className="section-title">Investigator associations linked to live events.</h1>
                 <p className="section-copy max-w-3xl">
-                  Browse investigator associations by region and country, then jump straight to the events each network is linked to.
+                  Browse associations by region and country, then open the calendar view for the events each organisation is linked to.
                 </p>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
                 <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] transition duration-500 hover:-translate-y-1 hover:shadow-[0_28px_64px_-36px_rgba(36,76,170,0.18)]">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-blue-700">Credible network</p>
-                  <p className="mt-2 text-sm text-slate-700">Real associations, visible logos, direct links, and linked event counts.</p>
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-blue-700">Clear provenance</p>
+                  <p className="mt-2 text-sm text-slate-700">Real associations, visible logos when available, direct links, and linked event counts.</p>
                 </div>
                 <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] transition duration-500 hover:-translate-y-1 hover:shadow-[0_28px_64px_-36px_rgba(36,76,170,0.18)]">
                   <p className="text-[10px] uppercase tracking-[0.18em] text-cyan-700">Browse faster</p>
-                  <p className="mt-2 text-sm text-slate-700">Filter by region or country before opening the connected calendar view.</p>
+                  <p className="mt-2 text-sm text-slate-700">Filter by region or country before opening the connected calendar results.</p>
                 </div>
                 <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] transition duration-500 hover:-translate-y-1 hover:shadow-[0_28px_64px_-36px_rgba(36,76,170,0.18)]">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-violet-700">Global signal</p>
-                  <p className="mt-2 text-sm text-slate-700">The network view helps the platform feel international, not local or isolated.</p>
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-violet-700">Useful context</p>
+                  <p className="mt-2 text-sm text-slate-700">This page helps you see which bodies are active before you open individual events.</p>
                 </div>
               </div>
             </div>

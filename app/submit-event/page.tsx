@@ -1,6 +1,7 @@
 import { Reveal } from '@/components/motion/reveal';
 import { submitEventAction } from '@/app/submit-event/actions';
 import { eventCountries, eventRegions } from '@/lib/forms/event-form-options';
+import { createSignedFormState } from '@/lib/security/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,6 +39,7 @@ export default function SubmitEventPage({
 }) {
   const isSuccess = searchParams?.status === 'success';
   const isError = searchParams?.status === 'error';
+  const formState = createSignedFormState('submit-event');
 
   return (
     <section className="section-pad relative overflow-hidden">
@@ -52,22 +54,22 @@ export default function SubmitEventPage({
                 <p className="eyebrow">Submit Event</p>
                 <h1 className="section-title">List an investigator event for free.</h1>
                 <p className="section-copy max-w-3xl">
-                  Submissions are reviewed before publishing. Most are checked within 48 hours, and promoted visibility is available later for major placements.
+                  Every submission is reviewed before it goes live. Most are checked within 48 hours.
                 </p>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
                 <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] transition duration-500 hover:-translate-y-1">
                   <p className="text-[10px] uppercase tracking-[0.18em] text-blue-700">Free listing</p>
-                  <p className="mt-2 text-sm text-slate-700">No charge to submit or browse.</p>
+                  <p className="mt-2 text-sm text-slate-700">Free to submit and free to browse.</p>
                 </div>
                 <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] transition duration-500 hover:-translate-y-1">
                   <p className="text-[10px] uppercase tracking-[0.18em] text-cyan-700">Reviewed</p>
-                  <p className="mt-2 text-sm text-slate-700">Every submission is checked before it goes live.</p>
+                  <p className="mt-2 text-sm text-slate-700">Every listing is checked before it goes live.</p>
                 </div>
                 <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] transition duration-500 hover:-translate-y-1">
                   <p className="text-[10px] uppercase tracking-[0.18em] text-violet-700">Fast turnaround</p>
-                  <p className="mt-2 text-sm text-slate-700">Most submissions reviewed within 48 hours.</p>
+                  <p className="mt-2 text-sm text-slate-700">Most listings are reviewed within 48 hours.</p>
                 </div>
               </div>
             </div>
@@ -89,22 +91,25 @@ export default function SubmitEventPage({
 
               {isError ? (
                 <p className="mt-4 rounded-[1.4rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-                  Submission failed. Confirm the review table is available, then try again.
+                  Submission failed. Please check the required fields and try again shortly.
                 </p>
               ) : null}
 
               <form action={submitEventAction} className="relative mt-6 grid gap-4 sm:grid-cols-2">
+                <input type="text" name="companyWebsite" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
+                <input type="hidden" name="issuedAt" value={formState.issuedAt} />
+                <input type="hidden" name="formToken" value={formState.token} />
                 <label className="text-sm text-slate-700">
                   Event name
-                  <input name="eventName" required className="field-input" />
+                  <input name="eventName" required maxLength={140} className="field-input" />
                 </label>
                 <label className="text-sm text-slate-700">
                   Organiser
-                  <input name="organiser" required className="field-input" />
+                  <input name="organiser" required maxLength={140} className="field-input" />
                 </label>
                 <label className="text-sm text-slate-700">
                   City
-                  <input name="city" required className="field-input" />
+                  <input name="city" required maxLength={120} className="field-input" />
                 </label>
                 <label className="text-sm text-slate-700">
                   Region
@@ -126,6 +131,7 @@ export default function SubmitEventPage({
                     list="submit-event-country-options"
                     required
                     autoComplete="country-name"
+                    maxLength={120}
                     placeholder="Select or enter country"
                     className="field-input"
                   />
@@ -154,10 +160,11 @@ export default function SubmitEventPage({
                 <label className="text-sm text-slate-700">
                   Website
                   <input type="text" name="website" required inputMode="url" placeholder="example.com" className="field-input" />
+                  <span className="mt-1 block text-xs text-slate-500">Use the public event page, with or without `https://`.</span>
                 </label>
                 <label className="text-sm text-slate-700">
                   Contact email
-                  <input type="email" name="contactEmail" required className="field-input" />
+                  <input type="email" name="contactEmail" required maxLength={160} className="field-input" />
                 </label>
                 <label className="text-sm text-slate-700 sm:col-span-2">
                   Listing type
@@ -174,13 +181,13 @@ export default function SubmitEventPage({
                 </label>
                 <label className="text-sm text-slate-700 sm:col-span-2">
                   Notes for review
-                  <textarea name="notes" rows={4} className="field-input" />
+                  <textarea name="notes" rows={4} maxLength={2000} className="field-input" />
                 </label>
-                <div className="sm:col-span-2 flex flex-wrap items-center justify-between gap-3 pt-2">
-                  <p className="max-w-xl text-xs uppercase tracking-[0.14em] text-slate-500">
+                <div className="sm:col-span-2 flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="max-w-xl text-xs leading-relaxed text-slate-500">
                     Submitted listings stay private until review is complete.
                   </p>
-                  <button type="submit" className="btn-primary px-5 py-2.5">
+                  <button type="submit" className="btn-primary w-full px-5 py-2.5 sm:w-auto">
                     Submit for review
                   </button>
                 </div>

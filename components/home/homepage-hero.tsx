@@ -4,6 +4,9 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { motion, useReducedMotion, useSpring } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
+import { geoOrthographic, geoPath } from 'd3-geo';
+import { feature } from 'topojson-client';
+import landData from 'world-atlas/land-110m.json';
 import { AssociationLogoBadge } from '@/components/association-logo-badge';
 import { FeaturedEventMiniMap } from '@/components/featured-event-mini-map';
 import type { EventItem } from '@/lib/data/events';
@@ -134,21 +137,6 @@ function getEventCoordinate(event: EventItem): GlobePoint {
   return REGION_COORDINATES[event.region] ?? { lat: 18, lon: 18 };
 }
 
-function buildDotField() {
-  const dots: Array<GlobePoint> = [];
-
-  for (let lat = -70; lat <= 70; lat += 10) {
-    for (let lon = -180; lon < 180; lon += 12) {
-      const wave = Math.sin((lat + 90) * 0.16 + lon * 0.08);
-      dots.push({
-        lat: lat + wave * 1.6,
-        lon: lon + Math.cos(lon * 0.12 + lat * 0.1) * 1.8
-      });
-    }
-  }
-
-  return dots;
-}
 
 function projectPoint(point: GlobePoint, rotation: number, radiusX: number, radiusY: number) {
   const lat = (point.lat * Math.PI) / 180;
@@ -195,7 +183,7 @@ function HeroEventCard({
       transition={reducedMotion ? undefined : { duration: 11 + delay * 4, delay, repeat: Infinity, ease: 'easeInOut' }}
       style={{ transformStyle: 'preserve-3d' }}
     >
-      <div className={`relative ${compact ? 'min-h-[10rem]' : 'min-h-[17rem]'}`}>
+      <div className={`relative ${compact ? 'min-h-[10rem]' : 'min-h-[14.25rem]'}`}>
         <div
           className="absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(34,117,255,0.34),transparent_28%),radial-gradient(circle_at_82%_16%,rgba(14,182,255,0.3),transparent_22%),radial-gradient(circle_at_84%_80%,rgba(124,58,237,0.16),transparent_24%),radial-gradient(circle_at_62%_72%,rgba(236,72,153,0.12),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.76),rgba(255,255,255,0.16))]"
           style={{ backgroundSize: '140% 140%' }}
@@ -288,7 +276,6 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
   const rotateX = useSpring(0, { stiffness: 90, damping: 22, mass: 0.9 });
   const rotateY = useSpring(0, { stiffness: 90, damping: 22, mass: 0.9 });
 
-  const dotField = useMemo(() => buildDotField(), []);
   const globeEvents = useMemo<GlobeEventNode[]>(
     () =>
       events.slice(0, 4).map((event) => {
@@ -328,20 +315,6 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
     return () => window.cancelAnimationFrame(frame);
   }, [reducedMotion]);
 
-  const projectedDots = useMemo(
-    () =>
-      dotField.map((point, index) => {
-        const projection = projectPoint(point, rotation, 178, 204);
-        return {
-          ...projection,
-          id: index,
-          radius: projection.z > 0 ? 1.5 + projection.z * 1.8 : 0.95,
-          opacity: projection.z > 0 ? 0.24 + projection.z * 0.56 : 0.06 + (projection.z + 1) * 0.08
-        };
-      }),
-    [dotField, rotation]
-  );
-
   const projectedNodes = useMemo(
     () =>
       globeEvents.map((event) => {
@@ -368,6 +341,26 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
       };
     });
   }, [projectedNodes]);
+
+  const landFeature = useMemo(() => feature(landData as any, (landData as any).objects.land) as any, []);
+
+  const projection = useMemo(
+    () =>
+      geoOrthographic()
+        .scale(188)
+        .translate([0, 0])
+        .rotate([rotation * (180 / Math.PI), -15, 0])
+        .clipAngle(90),
+    [rotation]
+  );
+
+  const pathGen = useMemo(() => geoPath(projection), [projection]);
+  const landPath = useMemo(() => pathGen(landFeature) ?? '', [pathGen, landFeature]);
+  const graticulePath = useMemo(() => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { geoGraticule } = require('d3-geo');
+    return pathGen(geoGraticule()()) ?? '';
+  }, [pathGen]);
 
   return (
     <section className="relative overflow-hidden pb-14 pt-2 sm:pb-24 sm:pt-10 lg:pb-28 lg:pt-14">
@@ -539,37 +532,33 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
                     <stop offset="100%" stopColor="rgba(199,223,255,0.26)" />
                   </radialGradient>
                   <radialGradient id="hero-node-glow" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stopColor="#a5f3fc" />
-                    <stop offset="45%" stopColor="#38bdf8" />
-                    <stop offset="100%" stopColor="rgba(56,189,248,0)" />
+                    <stop offset="0%" stopColor="#f0abfc" />
+                    <stop offset="45%" stopColor="#818cf8" />
+                    <stop offset="100%" stopColor="rgba(129,140,248,0)" />
                   </radialGradient>
                   <linearGradient id="hero-route-stroke" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="rgba(45,125,255,0.1)" />
-                    <stop offset="45%" stopColor="rgba(64,201,255,0.95)" />
-                    <stop offset="100%" stopColor="rgba(133,92,255,0.95)" />
+                    <stop offset="0%" stopColor="#60a5fa" />
+                    <stop offset="45%" stopColor="#a78bfa" />
+                    <stop offset="100%" stopColor="#e879f9" />
+                  </linearGradient>
+                  <linearGradient id="continent-gradient" x1="0%" y1="0%" x2="100%" y2="0%" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#155eef" />
+                    <stop offset="25%" stopColor="#10b8ff" />
+                    <stop offset="50%" stopColor="#7c3aed" />
+                    <stop offset="75%" stopColor="#ec4899" />
+                    <stop offset="100%" stopColor="#155eef" />
+                    <animateTransform attributeName="gradientTransform" type="translate" from="-600 0" to="600 0" dur="5.4s" repeatCount="indefinite" />
                   </linearGradient>
                 </defs>
 
                 <ellipse cx="0" cy="204" rx="164" ry="28" fill="rgba(76,127,255,0.12)" />
                 <ellipse cx="0" cy="204" rx="132" ry="18" fill="rgba(125,211,252,0.12)" />
                 <circle cx="0" cy="0" r="190" fill="url(#hero-globe-shell)" opacity="0.82" />
-                <circle cx="0" cy="0" r="190" fill="none" stroke="rgba(255,255,255,0.82)" strokeWidth="1.5" />
-                <ellipse cx="0" cy="0" rx="188" ry="76" fill="none" stroke="rgba(84,130,255,0.12)" strokeWidth="1" />
-                <ellipse cx="0" cy="0" rx="188" ry="128" fill="none" stroke="rgba(84,130,255,0.08)" strokeWidth="1" />
-                <path d="M -188 0 A 188 190 0 0 1 188 0" fill="none" stroke="rgba(255,255,255,0.36)" strokeWidth="1" />
+                <circle cx="0" cy="0" r="190" fill="none" stroke="#22d3ee" strokeWidth="1.5" opacity="0.6" />
 
-                {projectedDots
-                  .filter((dot) => dot.z <= 0)
-                  .map((dot) => (
-                    <circle
-                      key={`back-${dot.id}`}
-                      cx={dot.x}
-                      cy={dot.y}
-                      r={dot.radius}
-                      fill="rgba(74,127,255,0.42)"
-                      opacity={dot.opacity}
-                    />
-                  ))}
+                <path d={landPath} fill="url(#continent-gradient)" opacity="0.15" />
+                <path d={landPath} fill="url(#continent-gradient)" opacity="0.9" />
+                <path d={graticulePath} fill="none" stroke="rgba(139,92,246,0.15)" strokeWidth="0.5" />
 
                 {routePaths.map((route) => (
                   <g key={route.id} opacity={route.opacity}>
@@ -586,19 +575,6 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
                     />
                   </g>
                 ))}
-
-                {projectedDots
-                  .filter((dot) => dot.z > 0)
-                  .map((dot) => (
-                    <circle
-                      key={`front-${dot.id}`}
-                      cx={dot.x}
-                      cy={dot.y}
-                      r={dot.radius}
-                      fill={dot.z > 0.7 ? '#e0f2fe' : '#60a5fa'}
-                      opacity={dot.opacity}
-                    />
-                  ))}
 
                 {projectedNodes.map((node, index) => (
                   <g key={node.id} opacity={node.z > -0.22 ? 1 : 0.34}>

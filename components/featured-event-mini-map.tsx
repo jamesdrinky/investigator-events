@@ -1,9 +1,6 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
-import { geoNaturalEarth1, geoPath } from 'd3-geo';
-import { feature } from 'topojson-client';
-import landData from 'world-atlas/land-110m.json';
 
 interface FeaturedEventMiniMapProps {
   city: string;
@@ -12,150 +9,193 @@ interface FeaturedEventMiniMapProps {
   className?: string;
 }
 
-interface HotspotVariant {
-  primary: [number, number];
-  secondary: Array<{ coordinates: [number, number]; color: 'blue' | 'violet' | 'pink' }>;
+// City-specific grid configs — offsets give each city a subtly unique layout
+const CITY_CONFIGS: Record<string, { gridOffset: number; pinX: number; pinY: number }> = {
+  philadelphia: { gridOffset: 0,    pinX: 62, pinY: 48 },
+  newmarket:    { gridOffset: 12,   pinX: 58, pinY: 44 },
+  prague:       { gridOffset: 24,   pinX: 66, pinY: 52 },
+  london:       { gridOffset: 8,    pinX: 60, pinY: 46 },
+  berlin:       { gridOffset: 16,   pinX: 64, pinY: 50 },
+  paris:        { gridOffset: 20,   pinX: 62, pinY: 47 },
+  chicago:      { gridOffset: 4,    pinX: 60, pinY: 50 },
+  miami:        { gridOffset: 28,   pinX: 64, pinY: 52 },
+  amsterdam:    { gridOffset: 14,   pinX: 61, pinY: 46 },
+  rome:         { gridOffset: 22,   pinX: 63, pinY: 49 },
+};
+
+function getCityConfig(city: string) {
+  const key = city.toLowerCase().replace(/[^a-z]/g, '');
+  return CITY_CONFIGS[key] ?? { gridOffset: (city.charCodeAt(0) * 7) % 30, pinX: 62, pinY: 48 };
 }
 
-const HOTSPOT_VARIANTS: HotspotVariant[] = [
-  {
-    primary: [-74.006, 40.7128],
-    secondary: [
-      { coordinates: [-81.3792, 28.5383], color: 'blue' },
-      { coordinates: [-0.1276, 51.5072], color: 'violet' },
-      { coordinates: [14.4378, 50.0755], color: 'pink' }
-    ]
-  },
-  {
-    primary: [-0.1276, 51.5072],
-    secondary: [
-      { coordinates: [-74.006, 40.7128], color: 'blue' },
-      { coordinates: [13.405, 52.52], color: 'violet' },
-      { coordinates: [14.4378, 50.0755], color: 'pink' }
-    ]
-  },
-  {
-    primary: [13.405, 52.52],
-    secondary: [
-      { coordinates: [-81.3792, 28.5383], color: 'blue' },
-      { coordinates: [-0.1276, 51.5072], color: 'violet' },
-      { coordinates: [14.4378, 50.0755], color: 'pink' }
-    ]
-  },
-  {
-    primary: [14.4378, 50.0755],
-    secondary: [
-      { coordinates: [-74.006, 40.7128], color: 'blue' },
-      { coordinates: [-0.1276, 51.5072], color: 'violet' },
-      { coordinates: [-81.3792, 28.5383], color: 'pink' }
-    ]
-  }
-];
-
-const WIDTH = 1200;
-const HEIGHT = 420;
-const landFeature = feature((landData as any), (landData as any).objects.land) as any;
-const projection = geoNaturalEarth1().fitExtent(
-  [
-    [32, 34],
-    [WIDTH - 30, HEIGHT - 26]
-  ],
-  landFeature
-);
-const pathGenerator = geoPath(projection);
-const landPath = pathGenerator(landFeature) ?? '';
-
-function hashLabel(value: string) {
-  return value.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
-}
-
-function projectPoint([lon, lat]: [number, number]) {
-  const point = projection([lon, lat]);
-  return point ? { x: point[0], y: point[1] } : { x: 0, y: 0 };
-}
-
-export function FeaturedEventMiniMap({ city, country, region, className = '' }: FeaturedEventMiniMapProps) {
+export function FeaturedEventMiniMap({ city, className = '' }: FeaturedEventMiniMapProps) {
   const reducedMotion = useReducedMotion();
-  const variant = HOTSPOT_VARIANTS[hashLabel(`${city}-${country}`) % HOTSPOT_VARIANTS.length];
-  const primary = projectPoint(variant.primary);
-  const secondary = variant.secondary.map((point) => ({ ...point, projected: projectPoint(point.coordinates) }));
+  const config = getCityConfig(city);
+  const { gridOffset: g, pinX: px, pinY: py } = config;
+
+  // Route path: starts bottom-left, curves up to pin
+  const routeStart = { x: 18, y: 88 };
+  const routeEnd   = { x: px, y: py };
+  const routeCtrl  = { x: 32, y: 38 };
+  const routeD = `M ${routeStart.x} ${routeStart.y} Q ${routeCtrl.x} ${routeCtrl.y} ${routeEnd.x} ${routeEnd.y}`;
+
+  // Approximate path length for dash animation
+  const pathLen = 110;
 
   return (
     <div
-      className={`pointer-events-none relative overflow-hidden rounded-[1.2rem] border border-slate-200 bg-[linear-gradient(180deg,rgba(248,251,255,0.98),rgba(240,246,255,0.96))] shadow-[0_20px_44px_-30px_rgba(15,23,42,0.14)] ${className}`}
+      className={`pointer-events-none relative overflow-hidden rounded-[1.1rem] border border-white/60 bg-[linear-gradient(160deg,rgba(240,247,255,0.98),rgba(232,242,255,0.95))] shadow-[0_8px_28px_-12px_rgba(15,23,42,0.18)] ${className}`}
       aria-hidden="true"
+      style={{ width: '100%', height: '100%' }}
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_34%,rgba(37,99,235,0.14),transparent_24%),radial-gradient(circle_at_48%_62%,rgba(124,58,237,0.1),transparent_22%),radial-gradient(circle_at_82%_34%,rgba(255,45,166,0.08),transparent_20%)]" />
-      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0),rgba(180,160,255,0.08))]" />
+      {/* Subtle background tint */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_60%_40%,rgba(96,165,250,0.12),transparent_60%),radial-gradient(circle_at_30%_70%,rgba(232,121,249,0.08),transparent_50%)]" />
+
       <svg
-        viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-        className="absolute left-1/2 top-1/2 h-[144%] w-[144%] -translate-x-[50%] -translate-y-[50%] overflow-visible"
+        viewBox="0 0 100 100"
+        className="absolute inset-0 h-full w-full"
+        xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          <radialGradient id="world-panel-glow" cx="50%" cy="50%" r="52%">
-            <stop offset="0%" stopColor="rgba(37,99,235,0.1)" />
-            <stop offset="55%" stopColor="rgba(124,58,237,0.06)" />
-            <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-          </radialGradient>
-          <radialGradient id="world-hotspot-glow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="rgba(255,255,255,1)" />
-            <stop offset="32%" stopColor="rgba(37,99,235,0.34)" />
-            <stop offset="68%" stopColor="rgba(124,58,237,0.16)" />
-            <stop offset="100%" stopColor="rgba(255,45,166,0)" />
-          </radialGradient>
-          <linearGradient id="world-route-stroke" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="rgba(37,99,235,0.04)" />
-            <stop offset="45%" stopColor="rgba(37,99,235,0.16)" />
-            <stop offset="100%" stopColor="rgba(124,58,237,0.1)" />
+          <linearGradient id="minimap-route" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%"   stopColor="#60a5fa" />
+            <stop offset="55%"  stopColor="#a78bfa" />
+            <stop offset="100%" stopColor="#e879f9" />
+          </linearGradient>
+          <filter id="minimap-glow">
+            <feGaussianBlur stdDeviation="1.2" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          <linearGradient id="minimap-pin-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%"   stopColor="#60a5fa" />
+            <stop offset="100%" stopColor="#e879f9" />
           </linearGradient>
         </defs>
 
-        <ellipse cx="600" cy="224" rx="520" ry="162" fill="url(#world-panel-glow)" />
-
-        <path d={landPath} fill="rgba(255,255,255,0.97)" stroke="rgba(191,219,254,0.7)" strokeWidth="1.1" />
-
-        <g fill="none" stroke="rgba(148,163,184,0.12)" strokeWidth="1">
-          <path d="M126 186Q356 210 578 188" />
-          <path d="M598 184Q818 206 1058 190" />
-          <path d="M706 292Q822 314 980 292" />
-        </g>
-
-        <g stroke="url(#world-route-stroke)" strokeWidth="1.35" fill="none" strokeLinecap="round">
-          <path d={`M ${primary.x} ${primary.y} Q ${(primary.x + secondary[1].projected.x) / 2} ${Math.min(primary.y, secondary[1].projected.y) - 34} ${secondary[1].projected.x} ${secondary[1].projected.y}`} />
-          <path d={`M ${secondary[1].projected.x} ${secondary[1].projected.y} Q ${(secondary[1].projected.x + secondary[2].projected.x) / 2} ${Math.min(secondary[1].projected.y, secondary[2].projected.y) - 20} ${secondary[2].projected.x} ${secondary[2].projected.y}`} />
-          {region ? <path d={`M ${primary.x} ${primary.y} Q ${(primary.x + secondary[0].projected.x) / 2} ${Math.max(primary.y, secondary[0].projected.y) + 28} ${secondary[0].projected.x} ${secondary[0].projected.y}`} /> : null}
-        </g>
-
-        <motion.circle
-          cx={primary.x}
-          cy={primary.y}
-          r="28"
-          fill="url(#world-hotspot-glow)"
-          animate={reducedMotion ? undefined : { scale: [0.92, 1.16, 0.92], opacity: [0.28, 0.6, 0.28] }}
-          transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <circle cx={primary.x} cy={primary.y} r="5.8" fill="#2563EB" />
-
-        {secondary.map((point, index) => (
-          <motion.g key={`${point.projected.x}-${point.projected.y}-${index}`}>
-            <motion.circle
-              cx={point.projected.x}
-              cy={point.projected.y}
-              r="18"
-              fill="url(#world-hotspot-glow)"
-              animate={reducedMotion ? undefined : { opacity: [0.18, 0.34, 0.18], scale: [0.96, 1.08, 0.96] }}
-              transition={{ duration: 2.6 + index * 0.35, repeat: Infinity, ease: 'easeInOut' }}
-            />
-            <motion.circle
-              cx={point.projected.x}
-              cy={point.projected.y}
-              r="4.4"
-              fill={point.color === 'blue' ? '#38BDF8' : point.color === 'violet' ? '#7C3AED' : '#FF2DA6'}
-              animate={reducedMotion ? undefined : { opacity: [0.72, 1, 0.72], scale: [0.98, 1.08, 0.98] }}
-              transition={{ duration: 2.4 + index * 0.4, repeat: Infinity, ease: 'easeInOut' }}
-            />
-          </motion.g>
+        {/* Street grid — horizontal lines */}
+        {[22, 36, 50, 64, 78].map((y, i) => (
+          <line
+            key={`h${i}`}
+            x1={0 + (g % 6)}
+            y1={y}
+            x2={100}
+            y2={y + (g % 4) - 2}
+            stroke="rgba(148,163,184,0.28)"
+            strokeWidth="0.8"
+          />
         ))}
+        {/* Street grid — vertical lines */}
+        {[18, 32, 46, 60, 74, 88].map((x, i) => (
+          <line
+            key={`v${i}`}
+            x1={x + (g % 5) - 2}
+            y1={0}
+            x2={x + (g % 3)}
+            y2={100}
+            stroke="rgba(148,163,184,0.28)"
+            strokeWidth="0.8"
+          />
+        ))}
+
+        {/* A couple of slightly thicker main roads */}
+        <line x1={0} y1={50 + (g % 8) - 4} x2={100} y2={50 + (g % 6) - 3} stroke="rgba(148,163,184,0.45)" strokeWidth="1.4" />
+        <line x1={46 + (g % 6) - 3} y1={0} x2={48 + (g % 4) - 2} y2={100} stroke="rgba(148,163,184,0.45)" strokeWidth="1.4" />
+
+        {/* Route glow (blurred underlay) */}
+        <path
+          d={routeD}
+          fill="none"
+          stroke="url(#minimap-route)"
+          strokeWidth="4"
+          strokeLinecap="round"
+          opacity="0.35"
+          filter="url(#minimap-glow)"
+        />
+
+        {/* Animated route line */}
+        <motion.path
+          d={routeD}
+          fill="none"
+          stroke="url(#minimap-route)"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeDasharray={`${pathLen}`}
+          strokeDashoffset={pathLen}
+          animate={reducedMotion ? undefined : { strokeDashoffset: [pathLen, 0] }}
+          transition={{ duration: 1.4, delay: 0.3, ease: [0.4, 0, 0.2, 1] }}
+        />
+
+        {/* Pulsing dot travelling the route (looped) */}
+        {!reducedMotion && (
+          <motion.circle
+            r="2.2"
+            fill="#e879f9"
+            filter="url(#minimap-glow)"
+            animate={{
+              offsetDistance: ['0%', '100%'],
+              opacity: [0, 1, 1, 0]
+            }}
+            style={{
+              offsetPath: `path("${routeD}")`,
+              offsetRotate: '0deg',
+            } as React.CSSProperties}
+            transition={{ duration: 2.2, delay: 1.6, repeat: Infinity, repeatDelay: 2.8, ease: 'easeInOut' }}
+          />
+        )}
+
+        {/* Origin dot — start of route */}
+        <circle cx={routeStart.x} cy={routeStart.y} r="3" fill="rgba(96,165,250,0.5)" />
+        <circle cx={routeStart.x} cy={routeStart.y} r="1.6" fill="#60a5fa" />
+
+        {/* Pin drop shadow */}
+        <ellipse cx={px} cy={py + 7.5} rx="3.5" ry="1.2" fill="rgba(0,0,0,0.12)" />
+
+        {/* Pin body */}
+        <motion.g
+          animate={reducedMotion ? undefined : { y: [0, -2, 0] }}
+          transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          {/* Pin teardrop */}
+          <path
+            d={`M ${px} ${py - 10} 
+                a 5.5 5.5 0 1 1 0.001 0 
+                L ${px} ${py}`}
+            fill="url(#minimap-pin-gradient)"
+            stroke="rgba(255,255,255,0.8)"
+            strokeWidth="0.8"
+          />
+          {/* Pin centre dot */}
+          <circle cx={px} cy={py - 10} r="2" fill="white" opacity="0.9" />
+
+          {/* Pulse ring around pin */}
+          <motion.circle
+            cx={px}
+            cy={py - 10}
+            r="8"
+            fill="none"
+            stroke="url(#minimap-route)"
+            strokeWidth="1"
+            animate={reducedMotion ? undefined : { r: [6, 11], opacity: [0.7, 0] }}
+            transition={{ duration: 1.8, repeat: Infinity, ease: 'easeOut', repeatDelay: 0.6 }}
+          />
+        </motion.g>
+
+        {/* City label */}
+        <text
+          x={px}
+          y={py + 11}
+          textAnchor="middle"
+          fontSize="5.5"
+          fontWeight="600"
+          fontFamily="system-ui, sans-serif"
+          fill="rgba(30,41,59,0.7)"
+          letterSpacing="0.04em"
+        >
+          {city}
+        </text>
       </svg>
     </div>
   );

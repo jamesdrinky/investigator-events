@@ -195,7 +195,7 @@ function HeroEventCard({
       transition={reducedMotion ? undefined : { duration: 11 + delay * 4, delay, repeat: Infinity, ease: 'easeInOut' }}
       style={{ transformStyle: 'preserve-3d' }}
     >
-      <div className={`relative ${compact ? 'min-h-[10rem]' : 'min-h-[14.25rem]'}`}>
+      <div className={`relative ${compact ? 'min-h-[10rem]' : 'min-h-[17rem]'}`}>
         <div
           className="absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(34,117,255,0.34),transparent_28%),radial-gradient(circle_at_82%_16%,rgba(14,182,255,0.3),transparent_22%),radial-gradient(circle_at_84%_80%,rgba(124,58,237,0.16),transparent_24%),radial-gradient(circle_at_62%_72%,rgba(236,72,153,0.12),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.76),rgba(255,255,255,0.16))]"
           style={{ backgroundSize: '140% 140%' }}

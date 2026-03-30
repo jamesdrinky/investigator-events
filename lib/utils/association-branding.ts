@@ -16,7 +16,7 @@ const associationBrandingRecords: AssociationBrandingRecord[] = [
   {
     name: 'IKD',
     shortName: 'IKD',
-    aliases: ['IKD', 'Internationale Kommission der Detektiv-Verbande', 'Internationale Kommission der Detektiv-Verbände'],
+    aliases: ['IKD', 'Internationale Kommission der Detektiv-Verbande', 'Internationale Kommission der Detektiv-Verbände', 'IKD / FEDERPOL'],
     logoFileName: 'ikd.png'
   },
   { name: 'ODV', shortName: 'ODV', aliases: ['ODV', 'ÖDV', 'OEDV'], logoFileName: 'oedv.png' },
@@ -47,7 +47,13 @@ const associationBrandingRecords: AssociationBrandingRecord[] = [
   { name: 'FAPI', shortName: 'FAPI', aliases: ['FAPI'], logoFileName: 'fapi.png' },
   { name: 'FSPD', shortName: 'FSPD', aliases: ['FSPD'], logoFileName: 'fspd.png' },
   { name: 'IAIACE', shortName: 'IAIACE', aliases: ['IAIACE'], logoFileName: 'iaiace.png' },
-  { name: 'SFPP', shortName: 'SFPP', aliases: ['SFPP'], logoFileName: 'sfpp.png' }
+  { name: 'SFPP', shortName: 'SFPP', aliases: ['SFPP'], logoFileName: 'sfpp.png' },
+  { name: 'CALI', shortName: 'CALI', aliases: ['CALI', 'California Association of Licensed Investigators'], logoFileName: 'cali.png' },
+  { name: 'FALI', shortName: 'FALI', aliases: ['FALI', 'Florida Association of Licensed Investigators'], logoFileName: 'fali.png' },
+  { name: 'FEWA', shortName: 'FEWA', aliases: ['FEWA', 'Forensic Expert Witness Association'], logoFileName: 'fewa.png' },
+  { name: 'NCAPI', shortName: 'NCAPI', aliases: ['NCAPI', 'North Carolina Association of Private Investigators'], logoFileName: 'ncapi.png' },
+  { name: 'NCISS', shortName: 'NCISS', aliases: ['NCISS', 'National Council of Investigation & Security Services'], logoFileName: 'nciss.png' },
+  { name: 'TALI', shortName: 'TALI', aliases: ['TALI', 'Texas Association of Licensed Investigators'], logoFileName: 'tali.png' }
 ];
 
 export function findAssociationBranding(label: string) {
@@ -85,4 +91,8 @@ export function getAssociationBadgeLabel(label: string) {
 
 export function getAssociationDisplayName(label: string) {
   return findAssociationBranding(label)?.shortName ?? label;
+}
+
+export function getAssociationBrandingCount() {
+  return associationBrandingRecords.length;
 }

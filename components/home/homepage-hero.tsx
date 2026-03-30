@@ -405,7 +405,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
           >
             <div className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/86 px-3 py-1.5 shadow-[0_24px_60px_-34px_rgba(15,23,42,0.2)] backdrop-blur-xl">
               <span className="h-2.5 w-2.5 rounded-full bg-cyan-400 shadow-[0_0_0_8px_rgba(34,211,238,0.12)]" />
-              <span className="text-[11px] font-semibold uppercase tracking-[0.26em] text-slate-700">Global events calendar</span>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.26em] text-slate-700">Private Investigator Events Calendar</span>
             </div>
 
             <motion.h1
@@ -432,7 +432,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
                 <span className="text-slate-950">Miss Another</span>
               </span>
               <span className="mt-1.5 block max-w-[10ch] font-semibold leading-[0.88] tracking-[-0.065em] text-slate-950">
-                Industry
+                Investigator
               </span>
               <span className="block font-semibold leading-[0.88] tracking-[-0.065em] text-slate-950">
                 Event
@@ -445,7 +445,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.14, ease: [0.16, 1, 0.3, 1] }}
             >
-              Every confirmed conference, AGM, and training event in the private investigations sector - free to browse, free to list.
+              Every confirmed conference, AGM, and training event for private investigators — free to browse, free to list.
             </motion.p>
 
             <motion.div
@@ -455,7 +455,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             >
               <Link href="/calendar" className="btn-primary min-h-[3.5rem] px-7 text-[15px]">
-                Browse Events
+                Browse PI Events
               </Link>
               <Link href={"/list-your-event" as Route} className="btn-secondary min-h-[3.5rem] px-7 text-[15px]">
                 List Your Event Free

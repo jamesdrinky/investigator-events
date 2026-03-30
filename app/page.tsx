@@ -1,7 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { AssociationLogoBadge } from '@/components/association-logo-badge';
 import { EventCoverMedia } from '@/components/event-cover-media';
 import { FounderQuoteSection } from '@/components/home/FounderQuoteSection';
 import { WhyUseSection } from '@/components/home/WhyUseSection';
@@ -9,6 +8,7 @@ import { HomepageHero } from '@/components/home/homepage-hero';
 import { NewsletterSignupForm } from '@/components/newsletter-signup-form';
 import { Reveal } from '@/components/motion/reveal';
 import { fetchAllEvents, fetchFeaturedEvents } from '@/lib/data/events';
+import { getAssociationBrandLogoSrc, getAssociationBrandingCount } from '@/lib/utils/association-branding';
 import { getCoverageMetrics } from '@/lib/utils/coverage';
 import { getAssociationSummaries, type AssociationSummary } from '@/lib/utils/associations';
 import { formatEventDate, parseDate, sortEventsByDate } from '@/lib/utils/date';
@@ -29,12 +29,23 @@ function formatCount(label: 'event' | 'country', count: number) {
 }
 
 function selectFeaturedAssociation(summaries: AssociationSummary[]) {
-  const preferred = summaries.filter((association) => {
-    const name = association.canonicalName.toLowerCase();
-    return name.includes('world association of detectives') || name === 'wad' || name.includes('association of british investigators') || name.includes('(abi)');
-  });
+  const abi =
+    summaries.find((association) => {
+      const name = association.canonicalName.toLowerCase();
+      return name.includes('association of british investigators') || association.shortName.toLowerCase() === 'abi' || name.includes('(abi)');
+    }) ?? null;
 
-  return preferred[0] ?? summaries[0] ?? null;
+  if (abi) {
+    return abi;
+  }
+
+  const wad =
+    summaries.find((association) => {
+      const name = association.canonicalName.toLowerCase();
+      return name.includes('world association of detectives') || association.shortName.toLowerCase() === 'wad';
+    }) ?? null;
+
+  return wad ?? summaries[0] ?? null;
 }
 
 export default async function HomePage() {
@@ -55,6 +66,7 @@ export default async function HomePage() {
     .filter((association) => association.calendarAssociation !== featuredAssociation?.calendarAssociation)
     .slice(0, 6);
   const activeCountries = Array.from(new Set(mainEvents.map((event) => event.country))).sort();
+  const visibleBodiesCount = getAssociationBrandingCount();
 
   const heroStats = [
     { label: 'Countries', value: coverage.totalCountries },
@@ -232,8 +244,8 @@ export default async function HomePage() {
 
               <div className="mt-6 grid grid-cols-3 gap-2.5 sm:mt-8 sm:gap-3">
                 <div className="rounded-[1.7rem] border border-white/80 bg-white/88 px-5 py-5 shadow-[0_22px_60px_-40px_rgba(15,23,42,0.16)] transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-[0_34px_72px_-40px_rgba(36,76,170,0.22)]">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">Linked hosts</p>
-                  <p className="mt-2 text-3xl font-semibold tracking-[-0.05em] text-slate-950">{liveAssociationSummaries.length}</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">Visible bodies</p>
+                  <p className="mt-2 text-3xl font-semibold tracking-[-0.05em] text-slate-950">{visibleBodiesCount}</p>
                 </div>
                 <div className="rounded-[1.7rem] border border-white/80 bg-white/88 px-5 py-5 shadow-[0_22px_60px_-40px_rgba(15,23,42,0.16)] transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-[0_34px_72px_-40px_rgba(36,76,170,0.22)]">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">Countries</p>
@@ -267,24 +279,24 @@ export default async function HomePage() {
               <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.4),rgba(255,255,255,0)_28%,rgba(255,255,255,0.16)_56%,rgba(255,255,255,0)_100%)]" />
               <div className="relative">
                 <div className="grid gap-3 sm:grid-cols-3">
-                  {secondaryAssociations.map((association, index) => (
+                  {secondaryAssociations.map((association) => (
                     <div
                       key={association.calendarAssociation}
                       className="rounded-[1.6rem] border border-white/90 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(247,250,255,0.9))] p-4 shadow-[0_18px_46px_-34px_rgba(15,23,42,0.14)] transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-[0_30px_70px_-38px_rgba(22,104,255,0.22)]"
                     >
                       <div className="flex h-16 items-center justify-center rounded-[1.2rem] bg-[linear-gradient(145deg,#ffffff,#f5f9ff)] px-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                        {association.logoSrc ? (
-                          <Image
-                            src={association.logoSrc}
-                            alt={`${association.canonicalName} logo`}
-                            width={150}
-                            height={60}
-                            className="h-full w-full object-contain"
-                            priority={index < 3}
-                          />
-                        ) : (
-                          <AssociationLogoBadge associationName={association.calendarAssociation} compact labelHidden className="max-w-[4.5rem]" />
-                        )}
+                        {(() => {
+                          const logoSrc = getAssociationBrandLogoSrc(association.name);
+                          return logoSrc ? (
+                            <img
+                              src={logoSrc}
+                              alt={association.name}
+                              className="h-12 w-auto max-w-[8rem] object-contain"
+                            />
+                          ) : (
+                            <span className="text-lg font-semibold text-slate-500">{association.shortName ?? association.name}</span>
+                          );
+                        })()}
                       </div>
                       <p className="mt-4 text-sm font-semibold leading-tight text-slate-950">{association.canonicalName}</p>
                       <p className="mt-2 text-xs leading-relaxed text-slate-600">
@@ -297,17 +309,18 @@ export default async function HomePage() {
                 {featuredAssociation ? (
                   <div className="mt-6 grid gap-6 rounded-[2rem] border border-white/90 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-6 shadow-[0_26px_70px_-42px_rgba(15,23,42,0.16)] lg:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)] lg:items-center">
                     <div className="flex h-32 items-center justify-center rounded-[1.7rem] bg-[linear-gradient(145deg,#ffffff,#f5f9ff)] px-6 shadow-[inset_0_0_0_1px_rgba(226,232,240,0.82)]">
-                      {featuredAssociation.logoSrc ? (
-                        <Image
-                          src={featuredAssociation.logoSrc}
-                          alt={`${featuredAssociation.canonicalName} logo`}
-                          width={260}
-                          height={100}
-                          className="h-full w-full object-contain"
-                        />
-                      ) : (
-                        <span className="text-lg font-semibold uppercase tracking-[0.22em] text-slate-700">{featuredAssociation.shortName}</span>
-                      )}
+                      {(() => {
+                        const logoSrc = getAssociationBrandLogoSrc(featuredAssociation.name);
+                        return logoSrc ? (
+                          <img
+                            src={logoSrc}
+                            alt={featuredAssociation.name}
+                            className="h-16 w-auto max-w-[12rem] object-contain"
+                          />
+                        ) : (
+                          <span className="text-2xl font-semibold text-slate-800">{featuredAssociation.shortName}</span>
+                        );
+                      })()}
                     </div>
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-blue-700">Featured network</p>

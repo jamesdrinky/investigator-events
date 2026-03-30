@@ -9,13 +9,15 @@ const associationBrandingRecords: AssociationBrandingRecord[] = [
   {
     name: 'Association of British Investigators',
     shortName: 'ABI',
-    aliases: ['Association of British Investigators', 'Association of British Investigators (ABI)', 'ABI']
+    aliases: ['Association of British Investigators', 'Association of British Investigators (ABI)', 'ABI'],
+    logoFileName: 'abi.png'
   },
-  { name: 'WAD', shortName: 'WAD', aliases: ['WAD', 'World Association of Detectives'] },
+  { name: 'WAD', shortName: 'WAD', aliases: ['WAD', 'World Association of Detectives'], logoFileName: 'wad.png' },
   {
     name: 'IKD',
     shortName: 'IKD',
-    aliases: ['IKD', 'Internationale Kommission der Detektiv-Verbande', 'Internationale Kommission der Detektiv-Verbände']
+    aliases: ['IKD', 'Internationale Kommission der Detektiv-Verbande', 'Internationale Kommission der Detektiv-Verbände'],
+    logoFileName: 'ikd.png'
   },
   { name: 'ODV', shortName: 'ODV', aliases: ['ODV', 'ÖDV', 'OEDV'], logoFileName: 'oedv.png' },
   { name: 'EURODET', shortName: 'EURODET', aliases: ['EURODET'], logoFileName: 'eurodet.png' },
@@ -36,7 +38,16 @@ const associationBrandingRecords: AssociationBrandingRecord[] = [
   { name: 'PDPR', shortName: 'PDPR', aliases: ['PDPR'], logoFileName: 'pdpr.png' },
   { name: 'ARD', shortName: 'ARD', aliases: ['ARD'], logoFileName: 'ard.png' },
   { name: 'SAD', shortName: 'SAD', aliases: ['SAD'], logoFileName: 'sad.png' },
-  { name: 'DZRS', shortName: 'DZRS', aliases: ['DZRS'], logoFileName: 'dzrs.png' }
+  { name: 'DZRS', shortName: 'DZRS', aliases: ['DZRS'], logoFileName: 'dzrs.png' },
+  { name: 'CII', shortName: 'CII', aliases: ['CII', 'Chartered Insurance Institute'], logoFileName: 'cii.png' },
+  { name: 'Intellenet', shortName: 'Intellenet', aliases: ['Intellenet', 'INTELLENET'], logoFileName: undefined },
+  { name: 'APDPE', shortName: 'APDPE', aliases: ['APDPE'], logoFileName: 'apdpe.png' },
+  { name: 'APDU', shortName: 'APDU', aliases: ['APDU'], logoFileName: 'apdu.png' },
+  { name: 'CODPC', shortName: 'CODPC', aliases: ['CODPC'], logoFileName: 'codpc.png' },
+  { name: 'FAPI', shortName: 'FAPI', aliases: ['FAPI'], logoFileName: 'fapi.png' },
+  { name: 'FSPD', shortName: 'FSPD', aliases: ['FSPD'], logoFileName: 'fspd.png' },
+  { name: 'IAIACE', shortName: 'IAIACE', aliases: ['IAIACE'], logoFileName: 'iaiace.png' },
+  { name: 'SFPP', shortName: 'SFPP', aliases: ['SFPP'], logoFileName: 'sfpp.png' }
 ];
 
 export function findAssociationBranding(label: string) {

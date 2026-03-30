@@ -7,10 +7,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { geoOrthographic, geoPath } from 'd3-geo';
 import { feature } from 'topojson-client';
 import landData from 'world-atlas/land-110m.json';
-import { AssociationLogoBadge } from '@/components/association-logo-badge';
-import { FeaturedEventMiniMap } from '@/components/featured-event-mini-map';
 import type { EventItem } from '@/lib/data/events';
-import { getAssociationDisplayName } from '@/lib/utils/association-branding';
+import { AssociationLogoBadge } from '@/components/association-logo-badge';
+import { getAssociationBrandLogoSrc, getAssociationDisplayName } from '@/lib/utils/association-branding';
 import { formatEventDate } from '@/lib/utils/date';
 import { getEventSlug } from '@/lib/utils/event-slugs';
 
@@ -183,7 +182,7 @@ function HeroEventCard({
       transition={reducedMotion ? undefined : { duration: 11 + delay * 4, delay, repeat: Infinity, ease: 'easeInOut' }}
       style={{ transformStyle: 'preserve-3d' }}
     >
-      <div className={`relative ${compact ? 'min-h-[10rem]' : 'min-h-[14.25rem]'}`}>
+      <div className={`relative ${compact ? 'min-h-[10rem] max-h-[13rem] overflow-hidden' : 'flex min-h-[18rem] flex-col'}`}>
         <div
           className="absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(34,117,255,0.34),transparent_28%),radial-gradient(circle_at_82%_16%,rgba(14,182,255,0.3),transparent_22%),radial-gradient(circle_at_84%_80%,rgba(124,58,237,0.16),transparent_24%),radial-gradient(circle_at_62%_72%,rgba(236,72,153,0.12),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.76),rgba(255,255,255,0.16))]"
           style={{ backgroundSize: '140% 140%' }}
@@ -209,61 +208,68 @@ function HeroEventCard({
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(130deg,rgba(255,255,255,0.3),rgba(255,255,255,0)_34%,rgba(255,255,255,0.16)_58%,rgba(255,255,255,0)_76%)] opacity-90" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,rgba(111,86,255,0.16),transparent_26%),radial-gradient(circle_at_0%_100%,rgba(34,211,238,0.14),transparent_22%),radial-gradient(circle_at_84%_18%,rgba(236,72,153,0.1),transparent_20%)] opacity-90" />
 
-        <div className="absolute left-4 top-4 z-10">
-          <AssociationLogoBadge associationName={event.associationName} compact labelHidden className="max-w-[4.25rem]" />
+        <div className="absolute inset-x-0 top-0 z-10 px-5 pt-5">
+          {(() => {
+            const logoSrc = event.associationName ? getAssociationBrandLogoSrc(event.associationName) : null;
+            return logoSrc ? (
+              <img
+                src={logoSrc}
+                alt={event.associationName ?? ''}
+                className="h-8 w-auto max-w-[9rem] object-contain"
+              />
+            ) : (
+              <AssociationLogoBadge associationName={event.associationName} compact labelHidden className="max-w-[4.25rem]" />
+            );
+          })()}
         </div>
 
-        {!compact ? (
-          <div className="absolute left-4 top-[3.7rem] z-10">
-            <FeaturedEventMiniMap city={event.city} country={event.country} />
-          </div>
-        ) : null}
-
         <motion.div
-          className={`absolute inset-x-0 bottom-0 z-10 ${compact ? 'p-4 sm:p-5' : 'p-5 sm:p-5'}`}
+          className={compact ? 'absolute inset-x-0 bottom-0 z-10 p-4 sm:p-5' : 'mt-auto z-10 px-5 pb-5'}
           animate={reducedMotion ? undefined : { y: [0, -1.5, 0] }}
           transition={{ duration: 10 + delay * 3, repeat: Infinity, ease: 'easeInOut' }}
         >
-          <p
-            className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${
-              image ? 'text-sky-100/90' : 'text-slate-500'
-            }`}
-            style={{
-              display: '-webkit-box',
-              WebkitLineClamp: 1,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden'
-            }}
-          >
-            {event.associationName ? getAssociationDisplayName(event.associationName) : 'Featured event'}
-          </p>
-          <p
-            className={`mt-2 max-w-[18rem] font-semibold leading-[1.08] tracking-[-0.03em] ${compact ? 'text-[0.96rem]' : 'text-[1.17rem]'} ${
-              image ? 'text-white' : 'text-slate-950'
-            }`}
-            style={{
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden'
-            }}
-          >
-            {event.title}
-          </p>
-          <p className={`mt-2.5 text-[10px] font-semibold uppercase tracking-[0.15em] ${image ? 'text-sky-100/92' : 'text-blue-700'}`}>
-            {event.date}
-          </p>
-          <p
-            className={`mt-1.5 text-[11px] font-medium leading-[1.25] ${image ? 'text-white/88' : 'text-slate-600'}`}
-            style={{
-              display: '-webkit-box',
-              WebkitLineClamp: 1,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden'
-            }}
-          >
-            {event.city}, {event.country}
-          </p>
+          <div className="flex min-w-0 flex-col gap-1 pt-3">
+            <p
+              className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${
+                image ? 'text-sky-100/90' : 'text-slate-500'
+              }`}
+              style={{
+                display: '-webkit-box',
+                WebkitLineClamp: 1,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden'
+              }}
+            >
+              {event.associationName ? getAssociationDisplayName(event.associationName) : 'Featured event'}
+            </p>
+            <p
+              className={`min-w-0 font-semibold leading-[1.08] tracking-[-0.03em] ${compact ? 'line-clamp-2 text-[0.96rem]' : 'max-w-[18rem] text-[1.17rem]'} ${
+                image ? 'text-white' : 'text-slate-950'
+              }`}
+              style={{
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden'
+              }}
+            >
+              {event.title}
+            </p>
+            <p className={`text-[10px] font-semibold uppercase tracking-[0.15em] ${image ? 'text-sky-100/92' : 'text-blue-700'}`}>
+              {event.date}
+            </p>
+            <p
+              className={`text-[11px] font-medium leading-[1.25] ${image ? 'text-white/88' : 'text-slate-600'}`}
+              style={{
+                display: '-webkit-box',
+                WebkitLineClamp: 1,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden'
+              }}
+            >
+              {event.city}, {event.country}
+            </p>
+          </div>
         </motion.div>
       </div>
     </motion.article>
@@ -502,22 +508,6 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
                 transformStyle: 'preserve-3d'
               }}
             >
-              <motion.div
-                className="absolute inset-[8%] rounded-full bg-[radial-gradient(circle,rgba(79,70,229,0.24),rgba(14,165,233,0.18)_34%,rgba(236,72,153,0.08)_56%,transparent_68%)] blur-3xl"
-                animate={reducedMotion ? undefined : { opacity: [0.66, 0.84, 0.7], scale: [1, 1.02, 1] }}
-                transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
-              />
-              <motion.div
-                className="absolute inset-x-[14%] bottom-[8%] h-[16%] rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.32),rgba(22,104,255,0.08)_52%,transparent_76%)] blur-2xl"
-                animate={reducedMotion ? undefined : { x: [0, 8, -5, 0], opacity: [0.64, 0.86, 0.68] }}
-                transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-              />
-              <motion.div
-                className="absolute left-[18%] top-[18%] h-[12rem] w-[12rem] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.72),rgba(255,255,255,0.02)_68%)] blur-2xl"
-                animate={reducedMotion ? undefined : { x: [0, 6, -4, 0], y: [0, -6, 4, 0], opacity: [0.66, 0.84, 0.7] }}
-                transition={{ duration: 13, repeat: Infinity, ease: 'easeInOut' }}
-              />
-
               <motion.div
                 className="absolute inset-[10%] rounded-[3rem] border border-white/70 bg-[linear-gradient(145deg,rgba(255,255,255,0.84),rgba(241,247,255,0.36))] shadow-[0_52px_162px_-64px_rgba(49,66,180,0.46)] backdrop-blur-2xl"
                 animate={reducedMotion ? undefined : { y: [0, -4, 0, 2, 0], rotateZ: [0, 0.2, 0, -0.12, 0] }}

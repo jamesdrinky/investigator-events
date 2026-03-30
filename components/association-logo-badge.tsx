@@ -66,7 +66,7 @@ export function AssociationLogoBadge({
             alt={`${associationRecord?.name ?? associationName} logo`}
             width={compact ? 68 : 84}
             height={compact ? 24 : 28}
-            className={`w-auto object-contain ${tone === 'dark' ? 'brightness-[3.2] contrast-125' : 'contrast-110 saturate-110'} ${
+            className={`w-auto object-contain ${tone === 'dark' ? 'brightness-[10] saturate-0' : 'contrast-110 saturate-110'} ${
               compact ? 'h-[1.05rem] max-w-[2.7rem]' : 'h-[1.2rem] max-w-[3.3rem]'
             }`}
           />

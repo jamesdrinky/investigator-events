@@ -71,7 +71,7 @@ export default async function HomePage() {
   const heroStats = [
     { label: 'Countries', value: coverage.totalCountries },
     { label: 'Live events', value: coverage.totalEvents },
-    { label: 'Associations', value: liveAssociationSummaries.length }
+    { label: 'Associations', value: '12+' }
   ];
 
   return (
@@ -286,7 +286,7 @@ export default async function HomePage() {
                             <img
                               src={logoSrc}
                               alt={association.name}
-                              className="h-12 w-auto max-w-[8rem] object-contain"
+                              className={`h-12 w-auto max-w-[8rem] object-contain ${logoSrc.includes('/abi.png') ? 'grayscale brightness-0 contrast-200' : ''}`}
                             />
                           ) : (
                             <span className="text-lg font-semibold text-slate-500">{association.shortName ?? association.name}</span>
@@ -310,7 +310,7 @@ export default async function HomePage() {
                           <img
                             src={logoSrc}
                             alt={featuredAssociation.name}
-                            className="h-16 w-auto max-w-[12rem] object-contain"
+                            className={`h-16 w-auto max-w-[12rem] object-contain ${logoSrc.includes('/abi.png') ? 'grayscale brightness-0 contrast-200' : ''}`}
                           />
                         ) : (
                           <span className="text-2xl font-semibold text-slate-800">{featuredAssociation.shortName}</span>

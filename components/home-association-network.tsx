@@ -40,7 +40,7 @@ export function HomeAssociationNetwork({ associations }: HomeAssociationNetworkP
                     alt={`${association.canonicalName} logo`}
                     width={160}
                     height={80}
-                    className="h-full w-full object-contain"
+                    className={`h-full w-full object-contain ${association.logoSrc.includes('/abi.png') ? 'grayscale brightness-0 contrast-200' : ''}`}
                   />
                 ) : (
                   <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-700">{association.shortName}</span>

@@ -170,11 +170,10 @@ function HeroEventCard({
   compact?: boolean;
 }) {
   const reducedMotion = useReducedMotion();
-  const image = safeCoverImage(event.coverImage);
 
   return (
     <motion.article
-      className={`pointer-events-auto absolute overflow-hidden rounded-[1.9rem] border border-white/75 bg-[linear-gradient(155deg,rgba(255,255,255,0.92),rgba(239,245,255,0.8))] shadow-[0_30px_80px_-44px_rgba(36,76,170,0.26)] backdrop-blur-xl will-change-transform ${className}`}
+      className={`pointer-events-auto absolute overflow-hidden rounded-[1.8rem] border border-slate-200/70 bg-[linear-gradient(155deg,rgba(255,255,255,0.88),rgba(241,245,255,0.82))] shadow-[0_22px_56px_-38px_rgba(15,23,42,0.18)] backdrop-blur-xl will-change-transform ${className}`}
       initial={false}
       animate={
         reducedMotion ? undefined : { y: [0, compact ? -4 : -6, 0], rotateZ: [0, compact ? -0.45 : -0.6, 0, compact ? 0.35 : 0.45, 0] }
@@ -182,45 +181,37 @@ function HeroEventCard({
       transition={reducedMotion ? undefined : { duration: 11 + delay * 4, delay, repeat: Infinity, ease: 'easeInOut' }}
       style={{ transformStyle: 'preserve-3d' }}
     >
-      <div className={`relative ${compact ? 'min-h-[10rem] max-h-[13rem] overflow-hidden' : 'flex min-h-[14rem] flex-col'}`}>
+      <div className={`relative ${compact ? 'min-h-[9.5rem] max-h-[12rem] overflow-hidden' : 'flex min-h-[12.5rem] flex-col'}`}>
         <div
-          className="absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(34,117,255,0.34),transparent_28%),radial-gradient(circle_at_82%_16%,rgba(14,182,255,0.3),transparent_22%),radial-gradient(circle_at_84%_80%,rgba(124,58,237,0.16),transparent_24%),radial-gradient(circle_at_62%_72%,rgba(236,72,153,0.12),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.76),rgba(255,255,255,0.16))]"
+          className="absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(59,130,246,0.12),transparent_28%),radial-gradient(circle_at_82%_16%,rgba(14,165,233,0.1),transparent_22%),radial-gradient(circle_at_84%_80%,rgba(99,102,241,0.08),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.94),rgba(248,250,252,0.9))]"
           style={{ backgroundSize: '140% 140%' }}
         />
         <motion.div
-          className="pointer-events-none absolute inset-0 bg-[linear-gradient(118deg,rgba(255,255,255,0)_18%,rgba(255,255,255,0.28)_38%,rgba(255,255,255,0.08)_52%,rgba(255,255,255,0)_72%)] opacity-70"
+          className="pointer-events-none absolute inset-0 bg-[linear-gradient(118deg,rgba(255,255,255,0)_18%,rgba(255,255,255,0.22)_38%,rgba(255,255,255,0.06)_52%,rgba(255,255,255,0)_72%)] opacity-60"
           animate={reducedMotion ? undefined : { x: ['-16%', '84%'] }}
           transition={{ duration: 4.8, delay: 1.2 + delay, repeat: Infinity, repeatDelay: 7.5, ease: 'easeInOut' }}
         />
-        <div className="pointer-events-none absolute inset-0 rounded-[1.9rem] ring-1 ring-white/55" />
-        {image ? (
-          <>
-            <motion.img
-              src={image}
-              alt={`${event.title} image`}
-              className="absolute inset-0 h-full w-full object-cover"
-              animate={reducedMotion ? undefined : { scale: [1, 1.02, 1] }}
-              transition={{ duration: 14 + delay * 2, repeat: Infinity, ease: 'easeInOut' }}
-            />
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,17,31,0.06),rgba(9,17,31,0.24)_38%,rgba(6,12,22,0.82))]" />
-          </>
-        ) : null}
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(130deg,rgba(255,255,255,0.3),rgba(255,255,255,0)_34%,rgba(255,255,255,0.16)_58%,rgba(255,255,255,0)_76%)] opacity-90" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,rgba(111,86,255,0.16),transparent_26%),radial-gradient(circle_at_0%_100%,rgba(34,211,238,0.14),transparent_22%),radial-gradient(circle_at_84%_18%,rgba(236,72,153,0.1),transparent_20%)] opacity-90" />
+        <div className="pointer-events-none absolute inset-0 rounded-[1.8rem] ring-1 ring-white/55" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(130deg,rgba(255,255,255,0.2),rgba(255,255,255,0)_34%,rgba(255,255,255,0.08)_58%,rgba(255,255,255,0)_76%)] opacity-75" />
 
-        <div className="absolute inset-x-0 top-0 z-10 px-5 pt-5">
-          {(() => {
-            const logoSrc = event.associationName ? getAssociationBrandLogoSrc(event.associationName) : null;
-            return logoSrc ? (
-              <img
-                src={logoSrc}
-                alt={event.associationName ?? ''}
-                className="h-8 w-auto max-w-[9rem] object-contain"
-              />
-            ) : (
-              <AssociationLogoBadge associationName={event.associationName} compact labelHidden className="max-w-[4.25rem]" />
-            );
-          })()}
+        <div className="absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-3 px-4 pt-4 sm:px-5 sm:pt-5">
+          <div className="min-w-0 rounded-full border border-slate-200/80 bg-white/78 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500 backdrop-blur-md">
+            {compact ? 'Live event' : 'Featured event'}
+          </div>
+          <div className="flex min-w-0 items-center justify-end">
+            {(() => {
+              const logoSrc = event.associationName ? getAssociationBrandLogoSrc(event.associationName) : null;
+              return logoSrc ? (
+                <img
+                  src={logoSrc}
+                  alt={event.associationName ?? ''}
+                  className={`h-6 w-auto max-w-[7rem] object-contain opacity-90 ${logoSrc.includes('/abi.png') ? 'grayscale brightness-0 contrast-200' : ''}`}
+                />
+              ) : (
+                <AssociationLogoBadge associationName={event.associationName} compact labelHidden className="max-w-[3.25rem]" />
+              );
+            })()}
+          </div>
         </div>
 
         <motion.div
@@ -228,11 +219,9 @@ function HeroEventCard({
           animate={reducedMotion ? undefined : { y: [0, -1.5, 0] }}
           transition={{ duration: 10 + delay * 3, repeat: Infinity, ease: 'easeInOut' }}
         >
-          <div className="flex min-w-0 flex-col gap-1 pt-3">
+          <div className="flex min-w-0 flex-col gap-1.5 pt-3">
             <p
-              className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${
-                image ? 'text-sky-100/90' : 'text-slate-500'
-              }`}
+              className="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500"
               style={{
                 display: '-webkit-box',
                 WebkitLineClamp: 1,
@@ -243,9 +232,7 @@ function HeroEventCard({
               {event.associationName ? getAssociationDisplayName(event.associationName) : 'Featured event'}
             </p>
             <p
-              className={`min-w-0 font-semibold leading-[1.08] tracking-[-0.03em] ${compact ? 'line-clamp-2 text-[0.96rem]' : 'max-w-[18rem] text-[1.17rem]'} ${
-                image ? 'text-white' : 'text-slate-950'
-              }`}
+              className={`min-w-0 font-semibold leading-[1.08] tracking-[-0.03em] text-slate-950 ${compact ? 'line-clamp-2 text-[0.96rem]' : 'max-w-[14rem] text-[1.04rem]'}`}
               style={{
                 display: '-webkit-box',
                 WebkitLineClamp: 2,
@@ -255,20 +242,21 @@ function HeroEventCard({
             >
               {event.title}
             </p>
-            <p className={`text-[10px] font-semibold uppercase tracking-[0.15em] ${image ? 'text-sky-100/92' : 'text-blue-700'}`}>
-              {event.date}
-            </p>
-            <p
-              className={`text-[11px] font-medium leading-[1.25] ${image ? 'text-white/88' : 'text-slate-600'}`}
-              style={{
-                display: '-webkit-box',
-                WebkitLineClamp: 1,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden'
-              }}
-            >
-              {event.city}, {event.country}
-            </p>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] font-medium text-slate-600">
+              <p className="font-semibold uppercase tracking-[0.15em] text-blue-700">{event.date}</p>
+              <span className="text-slate-300">•</span>
+              <p
+                className="min-w-0"
+                style={{
+                  display: '-webkit-box',
+                  WebkitLineClamp: 1,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden'
+                }}
+              >
+                {event.city}, {event.country}
+              </p>
+            </div>
           </div>
         </motion.div>
       </div>

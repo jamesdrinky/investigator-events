@@ -26,6 +26,7 @@ export function AssociationLogoBadge({
 
   const associationRecord = findAssociationBranding(associationName);
   const logoSrc = getAssociationBrandLogoSrc(associationName);
+  const isAbiLogo = logoSrc?.includes('/abi.png');
   const badgeLabel = getAssociationBadgeLabel(associationName);
   const shouldShowLogo = Boolean(logoSrc && !mini);
   const shellClasses =
@@ -66,7 +67,7 @@ export function AssociationLogoBadge({
             alt={`${associationRecord?.name ?? associationName} logo`}
             width={compact ? 68 : 84}
             height={compact ? 24 : 28}
-            className={`w-auto object-contain ${tone === 'dark' ? 'brightness-[10] saturate-0' : 'contrast-110 saturate-110'} ${
+            className={`w-auto object-contain ${isAbiLogo ? 'grayscale brightness-0 contrast-200' : tone === 'dark' ? 'brightness-[10] saturate-0' : 'contrast-110 saturate-110'} ${
               compact ? 'h-[1.05rem] max-w-[2.7rem]' : 'h-[1.2rem] max-w-[3.3rem]'
             }`}
           />

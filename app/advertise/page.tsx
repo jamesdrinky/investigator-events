@@ -12,16 +12,16 @@ const advertiserTypes = [
 
 const placementOptions = [
   {
-    title: 'Featured event support',
-    text: 'Extra visibility for major conferences, training programmes, or association-led gatherings already relevant to the audience.'
+    title: 'Get in touch',
+    text: 'Get in touch to discuss how we can work together.'
   },
   {
-    title: 'Supplier visibility',
-    text: 'Relevant tools and services placed beside the calendar, weekly page, and related event discovery surfaces.'
+    title: 'Get in touch',
+    text: 'Get in touch to discuss how we can work together.'
   },
   {
-    title: 'Email update sponsorship',
-    text: 'Limited sponsorship around the weekly email update for subscribers who want new events and approaching dates.'
+    title: 'Get in touch',
+    text: 'Get in touch to discuss how we can work together.'
   }
 ];
 
@@ -76,7 +76,7 @@ export default function AdvertisePage() {
                 <div className="mt-5 rounded-[1.4rem] border border-emerald-100 bg-[linear-gradient(145deg,rgba(236,253,245,0.98),rgba(255,255,255,0.92))] p-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-emerald-700">Current scope</p>
                   <p className="mt-2 text-sm text-slate-700">
-                    Current options are limited to relevant partnerships, featured event support, and supplier visibility. This is not an open self-serve ad platform.
+                    Get in touch to discuss how we can work together.
                   </p>
                 </div>
               </div>
@@ -97,7 +97,7 @@ export default function AdvertisePage() {
                 </article>
                 <article className="rounded-xl border border-slate-200/80 bg-slate-50/90 p-4">
                   <p className="text-xs uppercase tracking-[0.16em] text-violet-700">Format options</p>
-                  <p className="mt-2 text-sm text-slate-700">Featured conference support, supplier visibility, and weekly email sponsorship.</p>
+                  <p className="mt-2 text-sm text-slate-700">Get in touch to discuss how we can work together.</p>
                 </article>
               </div>
             </section>

@@ -44,6 +44,7 @@ export function EventCard({ event, priority = 'default', isSignalActive = false,
         country={event.country}
         region={event.region}
         category={event.category}
+        imagePath={event.image_path}
         coverImage={event.coverImage}
         coverImageAlt={event.coverImageAlt}
         associationName={hostLabel}

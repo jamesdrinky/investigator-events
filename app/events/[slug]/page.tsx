@@ -21,24 +21,6 @@ async function resolveEvent(slug: string) {
   return { event, events };
 }
 
-function buildAudienceCopy(category?: string) {
-  if (!category) {
-    return 'Best for investigators, organisers, suppliers, and industry professionals tracking major dates and network activity.';
-  }
-
-  const normalized = category.toLowerCase();
-
-  if (normalized.includes('training')) {
-    return 'Best for investigators, analysts, and teams looking for practical development, certification, or specialist upskilling.';
-  }
-
-  if (normalized.includes('association')) {
-    return 'Best for members, leadership teams, and professionals following association activity and industry coordination.';
-  }
-
-  return 'Best for investigators, organisers, suppliers, and industry professionals tracking major dates and network activity.';
-}
-
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const slug = params?.slug?.trim();
   const { event } = await resolveEvent(slug ?? '');
@@ -155,6 +137,7 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
                 country={country}
                 region={region}
                 category={category}
+                imagePath={event.image_path}
                 coverImage={event.coverImage}
                 coverImageAlt={event.coverImageAlt}
                 associationName={organiser}
@@ -168,25 +151,12 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
         <Reveal delay={0.04}>
           <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
             <article className="rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-6 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.16)] sm:p-7">
-              <p className="eyebrow">Why Open This</p>
-              <h2 className="mt-4 font-[var(--font-serif)] text-3xl text-slate-950">A useful event record, not just a title and date.</h2>
-              <div className="mt-6 grid gap-3">
-                <div className="rounded-[1.5rem] border border-slate-200/80 bg-slate-50/90 p-4">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-blue-700">Who it is for</p>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-700">{buildAudienceCopy(category)}</p>
-                </div>
-                <div className="rounded-[1.5rem] border border-slate-200/80 bg-slate-50/90 p-4">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-cyan-700">Why it matters</p>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-700">
-                    This record brings together the key facts people need before they decide to travel, register, submit, sponsor, or monitor timing.
-                  </p>
-                </div>
-                <div className="rounded-[1.5rem] border border-slate-200/80 bg-slate-50/90 p-4">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-violet-700">What to do next</p>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-700">
-                    Use the official website for registration and agenda details, then save the dates to your own calendar.
-                  </p>
-                </div>
+              <p className="eyebrow">Event Description</p>
+              <h2 className="mt-4 font-[var(--font-serif)] text-3xl text-slate-950">What this event is about.</h2>
+              <div className="mt-6 rounded-[1.5rem] border border-slate-200/80 bg-slate-50/90 p-4">
+                <p className="text-sm leading-relaxed text-slate-700">
+                  {event.description || 'Official event details, organiser information, location, dates, and save links in one clean record.'}
+                </p>
               </div>
             </article>
 

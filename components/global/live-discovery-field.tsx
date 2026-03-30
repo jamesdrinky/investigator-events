@@ -187,6 +187,7 @@ export function LiveDiscoveryField({ events, regions }: LiveDiscoveryFieldProps)
                   country={node.event.country}
                   region={node.event.region}
                   category={node.event.category}
+                  imagePath={node.event.image_path}
                   coverImage={node.event.coverImage}
                   coverImageAlt={node.event.coverImageAlt}
                   associationName={node.event.association ?? node.event.organiser}

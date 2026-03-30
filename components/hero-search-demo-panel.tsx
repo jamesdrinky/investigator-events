@@ -295,6 +295,7 @@ export function HeroSearchDemoPanel({ demos }: HeroSearchDemoPanelProps) {
                         country={activeDemo.event.country}
                         region={activeDemo.event.region}
                         category={activeDemo.event.category}
+                        imagePath={activeDemo.event.image_path}
                         coverImage={activeDemo.event.coverImage}
                         coverImageAlt={activeDemo.event.coverImageAlt}
                         associationName={activeDemo.event.association ?? activeDemo.event.organiser}

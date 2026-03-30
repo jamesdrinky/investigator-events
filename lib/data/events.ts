@@ -17,6 +17,7 @@ export interface EventItem {
   category: string;
   description: string;
   website: string;
+  image_path?: string;
   coverImage?: string;
   coverImageAlt?: string;
   featured: boolean;
@@ -38,6 +39,7 @@ type CompatEventRow = Partial<EventRow> & {
   approved?: boolean | null;
   updated_at?: string | null;
   association?: string | null;
+  image_path?: string | null;
   cover_image_url?: string | null;
   image_url?: string | null;
   image?: string | null;
@@ -66,7 +68,8 @@ export function mapEventRowToItem(row: CompatEventRow): EventItem | null {
     category: row.category,
     description: row.description ?? '',
     website: row.website,
-    coverImage: row.cover_image_url ?? row.image_url ?? row.image ?? undefined,
+    image_path: row.image_path ?? undefined,
+    coverImage: row.image_path ?? row.cover_image_url ?? row.image_url ?? row.image ?? undefined,
     coverImageAlt: row.cover_image_alt ?? undefined,
     featured: row.featured ?? false,
     approved: row.approved ?? true,
@@ -77,13 +80,13 @@ export function mapEventRowToItem(row: CompatEventRow): EventItem | null {
 
 async function fetchRawEvents(): Promise<CompatEventRow[]> {
   const supabase = createSupabasePublicServerClient();
-  const primary = await supabase.from('events').select('*').order('date', { ascending: true });
+  const primary = await supabase.from('events').select('*, image_path').order('date', { ascending: true });
 
   if (!primary.error) {
     return (primary.data ?? []) as CompatEventRow[];
   }
 
-  const fallback = await supabase.from('events').select('*').order('start_date', { ascending: true });
+  const fallback = await supabase.from('events').select('*, image_path').order('start_date', { ascending: true });
 
   if (fallback.error) {
     return [];

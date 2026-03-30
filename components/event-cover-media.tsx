@@ -1,8 +1,8 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
 import { AssociationLogoBadge } from '@/components/association-logo-badge';
-import { EventCityVisual } from '@/components/event-city-visual';
 
 interface EventCoverMediaProps {
   title: string;
@@ -10,6 +10,7 @@ interface EventCoverMediaProps {
   country: string;
   region: string;
   category?: string;
+  imagePath?: string;
   coverImage?: string;
   coverImageAlt?: string;
   className?: string;
@@ -80,6 +81,7 @@ export function EventCoverMedia({
   country,
   region,
   category,
+  imagePath,
   coverImage,
   coverImageAlt,
   className = '',
@@ -91,21 +93,9 @@ export function EventCoverMedia({
 }: EventCoverMediaProps) {
   const [hasError, setHasError] = useState(false);
   const [badgeTreatment, setBadgeTreatment] = useState<BadgeTreatment>({ tone: 'light', position: 'left' });
-  const safeCoverImage =
-    coverImage && /^(\/(cities|events|images)\/|https?:\/\/)/.test(coverImage) ? coverImage : undefined;
-
-  if (!safeCoverImage || hasError) {
-    return (
-      <EventCityVisual
-        city={city}
-        country={country}
-        region={region}
-        title={priorityLabel ?? category ?? title}
-        associationName={associationName}
-        className={className}
-      />
-    );
-  }
+  const safeCoverImage = coverImage && /^(\/(cities|events|images)\/|https?:\/\/)/.test(coverImage) ? coverImage : undefined;
+  const resolvedImagePath = imagePath && /^(\/(cities|events|images)\/|https?:\/\/)/.test(imagePath) ? imagePath : undefined;
+  const imageSrc = hasError ? '/cities/fallback.jpg' : resolvedImagePath ?? safeCoverImage ?? '/cities/fallback.jpg';
 
   return (
     <div
@@ -113,13 +103,13 @@ export function EventCoverMedia({
         compact ? 'h-[13rem] sm:h-[13.5rem]' : 'h-[18rem] sm:h-[20rem]'
       } ${className}`}
     >
-      <img
-        src={safeCoverImage}
-        alt={coverImageAlt ?? `${title} cover image`}
-        className="h-full w-full object-cover transition duration-700 ease-out group-hover/media:scale-[1.05]"
+      <Image
+        src={imageSrc}
+        alt={coverImageAlt ?? title}
+        fill
+        className="object-cover transition duration-700 ease-out group-hover/media:scale-[1.05]"
         onError={() => setHasError(true)}
         onLoad={(event) => setBadgeTreatment(resolveBadgeTreatment(event.currentTarget))}
-        crossOrigin="anonymous"
       />
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.14),rgba(2,6,23,0)_28%,rgba(2,6,23,0.24)_54%,rgba(2,6,23,0.82))]" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[56%] bg-[linear-gradient(180deg,rgba(2,6,23,0),rgba(15,23,42,0.16)_18%,rgba(15,23,42,0.88))]" />

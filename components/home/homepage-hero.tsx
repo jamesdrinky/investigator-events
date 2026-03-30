@@ -182,7 +182,7 @@ function HeroEventCard({
       transition={reducedMotion ? undefined : { duration: 11 + delay * 4, delay, repeat: Infinity, ease: 'easeInOut' }}
       style={{ transformStyle: 'preserve-3d' }}
     >
-      <div className={`relative ${compact ? 'min-h-[10rem] max-h-[13rem] overflow-hidden' : 'flex min-h-[18rem] flex-col'}`}>
+      <div className={`relative ${compact ? 'min-h-[10rem] max-h-[13rem] overflow-hidden' : 'flex min-h-[14rem] flex-col'}`}>
         <div
           className="absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(34,117,255,0.34),transparent_28%),radial-gradient(circle_at_82%_16%,rgba(14,182,255,0.3),transparent_22%),radial-gradient(circle_at_84%_80%,rgba(124,58,237,0.16),transparent_24%),radial-gradient(circle_at_62%_72%,rgba(236,72,153,0.12),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.76),rgba(255,255,255,0.16))]"
           style={{ backgroundSize: '140% 140%' }}
@@ -374,27 +374,6 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(33,118,255,0.26),transparent_22%),radial-gradient(circle_at_88%_14%,rgba(0,196,255,0.22),transparent_18%),radial-gradient(circle_at_56%_62%,rgba(111,86,255,0.18),transparent_30%),radial-gradient(circle_at_82%_42%,rgba(236,72,153,0.1),transparent_24%),linear-gradient(180deg,#fbfdff_0%,#f4f8ff_46%,#f8fbff_100%)]"
         style={{ backgroundSize: '140% 140%' }}
       />
-      <motion.div
-        className="pointer-events-none absolute left-[-24%] top-6 h-[18rem] w-[24rem] rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.28),rgba(22,104,255,0.06)_58%,transparent_72%)] blur-3xl sm:left-[-10%] sm:top-14 sm:h-[26rem] sm:w-[34rem]"
-        animate={reducedMotion ? undefined : { x: [0, 18, -8, 0], y: [0, 10, -6, 0], opacity: [0.78, 0.9, 0.8] }}
-        transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <motion.div
-        className="pointer-events-none absolute right-[-18%] top-6 h-[16rem] w-[20rem] rounded-full bg-[radial-gradient(circle,rgba(14,182,255,0.26),rgba(14,182,255,0.06)_56%,transparent_74%)] blur-3xl sm:right-[-8%] sm:top-10 sm:h-[22rem] sm:w-[30rem]"
-        animate={reducedMotion ? undefined : { x: [0, -16, 8, 0], y: [0, -8, 8, 0], opacity: [0.72, 0.88, 0.74] }}
-        transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <motion.div
-        className="pointer-events-none absolute inset-x-[12%] top-20 h-[20rem] rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.24),rgba(22,104,255,0.08)_42%,rgba(111,86,255,0.06)_58%,transparent_72%)] blur-3xl sm:inset-x-[15%] sm:top-24 sm:h-[34rem]"
-        animate={reducedMotion ? undefined : { opacity: [0.72, 0.9, 0.82], scale: [1, 1.03, 1] }}
-        transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <motion.div
-        className="pointer-events-none absolute right-[4%] top-[24%] h-[11rem] w-[11rem] rounded-full bg-[radial-gradient(circle,rgba(236,72,153,0.14),rgba(236,72,153,0.03)_56%,transparent_72%)] blur-3xl sm:right-[10%] sm:top-[20%] sm:h-[16rem] sm:w-[16rem]"
-        animate={reducedMotion ? undefined : { x: [0, -8, 5, 0], y: [0, 4, -6, 0], opacity: [0.42, 0.58, 0.48] }}
-        transition={{ duration: 17, repeat: Infinity, ease: 'easeInOut' }}
-      />
-
       <div className="container-shell relative">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-center lg:gap-14">
           <motion.div
@@ -471,7 +450,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               {stats.map((item) => (
                 <motion.div
                   key={item.label}
-                  className="rounded-[1.35rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.86),rgba(244,248,255,0.72))] px-3.5 py-3.5 shadow-[0_26px_72px_-44px_rgba(15,23,42,0.18)] backdrop-blur-xl last:col-span-2 sm:rounded-[1.7rem] sm:px-4 sm:py-4 sm:last:col-span-1"
+                  className="rounded-[1.35rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.86),rgba(244,248,255,0.72))] px-3.5 py-3 shadow-[0_26px_72px_-44px_rgba(15,23,42,0.18)] backdrop-blur-xl last:col-span-2 sm:rounded-[1.7rem] sm:px-4 sm:py-4 sm:last:col-span-1"
                   whileHover={{ boxShadow: '0 34px 84px -46px rgba(76,90,255,0.22)' }}
                 >
                   <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500 sm:text-[10px] sm:tracking-[0.2em]">{item.label}</p>
@@ -593,7 +572,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               </svg>
 
               {globeEvents[0] ? (
-                <HeroEventCard event={globeEvents[0]} delay={0.24} className="left-[6%] top-[12%] w-[64%] max-w-[16.5rem] sm:left-[2%] sm:top-[9%] sm:w-[52%] sm:max-w-[22rem]" />
+                <HeroEventCard event={globeEvents[0]} delay={0.24} className="left-[6%] top-[12%] w-[58%] max-w-[14rem] sm:left-[2%] sm:top-[9%] sm:w-[42%] sm:max-w-[15rem]" />
               ) : null}
               {globeEvents[1] ? (
                 <HeroEventCard event={globeEvents[1]} delay={0.34} compact className="right-[4%] top-[14%] hidden w-[34%] min-w-[12rem] sm:block" />

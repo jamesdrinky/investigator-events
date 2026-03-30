@@ -82,10 +82,6 @@ export default async function HomePage() {
 
       <section className="relative overflow-hidden py-14 sm:py-28">
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0),rgba(234,244,255,0.84)_32%,rgba(255,255,255,0))]" />
-        <div className="pointer-events-none absolute left-[8%] top-12 h-52 w-52 rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.18),transparent_72%)] blur-3xl" />
-        <div className="pointer-events-none absolute right-[8%] top-[18%] h-48 w-48 rounded-full bg-[radial-gradient(circle,rgba(34,211,238,0.16),transparent_72%)] blur-3xl" />
-        <div className="pointer-events-none absolute right-[6%] bottom-10 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(111,86,255,0.16),transparent_72%)] blur-3xl" />
-        <div className="pointer-events-none absolute left-[30%] bottom-[12%] h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(236,72,153,0.08),transparent_72%)] blur-3xl" />
         <div className="container-shell relative">
           <Reveal className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-5">
             <div className="max-w-3xl">
@@ -139,6 +135,7 @@ export default async function HomePage() {
                       country={leadEvent.country}
                       region={leadEvent.region}
                       category={leadEvent.category}
+                      imagePath={leadEvent.image_path}
                       coverImage={leadEvent.coverImage}
                       coverImageAlt={leadEvent.coverImageAlt}
                       associationName={leadEvent.association ?? leadEvent.organiser}
@@ -162,6 +159,7 @@ export default async function HomePage() {
                           country={event.country}
                           region={event.region}
                           category={event.category}
+                          imagePath={event.image_path}
                           coverImage={event.coverImage}
                           coverImageAlt={event.coverImageAlt}
                           associationName={event.association ?? event.organiser}
@@ -215,9 +213,6 @@ export default async function HomePage() {
 
       <section className="relative overflow-hidden py-14 sm:py-28">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(22,104,255,0.12),transparent_22%),radial-gradient(circle_at_82%_18%,rgba(20,184,255,0.12),transparent_18%),linear-gradient(180deg,rgba(240,246,255,0.62),rgba(255,255,255,0.96))]" />
-        <div className="pointer-events-none absolute left-[4%] top-[12%] h-44 w-44 rounded-full bg-[radial-gradient(circle,rgba(20,184,255,0.16),transparent_72%)] blur-3xl" />
-        <div className="pointer-events-none absolute right-[8%] bottom-[10%] h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(111,86,255,0.14),transparent_72%)] blur-3xl" />
-        <div className="pointer-events-none absolute left-[34%] top-[8%] h-32 w-32 rounded-full bg-[radial-gradient(circle,rgba(236,72,153,0.08),transparent_72%)] blur-3xl" />
         <div className="container-shell relative">
           <Reveal className="grid gap-8 sm:gap-10 xl:grid-cols-[minmax(0,0.86fr)_minmax(0,1.14fr)] xl:items-end">
             <div className="max-w-xl">

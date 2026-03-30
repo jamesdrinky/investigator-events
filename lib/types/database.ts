@@ -21,6 +21,7 @@ export type Database = {
           event_scope: 'main' | 'secondary';
           featured: boolean;
           approved: boolean;
+          image_path: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -41,6 +42,7 @@ export type Database = {
           event_scope?: 'main' | 'secondary';
           featured?: boolean;
           approved?: boolean;
+          image_path?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -61,6 +63,7 @@ export type Database = {
           event_scope?: 'main' | 'secondary';
           featured?: boolean;
           approved?: boolean;
+          image_path?: string | null;
           created_at?: string;
           updated_at?: string;
         };

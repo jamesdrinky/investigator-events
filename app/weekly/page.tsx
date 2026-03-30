@@ -60,6 +60,7 @@ export default async function WeeklyPage() {
                     country={leadEvent.country}
                     region={leadEvent.region}
                     category={leadEvent.category}
+                    imagePath={leadEvent.image_path}
                     coverImage={leadEvent.coverImage}
                     coverImageAlt={leadEvent.coverImageAlt}
                     associationName={leadEvent.association ?? leadEvent.organiser}

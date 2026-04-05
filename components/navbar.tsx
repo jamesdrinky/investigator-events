@@ -2,6 +2,7 @@
 
 import type { Route } from 'next';
 import { Menu, X } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
@@ -69,12 +70,18 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/88 backdrop-blur-xl">
-      <div className="container-shell flex min-h-[4rem] items-center justify-between gap-3 py-2 md:min-h-[4.75rem] md:gap-5 md:py-0">
-        <Link href="/" onClick={() => handleNavigation('/')} className="group flex min-w-0 items-center gap-3">
-          <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[1.1rem] bg-[linear-gradient(135deg,#1668ff,#14b8ff_62%,#645bff)] text-sm font-semibold text-white shadow-[0_18px_32px_-24px_rgba(22,104,255,0.42)] transition-transform duration-300 group-hover:scale-105 md:h-11 md:w-11 md:rounded-2xl">
-            IE
-          </span>
-          <div className="min-w-0">
+      <div className="container-shell flex min-h-[3.5rem] items-center justify-between gap-3 py-2 sm:min-h-[4rem] md:min-h-[4.75rem] md:gap-5 md:py-0">
+        <Link href="/" onClick={() => handleNavigation('/')} className="group flex min-w-0 items-center gap-2.5 sm:gap-3">
+          <Image
+            src="/ie-pink.png"
+            alt="Investigator Events"
+            width={1536}
+            height={1024}
+            priority
+            className="h-8 w-auto shrink-0 object-contain sm:h-9 md:h-10"
+            sizes="(max-width: 639px) 96px, 112px"
+          />
+          <div className="hidden min-w-0 sm:block">
             <p className="truncate text-[11px] font-semibold tracking-[0.22em] text-slate-950 sm:text-sm sm:tracking-[0.26em]">INVESTIGATOR EVENTS</p>
             <p className="hidden text-[10px] uppercase tracking-[0.2em] text-slate-500 md:block">Global event discovery</p>
           </div>
@@ -108,7 +115,7 @@ export function Navbar() {
           <Link
             href={"/list-your-event" as Route}
             onClick={() => handleNavigation('/list-your-event' as Route)}
-            className="btn-primary inline-flex min-h-[2.5rem] px-3.5 text-xs sm:px-4 md:text-sm"
+            className="btn-primary hidden min-h-[2.5rem] px-3.5 text-xs sm:inline-flex sm:px-4 md:text-sm"
           >
             List Your Event
           </Link>

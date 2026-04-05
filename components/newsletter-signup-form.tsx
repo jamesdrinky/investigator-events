@@ -16,7 +16,7 @@ function SubmitButton({ pending }: { pending: boolean }) {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex h-13 items-center justify-center rounded-[1.15rem] bg-[linear-gradient(135deg,#1668ff,#14b8ff,#645bff)] px-6 py-2.5 text-sm font-semibold text-white shadow-[0_28px_58px_-28px_rgba(22,104,255,0.48)] transition duration-500 hover:-translate-y-1 hover:scale-[1.01] hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
+      className="inline-flex h-12 w-full items-center justify-center rounded-[1.05rem] bg-[linear-gradient(135deg,#1668ff,#14b8ff,#645bff)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_28px_58px_-28px_rgba(22,104,255,0.48)] transition duration-500 hover:-translate-y-1 hover:scale-[1.01] hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70 sm:h-13 sm:w-auto sm:rounded-[1.15rem] sm:px-6"
     >
       {pending ? 'Subscribing...' : 'Subscribe'}
     </button>
@@ -71,9 +71,9 @@ export function NewsletterSignupForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="relative grid gap-5 rounded-[2.3rem] border border-white/85 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-5 shadow-[0_34px_96px_-54px_rgba(15,23,42,0.16)] sm:p-6 lg:p-7"
+      className="relative grid gap-4 rounded-[1.5rem] border border-white/85 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-4 shadow-[0_34px_96px_-54px_rgba(15,23,42,0.16)] sm:gap-5 sm:rounded-[2.3rem] sm:p-6 lg:p-7"
     >
-      <div className="pointer-events-none absolute inset-0 rounded-[2.3rem] bg-[linear-gradient(135deg,rgba(255,255,255,0.28),rgba(255,255,255,0)_26%,rgba(255,255,255,0.1)_54%,rgba(255,255,255,0)_100%)]" />
+      <div className="pointer-events-none absolute inset-0 rounded-[1.5rem] bg-[linear-gradient(135deg,rgba(255,255,255,0.28),rgba(255,255,255,0)_26%,rgba(255,255,255,0.1)_54%,rgba(255,255,255,0)_100%)] sm:rounded-[2.3rem]" />
       <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
         <label className="grid gap-2 text-sm text-slate-600">
           <span>Email</span>

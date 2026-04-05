@@ -366,7 +366,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
   }, [pathGen]);
 
   return (
-    <section className="relative overflow-hidden pb-14 pt-2 sm:pb-24 sm:pt-10 lg:pb-28 lg:pt-14">
+    <section className="relative overflow-hidden pb-10 pt-4 sm:pb-24 sm:pt-10 lg:pb-28 lg:pt-14">
       {/* Dark hero background — deep navy fading to light */}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(165deg,#06091a_0%,#0a1228_30%,#0d1840_55%,#d4e4ff_84%,#f4f8ff_100%)]" />
       {/* Glow orbs */}
@@ -381,20 +381,20 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
       {/* Noise/grain texture overlay for depth */}
       <div className="pointer-events-none absolute inset-0 opacity-[0.018]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")', backgroundRepeat: 'repeat', backgroundSize: '180px 180px' }} />
       <div className="container-shell relative">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-center lg:gap-14">
+        <div className="app-mobile-shell flex flex-col gap-4 sm:gap-6 lg:grid lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-center lg:gap-14">
           <motion.div
             initial={reducedMotion ? false : { opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
             className="relative z-10 max-w-[36rem]"
           >
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-3 py-1.5 shadow-[0_24px_60px_-34px_rgba(0,0,60,0.5)] backdrop-blur-xl" style={{ borderColor: 'rgba(255,255,255,0.18)' }}>
-              <span className="h-2.5 w-2.5 rounded-full bg-cyan-400 shadow-[0_0_0_8px_rgba(34,211,238,0.22)]" style={{ animation: 'hero-pulse 3s ease-in-out infinite' }} />
-              <span className="text-[11px] font-semibold uppercase tracking-[0.26em] text-white/80">Private Investigator Events Calendar</span>
+            <div className="inline-flex max-w-full items-center gap-2 overflow-hidden rounded-full border border-white/18 bg-white/10 px-3 py-1.5 shadow-[0_24px_60px_-34px_rgba(0,0,60,0.5)] backdrop-blur-xl sm:inline-flex" style={{ borderColor: 'rgba(255,255,255,0.18)' }}>
+              <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-cyan-400 shadow-[0_0_0_8px_rgba(34,211,238,0.22)]" style={{ animation: 'hero-pulse 3s ease-in-out infinite' }} />
+              <span className="min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.22em] text-white/80 sm:text-[11px] sm:tracking-[0.26em]">Private Investigator Events Calendar</span>
             </div>
 
             <motion.h1
-              className="mt-5 max-w-[10ch] text-[3.25rem] font-semibold leading-[0.88] tracking-[-0.065em] text-white sm:mt-6 sm:text-7xl lg:mt-8 lg:text-[6.5rem]"
+              className="mt-4 max-w-[10ch] text-[2.35rem] font-semibold leading-[0.84] tracking-[-0.065em] text-white sm:mt-6 sm:text-[3.25rem] sm:leading-[0.88] lg:mt-8 lg:text-[6.5rem]"
               initial={reducedMotion ? false : { opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
@@ -416,7 +416,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
                 </motion.span>{' '}
                 <span className="text-white">Miss Another</span>
               </span>
-              <span className="mt-1.5 block max-w-[10ch] font-semibold leading-[0.88] tracking-[-0.065em] text-white">
+              <span className="mt-1 block max-w-[10ch] font-semibold leading-[0.88] tracking-[-0.065em] text-white">
                 Investigator
               </span>
               <span className="block font-semibold leading-[0.88] tracking-[-0.065em] text-white">
@@ -425,7 +425,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
             </motion.h1>
 
             <motion.p
-              className="mt-4 max-w-xl text-[0.98rem] leading-relaxed text-blue-100/80 sm:mt-6 sm:text-lg"
+              className="mt-3.5 max-w-[26rem] text-[0.98rem] leading-6 text-blue-100/88 sm:mt-6 sm:max-w-xl sm:text-lg sm:leading-relaxed"
               initial={reducedMotion ? false : { opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.14, ease: [0.16, 1, 0.3, 1] }}
@@ -434,21 +434,21 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
             </motion.p>
 
             <motion.div
-              className="mt-5 flex flex-col gap-3 sm:mt-8 sm:flex-row"
+              className="mt-4 flex flex-col gap-2.5 sm:mt-8 sm:flex-row sm:gap-3"
               initial={reducedMotion ? false : { opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             >
-              <Link href="/calendar" className="btn-primary min-h-[3.5rem] px-7 text-[15px]">
+              <Link href="/calendar" className="btn-primary min-h-[3.25rem] w-full px-5 py-2.5 text-[15px] sm:min-h-[3.5rem] sm:w-auto sm:px-7 sm:py-3">
                 Browse PI Events
               </Link>
-              <Link href={"/list-your-event" as Route} className="btn-outline-light min-h-[3.5rem] px-7 text-[15px]">
+              <Link href={"/list-your-event" as Route} className="btn-outline-light min-h-[3.25rem] w-full px-5 py-2.5 text-[15px] sm:min-h-[3.5rem] sm:w-auto sm:px-7 sm:py-3">
                 List Your Event Free
               </Link>
             </motion.div>
 
             <motion.div
-              className="mt-6 grid grid-cols-2 gap-2.5 sm:mt-8 sm:grid-cols-3 sm:gap-3"
+              className="mt-4 grid grid-cols-3 gap-2 sm:mt-8 sm:gap-3"
               initial={reducedMotion ? false : { opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.85, delay: 0.26, ease: [0.16, 1, 0.3, 1] }}
@@ -456,25 +456,25 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               {stats.map((item) => (
                 <motion.div
                   key={item.label}
-                  className="rounded-[1.35rem] border bg-[linear-gradient(145deg,rgba(255,255,255,0.11),rgba(255,255,255,0.06))] px-3.5 py-3 shadow-[0_26px_72px_-44px_rgba(0,0,50,0.4),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-xl last:col-span-2 sm:rounded-[1.7rem] sm:px-4 sm:py-4 sm:last:col-span-1"
+                  className="min-w-0 rounded-[1.15rem] border bg-[linear-gradient(145deg,rgba(255,255,255,0.13),rgba(255,255,255,0.08))] px-2.5 py-3 text-center shadow-[0_18px_44px_-34px_rgba(0,0,50,0.34),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-xl sm:rounded-[1.7rem] sm:px-4 sm:py-4"
                   style={{ borderColor: 'rgba(255,255,255,0.14)' }}
                   whileHover={{ boxShadow: '0 34px 84px -46px rgba(76,90,255,0.5), inset 0 1px 0 rgba(255,255,255,0.16)' }}
                 >
-                  <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-blue-200/70 sm:text-[10px] sm:tracking-[0.2em]">{item.label}</p>
-                  <p className="mt-1.5 text-[1.55rem] font-semibold tracking-[-0.04em] text-white sm:mt-2 sm:text-[1.75rem]">{item.value}</p>
+                  <p className="truncate text-[9px] font-semibold uppercase tracking-[0.16em] text-blue-100/80 sm:text-[10px] sm:tracking-[0.2em]">{item.label}</p>
+                  <p className="mt-1.5 text-[1.35rem] font-semibold tracking-[-0.04em] text-white sm:mt-2 sm:text-[1.75rem]">{item.value}</p>
                 </motion.div>
               ))}
             </motion.div>
           </motion.div>
 
           <motion.div
-            className="relative mx-auto w-full max-w-[24rem] lg:max-w-none"
+            className="hidden sm:pointer-events-auto sm:relative sm:mx-auto sm:block sm:w-full sm:max-w-[20.5rem] lg:mx-0 lg:max-w-none"
             initial={reducedMotion ? false : { opacity: 0, scale: 0.96, y: 18 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 1.05, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
           >
             <motion.div
-              className="relative mx-auto aspect-[1/1.02] w-full max-w-[24rem] sm:aspect-[1.05/1] sm:max-w-[46rem]"
+              className="relative ml-auto aspect-square w-full sm:mx-auto sm:aspect-[1/0.98] sm:max-w-[20.5rem] lg:max-w-[46rem]"
               onPointerMove={(event) => {
                 if (reducedMotion) return;
                 const bounds = event.currentTarget.getBoundingClientRect();
@@ -495,7 +495,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               }}
             >
               {/* Glowing orb behind globe */}
-              <div className="pointer-events-none absolute inset-[5%] rounded-full bg-[radial-gradient(ellipse,rgba(22,104,255,0.38),rgba(111,86,255,0.28)_42%,transparent_72%)] blur-2xl" style={{ animation: 'hero-pulse 6s ease-in-out infinite' }} />
+              <div className="pointer-events-none absolute inset-[7%] rounded-full bg-[radial-gradient(ellipse,rgba(22,104,255,0.3),rgba(111,86,255,0.2)_42%,transparent_72%)] blur-2xl sm:inset-[5%]" style={{ animation: 'hero-pulse 6s ease-in-out infinite' }} />
               <motion.div
                 className="absolute inset-[10%] rounded-[3rem] border bg-[linear-gradient(145deg,rgba(255,255,255,0.14),rgba(241,247,255,0.07))] shadow-[0_52px_162px_-64px_rgba(22,40,180,0.7),inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-2xl"
                 style={{ borderColor: 'rgba(255,255,255,0.2)' }}
@@ -582,7 +582,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               </svg>
 
               {globeEvents[0] ? (
-                <HeroEventCard event={globeEvents[0]} delay={0.24} className="left-[6%] top-[12%] w-[58%] max-w-[14rem] sm:left-[2%] sm:top-[9%] sm:w-[42%] sm:max-w-[15rem]" />
+                <HeroEventCard event={globeEvents[0]} delay={0.24} className="left-[10%] top-[14%] w-[58%] max-w-[9rem] sm:left-[2%] sm:top-[9%] sm:w-[42%] sm:max-w-[15rem]" />
               ) : null}
               {globeEvents[1] ? (
                 <HeroEventCard event={globeEvents[1]} delay={0.34} compact className="right-[4%] top-[14%] hidden w-[34%] min-w-[12rem] sm:block" />
@@ -594,7 +594,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               {globeEvents[0] ? (
                 <Link
                   href={`/events/${getEventSlug(events[0])}`}
-                  className="absolute bottom-[8%] left-[6%] inline-flex items-center gap-2 rounded-full border border-white/90 bg-white/92 px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-[0_28px_70px_-28px_rgba(0,0,50,0.5),0_2px_0_rgba(255,255,255,0.8)_inset] backdrop-blur-xl transition duration-300 hover:shadow-[0_36px_78px_-30px_rgba(76,90,255,0.4)] sm:bottom-[13%]"
+                  className="pointer-events-auto absolute bottom-[5%] left-1/2 inline-flex w-[82%] -translate-x-1/2 items-center justify-center gap-2 rounded-full border border-white/90 bg-white/92 px-2.5 py-2 text-[11px] font-semibold text-slate-900 shadow-[0_28px_70px_-28px_rgba(0,0,50,0.5),0_2px_0_rgba(255,255,255,0.8)_inset] backdrop-blur-xl transition duration-300 hover:shadow-[0_36px_78px_-30px_rgba(76,90,255,0.4)] sm:bottom-[13%] sm:left-[6%] sm:w-auto sm:-translate-x-0 sm:justify-start sm:px-4 sm:py-2.5 sm:text-sm"
                 >
                   Open featured event
                 </Link>
@@ -602,6 +602,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
             </motion.div>
           </motion.div>
         </div>
+
       </div>
     </section>
   );

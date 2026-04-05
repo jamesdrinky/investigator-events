@@ -5,15 +5,16 @@ import Link from 'next/link';
 
 export function FounderQuoteSection() {
   return (
-    <section className="relative overflow-hidden py-14 sm:py-24">
+    <section className="relative overflow-hidden py-10 sm:py-24">
       {/* Dark navy section background */}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(170deg,#f4f8ff_0%,#0a1128_18%,#0c1535_60%,#091028_100%)]" />
       {/* Background glows */}
       <div className="pointer-events-none absolute left-[10%] top-[20%] h-80 w-80 rounded-full bg-[radial-gradient(ellipse,rgba(22,104,255,0.22),transparent_65%)] blur-3xl" />
       <div className="pointer-events-none absolute right-[12%] bottom-[18%] h-64 w-64 rounded-full bg-[radial-gradient(ellipse,rgba(111,86,255,0.18),transparent_65%)] blur-3xl" />
       <div className="container-shell relative">
+        <div className="app-mobile-shell">
         <div
-          className="mx-auto max-w-5xl overflow-hidden rounded-[1.35rem] border bg-[linear-gradient(145deg,rgba(255,255,255,0.07),rgba(255,255,255,0.03))] p-4 shadow-[0_44px_120px_-52px_rgba(0,0,50,0.7),inset_0_1px_0_rgba(255,255,255,0.1)] backdrop-blur-xl sm:rounded-[1.75rem] sm:p-8 lg:p-10"
+          className="mx-auto max-w-5xl overflow-hidden rounded-[1.35rem] border bg-[linear-gradient(145deg,rgba(255,255,255,0.07),rgba(255,255,255,0.03))] p-3.5 shadow-[0_44px_120px_-52px_rgba(0,0,50,0.7),inset_0_1px_0_rgba(255,255,255,0.1)] backdrop-blur-xl sm:rounded-[1.75rem] sm:p-8 lg:p-10"
           style={{ borderColor: 'rgba(255,255,255,0.1)' }}
         >
           {/* Top gradient shimmer line */}
@@ -59,6 +60,7 @@ export function FounderQuoteSection() {
               </Link>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </section>

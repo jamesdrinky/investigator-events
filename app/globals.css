@@ -68,6 +68,10 @@ a {
   @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-10;
 }
 
+.app-mobile-shell {
+  @apply mx-auto w-full max-w-[640px] sm:max-w-none;
+}
+
 .h-13 {
   height: 3.25rem;
 }

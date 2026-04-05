@@ -283,11 +283,13 @@ export default async function HomePage() {
                         {(() => {
                           const logoSrc = getAssociationBrandLogoSrc(association.name);
                           return logoSrc ? (
-                            <img
-                              src={logoSrc}
-                              alt={association.name}
-                              className={`h-12 w-auto max-w-[8rem] object-contain ${logoSrc.includes('/abi.png') ? 'grayscale brightness-0 contrast-200' : ''}`}
-                            />
+                            <div className="flex items-center justify-center rounded-md bg-white/70 px-2 py-1 backdrop-blur">
+                              <img
+                                src={logoSrc}
+                                alt={association.name}
+                                className={`h-8 sm:h-10 w-auto max-w-[10rem] object-contain opacity-95 ${logoSrc.includes('/abi.png') ? 'grayscale brightness-0 contrast-200' : ''}`}
+                              />
+                            </div>
                           ) : (
                             <span className="text-lg font-semibold text-slate-500">{association.shortName ?? association.name}</span>
                           );
@@ -307,11 +309,13 @@ export default async function HomePage() {
                       {(() => {
                         const logoSrc = getAssociationBrandLogoSrc(featuredAssociation.name);
                         return logoSrc ? (
-                          <img
-                            src={logoSrc}
-                            alt={featuredAssociation.name}
-                            className={`h-16 w-auto max-w-[12rem] object-contain ${logoSrc.includes('/abi.png') ? 'grayscale brightness-0 contrast-200' : ''}`}
-                          />
+                          <div className="flex items-center justify-center rounded-md bg-white/70 px-2 py-1 backdrop-blur">
+                            <img
+                              src={logoSrc}
+                              alt={featuredAssociation.name}
+                              className={`h-8 sm:h-10 w-auto max-w-[10rem] object-contain opacity-95 ${logoSrc.includes('/abi.png') ? 'grayscale brightness-0 contrast-200' : ''}`}
+                            />
+                          </div>
                         ) : (
                           <span className="text-2xl font-semibold text-slate-800">{featuredAssociation.shortName}</span>
                         );
@@ -359,7 +363,7 @@ export default async function HomePage() {
                 <div className="max-w-xl">
                   <p className="eyebrow">Newsletter</p>
                   <h2 className="mt-3 max-w-[10ch] text-[2.15rem] font-semibold leading-[0.94] tracking-[-0.05em] text-slate-950 sm:mt-4 sm:text-5xl lg:text-[4rem]">
-                    Get free monthly event alerts
+                    Get free weekly event alerts
                   </h2>
                   <p className="mt-4 text-base leading-relaxed text-slate-600 sm:mt-5">
                     New events, important dates, and key conferences sent straight to your inbox. No spam. Unsubscribe any time.

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Cormorant_Garamond, Plus_Jakarta_Sans } from 'next/font/google';
+import { CookieBanner } from '@/components/CookieBanner';
 import { Footer } from '@/components/footer';
 import { Navbar } from '@/components/navbar';
 import './globals.css';
@@ -36,6 +37,7 @@ export default function RootLayout({
           <main className="flex-1">{children}</main>
           <Footer />
         </div>
+        <CookieBanner />
       </body>
     </html>
   );

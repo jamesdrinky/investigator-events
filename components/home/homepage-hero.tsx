@@ -198,17 +198,26 @@ function HeroEventCard({
           <div className="min-w-0 rounded-full border border-slate-200/80 bg-white/78 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500 backdrop-blur-md">
             {compact ? 'Live event' : 'Featured event'}
           </div>
-          <div className="flex min-w-0 items-center justify-end">
+          <div className="absolute right-3 top-3 z-10 sm:right-4 sm:top-4">
             {(() => {
               const logoSrc = event.associationName ? getAssociationBrandLogoSrc(event.associationName) : null;
+              const isAbiAssociation =
+                Boolean(event.associationName && /association of british investigators|\babi\b/i.test(event.associationName)) ||
+                Boolean(logoSrc?.includes('/abi.png'));
               return logoSrc ? (
-                <img
-                  src={logoSrc}
-                  alt={event.associationName ?? ''}
-                  className={`h-6 w-auto max-w-[7rem] object-contain opacity-90 ${logoSrc.includes('/abi.png') ? 'grayscale brightness-0 contrast-200' : ''}`}
-                />
+                <div className="flex items-center justify-center rounded-md border border-white/70 bg-white/90 px-2 py-1 shadow-sm backdrop-blur-sm">
+                  {isAbiAssociation ? (
+                    <span className="text-[11px] font-semibold tracking-[0.16em] text-slate-950">ABI</span>
+                  ) : (
+                    <img
+                      src={logoSrc}
+                      alt={event.associationName ?? ''}
+                      className="h-6 sm:h-7 w-auto max-w-[4.5rem] object-contain"
+                    />
+                  )}
+                </div>
               ) : (
-                <AssociationLogoBadge associationName={event.associationName} compact labelHidden className="max-w-[3.25rem]" />
+                null
               );
             })()}
           </div>

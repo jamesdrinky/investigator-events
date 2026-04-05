@@ -159,7 +159,7 @@ export function AssociationsDirectory({ associations, stats }: AssociationsDirec
                   alt={`${featuredAssociation.name} logo`}
                   width={260}
                   height={120}
-                  className={`max-h-28 max-w-[280px] w-auto h-auto object-contain ${featuredAssociation.logoSrc.includes('/abi.png') ? 'grayscale brightness-0 contrast-200' : ''}`}
+                  className={`h-8 sm:h-10 w-auto max-w-[10rem] object-contain opacity-95 ${featuredAssociation.logoSrc.includes('/abi.png') ? 'grayscale brightness-0 contrast-200' : ''}`}
                 />
               ) : (
                 <span className="text-xl font-semibold uppercase tracking-[0.22em] text-slate-700">
@@ -186,7 +186,7 @@ export function AssociationsDirectory({ associations, stats }: AssociationsDirec
                       alt={`${association.name} logo`}
                       width={180}
                       height={72}
-                      className={`max-h-12 max-w-[140px] w-auto h-auto object-contain ${association.logoSrc.includes('/abi.png') ? 'grayscale brightness-0 contrast-200' : ''}`}
+                      className={`h-8 sm:h-10 w-auto max-w-[10rem] object-contain opacity-95 ${association.logoSrc.includes('/abi.png') ? 'grayscale brightness-0 contrast-200' : ''}`}
                     />
                   ) : (
                     <span className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-700">{getInitials(association.shortName)}</span>

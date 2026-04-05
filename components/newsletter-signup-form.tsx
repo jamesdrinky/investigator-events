@@ -98,6 +98,11 @@ export function NewsletterSignupForm() {
         Weekly updates focused on new events, approaching dates, and one standout event.
       </p>
 
+      <p className="text-xs leading-relaxed text-slate-400">
+        Your details are stored securely and used only to process your submission. See our{' '}
+        <a href="/privacy" className="underline underline-offset-2 hover:text-slate-600">privacy policy</a>.
+      </p>
+
       {state.status === 'success' ? (
         <p className="rounded-2xl border border-emerald-400/30 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{state.message}</p>
       ) : null}

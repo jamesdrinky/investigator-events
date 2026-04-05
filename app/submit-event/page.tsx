@@ -184,9 +184,15 @@ export default function SubmitEventPage({
                   <textarea name="notes" rows={4} maxLength={2000} className="field-input" />
                 </label>
                 <div className="sm:col-span-2 flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="max-w-xl text-xs leading-relaxed text-slate-500">
-                    Submitted listings stay private until review is complete.
-                  </p>
+                  <div className="max-w-xl space-y-1">
+                    <p className="text-xs leading-relaxed text-slate-500">
+                      Submitted listings stay private until review is complete.
+                    </p>
+                    <p className="text-xs leading-relaxed text-slate-400">
+                      Your details are stored securely and used only to process your submission. See our{' '}
+                      <a href="/privacy" className="underline underline-offset-2 hover:text-slate-600">privacy policy</a>.
+                    </p>
+                  </div>
                   <button type="submit" className="btn-primary w-full px-5 py-2.5 sm:w-auto">
                     Submit for review
                   </button>

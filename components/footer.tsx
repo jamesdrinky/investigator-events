@@ -28,6 +28,7 @@ export function Footer() {
             <li><Link href="/associations" className="premium-link hover:text-slate-950">Associations</Link></li>
             <li><Link href="/weekly" className="premium-link hover:text-slate-950">Weekly</Link></li>
             <li><Link href="/about" className="premium-link hover:text-slate-950">About</Link></li>
+            <li><Link href="/privacy" className="premium-link hover:text-slate-950">Privacy</Link></li>
           </ul>
           </div>
 
@@ -37,6 +38,7 @@ export function Footer() {
             <li><Link href="/submit-event" className="premium-link hover:text-slate-950">Submit event</Link></li>
             <li><Link href="/advertise" className="premium-link hover:text-slate-950">Advertise or partner</Link></li>
             <li><Link href="/weekly#signup" className="premium-link hover:text-slate-950">Email updates</Link></li>
+            <li><Link href="/advice" className="premium-link hover:text-slate-950">Organiser advice</Link></li>
           </ul>
           </div>
         </div>

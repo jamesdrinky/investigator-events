@@ -9,6 +9,7 @@ const desktopNavItems: Array<{ href: Route; label: string }> = [
   { href: '/calendar', label: 'Events' },
   { href: '/associations', label: 'Associations' },
   { href: '/weekly', label: 'Weekly' },
+  { href: '/advice', label: 'Advice' },
   { href: '/about', label: 'About' }
 ];
 
@@ -22,6 +23,7 @@ const mobileMenuItems: Array<{ href: Route; label: string }> = [
   { href: '/calendar', label: 'Events' },
   { href: '/associations', label: 'Associations' },
   { href: '/weekly', label: 'Weekly' },
+  { href: '/advice', label: 'Advice' },
   { href: '/about', label: 'About' }
 ];
 

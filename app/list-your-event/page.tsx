@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
 
-export default function ListYourEventPage() {
+export default function Page() {
   redirect('/submit-event');
 }

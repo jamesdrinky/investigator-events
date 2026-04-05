@@ -173,7 +173,7 @@ function HeroEventCard({
 
   return (
     <motion.article
-      className={`pointer-events-auto absolute overflow-hidden rounded-[1.8rem] border border-slate-200/70 bg-[linear-gradient(155deg,rgba(255,255,255,0.88),rgba(241,245,255,0.82))] shadow-[0_22px_56px_-38px_rgba(15,23,42,0.18)] backdrop-blur-xl will-change-transform ${className}`}
+      className={`pointer-events-auto absolute overflow-hidden rounded-[1.8rem] border border-white/60 bg-[linear-gradient(155deg,rgba(255,255,255,0.92),rgba(241,245,255,0.86))] shadow-[0_28px_80px_-16px_rgba(0,0,50,0.55),0_2px_0_rgba(255,255,255,0.8)_inset] backdrop-blur-xl will-change-transform ${className}`}
       initial={false}
       animate={
         reducedMotion ? undefined : { y: [0, compact ? -4 : -6, 0], rotateZ: [0, compact ? -0.45 : -0.6, 0, compact ? 0.35 : 0.45, 0] }
@@ -367,10 +367,19 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
 
   return (
     <section className="relative overflow-hidden pb-14 pt-2 sm:pb-24 sm:pt-10 lg:pb-28 lg:pt-14">
+      {/* Dark hero background — deep navy fading to light */}
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(165deg,#06091a_0%,#0a1228_30%,#0d1840_55%,#d4e4ff_84%,#f4f8ff_100%)]" />
+      {/* Glow orbs */}
       <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(33,118,255,0.26),transparent_22%),radial-gradient(circle_at_88%_14%,rgba(0,196,255,0.22),transparent_18%),radial-gradient(circle_at_56%_62%,rgba(111,86,255,0.18),transparent_30%),radial-gradient(circle_at_82%_42%,rgba(236,72,153,0.1),transparent_24%),linear-gradient(180deg,#fbfdff_0%,#f4f8ff_46%,#f8fbff_100%)]"
-        style={{ backgroundSize: '140% 140%' }}
-      />
+        className="pointer-events-none absolute inset-0"
+        style={{ animation: 'orb-drift 18s ease-in-out infinite' }}
+      >
+        <div className="absolute left-[8%] top-[8%] h-[34rem] w-[34rem] rounded-full bg-[radial-gradient(ellipse,rgba(22,104,255,0.38),transparent_65%)] blur-3xl" />
+        <div className="absolute right-[10%] top-[4%] h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(ellipse,rgba(111,86,255,0.32),transparent_62%)] blur-3xl" />
+        <div className="absolute bottom-[10%] left-[40%] h-[20rem] w-[20rem] rounded-full bg-[radial-gradient(ellipse,rgba(20,184,255,0.2),transparent_60%)] blur-3xl" />
+      </div>
+      {/* Noise/grain texture overlay for depth */}
+      <div className="pointer-events-none absolute inset-0 opacity-[0.018]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")', backgroundRepeat: 'repeat', backgroundSize: '180px 180px' }} />
       <div className="container-shell relative">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-center lg:gap-14">
           <motion.div
@@ -379,13 +388,13 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
             className="relative z-10 max-w-[36rem]"
           >
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/86 px-3 py-1.5 shadow-[0_24px_60px_-34px_rgba(15,23,42,0.2)] backdrop-blur-xl">
-              <span className="h-2.5 w-2.5 rounded-full bg-cyan-400 shadow-[0_0_0_8px_rgba(34,211,238,0.12)]" />
-              <span className="text-[11px] font-semibold uppercase tracking-[0.26em] text-slate-700">Private Investigator Events Calendar</span>
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-3 py-1.5 shadow-[0_24px_60px_-34px_rgba(0,0,60,0.5)] backdrop-blur-xl" style={{ borderColor: 'rgba(255,255,255,0.18)' }}>
+              <span className="h-2.5 w-2.5 rounded-full bg-cyan-400 shadow-[0_0_0_8px_rgba(34,211,238,0.22)]" style={{ animation: 'hero-pulse 3s ease-in-out infinite' }} />
+              <span className="text-[11px] font-semibold uppercase tracking-[0.26em] text-white/80">Private Investigator Events Calendar</span>
             </div>
 
             <motion.h1
-              className="mt-5 max-w-[10ch] text-[2.9rem] font-semibold leading-[0.88] tracking-[-0.065em] text-slate-950 sm:mt-6 sm:text-6xl lg:mt-8 lg:text-[5.6rem]"
+              className="mt-5 max-w-[10ch] text-[3.25rem] font-semibold leading-[0.88] tracking-[-0.065em] text-white sm:mt-6 sm:text-7xl lg:mt-8 lg:text-[6.5rem]"
               initial={reducedMotion ? false : { opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
@@ -405,18 +414,18 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
                 >
                   Never
                 </motion.span>{' '}
-                <span className="text-slate-950">Miss Another</span>
+                <span className="text-white">Miss Another</span>
               </span>
-              <span className="mt-1.5 block max-w-[10ch] font-semibold leading-[0.88] tracking-[-0.065em] text-slate-950">
+              <span className="mt-1.5 block max-w-[10ch] font-semibold leading-[0.88] tracking-[-0.065em] text-white">
                 Investigator
               </span>
-              <span className="block font-semibold leading-[0.88] tracking-[-0.065em] text-slate-950">
+              <span className="block font-semibold leading-[0.88] tracking-[-0.065em] text-white">
                 Event
               </span>
             </motion.h1>
 
             <motion.p
-              className="mt-4 max-w-xl text-[0.98rem] leading-relaxed text-slate-600 sm:mt-6 sm:text-lg"
+              className="mt-4 max-w-xl text-[0.98rem] leading-relaxed text-blue-100/80 sm:mt-6 sm:text-lg"
               initial={reducedMotion ? false : { opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.14, ease: [0.16, 1, 0.3, 1] }}
@@ -433,7 +442,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               <Link href="/calendar" className="btn-primary min-h-[3.5rem] px-7 text-[15px]">
                 Browse PI Events
               </Link>
-              <Link href={"/list-your-event" as Route} className="btn-secondary min-h-[3.5rem] px-7 text-[15px]">
+              <Link href={"/list-your-event" as Route} className="btn-outline-light min-h-[3.5rem] px-7 text-[15px]">
                 List Your Event Free
               </Link>
             </motion.div>
@@ -447,11 +456,12 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               {stats.map((item) => (
                 <motion.div
                   key={item.label}
-                  className="rounded-[1.35rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.86),rgba(244,248,255,0.72))] px-3.5 py-3 shadow-[0_26px_72px_-44px_rgba(15,23,42,0.18)] backdrop-blur-xl last:col-span-2 sm:rounded-[1.7rem] sm:px-4 sm:py-4 sm:last:col-span-1"
-                  whileHover={{ boxShadow: '0 34px 84px -46px rgba(76,90,255,0.22)' }}
+                  className="rounded-[1.35rem] border bg-[linear-gradient(145deg,rgba(255,255,255,0.11),rgba(255,255,255,0.06))] px-3.5 py-3 shadow-[0_26px_72px_-44px_rgba(0,0,50,0.4),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-xl last:col-span-2 sm:rounded-[1.7rem] sm:px-4 sm:py-4 sm:last:col-span-1"
+                  style={{ borderColor: 'rgba(255,255,255,0.14)' }}
+                  whileHover={{ boxShadow: '0 34px 84px -46px rgba(76,90,255,0.5), inset 0 1px 0 rgba(255,255,255,0.16)' }}
                 >
-                  <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500 sm:text-[10px] sm:tracking-[0.2em]">{item.label}</p>
-                  <p className="mt-1.5 text-[1.35rem] font-semibold tracking-[-0.04em] text-slate-950 sm:mt-2 sm:text-2xl">{item.value}</p>
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-blue-200/70 sm:text-[10px] sm:tracking-[0.2em]">{item.label}</p>
+                  <p className="mt-1.5 text-[1.55rem] font-semibold tracking-[-0.04em] text-white sm:mt-2 sm:text-[1.75rem]">{item.value}</p>
                 </motion.div>
               ))}
             </motion.div>
@@ -484,8 +494,11 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
                 transformStyle: 'preserve-3d'
               }}
             >
+              {/* Glowing orb behind globe */}
+              <div className="pointer-events-none absolute inset-[5%] rounded-full bg-[radial-gradient(ellipse,rgba(22,104,255,0.38),rgba(111,86,255,0.28)_42%,transparent_72%)] blur-2xl" style={{ animation: 'hero-pulse 6s ease-in-out infinite' }} />
               <motion.div
-                className="absolute inset-[10%] rounded-[3rem] border border-white/70 bg-[linear-gradient(145deg,rgba(255,255,255,0.84),rgba(241,247,255,0.36))] shadow-[0_52px_162px_-64px_rgba(49,66,180,0.46)] backdrop-blur-2xl"
+                className="absolute inset-[10%] rounded-[3rem] border bg-[linear-gradient(145deg,rgba(255,255,255,0.14),rgba(241,247,255,0.07))] shadow-[0_52px_162px_-64px_rgba(22,40,180,0.7),inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-2xl"
+                style={{ borderColor: 'rgba(255,255,255,0.2)' }}
                 animate={reducedMotion ? undefined : { y: [0, -4, 0, 2, 0], rotateZ: [0, 0.2, 0, -0.12, 0] }}
                 transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
               />
@@ -517,8 +530,8 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
                   </linearGradient>
                 </defs>
 
-                <ellipse cx="0" cy="204" rx="164" ry="28" fill="rgba(76,127,255,0.12)" />
-                <ellipse cx="0" cy="204" rx="132" ry="18" fill="rgba(125,211,252,0.12)" />
+                <ellipse cx="0" cy="204" rx="164" ry="28" fill="rgba(22,104,255,0.28)" />
+                <ellipse cx="0" cy="204" rx="132" ry="18" fill="rgba(125,211,252,0.22)" />
                 <circle cx="0" cy="0" r="190" fill="url(#hero-globe-shell)" opacity="0.82" />
                 <circle cx="0" cy="0" r="190" fill="none" stroke="#22d3ee" strokeWidth="1.5" opacity="0.6" />
 
@@ -581,7 +594,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               {globeEvents[0] ? (
                 <Link
                   href={`/events/${getEventSlug(events[0])}`}
-                  className="absolute bottom-[8%] left-[6%] inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/88 px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-[0_26px_70px_-42px_rgba(15,23,42,0.26)] backdrop-blur-xl transition duration-300 hover:shadow-[0_34px_78px_-42px_rgba(36,76,170,0.22)] sm:bottom-[13%]"
+                  className="absolute bottom-[8%] left-[6%] inline-flex items-center gap-2 rounded-full border border-white/90 bg-white/92 px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-[0_28px_70px_-28px_rgba(0,0,50,0.5),0_2px_0_rgba(255,255,255,0.8)_inset] backdrop-blur-xl transition duration-300 hover:shadow-[0_36px_78px_-30px_rgba(76,90,255,0.4)] sm:bottom-[13%]"
                 >
                   Open featured event
                 </Link>

@@ -211,8 +211,10 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <div className="signal-divider mx-4 opacity-50 sm:mx-10" />
+
       <section className="relative overflow-hidden py-14 sm:py-28">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(22,104,255,0.12),transparent_22%),radial-gradient(circle_at_82%_18%,rgba(20,184,255,0.12),transparent_18%),linear-gradient(180deg,rgba(240,246,255,0.62),rgba(255,255,255,0.96))]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(22,104,255,0.14),transparent_24%),radial-gradient(circle_at_82%_18%,rgba(20,184,255,0.14),transparent_20%),linear-gradient(180deg,rgba(240,246,255,0.7),rgba(255,255,255,0.98))]" />
         <div className="container-shell relative">
           <Reveal className="grid gap-8 sm:gap-10 xl:grid-cols-[minmax(0,0.86fr)_minmax(0,1.14fr)] xl:items-end">
             <div className="max-w-xl">
@@ -238,17 +240,17 @@ export default async function HomePage() {
               </div>
 
               <div className="mt-6 grid grid-cols-3 gap-2.5 sm:mt-8 sm:gap-3">
-                <div className="rounded-[1.7rem] border border-white/80 bg-white/88 px-5 py-5 shadow-[0_22px_60px_-40px_rgba(15,23,42,0.16)] transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-[0_34px_72px_-40px_rgba(36,76,170,0.22)]">
+                <div className="rounded-[1.7rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(239,246,255,0.88))] px-5 py-5 shadow-[0_22px_60px_-36px_rgba(22,104,255,0.2)] transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-[0_34px_72px_-36px_rgba(36,76,170,0.3)]">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">Visible bodies</p>
-                  <p className="mt-2 text-3xl font-semibold tracking-[-0.05em] text-slate-950">{visibleBodiesCount}</p>
+                  <p className="mt-2 text-[2.25rem] font-semibold tracking-[-0.055em] text-slate-950 sm:text-[2.5rem]">{visibleBodiesCount}</p>
                 </div>
-                <div className="rounded-[1.7rem] border border-white/80 bg-white/88 px-5 py-5 shadow-[0_22px_60px_-40px_rgba(15,23,42,0.16)] transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-[0_34px_72px_-40px_rgba(36,76,170,0.22)]">
+                <div className="rounded-[1.7rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(239,246,255,0.88))] px-5 py-5 shadow-[0_22px_60px_-36px_rgba(22,104,255,0.2)] transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-[0_34px_72px_-36px_rgba(36,76,170,0.3)]">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">Countries</p>
-                  <p className="mt-2 text-3xl font-semibold tracking-[-0.05em] text-slate-950">{coverage.totalCountries}</p>
+                  <p className="mt-2 text-[2.25rem] font-semibold tracking-[-0.055em] text-slate-950 sm:text-[2.5rem]">{coverage.totalCountries}</p>
                 </div>
-                <div className="rounded-[1.7rem] border border-white/80 bg-white/88 px-5 py-5 shadow-[0_22px_60px_-40px_rgba(15,23,42,0.16)] transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-[0_34px_72px_-40px_rgba(36,76,170,0.22)]">
+                <div className="rounded-[1.7rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(239,246,255,0.88))] px-5 py-5 shadow-[0_22px_60px_-36px_rgba(22,104,255,0.2)] transition duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-[0_34px_72px_-36px_rgba(36,76,170,0.3)]">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">Regions</p>
-                  <p className="mt-2 text-3xl font-semibold tracking-[-0.05em] text-slate-950">
+                  <p className="mt-2 text-[2.25rem] font-semibold tracking-[-0.055em] text-slate-950 sm:text-[2.5rem]">
                     {coverage.regions.filter((region) => region.eventCount > 0).length}
                   </p>
                 </div>

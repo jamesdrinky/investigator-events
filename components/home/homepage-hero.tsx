@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { motion, AnimatePresence, useReducedMotion, useSpring } from 'framer-motion';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { geoOrthographic, geoPath } from 'd3-geo';
 import { feature } from 'topojson-client';
 import landData from 'world-atlas/land-110m.json';
@@ -176,9 +176,33 @@ function HeroEventCard({
 }) {
   const reducedMotion = useReducedMotion();
   const [isExpanded, setIsExpanded] = useState(false);
+  const lastPointerType = useRef<string>('mouse');
+  const hoverTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   const EXPANDED_W = 290;
   const EXPANDED_H = 272;
+
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    lastPointerType.current = e.pointerType;
+  }, []);
+
+  const handleMouseEnter = useCallback(() => {
+    if (lastPointerType.current === 'touch') return;
+    clearTimeout(hoverTimeout.current);
+    setIsExpanded(true);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    if (lastPointerType.current === 'touch') return;
+    hoverTimeout.current = setTimeout(() => setIsExpanded(false), 120);
+  }, []);
+
+  const handleClick = useCallback(() => {
+    // Only toggle on touch — desktop uses hover
+    if (lastPointerType.current === 'touch') {
+      setIsExpanded((v) => !v);
+    }
+  }, []);
 
   const logoSrc = event.associationName ? getAssociationBrandLogoSrc(event.associationName) : null;
   const isAbiAssociation =
@@ -216,7 +240,10 @@ function HeroEventCard({
             }
       }
       style={{ transformStyle: 'preserve-3d' }}
-      onClick={() => setIsExpanded((v) => !v)}
+      onPointerDown={handlePointerDown}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onClick={handleClick}
     >
       {/* ── Base background (light in both states) ── */}
       <motion.div
@@ -416,7 +443,16 @@ function HeroEventCard({
 export function HomepageHero({ events, stats }: HomepageHeroProps) {
   const reducedMotion = useReducedMotion();
   const [rotation, setRotation] = useState(0.45);
+  const [isMobile, setIsMobile] = useState(false);
   const rotateX = useSpring(0, { stiffness: 90, damping: 22, mass: 0.9 });
+
+  useEffect(() => {
+    const mql = window.matchMedia('(max-width: 639px)');
+    setIsMobile(mql.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mql.addEventListener('change', handler);
+    return () => mql.removeEventListener('change', handler);
+  }, []);
   const rotateY = useSpring(0, { stiffness: 90, damping: 22, mass: 0.9 });
 
   const globeEvents = useMemo<GlobeEventNode[]>(
@@ -507,7 +543,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
   }, [pathGen]);
 
   return (
-    <section className="relative overflow-hidden pb-10 pt-4 sm:pb-24 sm:pt-10 lg:pb-28 lg:pt-14">
+    <section className="relative overflow-hidden pb-6 pt-4 sm:pb-24 sm:pt-10 lg:pb-28 lg:pt-14">
       {/* Dark hero background — deep navy fading to light */}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(165deg,#06091a_0%,#0a1228_30%,#0d1840_55%,#d4e4ff_84%,#f4f8ff_100%)]" />
       {/* Glow orbs */}
@@ -519,6 +555,9 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
         <div className="absolute right-[10%] top-[4%] h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(ellipse,rgba(111,86,255,0.32),transparent_62%)] blur-3xl" />
         <div className="absolute bottom-[10%] left-[40%] h-[20rem] w-[20rem] rounded-full bg-[radial-gradient(ellipse,rgba(20,184,255,0.2),transparent_60%)] blur-3xl" />
       </div>
+      {/* Mobile gradient mesh accents */}
+      <div className="pointer-events-none absolute left-[-20%] top-[30%] h-[18rem] w-[18rem] rounded-full bg-[radial-gradient(ellipse,rgba(236,72,153,0.22),transparent_65%)] blur-3xl sm:hidden" />
+      <div className="pointer-events-none absolute right-[-15%] top-[55%] h-[14rem] w-[14rem] rounded-full bg-[radial-gradient(ellipse,rgba(14,165,233,0.2),transparent_65%)] blur-3xl sm:hidden" />
       {/* Noise/grain texture overlay for depth */}
       <div className="pointer-events-none absolute inset-0 opacity-[0.018]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")', backgroundRepeat: 'repeat', backgroundSize: '180px 180px' }} />
       <div className="container-shell relative">
@@ -535,7 +574,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
             </div>
 
             <motion.h1
-              className="mt-4 max-w-[10ch] text-[2.65rem] font-bold leading-[0.84] tracking-[-0.065em] text-white sm:mt-6 sm:text-[4rem] sm:leading-[0.86] lg:mt-8 lg:text-[7.5rem]"
+              className="mt-4 max-w-[10ch] text-[3.2rem] font-bold leading-[0.84] tracking-[-0.065em] text-white sm:mt-6 sm:text-[4rem] sm:leading-[0.86] lg:mt-8 lg:text-[7.5rem]"
               initial={reducedMotion ? false : { opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
@@ -589,7 +628,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
             </motion.div>
 
             <motion.div
-              className="mt-4 grid grid-cols-3 gap-2 sm:mt-8 sm:gap-3"
+              className="mt-4 grid grid-cols-3 gap-1.5 sm:mt-8 sm:gap-3"
               initial={reducedMotion ? false : { opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.85, delay: 0.26, ease: [0.16, 1, 0.3, 1] }}
@@ -608,13 +647,13 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
                 return (
                   <motion.div
                     key={item.label}
-                    className={`min-w-0 rounded-[1.15rem] border ${gradients[index % 3]} px-2.5 py-3.5 text-center shadow-[0_22px_52px_-34px_rgba(0,0,50,0.4),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-xl sm:rounded-[1.7rem] sm:px-4 sm:py-5`}
+                    className={`min-w-0 rounded-[0.9rem] border ${gradients[index % 3]} px-1.5 py-2.5 text-center shadow-[0_22px_52px_-34px_rgba(0,0,50,0.4),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-xl sm:rounded-[1.7rem] sm:px-4 sm:py-5`}
                     style={{ borderColor: 'rgba(255,255,255,0.16)' }}
                     whileHover={{ scale: 1.04, boxShadow: '0 38px_90px_-46px rgba(76,90,255,0.55), inset 0 1px 0 rgba(255,255,255,0.18)' }}
                     transition={{ type: 'spring', stiffness: 400, damping: 24 }}
                   >
-                    <p className="truncate text-[9px] font-semibold uppercase tracking-[0.18em] text-blue-100/80 sm:text-[10px] sm:tracking-[0.22em]">{item.label}</p>
-                    <p className={`mt-1.5 text-[1.6rem] font-bold tracking-[-0.05em] sm:mt-2 sm:text-[2.2rem] ${textColors[index % 3]}`}>{item.value}</p>
+                    <p className="truncate text-[8px] font-semibold uppercase tracking-[0.14em] text-blue-100/80 sm:text-[10px] sm:tracking-[0.22em]">{item.label}</p>
+                    <p className={`mt-1 text-[1.35rem] font-bold tracking-[-0.05em] sm:mt-2 sm:text-[2.2rem] ${textColors[index % 3]}`}>{item.value}</p>
                   </motion.div>
                 );
               })}
@@ -622,13 +661,13 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
           </motion.div>
 
           <motion.div
-            className="hidden sm:pointer-events-auto sm:relative sm:mx-auto sm:block sm:w-full sm:max-w-[20.5rem] lg:mx-0 lg:max-w-none"
+            className="pointer-events-auto relative mx-auto w-full max-w-[22rem] sm:max-w-[20.5rem] lg:mx-0 lg:max-w-none"
             initial={reducedMotion ? false : { opacity: 0, scale: 0.96, y: 18 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 1.05, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
           >
             <motion.div
-              className="relative ml-auto aspect-square w-full sm:mx-auto sm:aspect-[1/0.98] sm:max-w-[20.5rem] lg:max-w-[46rem]"
+              className="relative mx-auto aspect-square w-full max-w-[22rem] sm:aspect-[1/0.98] sm:max-w-[20.5rem] lg:max-w-[46rem]"
               onPointerMove={(event) => {
                 if (reducedMotion) return;
                 const bounds = event.currentTarget.getBoundingClientRect();
@@ -737,10 +776,10 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               </svg>
 
               {globeEvents[0] ? (
-                <HeroEventCard event={globeEvents[0]} delay={0.24} collapsedW={224} collapsedH={200} className="left-[10%] top-[14%] sm:left-[2%] sm:top-[9%]" />
+                <HeroEventCard event={globeEvents[0]} delay={0.24} collapsedW={isMobile ? 168 : 224} collapsedH={isMobile ? 144 : 200} className="left-[2%] top-[6%] sm:left-[2%] sm:top-[9%]" />
               ) : null}
               {globeEvents[1] ? (
-                <HeroEventCard event={globeEvents[1]} delay={0.34} compact collapsedW={198} collapsedH={155} className="right-[4%] top-[14%] hidden sm:block" />
+                <HeroEventCard event={globeEvents[1]} delay={0.34} compact collapsedW={isMobile ? 148 : 198} collapsedH={isMobile ? 124 : 155} className="right-[2%] bottom-[4%] sm:right-[4%] sm:top-[14%] sm:bottom-auto" />
               ) : null}
               {globeEvents[2] ? (
                 <HeroEventCard event={globeEvents[2]} delay={0.42} compact collapsedW={212} collapsedH={155} className="right-[10%] bottom-[8%] hidden sm:block" />

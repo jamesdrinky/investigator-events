@@ -417,4 +417,27 @@ a {
   .signal-marquee-track {
     animation: none;
   }
+  .animate-loop-left,
+  .animate-loop-right {
+    animation: none;
+  }
+}
+
+/* ── Association logo loop ── */
+@keyframes loop-scroll-left {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes loop-scroll-right {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+.animate-loop-left {
+  animation: loop-scroll-left 32s linear infinite;
+}
+
+.animate-loop-right {
+  animation: loop-scroll-right 36s linear infinite;
 }

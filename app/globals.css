@@ -463,6 +463,21 @@ a {
   animation: loop-scroll-right 36s linear infinite;
 }
 
+/* ── Vertical marquee for 3D logo wall ── */
+@keyframes marquee-v {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(calc(-100% - 0.75rem)); }
+}
+
+@keyframes marquee-v-reverse {
+  0% { transform: translateY(calc(-100% - 0.75rem)); }
+  100% { transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [style*="marquee-v"] { animation: none !important; }
+}
+
 /* ── Holographic card ── */
 .holo-card {
   position: relative;

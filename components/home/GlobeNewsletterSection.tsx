@@ -112,7 +112,7 @@ export function GlobeNewsletterSection() {
   return (
     <section
       id="newsletter"
-      className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(145deg,#06091a,#0d1840)] px-5 py-10 shadow-[0_40px_120px_-40px_rgba(0,0,50,0.5)] sm:rounded-[3rem] sm:px-10 sm:py-16 lg:px-14"
+      className="relative overflow-hidden rounded-[1.8rem] border border-white/10 bg-[linear-gradient(145deg,#06091a,#0d1840)] px-7 py-14 shadow-[0_40px_120px_-40px_rgba(0,0,50,0.5)] sm:rounded-[3rem] sm:px-10 sm:py-16 lg:px-14"
     >
       {/* Subtle glow accents */}
       <div className="pointer-events-none absolute left-[5%] top-[10%] h-64 w-64 rounded-full bg-[radial-gradient(ellipse,rgba(22,104,255,0.15),transparent_60%)]" />
@@ -124,7 +124,7 @@ export function GlobeNewsletterSection() {
           <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-cyan-400 sm:text-xs">
             Newsletter
           </p>
-          <h2 className="mt-4 max-w-[12ch] text-[2rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white sm:text-[2.8rem] lg:text-[3.5rem]">
+          <h2 className="mt-5 max-w-[12ch] text-[2.4rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white sm:text-[2.8rem] lg:text-[3.5rem]">
             Get free weekly event alerts
           </h2>
           <p className="mt-4 max-w-md text-base leading-relaxed text-blue-200/50 sm:mt-5">

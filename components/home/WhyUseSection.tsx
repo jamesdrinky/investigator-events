@@ -33,19 +33,19 @@ const PANELS = [
 
 export function WhyUseSection() {
   return (
-    <section className="relative overflow-hidden py-12 sm:py-28">
+    <section className="relative overflow-hidden py-20 sm:py-28">
       <div className="container-shell relative">
         <div className="app-mobile-shell">
           <Reveal>
             <div className="max-w-3xl">
               <p className="eyebrow">WHY USE THIS SITE</p>
-              <h2 className="mt-2.5 text-[2rem] font-semibold leading-[0.95] tracking-[-0.05em] text-slate-950 sm:mt-4 sm:text-5xl lg:text-[4.2rem]">
+              <h2 className="mt-4 text-[2.4rem] font-semibold leading-[0.94] tracking-[-0.05em] text-slate-950 sm:mt-4 sm:text-5xl lg:text-[4.2rem]">
                 A clearer way to plan the year ahead
               </h2>
             </div>
           </Reveal>
 
-          <div className="mt-6 grid gap-4 sm:mt-14 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+          <div className="mt-12 grid gap-5 sm:mt-14 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
             {PANELS.map(({ title, description, Icon, gradient, iconBg, iconShadow }, index) => (
               <Reveal key={title} delay={0.06 * index} y={24}>
                 <HolographicCard className="rounded-[1.6rem] border border-white/70 bg-white/95 shadow-[0_20px_50px_-20px_rgba(15,23,42,0.1)] sm:rounded-[2rem]">
@@ -56,14 +56,14 @@ export function WhyUseSection() {
                   {/* Subtle radial glow on hover */}
                   <div className="pointer-events-none absolute inset-0 rounded-[1.6rem] bg-[radial-gradient(circle_at_50%_0%,rgba(99,102,241,0.06),transparent_60%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100 sm:rounded-[2rem]" />
 
-                  <div className="relative p-5 sm:p-8">
-                    <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${iconBg} ${iconShadow} transition-transform duration-500 group-hover:scale-110 sm:h-14 sm:w-14`}>
+                  <div className="relative p-7 sm:p-8">
+                    <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${iconBg} ${iconShadow} transition-transform duration-500 group-hover:scale-110 sm:h-14 sm:w-14`}>
                       <Icon className="h-6 w-6 text-white" strokeWidth={2} aria-hidden="true" />
                     </div>
-                    <h3 className="mt-5 text-xl font-semibold leading-tight tracking-[-0.03em] text-slate-950 sm:mt-6 sm:text-2xl">
+                    <h3 className="mt-6 text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-slate-950 sm:mt-6 sm:text-2xl">
                       {title}
                     </h3>
-                    <p className="mt-3 max-w-[34ch] text-[0.94rem] leading-relaxed text-slate-600 sm:mt-4">
+                    <p className="mt-3 max-w-[34ch] text-[0.95rem] leading-[1.6] text-slate-600 sm:mt-4">
                       {description}
                     </p>
                   </div>

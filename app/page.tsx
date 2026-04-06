@@ -71,7 +71,7 @@ export default async function HomePage() {
       </div>
 
       <div className="order-7 sm:order-none">
-        <div className="container-shell py-7 sm:py-20">
+        <div className="container-shell py-14 sm:py-20">
           <div className="app-mobile-shell">
             <Reveal>
               <GlobeNewsletterSection />

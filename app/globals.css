@@ -130,7 +130,32 @@ a {
 }
 
 .section-pad {
-  @apply py-24 sm:py-28;
+  @apply py-16 sm:py-28;
+}
+
+/* ── Mobile-specific overrides (Stripe-style generous whitespace) ── */
+@media (max-width: 639px) {
+  .container-shell {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  .section-title {
+    font-size: 2rem;
+    line-height: 0.96;
+  }
+
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.28em;
+  }
+
+  .btn-primary,
+  .btn-outline-light,
+  .btn-secondary {
+    min-height: 3.25rem;
+    font-size: 0.938rem;
+  }
 }
 
 .eyebrow {

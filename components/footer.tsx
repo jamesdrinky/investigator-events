@@ -7,11 +7,11 @@ export function Footer() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(22,104,255,0.1),transparent_22%),radial-gradient(circle_at_86%_16%,rgba(20,184,255,0.1),transparent_18%),radial-gradient(circle_at_70%_84%,rgba(100,91,255,0.08),transparent_18%),radial-gradient(circle_at_54%_14%,rgba(236,72,153,0.04),transparent_18%)]" />
       <div className="pointer-events-none absolute left-[10%] top-6 h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.14),transparent_72%)] blur-3xl" />
       <div className="pointer-events-none absolute right-[12%] top-10 h-36 w-36 rounded-full bg-[radial-gradient(circle,rgba(111,86,255,0.12),transparent_72%)] blur-3xl" />
-      <div className="container-shell relative grid gap-6 py-8 sm:gap-10 sm:py-16 md:grid-cols-[1.2fr_0.8fr_0.8fr_0.9fr] lg:py-20">
+      <div className="container-shell relative grid gap-12 py-16 sm:gap-10 sm:py-16 md:grid-cols-[1.2fr_0.8fr_0.8fr_0.9fr] lg:py-20">
         <div>
           <Image src="/logo/ie-none.png" alt="Investigator Events" width={64} height={64} className="h-14 w-14 rounded-2xl object-contain sm:h-16 sm:w-16" />
           <p className="mt-5 text-[11px] font-semibold tracking-[0.28em] text-slate-900">INVESTIGATOR EVENTS</p>
-          <p className="mt-3 max-w-md font-[var(--font-serif)] text-[1.95rem] leading-[1.02] tracking-[-0.04em] text-slate-950 sm:mt-4 sm:text-3xl">
+          <p className="mt-4 max-w-md font-[var(--font-serif)] text-[2.2rem] leading-[1.02] tracking-[-0.04em] text-slate-950 sm:mt-4 sm:text-3xl">
             Every investigator event. One global calendar.
           </p>
           <p className="mt-3 max-w-md text-sm leading-relaxed text-slate-600 sm:mt-4">
@@ -55,7 +55,7 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-slate-200 py-4 text-center text-xs text-slate-500">
+      <div className="border-t border-slate-200 py-5 text-center text-xs text-slate-500">
         (c) {new Date().getFullYear()} Investigator Events
       </div>
     </footer>

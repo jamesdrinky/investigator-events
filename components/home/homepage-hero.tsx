@@ -368,7 +368,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
         {/* ── Header content (centered, above globe) ── */}
         <motion.div
           style={{ translateY: headerY }}
-          className="relative z-10 px-4 pb-4 pt-6 text-center sm:pb-8 sm:pt-12 lg:pt-16"
+          className="relative z-10 px-6 pb-8 pt-14 text-center sm:pb-8 sm:pt-12 lg:pt-16"
         >
           {/* Badge pill */}
           <motion.div
@@ -395,7 +395,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
 
           {/* Heading */}
           <motion.h1
-            className="mx-auto mt-5 max-w-[10ch] text-[3.2rem] font-bold leading-[0.84] tracking-[-0.065em] text-white sm:mt-7 sm:text-[4.5rem] sm:leading-[0.86] lg:mt-8 lg:text-[7.5rem]"
+            className="mx-auto mt-8 max-w-[10ch] text-[4rem] font-bold leading-[0.88] tracking-[-0.06em] text-white sm:mt-7 sm:text-[4.5rem] sm:leading-[0.86] lg:mt-8 lg:text-[7.5rem]"
             initial={reducedMotion ? false : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
@@ -419,7 +419,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
 
           {/* Description */}
           <motion.p
-            className="mx-auto mt-4 max-w-lg text-[0.95rem] leading-relaxed text-blue-100/60 sm:mt-6 sm:max-w-xl sm:text-lg"
+            className="mx-auto mt-6 max-w-lg text-[1.05rem] leading-[1.6] text-blue-100/60 sm:mt-6 sm:max-w-xl sm:text-lg"
             initial={reducedMotion ? false : { opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
@@ -434,7 +434,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
 
           {/* CTA buttons */}
           <motion.div
-            className="mt-5 flex flex-col items-center gap-2.5 sm:mt-8 sm:flex-row sm:justify-center sm:gap-3"
+            className="mt-8 flex flex-col items-center gap-3.5 sm:mt-8 sm:flex-row sm:justify-center sm:gap-3"
             initial={reducedMotion ? false : { opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
@@ -445,13 +445,13 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
           >
             <Link
               href="/calendar"
-              className="btn-primary min-h-[3.25rem] w-full px-6 py-2.5 text-[15px] sm:min-h-[3.5rem] sm:w-auto sm:px-8 sm:py-3"
+              className="btn-primary min-h-[3.5rem] w-full px-6 py-3.5 text-[15px] sm:min-h-[3.5rem] sm:w-auto sm:px-8 sm:py-3"
             >
               Browse PI Events
             </Link>
             <Link
               href={'/list-your-event' as Route}
-              className="btn-outline-light min-h-[3.25rem] w-full px-6 py-2.5 text-[15px] sm:min-h-[3.5rem] sm:w-auto sm:px-8 sm:py-3"
+              className="btn-outline-light min-h-[3.5rem] w-full px-6 py-3.5 text-[15px] sm:min-h-[3.5rem] sm:w-auto sm:px-8 sm:py-3"
             >
               List Your Event Free
             </Link>
@@ -459,7 +459,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
 
           {/* Stats row */}
           <motion.div
-            className="mx-auto mt-5 grid max-w-sm grid-cols-3 gap-1.5 sm:mt-10 sm:max-w-md sm:gap-3"
+            className="mx-auto mt-10 grid max-w-md grid-cols-3 gap-3 sm:mt-10 sm:max-w-md sm:gap-3"
             initial={reducedMotion ? false : { opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
@@ -477,17 +477,17 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               return (
                 <div
                   key={item.label}
-                  className="rounded-[0.9rem] border px-2 py-2.5 text-center sm:rounded-[1.4rem] sm:px-4 sm:py-4"
+                  className="rounded-[1.2rem] border px-3 py-4 text-center sm:rounded-[1.4rem] sm:px-4 sm:py-4"
                   style={{
                     borderColor: 'rgba(255,255,255,0.1)',
                     background: 'rgba(255,255,255,0.05)',
                   }}
                 >
-                  <p className="truncate text-[8px] font-semibold uppercase tracking-[0.14em] text-blue-100/60 sm:text-[10px] sm:tracking-[0.2em]">
+                  <p className="truncate text-[9px] font-semibold uppercase tracking-[0.16em] text-blue-100/60 sm:text-[10px] sm:tracking-[0.2em]">
                     {item.label}
                   </p>
                   <p
-                    className={`mt-1 bg-gradient-to-r ${colors[index % 3]} bg-clip-text text-xl font-bold tracking-tight text-transparent sm:mt-1.5 sm:text-[1.8rem]`}
+                    className={`mt-1.5 bg-gradient-to-r ${colors[index % 3]} bg-clip-text text-2xl font-bold tracking-tight text-transparent sm:mt-1.5 sm:text-[1.8rem]`}
                   >
                     {item.value}
                   </p>
@@ -505,7 +505,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
             boxShadow:
               '0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #00000026, 0 149px 60px #0000000a, 0 233px 65px #00000003',
           }}
-          className="relative z-20 mx-auto w-[calc(100%-1.5rem)] max-w-5xl sm:w-[calc(100%-3rem)]"
+          className="relative z-20 mx-auto mt-4 w-[calc(100%-2.5rem)] max-w-5xl sm:mt-0 sm:w-[calc(100%-3rem)]"
         >
           <div className="overflow-hidden rounded-xl border-[3px] border-[#2a2a3e] bg-[#12122a] p-1 shadow-[0_0_80px_rgba(99,102,241,0.12)] sm:rounded-[1.8rem] sm:border-4 sm:p-3 lg:rounded-[2.2rem] lg:p-4">
             {/* Shimmer top edge */}
@@ -525,7 +525,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
         </motion.div>
 
         {/* ── Bottom fade to page background ── */}
-        <div className="pointer-events-none relative z-30 -mt-8 h-24 bg-gradient-to-b from-transparent via-[#0a1228]/60 to-[#f4f8fc] sm:-mt-12 sm:h-36" />
+        <div className="pointer-events-none relative z-30 -mt-6 h-20 bg-gradient-to-b from-transparent via-[#0a1228]/60 to-[#f4f8fc] sm:-mt-12 sm:h-36" />
       </div>
     </div>
   );

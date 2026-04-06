@@ -27,14 +27,14 @@ export function FeaturedEventsSection({ events }: FeaturedEventsSectionProps) {
   }));
 
   return (
-    <LampSection className="pb-16 pt-0 sm:pb-24">
+    <LampSection className="pb-20 pt-0 sm:pb-24">
       {/* Heading */}
       <Reveal>
         <div className="mx-auto max-w-4xl text-center">
           <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-cyan-400 sm:text-xs">
             Featured Events
           </p>
-          <h2 className="mt-4 text-[2rem] font-semibold leading-[0.95] tracking-[-0.05em] text-white sm:text-5xl lg:text-[4.2rem]">
+          <h2 className="mt-5 text-[2.4rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white sm:text-5xl lg:text-[4.2rem]">
             Featured events worth planning around.
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-blue-200/50">
@@ -50,7 +50,7 @@ export function FeaturedEventsSection({ events }: FeaturedEventsSectionProps) {
       </Reveal>
 
       {/* Carousel */}
-      <div className="mt-10 w-full max-w-7xl sm:mt-14">
+      <div className="mt-12 w-full max-w-7xl sm:mt-14">
         <FeaturedEventsCarousel items={cards} />
       </div>
     </LampSection>

@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 
 export function Footer() {
@@ -8,9 +9,7 @@ export function Footer() {
       <div className="pointer-events-none absolute right-[12%] top-10 h-36 w-36 rounded-full bg-[radial-gradient(circle,rgba(111,86,255,0.12),transparent_72%)] blur-3xl" />
       <div className="container-shell relative grid gap-6 py-8 sm:gap-10 sm:py-16 md:grid-cols-[1.2fr_0.8fr_0.8fr_0.9fr] lg:py-20">
         <div>
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#1668ff,#14b8ff,#645bff)] text-sm font-semibold text-white shadow-[0_22px_46px_-24px_rgba(22,104,255,0.44)]">
-            IE
-          </div>
+          <Image src="/logo/ie-none.png" alt="Investigator Events" width={64} height={64} className="h-14 w-14 rounded-2xl object-contain sm:h-16 sm:w-16" />
           <p className="mt-5 text-[11px] font-semibold tracking-[0.28em] text-slate-900">INVESTIGATOR EVENTS</p>
           <p className="mt-3 max-w-md font-[var(--font-serif)] text-[1.95rem] leading-[1.02] tracking-[-0.04em] text-slate-950 sm:mt-4 sm:text-3xl">
             Every investigator event. One global calendar.

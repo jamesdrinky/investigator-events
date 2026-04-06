@@ -1,213 +1,196 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { EventCard } from '@/components/event-card';
-import { EventCoverMedia } from '@/components/event-cover-media';
 import { Reveal } from '@/components/motion/reveal';
 import { SaveDateLinks } from '@/components/save-date-links';
 import { fetchAllEvents, fetchEventBySlug } from '@/lib/data/events';
 import { formatEventDate, parseDate } from '@/lib/utils/date';
 import { getCountryFlag } from '@/lib/utils/location';
+import { getAssociationBrandLogoSrc } from '@/lib/utils/association-branding';
 
 export const dynamic = 'force-dynamic';
 
 async function resolveEvent(slug: string) {
-  if (!slug) {
-    return { event: null, events: [] };
-  }
-
+  if (!slug) return { event: null, events: [] };
   const [event, events] = await Promise.all([fetchEventBySlug(slug), fetchAllEvents()]);
-
   return { event, events };
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const slug = params?.slug?.trim();
-  const { event } = await resolveEvent(slug ?? '');
-
-  if (!event) {
-    return {
-      title: 'Event Not Found | Investigator Events'
-    };
-  }
-
+  const { event } = await resolveEvent(params?.slug?.trim() ?? '');
+  if (!event) return { title: 'Event Not Found | Investigator Events' };
   return {
-    title: `${event.title ?? 'Event detail'} | Investigator Events`,
-    description: event.description
-      ? `${event.title ?? 'Event'} in ${event.city ?? 'Unknown location'}, ${event.country ?? 'Unknown country'}. ${event.description}`
-      : `${event.title ?? 'Event'} in ${event.city ?? 'Unknown location'}, ${event.country ?? 'Unknown country'}.`
+    title: `${event.title} | Investigator Events`,
+    description: `${event.title} in ${event.city}, ${event.country}. ${event.description || ''}`.trim(),
   };
 }
 
 export default async function EventDetailPage({ params }: { params: { slug: string } }) {
   const slug = params?.slug?.trim();
-  if (!slug) {
-    notFound();
-  }
-
+  if (!slug) notFound();
   const { event, events } = await resolveEvent(slug);
-
-  if (!event) {
-    notFound();
-  }
+  if (!event) notFound();
 
   const category = event.category ?? 'Event';
   const region = event.region ?? 'Global';
-  const country = event.country ?? 'Unknown country';
-  const city = event.city ?? 'Location to be confirmed';
-  const organiser = event.association ?? event.organiser ?? 'Organiser to be confirmed';
+  const country = event.country ?? 'Unknown';
+  const city = event.city ?? 'TBC';
+  const organiser = event.association ?? event.organiser ?? 'TBC';
   const website = event.website?.trim();
-  const title = event.title ?? 'Event detail';
-  const eventDate = event.date ? formatEventDate(event) : 'Date to be confirmed';
+  const title = event.title ?? 'Event';
+  const eventDate = event.date ? formatEventDate(event) : 'TBC';
+  const logoSrc = getAssociationBrandLogoSrc(organiser);
+  const imageSrc = (event.image_path && /^(\/(cities|events|images)\/|https?:\/\/)/.test(event.image_path) ? event.image_path : event.coverImage) ?? '/cities/fallback.jpg';
+  // Video support — if the event has a video URL field
+  const videoUrl = (event as any).videoUrl as string | undefined;
 
   const relatedEvents = events
-    .filter((item) => item.id !== event.id)
-    .filter((item) => item.eventScope === 'main')
-    .filter((item) => item.region === event.region || item.category === event.category || item.country === event.country)
-    .sort(
-      (a, b) =>
-        Math.abs(parseDate(a.date).getTime() - parseDate(event.date ?? a.date).getTime()) -
-        Math.abs(parseDate(b.date).getTime() - parseDate(event.date ?? b.date).getTime())
-    )
+    .filter((e) => e.id !== event.id && e.eventScope === 'main')
+    .filter((e) => e.region === event.region || e.category === event.category || e.country === event.country)
+    .sort((a, b) => Math.abs(parseDate(a.date).getTime() - parseDate(event.date ?? a.date).getTime()) - Math.abs(parseDate(b.date).getTime() - parseDate(event.date ?? b.date).getTime()))
     .slice(0, 3);
 
   return (
-    <section className="section-pad relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_14%,rgba(22,104,255,0.08),transparent_24%),radial-gradient(circle_at_84%_20%,rgba(20,184,255,0.08),transparent_20%)]" />
-      <div className="pointer-events-none absolute left-[8%] top-[10%] h-48 w-48 rounded-full bg-[radial-gradient(circle,rgba(22,104,255,0.12),transparent_72%)] blur-3xl" />
-      <div className="container-shell relative space-y-6 sm:space-y-8">
-        <Reveal>
-          <header className="overflow-hidden rounded-[1.9rem] border border-white/80 bg-[linear-gradient(135deg,#ffffff_0%,#eef6ff_48%,#f5fbff_100%)] p-4 shadow-[0_36px_96px_-56px_rgba(15,23,42,0.18)] sm:rounded-[2.5rem] sm:p-8 lg:p-10">
-            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.24),rgba(255,255,255,0)_28%,rgba(255,255,255,0.1)_56%,rgba(255,255,255,0)_100%)]" />
-            <div className="grid gap-5 sm:gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-start">
-              <div>
-                <div className="flex flex-wrap gap-2">
-                  <span className="city-chip">{category}</span>
-                  <span className="global-chip">{region}</span>
-                  <span className="country-chip">
-                    <span>{getCountryFlag(country)}</span>
-                    <span>{country}</span>
-                  </span>
-                </div>
+    <section className="relative overflow-hidden">
+      {/* ── Hero — full-width cover image ── */}
+      <div className="relative h-[28rem] w-full overflow-hidden sm:h-[36rem] lg:h-[40rem]">
+        <Image src={imageSrc} alt={title} fill className="object-cover" priority />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
 
-                <h1 className="mt-5 max-w-4xl font-[var(--font-serif)] text-[2.2rem] leading-[0.94] text-slate-950 sm:mt-6 sm:text-5xl lg:text-[4rem]">
-                  {title}
-                </h1>
-                <p className="mt-3 max-w-3xl text-[0.98rem] leading-relaxed text-slate-600 sm:mt-4 sm:text-base">
-                  {event.description || 'Official event details, organiser information, location, dates, and save links in one clean record.'}
-                </p>
+        {/* Association logo — top-left */}
+        {logoSrc && (
+          <div className="absolute left-4 top-20 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/30 bg-white/90 p-2 shadow-xl sm:left-8 sm:top-24 sm:h-16 sm:w-16">
+            <Image src={logoSrc} alt={organiser} width={48} height={48} className="h-auto max-h-10 w-auto max-w-10 object-contain sm:max-h-12 sm:max-w-12" />
+          </div>
+        )}
 
-                <div className="mt-5 grid gap-2.5 sm:mt-6 sm:grid-cols-3 sm:gap-3">
-                  <div className="rounded-[1.2rem] border border-white/90 bg-white/90 p-3.5 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] transition duration-500 hover:-translate-y-1 sm:rounded-[1.5rem] sm:p-4">
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Dates</p>
-                    <p className="mt-2 text-sm font-medium text-slate-950">{eventDate}</p>
-                  </div>
-                  <div className="rounded-[1.2rem] border border-white/90 bg-white/90 p-3.5 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] transition duration-500 hover:-translate-y-1 sm:rounded-[1.5rem] sm:p-4">
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Location</p>
-                    <p className="mt-2 text-sm font-medium text-slate-950">
-                      {city}, {country}
-                    </p>
-                  </div>
-                  <div className="rounded-[1.2rem] border border-white/90 bg-white/90 p-3.5 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] transition duration-500 hover:-translate-y-1 sm:rounded-[1.5rem] sm:p-4">
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Organiser</p>
-                    <p className="mt-2 text-sm font-medium text-slate-950">{organiser}</p>
-                  </div>
-                </div>
-
-                <div className="mt-5 flex flex-wrap gap-3 sm:mt-6">
-                  {website ? (
-                    <a href={website} target="_blank" rel="noreferrer" className="btn-primary px-5 py-2.5">
-                      Official website
-                    </a>
-                  ) : (
-                    <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-5 py-2.5 text-sm font-medium text-slate-500" aria-disabled="true">
-                      Official website not provided
-                    </span>
-                  )}
-                  <Link href="/calendar" className="btn-secondary px-5 py-2.5">
-                    Back to calendar
-                  </Link>
-                  <SaveDateLinks event={event} />
-                </div>
-              </div>
-
-              <EventCoverMedia
-                title={title}
-                city={city}
-                country={country}
-                region={region}
-                category={category}
-                imagePath={event.image_path}
-                coverImage={event.coverImage}
-                coverImageAlt={event.coverImageAlt}
-                associationName={organiser}
-                featured={event.featured}
-                className="h-[14.5rem] sm:h-[20rem] lg:h-[27rem]"
-              />
+        {/* Hero content over image */}
+        <div className="absolute inset-x-0 bottom-0 pb-8 sm:pb-12">
+          <div className="container-shell">
+            <div className="flex flex-wrap gap-2">
+              <span className="rounded-full bg-blue-500/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-blue-200">{category}</span>
+              <span className="rounded-full bg-white/15 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-white/80">{region}</span>
+              <span className="rounded-full bg-white/15 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-white/80">{getCountryFlag(country)} {country}</span>
             </div>
-          </header>
-        </Reveal>
+            <h1 className="mt-4 max-w-3xl text-[2rem] font-bold leading-[0.95] tracking-[-0.04em] text-white sm:text-[3rem] lg:text-[4rem]">
+              {title}
+            </h1>
+          </div>
+        </div>
+      </div>
 
-        <Reveal delay={0.04}>
-          <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-            <article className="rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-6 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.16)] sm:p-7">
-              <p className="eyebrow">Event Description</p>
-              <h2 className="mt-4 font-[var(--font-serif)] text-3xl text-slate-950">What this event is about.</h2>
-              <div className="mt-6 rounded-[1.5rem] border border-slate-200/80 bg-slate-50/90 p-4">
-                <p className="text-sm leading-relaxed text-slate-700">
-                  {event.description || 'Official event details, organiser information, location, dates, and save links in one clean record.'}
-                </p>
+      {/* ── Content ── */}
+      <div className="container-shell relative py-8 sm:py-12">
+        <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+          {/* Left column — main content */}
+          <div className="space-y-6">
+            {/* Quick info pills */}
+            <Reveal>
+              <div className="flex flex-wrap gap-3">
+                <div className="rounded-xl border border-slate-200/60 bg-white px-4 py-3 shadow-sm">
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-400">Date</p>
+                  <p className="mt-1 text-sm font-bold text-slate-950">{eventDate}</p>
+                </div>
+                <div className="rounded-xl border border-slate-200/60 bg-white px-4 py-3 shadow-sm">
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-400">Location</p>
+                  <p className="mt-1 text-sm font-bold text-slate-950">{city}, {country}</p>
+                </div>
+                <div className="rounded-xl border border-slate-200/60 bg-white px-4 py-3 shadow-sm">
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-400">Organiser</p>
+                  <p className="mt-1 text-sm font-bold text-slate-950">{organiser}</p>
+                </div>
               </div>
-            </article>
+            </Reveal>
 
-            <article className="rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-6 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.16)] sm:p-7">
-              <p className="eyebrow">Event Summary</p>
-              <h2 className="mt-4 font-[var(--font-serif)] text-3xl text-slate-950">Confirmed details</h2>
-              <dl className="mt-6 grid gap-4 sm:grid-cols-2">
-                <div className="rounded-[1.5rem] border border-slate-200/80 bg-slate-50/90 p-4">
-                  <dt className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Event type</dt>
-                  <dd className="mt-2 text-base text-slate-950">{category}</dd>
-                </div>
-                <div className="rounded-[1.5rem] border border-slate-200/80 bg-slate-50/90 p-4">
-                  <dt className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Coverage region</dt>
-                  <dd className="mt-2 text-base text-slate-950">{region}</dd>
-                </div>
-                <div className="rounded-[1.5rem] border border-slate-200/80 bg-slate-50/90 p-4">
-                  <dt className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Host organisation</dt>
-                  <dd className="mt-2 text-base text-slate-950">{event.organiser ?? organiser}</dd>
-                </div>
-                <div className="rounded-[1.5rem] border border-slate-200/80 bg-slate-50/90 p-4">
-                  <dt className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Association</dt>
-                  <dd className="mt-2 text-base text-slate-950">{event.association ?? 'Not specified separately'}</dd>
-                </div>
-              </dl>
-            </article>
-          </section>
-        </Reveal>
-
-        <Reveal delay={0.08}>
-          <section className="rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(245,249,255,0.92))] p-6 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.16)] sm:p-7">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="eyebrow">Related Events</p>
-                <h2 className="mt-4 font-[var(--font-serif)] text-3xl text-slate-950">Other major events to compare</h2>
-              </div>
-              <Link href="/submit-event" className="btn-secondary px-5 py-2.5">
-                Submit an event
-              </Link>
+            {/* CTAs */}
+            <div className="flex flex-wrap gap-3">
+              {website ? (
+                <a href={website} target="_blank" rel="noreferrer" className="btn-primary px-6 py-3">Official website</a>
+              ) : null}
+              <Link href="/calendar" className="btn-secondary px-5 py-2.5">Back to calendar</Link>
+              <SaveDateLinks event={event} />
             </div>
 
-            {relatedEvents.length > 0 ? (
-              <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {relatedEvents.map((relatedEvent) => (
-                  <EventCard key={relatedEvent.id} event={relatedEvent} />
+            {/* Video section — if event has video */}
+            {videoUrl && (
+              <Reveal>
+                <div className="overflow-hidden rounded-2xl border border-slate-200/60 bg-black shadow-lg">
+                  <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                    {videoUrl.includes('youtube') || videoUrl.includes('youtu.be') ? (
+                      <iframe
+                        src={videoUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
+                        className="absolute inset-0 h-full w-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    ) : (
+                      <video className="absolute inset-0 h-full w-full object-cover" controls preload="metadata" playsInline>
+                        <source src={videoUrl} type="video/mp4" />
+                      </video>
+                    )}
+                  </div>
+                </div>
+              </Reveal>
+            )}
+
+            {/* Description */}
+            <Reveal>
+              <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm">
+                <h2 className="text-lg font-bold text-slate-950">About this event</h2>
+                <p className="mt-3 text-sm leading-relaxed text-slate-600">
+                  {event.description || 'Full event details, organiser information, and dates in one clean record.'}
+                </p>
+              </div>
+            </Reveal>
+          </div>
+
+          {/* Right column — sidebar */}
+          <div className="space-y-4">
+            {/* Event details card */}
+            <Reveal delay={0.04}>
+              <div className="rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm">
+                <h3 className="text-sm font-bold text-slate-950">Event details</h3>
+                <dl className="mt-4 space-y-3">
+                  {[
+                    { label: 'Event type', value: category },
+                    { label: 'Region', value: region },
+                    { label: 'Host', value: event.organiser ?? organiser },
+                    { label: 'Association', value: event.association ?? 'Not specified' },
+                    { label: 'Scope', value: event.eventScope === 'main' ? 'Major event' : 'Additional listing' },
+                  ].map((item) => (
+                    <div key={item.label} className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3 last:border-0 last:pb-0">
+                      <dt className="text-xs text-slate-400">{item.label}</dt>
+                      <dd className="text-right text-sm font-medium text-slate-900">{item.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            </Reveal>
+
+            {/* Submit CTA */}
+            <div className="rounded-2xl border border-indigo-200/60 bg-indigo-50/50 p-5">
+              <p className="text-sm font-bold text-slate-950">Have an event to list?</p>
+              <p className="mt-1 text-xs text-slate-500">Free to submit, reviewed within 48 hours.</p>
+              <Link href="/submit-event" className="btn-primary mt-3 w-full px-4 py-2.5 text-sm">Submit an event</Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Related events */}
+        {relatedEvents.length > 0 && (
+          <Reveal delay={0.08}>
+            <div className="mt-12">
+              <h2 className="text-xl font-bold text-slate-950 sm:text-2xl">Related events</h2>
+              <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {relatedEvents.map((e) => (
+                  <EventCard key={e.id} event={e} />
                 ))}
               </div>
-            ) : (
-              <p className="mt-6 text-sm text-slate-600">No closely related major events are available right now.</p>
-            )}
-          </section>
-        </Reveal>
+            </div>
+          </Reveal>
+        )}
       </div>
     </section>
   );

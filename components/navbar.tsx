@@ -73,12 +73,12 @@ export function Navbar() {
       <div className="container-shell flex min-h-[3.25rem] items-center justify-between gap-2.5 py-1.5 sm:min-h-[4rem] sm:gap-3 md:min-h-[4.75rem] md:gap-5 md:py-0">
         <Link href="/" onClick={() => handleNavigation('/')} className="group flex min-w-0 items-center gap-2.5 sm:gap-3">
           <Image
-            src="/ie-pink.png"
+            src="/logo/ie-none.png"
             alt="Investigator Events"
             width={1536}
             height={1024}
             priority
-            className="h-8 w-auto shrink-0 object-contain sm:h-9 md:h-10"
+            className="h-10 w-auto shrink-0 object-contain sm:h-11 md:h-12"
             sizes="(max-width: 639px) 96px, 112px"
           />
           <div className="hidden min-w-0 sm:block">

@@ -1,5 +1,4 @@
 import { Reveal } from '@/components/motion/reveal';
-import { SubmitFeatureCards } from '@/components/submit/submit-feature-cards';
 import { SubmitEventForm } from '@/components/submit/submit-event-form';
 import { submitEventAction } from '@/app/submit-event/actions';
 import { eventCountries, eventRegions } from '@/lib/forms/event-form-options';
@@ -14,58 +13,56 @@ const scopes = [
 ];
 
 const faqs = [
-  {
-    question: 'Is listing free?',
-    answer: 'Yes. Event listings are free to submit and free to browse.'
-  },
-  {
-    question: 'How long does review take?',
-    answer: 'Most submissions are reviewed within 48 hours.'
-  },
-  {
-    question: 'How do I update or remove a listing?',
-    answer: 'Use the contact email included in your submission and the team can update or remove the listing after review.'
-  },
-  {
-    question: 'What qualifies?',
-    answer: 'Investigator conferences, training, association meetings, seminars, and related professional events with confirmed dates and a public website.'
-  }
+  { question: 'Is listing free?', answer: 'Yes. Event listings are free to submit and free to browse.' },
+  { question: 'How long does review take?', answer: 'Most submissions are reviewed within 48 hours.' },
+  { question: 'How do I update or remove a listing?', answer: 'Use the contact email included in your submission and the team can update or remove the listing after review.' },
+  { question: 'What qualifies?', answer: 'Investigator conferences, training, association meetings, seminars, and related professional events with confirmed dates and a public website.' },
 ];
 
 export default function SubmitEventPage({
   searchParams
 }: {
-  searchParams?: {
-    status?: string;
-  };
+  searchParams?: { status?: string };
 }) {
   const isSuccess = searchParams?.status === 'success';
   const isError = searchParams?.status === 'error';
   const formState = createSignedFormState('submit-event');
 
   return (
-    <section className="section-pad relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_14%,rgba(22,104,255,0.06),transparent_24%),radial-gradient(circle_at_86%_20%,rgba(20,184,255,0.06),transparent_20%)]" />
-      <div className="container-shell relative space-y-8">
-        {/* Header */}
-        <Reveal>
-          <header className="overflow-hidden rounded-[2.4rem] border border-white/80 bg-[linear-gradient(135deg,#ffffff_0%,#eff6ff_54%,#f4fbff_100%)] p-6 shadow-[0_34px_84px_-52px_rgba(15,23,42,0.16)] sm:p-8 lg:p-10">
-            <div className="grid gap-8 lg:grid-cols-[1.02fr_0.98fr] lg:items-end">
-              <div>
-                <p className="eyebrow">Submit Event</p>
-                <h1 className="section-title">List an investigator event for free.</h1>
-                <p className="section-copy max-w-3xl">
-                  Create a page for your event in under a minute. Every submission is reviewed before it goes live.
-                </p>
+    <section className="relative overflow-hidden">
+      {/* ── Hero — compact on mobile ── */}
+      <div className="relative bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_30%,#f0e8ff_60%,#f8fbff_100%)] pb-6 pt-24 sm:pb-10 sm:pt-32">
+        <div className="container-shell relative">
+          <Reveal>
+            <div className="mx-auto max-w-2xl text-center sm:text-left sm:mx-0 sm:max-w-none">
+              <p className="eyebrow">Submit Event</p>
+              <h1 className="mt-3 text-[1.8rem] font-bold leading-[0.95] tracking-[-0.05em] text-slate-950 sm:mt-4 sm:text-[3rem] lg:text-[4rem]">
+                List an investigator event for free.
+              </h1>
+              <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:mt-4 sm:max-w-xl sm:text-base">
+                Create a page for your event in under a minute. Every submission is reviewed before it goes live.
+              </p>
+              {/* Feature pills — inline on mobile */}
+              <div className="mt-4 flex flex-wrap justify-center gap-2 sm:justify-start sm:mt-6">
+                {[
+                  { label: 'Free listing', color: 'text-blue-600 bg-blue-50 border-blue-100' },
+                  { label: 'Reviewed', color: 'text-cyan-600 bg-cyan-50 border-cyan-100' },
+                  { label: '48hr turnaround', color: 'text-violet-600 bg-violet-50 border-violet-100' },
+                ].map((p) => (
+                  <span key={p.label} className={`rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] sm:text-[11px] ${p.color}`}>
+                    {p.label}
+                  </span>
+                ))}
               </div>
-              <SubmitFeatureCards />
             </div>
-          </header>
-        </Reveal>
+          </Reveal>
+        </div>
+      </div>
 
-        {/* Form section — lu.ma inspired layout */}
+      {/* ── Form — clean single column on mobile ── */}
+      <div className="container-shell relative -mt-2 pb-10 sm:pb-16">
         <Reveal delay={0.05}>
-          <div className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white p-5 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.12)] sm:p-8 lg:p-10">
+          <div className="mx-auto max-w-3xl rounded-2xl border border-slate-200/60 bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.08)] sm:rounded-[2rem] sm:p-8 lg:p-10">
             <SubmitEventForm
               action={submitEventAction}
               issuedAt={formState.issuedAt}
@@ -80,17 +77,18 @@ export default function SubmitEventPage({
           </div>
         </Reveal>
 
-        {/* FAQ section */}
+        {/* FAQ — below the form */}
         <Reveal delay={0.08}>
-          <div className="rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-6 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.12)] sm:p-8">
-            <p className="text-xs uppercase tracking-[0.2em] text-blue-700">FAQ</p>
-            <h2 className="mt-3 font-[var(--font-serif)] text-3xl text-slate-950">Before you submit</h2>
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          <div className="mx-auto mt-6 max-w-3xl sm:mt-8">
+            <h2 className="text-lg font-bold text-slate-950 sm:text-xl">Before you submit</h2>
+            <div className="mt-4 space-y-2">
               {faqs.map((faq) => (
-                <div key={faq.question} className="rounded-[1.4rem] border border-slate-200/80 bg-slate-50/90 p-4 transition duration-300 hover:-translate-y-0.5">
-                  <p className="text-sm font-semibold text-slate-950">{faq.question}</p>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-600">{faq.answer}</p>
-                </div>
+                <details key={faq.question} className="group rounded-xl border border-slate-200/60 bg-white">
+                  <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-slate-950 transition hover:text-blue-600">
+                    {faq.question}
+                  </summary>
+                  <p className="px-4 pb-3 text-sm leading-relaxed text-slate-600">{faq.answer}</p>
+                </details>
               ))}
             </div>
           </div>

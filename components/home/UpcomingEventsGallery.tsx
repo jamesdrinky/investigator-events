@@ -1,58 +1,34 @@
 import Link from 'next/link';
 import { Reveal } from '@/components/motion/reveal';
+import { ExpandingEventCards, type ExpandingEventItem } from './ExpandingEventCards';
 import type { EventItem } from '@/lib/data/events';
 import { formatEventDate } from '@/lib/utils/date';
 import { getEventSlug } from '@/lib/utils/event-slugs';
-import { EventsCircularGallery } from './EventsCircularGallery';
 
 interface UpcomingEventsGalleryProps {
   events: EventItem[];
 }
 
-/* ── Mobile: horizontal scroll card ── */
-
-function MobileEventCard({ event }: { event: EventItem }) {
-  const slug = getEventSlug(event);
-
-  return (
-    <Link
-      href={`/events/${slug}`}
-      className="w-[16rem] flex-shrink-0 overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-[0_4px_16px_-6px_rgba(15,23,42,0.08)]"
-    >
-      <div className="h-28 w-full bg-gradient-to-br from-blue-50 to-indigo-100" />
-      <div className="p-3">
-        <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-blue-600">
-          {formatEventDate(event)}
-        </p>
-        <h3 className="mt-1 text-sm font-semibold leading-tight text-slate-950 line-clamp-2">
-          {event.title}
-        </h3>
-        <p className="mt-1 text-[11px] text-slate-500 line-clamp-1">
-          {event.city}, {event.country}
-        </p>
-      </div>
-    </Link>
-  );
+function serializeEvents(events: EventItem[]): ExpandingEventItem[] {
+  return events.map((e) => ({
+    id: e.id,
+    title: e.title,
+    date: formatEventDate(e),
+    city: e.city,
+    country: e.country,
+    region: e.region,
+    category: e.category,
+    slug: getEventSlug(e),
+    association: e.association ?? e.organiser,
+    coverImage: e.coverImage,
+    description: e.description || undefined,
+  }));
 }
 
 export function UpcomingEventsGallery({ events }: UpcomingEventsGalleryProps) {
   if (events.length === 0) return null;
 
-  const galleryEvents = events.slice(0, 8);
-
-  // Serialize minimal data for the client gallery
-  const galleryItems = galleryEvents.map((event) => ({
-    id: event.id,
-    title: event.title,
-    date: formatEventDate(event),
-    city: event.city,
-    country: event.country,
-    slug: getEventSlug(event),
-    association: event.association ?? event.organiser,
-    coverImage: event.coverImage,
-    region: event.region,
-    category: event.category,
-  }));
+  const items = serializeEvents(events.slice(0, 6));
 
   return (
     <section className="relative py-10 sm:py-24">
@@ -62,7 +38,7 @@ export function UpcomingEventsGallery({ events }: UpcomingEventsGalleryProps) {
             <div>
               <p className="eyebrow">Coming Up</p>
               <h2 className="mt-2 text-[1.9rem] font-semibold leading-[0.95] tracking-[-0.05em] text-slate-950 sm:mt-3 sm:text-5xl lg:text-[4rem]">
-                Events on the horizon
+                Next on the calendar
               </h2>
             </div>
             <Link
@@ -73,28 +49,10 @@ export function UpcomingEventsGallery({ events }: UpcomingEventsGalleryProps) {
             </Link>
           </div>
         </Reveal>
-      </div>
 
-      {/* ── Mobile / Tablet: horizontal scroll ── */}
-      <div className="mt-6 lg:hidden">
-        <div
-          className="flex gap-3 overflow-x-auto px-4 pb-4 sm:px-6"
-          style={{
-            scrollSnapType: 'x mandatory',
-            WebkitOverflowScrolling: 'touch',
-          }}
-        >
-          {galleryEvents.map((event) => (
-            <div key={event.id} style={{ scrollSnapAlign: 'start' }}>
-              <MobileEventCard event={event} />
-            </div>
-          ))}
+        <div className="mt-6 sm:mt-10">
+          <ExpandingEventCards items={items} />
         </div>
-      </div>
-
-      {/* ── Desktop: 3D circular gallery ── */}
-      <div className="relative mt-10 hidden lg:block">
-        <EventsCircularGallery items={galleryItems} />
       </div>
     </section>
   );

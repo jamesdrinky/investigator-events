@@ -1,11 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { EventCoverMedia } from '@/components/event-cover-media';
-import { FeaturedEventMiniMap } from '@/components/featured-event-mini-map';
+import Image from 'next/image';
 import type { EventItem } from '@/lib/data/events';
 import { formatEventDate } from '@/lib/utils/date';
 import { getEventSlug } from '@/lib/utils/event-slugs';
+import { getAssociationBrandLogoSrc } from '@/lib/utils/association-branding';
 
 interface EventCardProps {
   event: EventItem;
@@ -16,109 +16,92 @@ interface EventCardProps {
 
 export function EventCard({ event, priority = 'default', isSignalActive = false, onHoverChange }: EventCardProps) {
   const hostLabel = event.association ?? event.organiser;
-  const featured = priority === 'featured' || priority === 'hero';
+  const logoSrc = getAssociationBrandLogoSrc(hostLabel);
   const hero = priority === 'hero';
-  const mobileDefault = priority === 'default';
+  const featured = priority === 'featured' || hero;
   const description = event.description?.trim();
+
+  const safeCoverImage = event.coverImage && /^(\/(cities|events|images)\/|https?:\/\/)/.test(event.coverImage) ? event.coverImage : undefined;
+  const imageSrc = event.image_path && /^(\/(cities|events|images)\/|https?:\/\/)/.test(event.image_path) ? event.image_path : safeCoverImage ?? '/cities/fallback.jpg';
 
   return (
     <Link
       href={`/events/${getEventSlug(event)}`}
       onMouseEnter={() => onHoverChange?.(true)}
       onMouseLeave={() => onHoverChange?.(false)}
-      onFocus={() => onHoverChange?.(true)}
-      onBlur={() => onHoverChange?.(false)}
-      className={`group relative flex h-full w-full overflow-hidden border bg-white text-left transition duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:scale-[1.01] ${
-        mobileDefault ? 'flex-row rounded-[1rem] sm:flex-col sm:rounded-[1.4rem]' : 'flex-col rounded-[1.2rem] sm:rounded-[1.4rem]'
-      } ${
+      className={`group relative flex h-full flex-col overflow-hidden rounded-2xl border bg-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 ${
         isSignalActive
-          ? 'border-sky-300 shadow-[0_28px_80px_-40px_rgba(14,165,233,0.34),0_0_26px_rgba(99,102,241,0.12)]'
-          : featured
-            ? 'border-slate-200 shadow-[0_24px_62px_-38px_rgba(15,23,42,0.22)] hover:border-sky-200 hover:shadow-[0_34px_86px_-40px_rgba(15,23,42,0.3),0_0_28px_rgba(56,189,248,0.12)]'
-            : 'border-slate-200 shadow-[0_16px_42px_-34px_rgba(15,23,42,0.16)] hover:border-sky-100 hover:shadow-[0_26px_62px_-38px_rgba(15,23,42,0.22),0_0_22px_rgba(56,189,248,0.1)]'
+          ? 'border-blue-300 shadow-[0_20px_50px_-16px_rgba(59,130,246,0.25)]'
+          : 'border-slate-200/60 shadow-[0_4px_16px_-8px_rgba(15,23,42,0.06)] hover:shadow-[0_20px_50px_-16px_rgba(59,130,246,0.15)]'
       }`}
     >
-      <EventCoverMedia
-        title={event.title}
-        city={event.city}
-        country={event.country}
-        region={event.region}
-        category={event.category}
-        imagePath={event.image_path}
-        coverImage={event.coverImage}
-        coverImageAlt={event.coverImageAlt}
-        associationName={hostLabel}
-        featured={event.featured}
-        compact
-        hideMeta
-        className={
-          hero
-            ? 'h-[14.5rem] rounded-b-none rounded-t-[1.05rem] border-x-0 border-t-0 sm:h-[19rem] sm:rounded-t-[1.25rem] lg:h-[20rem]'
-            : featured
-              ? 'h-[12rem] rounded-b-none rounded-t-[1rem] border-x-0 border-t-0 sm:h-[16rem] sm:rounded-t-[1.2rem]'
-              : 'h-auto w-[6.9rem] shrink-0 rounded-l-[1rem] rounded-r-none border-b-0 border-l-0 border-r border-t-0 sm:h-[14.5rem] sm:w-auto sm:rounded-b-none sm:rounded-t-[1.1rem] sm:border-r-0 sm:border-t-0'
-        }
-      />
+      {/* ── Cover image with logo + date badge ── */}
+      <div className={`relative w-full overflow-hidden ${hero ? 'h-52 sm:h-64' : featured ? 'h-44 sm:h-52' : 'h-40 sm:h-48'}`}>
+        <Image
+          src={imageSrc}
+          alt={event.title}
+          fill
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+        {/* Dark gradient overlay */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
-      <div className={`${hero ? 'flex flex-1 flex-col gap-3 p-4 sm:gap-4 sm:p-6' : mobileDefault ? 'flex flex-1 flex-col gap-2.5 p-3 sm:gap-3.5 sm:p-5' : 'flex flex-1 flex-col gap-3 p-3.5 sm:gap-3.5 sm:p-5'}`}>
-        <div className={`${hero ? 'flex min-w-0 flex-1 flex-col gap-3 sm:gap-4' : mobileDefault ? 'flex min-w-0 flex-1 flex-col gap-2 sm:gap-3.5' : 'flex min-w-0 flex-1 flex-col gap-3 sm:gap-3.5'}`}>
-          {mobileDefault ? (
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-700 sm:hidden">{formatEventDate(event)}</p>
-          ) : null}
+        {/* Association logo — top-left, BIG */}
+        {logoSrc ? (
+          <div className="absolute left-3 top-3 flex h-12 w-12 items-center justify-center rounded-xl border border-white/30 bg-white/90 p-1.5 shadow-lg sm:left-4 sm:top-4 sm:h-14 sm:w-14 sm:p-2">
+            <Image
+              src={logoSrc}
+              alt={hostLabel}
+              width={48}
+              height={48}
+              className="h-auto max-h-8 w-auto max-w-8 object-contain sm:max-h-10 sm:max-w-10"
+            />
+          </div>
+        ) : (
+          <div className="absolute left-3 top-3 flex h-12 w-12 items-center justify-center rounded-xl border border-white/30 bg-white/90 shadow-lg sm:left-4 sm:top-4 sm:h-14 sm:w-14">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{hostLabel.slice(0, 3)}</span>
+          </div>
+        )}
+
+        {/* Date badge — top-right */}
+        <div className="absolute right-3 top-3 rounded-lg bg-white/90 px-2.5 py-1.5 shadow-lg sm:right-4 sm:top-4">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600 sm:text-[11px]">{formatEventDate(event)}</p>
+        </div>
+
+        {/* Title over image — bottom */}
+        <div className="absolute inset-x-0 bottom-0 px-4 pb-4">
           <h3
-            className={`text-slate-950 transition-colors duration-200 group-hover:text-sky-700 ${
-              hero ? 'text-[1.55rem] font-semibold leading-[1.06] tracking-[-0.045em] sm:text-[1.85rem]' : featured ? 'text-[1.24rem] font-semibold leading-[1.1] tracking-[-0.04em] sm:text-[1.42rem]' : 'text-[1rem] font-semibold leading-[1.15] tracking-[-0.03em] sm:text-[1.28rem] sm:leading-[1.12] sm:tracking-[-0.035em]'
-            }`}
-            style={{
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden'
-            }}
+            className={`font-bold leading-tight text-white ${hero ? 'text-xl sm:text-2xl' : 'text-base sm:text-lg'}`}
+            style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
           >
             {event.title}
           </h3>
+        </div>
+      </div>
 
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] font-medium uppercase tracking-[0.14em] text-slate-500 sm:gap-x-2.5 sm:text-[11px] sm:tracking-[0.16em]">
-            <span className={`${mobileDefault ? 'hidden sm:inline text-sky-700' : 'text-sky-700'}`}>{formatEventDate(event)}</span>
-            <span className="h-1 w-1 rounded-full bg-slate-300" />
-            <span>{event.city}, {event.country}</span>
-            <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:inline-block" />
-            <span className="hidden sm:inline">{event.region}</span>
-          </div>
-
-          {description ? (
-            <p
-              className={`${hero || featured ? 'text-sm leading-6 text-slate-600' : 'hidden text-sm leading-6 text-slate-600 sm:block'}`}
-              style={{
-                display: '-webkit-box',
-                WebkitLineClamp: hero ? 3 : 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden'
-              }}
-            >
-              {description}
-            </p>
-          ) : null}
-
-          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-            <span className={`rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-600 ${mobileDefault ? 'max-w-full truncate' : ''}`}>
-              {hostLabel}
-            </span>
-            <span className="hidden rounded-full border border-sky-100 bg-sky-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-sky-700 sm:inline-flex">
-              {event.category}
-            </span>
-          </div>
-
-          <div className="mt-auto pt-0.5 sm:pt-1">
-            <span className="inline-flex items-center text-[0.92rem] font-semibold text-sky-700 transition duration-300 group-hover:text-sky-600 sm:text-sm">
-              {mobileDefault ? 'Open event' : 'Explore event'}
-              <span className="ml-1 transition-transform duration-200 group-hover:translate-x-1.5">→</span>
-            </span>
-          </div>
+      {/* ── Details below image ── */}
+      <div className="flex flex-1 flex-col gap-2 p-4">
+        {/* Location + category tags */}
+        <div className="flex flex-wrap gap-1.5">
+          <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-medium text-slate-600">
+            {event.city}, {event.country}
+          </span>
+          <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-medium text-blue-600">
+            {event.category}
+          </span>
         </div>
 
-        {hero ? <FeaturedEventMiniMap city={event.city} country={event.country} region={event.region} className="mt-1 hidden h-[20rem] w-full lg:block xl:h-[20.5rem]" /> : null}
+        {/* Description (featured/hero only) */}
+        {description && featured ? (
+          <p className="text-sm leading-relaxed text-slate-500 line-clamp-2">{description}</p>
+        ) : null}
+
+        {/* CTA */}
+        <div className="mt-auto pt-1">
+          <span className="text-sm font-semibold text-blue-600 transition group-hover:text-blue-500">
+            View event <span className="transition-transform duration-200 group-hover:translate-x-1 inline-block">→</span>
+          </span>
+        </div>
       </div>
     </Link>
   );

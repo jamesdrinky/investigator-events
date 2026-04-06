@@ -476,6 +476,29 @@ a {
 
 @media (prefers-reduced-motion: reduce) {
   [style*="marquee-v"] { animation: none !important; }
+  [style*="spin-ring"] { animation: none !important; }
+}
+
+/* ── Rotating logo rings ── */
+@keyframes spin-ring {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes spin-ring-reverse {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(-360deg); }
+}
+
+/* Counter-rotation for logos inside rings (no translate needed) */
+@keyframes counter-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes counter-spin-reverse {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
 }
 
 /* ── Holographic card ── */

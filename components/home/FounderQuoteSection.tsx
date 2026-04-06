@@ -27,7 +27,7 @@ export function FounderQuoteSection() {
                 <div className="flex justify-center lg:justify-start">
                   <div className="flex h-16 w-16 items-center justify-center rounded-full border border-slate-200/60 bg-gradient-to-br from-white to-slate-50 p-1 shadow-[0_8px_30px_-10px_rgba(99,102,241,0.2)] sm:h-20 sm:w-20">
                     <Image
-                      src="/faces/mike1.webp"
+                      src="/faces/mike2.png"
                       alt="Mike LaCorte"
                       width={80}
                       height={80}

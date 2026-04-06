@@ -39,7 +39,7 @@ export default async function HomePage() {
   ];
 
   return (
-    <div className="relative flex flex-col overflow-x-hidden">
+    <div className="relative flex flex-col">
       {/* ── Stripe-style animated gradient mesh blobs ── */}
       <div className="mesh-blob mesh-blob-1" aria-hidden="true" />
       <div className="mesh-blob mesh-blob-2" aria-hidden="true" />

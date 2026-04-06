@@ -364,7 +364,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
 
         {/* ── Header content (centered, above globe) ── */}
         <motion.div
-          style={{ translateY: headerY }}
+          style={isMobile ? undefined : { translateY: headerY }}
           className="relative z-10 px-6 pb-10 pt-16 text-center sm:pb-8 sm:pt-12 lg:pt-16"
         >
           {/* Badge pill */}

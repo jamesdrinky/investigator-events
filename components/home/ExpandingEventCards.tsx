@@ -40,7 +40,7 @@ export function ExpandingEventCards({ items }: { items: ExpandingEventItem[] }) 
     }
     return {
       gridTemplateColumns: '1fr',
-      gridTemplateRows: items.map((_, i) => (i === activeIndex ? '5fr' : '1fr')).join(' '),
+      gridTemplateRows: items.map((_, i) => (i === activeIndex ? '4fr' : 'minmax(70px, 1fr)')).join(' '),
     };
   }, [activeIndex, items.length, isDesktop]);
 
@@ -52,8 +52,10 @@ export function ExpandingEventCards({ items }: { items: ExpandingEventItem[] }) 
       className="grid w-full gap-2"
       style={{
         ...gridStyle,
-        height: isDesktop ? '480px' : '560px',
-        transition: 'grid-template-columns 0.5s ease, grid-template-rows 0.5s ease',
+        height: isDesktop ? '480px' : '600px',
+        transition: 'grid-template-columns 0.45s cubic-bezier(0.4,0,0.2,1), grid-template-rows 0.45s cubic-bezier(0.4,0,0.2,1)',
+        willChange: 'grid-template-columns, grid-template-rows',
+        contain: 'layout style',
       }}
     >
       {items.map((item, index) => {
@@ -70,11 +72,11 @@ export function ExpandingEventCards({ items }: { items: ExpandingEventItem[] }) 
             tabIndex={0}
             onFocus={() => setActiveIndex(index)}
             style={{
-              border: active ? '2px solid rgba(99, 102, 241, 0.6)' : '1px solid rgba(226, 232, 240, 0.2)',
+              border: active ? '2px solid rgba(99, 102, 241, 0.6)' : '1px solid rgba(226, 232, 240, 0.25)',
               boxShadow: active
-                ? '0 0 20px rgba(99, 102, 241, 0.4), 0 0 50px rgba(99, 102, 241, 0.25), 0 0 80px rgba(139, 92, 246, 0.15), inset 0 0 30px rgba(99, 102, 241, 0.1)'
-                : '0 4px 20px -8px rgba(0,0,0,0.1)',
-              transition: 'border-color 0.4s ease, box-shadow 0.4s ease',
+                ? '0 0 24px rgba(99, 102, 241, 0.35), 0 0 60px rgba(139, 92, 246, 0.15)'
+                : 'none',
+              transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
             }}
           >
             {/* Background image — always colourful, no grayscale */}

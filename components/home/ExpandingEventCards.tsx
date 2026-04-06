@@ -63,18 +63,25 @@ export function ExpandingEventCards({ items }: { items: ExpandingEventItem[] }) 
         return (
           <li
             key={item.id}
-            className="group relative min-h-0 min-w-0 cursor-pointer overflow-hidden rounded-2xl border border-slate-200/40 md:min-w-[60px]"
+            className="group relative min-h-0 min-w-0 cursor-pointer overflow-hidden rounded-2xl md:min-w-[60px]"
             data-active={active}
             onMouseEnter={() => setActiveIndex(index)}
             onClick={() => setActiveIndex(index)}
             tabIndex={0}
             onFocus={() => setActiveIndex(index)}
+            style={{
+              border: active ? '2px solid rgba(99, 102, 241, 0.6)' : '1px solid rgba(226, 232, 240, 0.2)',
+              boxShadow: active
+                ? '0 0 20px rgba(99, 102, 241, 0.4), 0 0 50px rgba(99, 102, 241, 0.25), 0 0 80px rgba(139, 92, 246, 0.15), inset 0 0 30px rgba(99, 102, 241, 0.1)'
+                : '0 4px 20px -8px rgba(0,0,0,0.1)',
+              transition: 'border-color 0.4s ease, box-shadow 0.4s ease',
+            }}
           >
-            {/* Background image */}
+            {/* Background image — always colourful, no grayscale */}
             <img
               src={safeSrc(item.coverImage)}
               alt={item.title}
-              className="absolute inset-0 h-full w-full object-cover transition-all duration-500 ease-out group-data-[active=true]:scale-100 group-data-[active=true]:grayscale-0 scale-110 grayscale"
+              className="absolute inset-0 h-full w-full object-cover transition-all duration-500 ease-out group-data-[active=true]:scale-100 scale-110"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
 

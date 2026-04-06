@@ -186,6 +186,98 @@ a {
   @apply mt-4 text-sm leading-relaxed text-slate-600 sm:text-base;
 }
 
+/* ── Glow gradient button — animated gradient synced with hero "Never" text ── */
+.btn-glow {
+  @apply relative inline-flex items-center justify-center overflow-hidden rounded-full px-6 py-3 text-sm font-semibold text-white transition-all duration-500 hover:-translate-y-0.5;
+  background: linear-gradient(92deg, #3b82f6 0%, #22d3ee 30%, #a855f7 65%, #ec4899 100%);
+  background-size: 200% 100%;
+  animation: gradient-text-cycle 5s ease-in-out infinite;
+  box-shadow:
+    0 20px 40px -20px rgba(99, 102, 241, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.btn-glow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, transparent 10%, rgba(255, 255, 255, 0.3) 50%, transparent 90%);
+  transform: translateX(-110%) skewX(-20deg);
+  pointer-events: none;
+}
+
+.btn-glow:hover::after {
+  animation: btn-shimmer 0.7s ease forwards;
+}
+
+.btn-glow:hover {
+  box-shadow:
+    0 0 30px -4px rgba(99, 102, 241, 0.5),
+    0 28px 50px -16px rgba(99, 102, 241, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.btn-glow:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+/* ── Compact glow gradient button for nav ── */
+.btn-glow-nav {
+  @apply relative inline-flex items-center justify-center overflow-hidden rounded-full text-sm font-semibold text-white transition-all duration-500 hover:-translate-y-0.5;
+  background: linear-gradient(92deg, #3b82f6 0%, #22d3ee 30%, #a855f7 65%, #ec4899 100%);
+  background-size: 200% 100%;
+  animation: gradient-text-cycle 5s ease-in-out infinite;
+  box-shadow:
+    0 12px 24px -12px rgba(99, 102, 241, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.btn-glow-nav:hover {
+  box-shadow:
+    0 0 20px -4px rgba(99, 102, 241, 0.4),
+    0 16px 32px -12px rgba(99, 102, 241, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* ── Glow outline button (secondary CTA) ── */
+.btn-glow-outline {
+  @apply relative inline-flex items-center justify-center overflow-hidden rounded-full px-6 py-3 text-sm font-semibold text-white/60 transition-all duration-500 hover:-translate-y-0.5 hover:text-white/90;
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 16px 32px -20px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.btn-glow-outline::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 9999px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.03) 40%, rgba(255,255,255,0.01) 60%, rgba(255,255,255,0.1));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.btn-glow-outline:hover {
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.18),
+    0 0 20px -4px rgba(99, 102, 241, 0.2),
+    0 20px 40px -16px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.btn-glow-outline:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+/* ── Legacy gradient button (keep for non-hero use) ── */
 .btn-primary {
   @apply relative inline-flex items-center justify-center overflow-hidden rounded-full px-6 py-3 text-sm font-semibold text-white transition duration-500 hover:-translate-y-1 hover:scale-[1.01] hover:brightness-105;
   background: linear-gradient(135deg, #1668ff 0%, #10b8ff 36%, #7c3aed 78%, #ec4899 100%);
@@ -340,6 +432,12 @@ a {
 @keyframes globe-css-spin {
   from { transform: translateX(-50%) rotate(0deg); }
   to { transform: translateX(-50%) rotate(360deg); }
+}
+
+/* Slow globe rotation for hero — desktop only */
+@keyframes globe-slow-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 @keyframes hero-dash-flow {

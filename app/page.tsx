@@ -62,7 +62,7 @@ export default async function HomePage() {
         <WhyUseSection />
       </div>
 
-      <div className="order-5 mobile-section-divider sm:order-none ">
+      <div className="order-5 sm:order-none">
         <FounderQuoteSection />
       </div>
 

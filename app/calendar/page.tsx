@@ -42,7 +42,7 @@ export default async function CalendarPage({
   return (
     <section className="relative overflow-hidden">
       {/* ── Hero ── */}
-      <div className="relative overflow-hidden bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_25%,#f0e8ff_50%,#f4f0ff_75%,#f8fbff_100%)] pb-8 pt-24 sm:pb-14 sm:pt-32">
+      <div className="relative overflow-hidden bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_25%,#f0e8ff_50%,#f4f0ff_75%,#f8fbff_100%)] pb-10 pt-28 sm:pb-16 sm:pt-36">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(99,102,241,0.08),transparent_40%),radial-gradient(circle_at_80%_20%,rgba(59,130,246,0.06),transparent_35%)]" />
         <SpinningLogoRings />
 
@@ -50,24 +50,17 @@ export default async function CalendarPage({
           <Reveal>
             <div className="max-w-3xl">
               <p className="eyebrow">Calendar</p>
-              <h1 className="mt-3 text-[2rem] font-bold leading-[0.92] tracking-[-0.05em] text-slate-950 sm:mt-4 sm:text-[3.5rem] lg:text-[5rem]">
+              <h1 className="mt-3 text-[2.2rem] font-bold leading-[0.94] tracking-[-0.05em] text-slate-950 sm:mt-4 sm:text-[3.5rem] lg:text-[5rem]">
                 The{' '}
-                <span className="relative inline-block">
-                  <span
-                    className="bg-[linear-gradient(92deg,#2563eb_0%,#7c3aed_50%,#ec4899_100%)] bg-[length:200%_100%] bg-clip-text text-transparent"
-                    style={{ animation: 'gradient-text-cycle 5s ease-in-out infinite' }}
-                  >
-                    live
-                  </span>
-                  {/* Glow behind "live" */}
-                  <span
-                    className="pointer-events-none absolute inset-0 -z-10 rounded-lg bg-[radial-gradient(circle,rgba(99,102,241,0.2),transparent_70%)]"
-                    style={{ animation: 'hero-pulse 3s ease-in-out infinite', filter: 'blur(12px)' }}
-                  />
+                <span
+                  className="inline-block bg-[linear-gradient(92deg,#3b82f6_0%,#22d3ee_30%,#a855f7_65%,#ec4899_100%)] bg-[length:200%_100%] bg-clip-text text-transparent"
+                  style={{ animation: 'gradient-text-cycle 5s ease-in-out infinite' }}
+                >
+                  live
                 </span>{' '}
                 global events calendar.
               </h1>
-              <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-600 sm:mt-5 sm:max-w-2xl sm:text-base">
+              <p className="mt-4 max-w-xl text-[0.95rem] leading-relaxed text-slate-600 sm:mt-5 sm:max-w-2xl sm:text-lg">
                 Browse conferences, training, and association events in one place, then filter by month, region, or organiser.
               </p>
             </div>
@@ -75,15 +68,15 @@ export default async function CalendarPage({
 
           {/* Stats — responsive */}
           <Reveal delay={0.06}>
-            <div className="mt-6 grid grid-cols-3 gap-2 sm:mt-10 sm:gap-4">
+            <div className="mt-8 grid grid-cols-3 gap-3 sm:mt-12 sm:gap-5">
               {[
-                { label: 'Upcoming', value: upcomingCount, color: 'text-blue-600' },
-                { label: 'Countries', value: coverage.totalCountries, color: 'text-violet-600' },
-                { label: 'Total', value: coverage.totalEvents, color: 'text-cyan-600' },
+                { label: 'Upcoming', value: upcomingCount, gradient: 'from-blue-500 to-cyan-400' },
+                { label: 'Countries', value: coverage.totalCountries, gradient: 'from-violet-500 to-purple-400' },
+                { label: 'Total', value: coverage.totalEvents, gradient: 'from-cyan-500 to-teal-400' },
               ].map((item) => (
-                <div key={item.label} className="rounded-xl border border-white/80 bg-white/90 px-3 py-3 shadow-sm sm:rounded-2xl sm:px-5 sm:py-6">
-                  <p className="text-[8px] font-semibold uppercase tracking-[0.16em] text-slate-400 sm:text-[11px]">{item.label}</p>
-                  <p className={`mt-1 text-[1.5rem] font-bold tracking-tight sm:mt-2 sm:text-[3rem] ${item.color}`}>{item.value}</p>
+                <div key={item.label} className="rounded-xl border border-white/70 bg-white/95 px-4 py-4 shadow-[0_12px_30px_-12px_rgba(15,23,42,0.1)] sm:rounded-2xl sm:px-6 sm:py-6">
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-400 sm:text-[11px]">{item.label}</p>
+                  <p className={`mt-1.5 bg-gradient-to-r ${item.gradient} bg-clip-text text-[1.8rem] font-bold tracking-tight text-transparent sm:mt-2 sm:text-[3rem]`}>{item.value}</p>
                 </div>
               ))}
             </div>
@@ -105,7 +98,7 @@ export default async function CalendarPage({
       </div>
 
       {/* ── Calendar content ── */}
-      <div className="container-shell relative py-6 sm:py-10">
+      <div className="container-shell relative py-8 sm:py-12">
         <CalendarView
           events={events}
           initialAssociation={initialAssociation}

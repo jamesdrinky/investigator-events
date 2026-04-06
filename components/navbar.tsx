@@ -115,7 +115,7 @@ export function Navbar() {
           <Link
             href={"/list-your-event" as Route}
             onClick={() => handleNavigation('/list-your-event' as Route)}
-            className="btn-primary hidden min-h-[2.5rem] px-3.5 text-xs sm:inline-flex sm:px-4 md:text-sm"
+            className="btn-glow-nav hidden min-h-[2.5rem] px-3.5 text-xs sm:inline-flex sm:px-4 md:text-sm"
           >
             List Your Event
           </Link>

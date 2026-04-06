@@ -63,7 +63,7 @@ export function SpinningLogoRings() {
     <div className="pointer-events-none absolute right-0 top-0 hidden h-full w-[55%] overflow-hidden lg:block">
       {/* Position the center of rings at center-right, clipped by overflow */}
       <div className="relative h-full w-full">
-        <div className="absolute -right-[10%] top-[30%]" style={{ width: 520, height: 520 }}>
+        <div className="absolute -right-[10%] top-[10%]" style={{ width: 520, height: 520 }}>
           <Ring logos={RING_1} size={220} duration="50s" />
           <Ring logos={RING_2} size={360} duration="65s" reverse />
           <Ring logos={RING_3} size={500} duration="80s" />

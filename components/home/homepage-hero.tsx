@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { Route } from 'next';
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
-import { useMemo, useRef, useState, useEffect } from 'react';
+import { useMemo, useRef, useState, useEffect, useCallback } from 'react';
 import { geoOrthographic, geoPath, geoGraticule } from 'd3-geo';
 import { feature } from 'topojson-client';
 import landData from 'world-atlas/land-110m.json';
@@ -135,13 +135,9 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
     target: containerRef,
     offset: ['start start', 'end start'],
   });
-  const ipadRotate = useTransform(scrollYProgress, [0, 0.65], [20, 0]);
-  const ipadScale = useTransform(
-    scrollYProgress,
-    [0, 0.65],
-    isMobile ? [0.78, 0.95] : [1.05, 1],
-  );
-  const headerY = useTransform(scrollYProgress, [0, 0.5], [0, -60]);
+  const ipadRotate = useTransform(scrollYProgress, [0, 1], [35, 0]);
+  const ipadScale = useTransform(scrollYProgress, [0, 1], [0.85, 1]);
+  const headerY = useTransform(scrollYProgress, [0, 0.5], [0, -80]);
 
   /* ── Mobile detection ── */
   useEffect(() => {
@@ -151,10 +147,6 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
     mql.addEventListener('change', handler);
     return () => mql.removeEventListener('change', handler);
   }, []);
-
-  /* Globe renders once with a fixed rotation — CSS handles the spin.
-     No requestAnimationFrame, no React re-renders, no d3 recalculations. */
-  const STATIC_ROTATION = 25; // degrees
 
   /* ── Globe data ── */
   const globeNodes = useMemo(
@@ -171,39 +163,48 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
     () => feature(landData as any, (landData as any).objects.land) as any,
     [],
   );
+  const graticuleData = useMemo(() => geoGraticule()(), []);
 
-  const projection = useMemo(
-    () =>
-      geoOrthographic()
+  /* ── Animated globe rotation (desktop only) ── */
+  const rotationRef = useRef(25);
+  const landRef = useRef<SVGPathElement>(null);
+  const landWireRef = useRef<SVGPathElement>(null);
+  const graticuleRef = useRef<SVGPathElement>(null);
+  const dotsGroupRef = useRef<SVGGElement>(null);
+  const arcsGroupRef = useRef<SVGGElement>(null);
+
+  const shouldAnimate = !reducedMotion && !isMobile;
+
+  // Build projection + pathGen for a given rotation
+  const buildProjection = useCallback(
+    (rot: number) => {
+      const proj = geoOrthographic()
         .scale(globeScale)
         .translate([0, 0])
-        .rotate([STATIC_ROTATION, -18, 0])
-        .clipAngle(90),
+        .rotate([rot, -18, 0])
+        .clipAngle(90);
+      return { proj, gen: geoPath(proj) };
+    },
     [globeScale],
   );
 
-  const pathGen = useMemo(() => geoPath(projection), [projection]);
-  const landPath = useMemo(() => pathGen(landFeature) ?? '', [pathGen, landFeature]);
-  const graticulePath = useMemo(
-    () => pathGen(geoGraticule()()) ?? '',
-    [pathGen],
+  // Initial static render
+  const { proj: initProj, gen: initGen } = useMemo(
+    () => buildProjection(25),
+    [buildProjection],
   );
-
-  /* ── Projected event dots ── */
+  const landPath = useMemo(() => initGen(landFeature) ?? '', [initGen, landFeature]);
+  const graticulePath = useMemo(() => initGen(graticuleData) ?? '', [initGen, graticuleData]);
   const projectedDots = useMemo(
     () =>
       globeNodes
         .map((node) => {
-          const coords = projection([node.lon, node.lat]);
-          return coords
-            ? { x: coords[0], y: coords[1], id: node.id }
-            : null;
+          const coords = initProj([node.lon, node.lat]);
+          return coords ? { x: coords[0], y: coords[1], id: node.id } : null;
         })
         .filter((d): d is NonNullable<typeof d> => d !== null),
-    [globeNodes, projection],
+    [globeNodes, initProj],
   );
-
-  /* ── Route arcs between events ── */
   const arcPaths = useMemo(() => {
     if (globeNodes.length < 2) return [];
     return globeNodes.slice(0, -1).map((node, i) => {
@@ -213,18 +214,62 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
         properties: {},
         geometry: {
           type: 'LineString' as const,
-          coordinates: [
-            [node.lon, node.lat],
-            [next.lon, next.lat],
-          ],
+          coordinates: [[node.lon, node.lat], [next.lon, next.lat]],
         },
       };
-      return {
-        id: `${node.id}-${next.id}`,
-        d: pathGen(arc as any) ?? '',
-      };
+      return { id: `${node.id}-${next.id}`, d: initGen(arc as any) ?? '' };
     });
-  }, [globeNodes, pathGen]);
+  }, [globeNodes, initGen]);
+
+  // Animation loop — updates SVG attributes directly, no React re-renders
+  useEffect(() => {
+    if (!shouldAnimate) return;
+    let frame: number;
+    const tick = () => {
+      rotationRef.current += 0.015; // ~0.9° per second → full rotation in ~6.5 min
+      const { proj, gen } = buildProjection(rotationRef.current);
+
+      // Update land paths
+      if (landRef.current) landRef.current.setAttribute('d', gen(landFeature) ?? '');
+      if (landWireRef.current) landWireRef.current.setAttribute('d', gen(landFeature) ?? '');
+      if (graticuleRef.current) graticuleRef.current.setAttribute('d', gen(graticuleData) ?? '');
+
+      // Update dots
+      if (dotsGroupRef.current) {
+        globeNodes.forEach((node, i) => {
+          const coords = proj([node.lon, node.lat]);
+          const group = dotsGroupRef.current?.children[i] as SVGGElement | undefined;
+          if (!group) return;
+          if (coords) {
+            group.style.display = '';
+            const cs = group.querySelectorAll('circle');
+            cs.forEach((c) => { c.setAttribute('cx', String(coords[0])); c.setAttribute('cy', String(coords[1])); });
+          } else {
+            group.style.display = 'none';
+          }
+        });
+      }
+
+      // Update arcs
+      if (arcsGroupRef.current) {
+        const paths = arcsGroupRef.current.querySelectorAll('path');
+        if (globeNodes.length >= 2) {
+          globeNodes.slice(0, -1).forEach((node, i) => {
+            const next = globeNodes[i + 1];
+            const arc = {
+              type: 'Feature' as const, properties: {},
+              geometry: { type: 'LineString' as const, coordinates: [[node.lon, node.lat], [next.lon, next.lat]] },
+            };
+            if (paths[i]) paths[i].setAttribute('d', gen(arc as any) ?? '');
+          });
+        }
+      }
+
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [shouldAnimate, buildProjection, landFeature, graticuleData, globeNodes]);
 
   const vb = globeScale + 60;
 
@@ -261,25 +306,13 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
             className="h-full w-full overflow-visible"
           >
             <defs>
-              <linearGradient
-                id="hero-land-wire"
-                x1="0%"
-                y1="0%"
-                x2="100%"
-                y2="100%"
-              >
+              <linearGradient id="hero-land-wire" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#1668ff" />
                 <stop offset="35%" stopColor="#10b8ff" />
                 <stop offset="70%" stopColor="#a855f7" />
                 <stop offset="100%" stopColor="#ec4899" />
               </linearGradient>
-              <linearGradient
-                id="hero-arc-grad"
-                x1="0%"
-                y1="0%"
-                x2="100%"
-                y2="0%"
-              >
+              <linearGradient id="hero-arc-grad" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stopColor="#60a5fa" />
                 <stop offset="100%" stopColor="#f472b6" />
               </linearGradient>
@@ -288,80 +321,44 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
                 <stop offset="60%" stopColor="rgba(15,25,60,0.03)" />
                 <stop offset="100%" stopColor="transparent" />
               </radialGradient>
-              {/* No SVG filter — filters are GPU-expensive */}
             </defs>
 
             {/* Globe sphere */}
-            <circle
-              r={globeScale}
-              fill="url(#hero-globe-fill)"
-              stroke="rgba(59,130,246,0.15)"
-              strokeWidth="1.2"
-            />
+            <circle r={globeScale} fill="url(#hero-globe-fill)" stroke="rgba(59,130,246,0.15)" strokeWidth="1.2" />
 
             {/* Graticule grid */}
-            <path
-              d={graticulePath}
-              fill="none"
-              stroke="rgba(59,130,246,0.07)"
-              strokeWidth="0.5"
-            />
+            <path ref={graticuleRef} d={graticulePath} fill="none" stroke="rgba(59,130,246,0.07)" strokeWidth="0.5" />
 
             {/* Land — wireframe dotted style */}
-            <path
-              d={landPath}
-              fill="rgba(59,130,246,0.03)"
-              stroke="url(#hero-land-wire)"
-              strokeWidth="0.7"
-              strokeDasharray="3 5"
-              opacity="0.5"
-            />
-            <path
-              d={landPath}
-              fill="none"
-              stroke="url(#hero-land-wire)"
-              strokeWidth="1.2"
-              opacity="0.25"
-            />
+            <path ref={landRef} d={landPath} fill="rgba(59,130,246,0.03)" stroke="url(#hero-land-wire)" strokeWidth="0.7" strokeDasharray="3 5" opacity="0.5" />
+            <path ref={landWireRef} d={landPath} fill="none" stroke="url(#hero-land-wire)" strokeWidth="1.2" opacity="0.25" />
 
-            {/* Route arcs between events (CSS-animated) */}
-            {arcPaths.map((arc) => (
-              <path
-                key={arc.id}
-                d={arc.d}
-                fill="none"
-                stroke="url(#hero-arc-grad)"
-                strokeWidth="1.4"
-                strokeDasharray="6 8"
-                opacity="0.35"
-                style={{
-                  animation: reducedMotion ? 'none' : 'hero-dash-flow 5s linear infinite',
-                }}
-              />
-            ))}
-
-            {/* Event location dots (CSS-animated, no React re-renders) */}
-            {projectedDots.map((dot, i) => (
-              <g key={dot.id}>
-                <circle
-                  cx={dot.x}
-                  cy={dot.y}
-                  r="14"
-                  fill="rgba(236,72,153,0.22)"
-                  opacity="0.35"
-                  style={{ animation: `hero-pulse ${3 + i * 0.5}s ease-in-out infinite` }}
-                />
-                <circle cx={dot.x} cy={dot.y} r="4" fill="#ec4899" />
-                <circle
-                  cx={dot.x}
-                  cy={dot.y}
-                  r="7"
+            {/* Route arcs between events */}
+            <g ref={arcsGroupRef}>
+              {arcPaths.map((arc) => (
+                <path
+                  key={arc.id}
+                  d={arc.d}
                   fill="none"
-                  stroke="rgba(236,72,153,0.5)"
-                  strokeWidth="1"
+                  stroke="url(#hero-arc-grad)"
+                  strokeWidth="1.4"
+                  strokeDasharray="6 8"
+                  opacity="0.35"
+                  style={{ animation: reducedMotion ? 'none' : 'hero-dash-flow 5s linear infinite' }}
                 />
-              </g>
-            ))}
+              ))}
+            </g>
+
+            {/* Event location dots */}
+            <g ref={dotsGroupRef}>
+              {projectedDots.map((dot, i) => (
+                <g key={dot.id}>
+                  <circle cx={dot.x} cy={dot.y} r="14" fill="rgba(236,72,153,0.22)" opacity="0.35" style={{ animation: `hero-pulse ${3 + i * 0.5}s ease-in-out infinite` }} />
+                  <circle cx={dot.x} cy={dot.y} r="4" fill="#ec4899" />
+                  <circle cx={dot.x} cy={dot.y} r="7" fill="none" stroke="rgba(236,72,153,0.5)" strokeWidth="1" />
+                </g>
+              ))}
+            </g>
           </svg>
         </div>
 
@@ -445,13 +442,13 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
           >
             <Link
               href="/calendar"
-              className="btn-primary min-h-[3.5rem] w-full px-6 py-3.5 text-[15px] sm:min-h-[3.5rem] sm:w-auto sm:px-8 sm:py-3"
+              className="btn-glow min-h-[3.5rem] w-full px-8 py-3.5 text-[15px] sm:w-auto sm:px-10 sm:py-4 sm:text-base"
             >
               Browse PI Events
             </Link>
             <Link
               href={'/list-your-event' as Route}
-              className="btn-outline-light min-h-[3.5rem] w-full px-6 py-3.5 text-[15px] sm:min-h-[3.5rem] sm:w-auto sm:px-8 sm:py-3"
+              className="btn-glow-outline min-h-[3.5rem] w-full px-8 py-3.5 text-[15px] sm:w-auto sm:px-10 sm:py-4 sm:text-base"
             >
               List Your Event Free
             </Link>
@@ -532,33 +529,31 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
         </div>
 
         {/* ── Desktop: iPad scroll-animated card ── */}
-        <div className="hidden sm:block">
-          <motion.div
-            style={{
-              rotateX: ipadRotate,
-              scale: ipadScale,
-              boxShadow:
-                '0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #00000026, 0 149px 60px #0000000a, 0 233px 65px #00000003',
-            }}
-            className="relative z-20 mx-auto w-[calc(100%-3rem)] max-w-5xl"
-          >
-            <div className="overflow-hidden rounded-[1.8rem] border-4 border-[#2a2a3e] bg-[#12122a] p-3 shadow-[0_0_80px_rgba(99,102,241,0.12)] lg:rounded-[2.2rem] lg:p-4">
-              {/* Shimmer top edge */}
-              <div className="absolute inset-x-0 top-0 z-10 h-px bg-[linear-gradient(90deg,transparent,rgba(99,102,241,0.5),rgba(236,72,153,0.4),transparent)]" />
-              <div className="overflow-hidden rounded-xl lg:rounded-2xl">
-                <Image
-                  src="/hero/ipad.png"
-                  alt="Investigator Events Platform"
-                  width={1536}
-                  height={1024}
-                  className="h-auto w-full"
-                  priority
-                  unoptimized
-                />
-              </div>
+        <motion.div
+          style={{
+            rotateX: ipadRotate,
+            scale: ipadScale,
+            boxShadow:
+              '0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #00000026, 0 149px 60px #0000000a, 0 233px 65px #00000003',
+          }}
+          className="relative z-20 mx-auto hidden w-[calc(100%-3rem)] max-w-5xl sm:block"
+        >
+          <div className="overflow-hidden rounded-[1.8rem] border-4 border-[#2a2a3e] bg-[#12122a] p-3 shadow-[0_0_80px_rgba(99,102,241,0.12)] lg:rounded-[2.2rem] lg:p-4">
+            {/* Shimmer top edge */}
+            <div className="absolute inset-x-0 top-0 z-10 h-px bg-[linear-gradient(90deg,transparent,rgba(99,102,241,0.5),rgba(236,72,153,0.4),transparent)]" />
+            <div className="overflow-hidden rounded-xl lg:rounded-2xl">
+              <Image
+                src="/hero/ipad.png"
+                alt="Investigator Events Platform"
+                width={1536}
+                height={1024}
+                className="h-auto w-full"
+                priority
+                unoptimized
+              />
             </div>
-          </motion.div>
-        </div>
+          </div>
+        </motion.div>
 
         {/* ── Bottom fade to page background ── */}
         <div className="pointer-events-none relative z-30 h-16 bg-gradient-to-b from-transparent via-[#0a1228]/60 to-[#f4f8fc] sm:-mt-12 sm:h-36" />

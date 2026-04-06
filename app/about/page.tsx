@@ -63,7 +63,7 @@ export default async function AboutPage() {
         <Reveal delay={0.04}>
           <section className="grid gap-10 border-t border-slate-300/80 pt-9 md:grid-cols-3 md:gap-8 md:pt-11">
             {pillars.map((item) => (
-              <article key={item.title} className="max-w-sm">
+              <article key={item.title} className="max-w-sm rounded-2xl border border-white/70 bg-white/95 p-5 shadow-[0_16px_40px_-18px_rgba(15,23,42,0.08)]">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-700">{item.title}</p>
                 <p className="mt-4 text-base font-medium leading-8 text-slate-800">{item.description}</p>
               </article>

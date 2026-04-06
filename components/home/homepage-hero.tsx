@@ -1,17 +1,18 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import type { Route } from 'next';
-import { motion, AnimatePresence, useReducedMotion, useSpring } from 'framer-motion';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { geoOrthographic, geoPath } from 'd3-geo';
+import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
+import { useMemo, useRef, useState, useEffect } from 'react';
+import { geoOrthographic, geoPath, geoGraticule } from 'd3-geo';
 import { feature } from 'topojson-client';
 import landData from 'world-atlas/land-110m.json';
 import type { EventItem } from '@/lib/data/events';
-import { AssociationLogoBadge } from '@/components/association-logo-badge';
-import { getAssociationBrandLogoSrc, getAssociationDisplayName } from '@/lib/utils/association-branding';
-import { formatEventDate } from '@/lib/utils/date';
-import { getEventSlug } from '@/lib/utils/event-slugs';
+
+/* ────────────────────────────────────────────── */
+/*  Types                                         */
+/* ────────────────────────────────────────────── */
 
 interface HomepageHeroProps {
   events: EventItem[];
@@ -23,16 +24,9 @@ interface GlobePoint {
   lon: number;
 }
 
-interface GlobeEventNode extends GlobePoint {
-  id: string;
-  title: string;
-  city: string;
-  country: string;
-  date: string;
-  slug: string;
-  associationName?: string;
-  coverImage?: string;
-}
+/* ────────────────────────────────────────────── */
+/*  City / Country / Region coordinates           */
+/* ────────────────────────────────────────────── */
 
 const CITY_COORDINATES: Record<string, GlobePoint> = {
   amsterdam: { lat: 52.3676, lon: 4.9041 },
@@ -80,7 +74,7 @@ const CITY_COORDINATES: Record<string, GlobePoint> = {
   vienna: { lat: 48.2082, lon: 16.3738 },
   warsaw: { lat: 52.2297, lon: 21.0122 },
   washington: { lat: 38.9072, lon: -77.0369 },
-  zurich: { lat: 47.3769, lon: 8.5417 }
+  zurich: { lat: 47.3769, lon: 8.5417 },
 };
 
 const COUNTRY_COORDINATES: Record<string, GlobePoint> = {
@@ -105,347 +99,51 @@ const COUNTRY_COORDINATES: Record<string, GlobePoint> = {
   Switzerland: { lat: 46.8182, lon: 8.2275 },
   'United Arab Emirates': { lat: 23.4241, lon: 53.8478 },
   'United Kingdom': { lat: 55.3781, lon: -3.436 },
-  'United States': { lat: 39.8283, lon: -98.5795 }
+  'United States': { lat: 39.8283, lon: -98.5795 },
 };
 
 const REGION_COORDINATES: Record<string, GlobePoint> = {
   'Asia-Pacific': { lat: 7, lon: 114 },
   Europe: { lat: 50, lon: 12 },
   'Middle East': { lat: 24, lon: 46 },
-  'North America': { lat: 39, lon: -98 }
+  'North America': { lat: 39, lon: -98 },
 };
 
 function normalizeKey(value: string) {
   return value.trim().toLowerCase();
 }
 
-function safeCoverImage(coverImage?: string) {
-  return coverImage && /^(\/(cities|events|images|associations)\/|https?:\/\/)/.test(coverImage) ? coverImage : undefined;
-}
-
 function getEventCoordinate(event: EventItem): GlobePoint {
   const cityMatch = CITY_COORDINATES[normalizeKey(event.city)];
-  if (cityMatch) {
-    return cityMatch;
-  }
-
+  if (cityMatch) return cityMatch;
   const countryMatch = COUNTRY_COORDINATES[event.country];
-  if (countryMatch) {
-    return countryMatch;
-  }
-
+  if (countryMatch) return countryMatch;
   return REGION_COORDINATES[event.region] ?? { lat: 18, lon: 18 };
 }
 
-
-function projectPoint(point: GlobePoint, rotation: number, radiusX: number, radiusY: number) {
-  const lat = (point.lat * Math.PI) / 180;
-  const lon = (point.lon * Math.PI) / 180 + rotation;
-  const x = Math.cos(lat) * Math.sin(lon);
-  const y = Math.sin(lat);
-  const z = Math.cos(lat) * Math.cos(lon);
-
-  return {
-    x: x * radiusX,
-    y: y * radiusY,
-    z
-  };
-}
-
-function buildArcPath(from: ReturnType<typeof projectPoint>, to: ReturnType<typeof projectPoint>) {
-  const curve = Math.max(24, 84 - Math.abs(from.x - to.x) * 0.12);
-  const controlX = (from.x + to.x) / 2;
-  const controlY = Math.min(from.y, to.y) - curve;
-  return `M ${from.x} ${from.y} Q ${controlX} ${controlY} ${to.x} ${to.y}`;
-}
-
-function HeroEventCard({
-  event,
-  className,
-  delay,
-  compact = false,
-  collapsedW,
-  collapsedH,
-}: {
-  event: GlobeEventNode;
-  className: string;
-  delay: number;
-  compact?: boolean;
-  collapsedW: number;
-  collapsedH: number;
-}) {
-  const reducedMotion = useReducedMotion();
-  const [isExpanded, setIsExpanded] = useState(false);
-  const lastPointerType = useRef<string>('mouse');
-  const hoverTimeout = useRef<ReturnType<typeof setTimeout>>();
-
-  const EXPANDED_W = 290;
-  const EXPANDED_H = 272;
-
-  const handlePointerDown = useCallback((e: React.PointerEvent) => {
-    lastPointerType.current = e.pointerType;
-  }, []);
-
-  const handleMouseEnter = useCallback(() => {
-    if (lastPointerType.current === 'touch') return;
-    clearTimeout(hoverTimeout.current);
-    setIsExpanded(true);
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    if (lastPointerType.current === 'touch') return;
-    hoverTimeout.current = setTimeout(() => setIsExpanded(false), 120);
-  }, []);
-
-  const handleClick = useCallback(() => {
-    // Only toggle on touch — desktop uses hover
-    if (lastPointerType.current === 'touch') {
-      setIsExpanded((v) => !v);
-    }
-  }, []);
-
-  const logoSrc = event.associationName ? getAssociationBrandLogoSrc(event.associationName) : null;
-  const isAbiAssociation =
-    Boolean(event.associationName && /association of british investigators|\babi\b/i.test(event.associationName)) ||
-    Boolean(logoSrc?.includes('/abi.png'));
-
-  return (
-    <motion.article
-      className={`pointer-events-auto absolute cursor-pointer overflow-hidden rounded-[1.8rem] border border-white/80 shadow-[0_32px_100px_-18px_rgba(0,0,50,0.6),0_2px_0_rgba(255,255,255,0.85)_inset,0_0_0_1px_rgba(255,255,255,0.2)] backdrop-blur-2xl will-change-transform ${isExpanded ? 'z-50' : ''} ${className}`}
-      initial={{ width: collapsedW, height: collapsedH }}
-      animate={{
-        width: isExpanded ? EXPANDED_W : collapsedW,
-        height: isExpanded ? EXPANDED_H : collapsedH,
-        y: isExpanded ? 0 : reducedMotion ? 0 : [0, compact ? -4 : -6, 0],
-        rotateZ: isExpanded ? 0 : reducedMotion ? 0 : [0, compact ? -0.45 : -0.6, 0, compact ? 0.35 : 0.45, 0],
-      }}
-      transition={
-        isExpanded
-          ? { type: 'spring', stiffness: 400, damping: 32 }
-          : {
-              y: {
-                duration: reducedMotion ? 0 : 11 + delay * 4,
-                delay: reducedMotion ? 0 : delay,
-                repeat: reducedMotion ? 0 : Infinity,
-                ease: 'easeInOut',
-              },
-              rotateZ: {
-                duration: reducedMotion ? 0 : 11 + delay * 4,
-                delay: reducedMotion ? 0 : delay,
-                repeat: reducedMotion ? 0 : Infinity,
-                ease: 'easeInOut',
-              },
-              width: { type: 'spring', stiffness: 400, damping: 32 },
-              height: { type: 'spring', stiffness: 400, damping: 32 },
-            }
-      }
-      style={{ transformStyle: 'preserve-3d' }}
-      onPointerDown={handlePointerDown}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onClick={handleClick}
-    >
-      {/* ── Base background (light in both states) ── */}
-      <motion.div
-        className="absolute inset-0"
-        animate={{
-          background: isExpanded
-            ? 'linear-gradient(160deg, #ffffff 0%, #f1f5f9 100%)'
-            : 'linear-gradient(155deg, rgba(255,255,255,0.92) 0%, rgba(241,245,255,0.86) 100%)',
-        }}
-        transition={{ duration: 0.3 }}
-      />
-
-      {/* ── Collapsed decorative layers (shimmer + radials) ── */}
-      <motion.div
-        className="pointer-events-none absolute inset-0"
-        animate={{ opacity: isExpanded ? 0 : 1 }}
-        transition={{ duration: 0.2 }}
-      >
-        <div
-          className="absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(59,130,246,0.12),transparent_28%),radial-gradient(circle_at_82%_16%,rgba(14,165,233,0.1),transparent_22%),radial-gradient(circle_at_84%_80%,rgba(99,102,241,0.08),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.94),rgba(248,250,252,0.9))]"
-          style={{ backgroundSize: '140% 140%' }}
-        />
-        <motion.div
-          className="absolute inset-0 bg-[linear-gradient(118deg,rgba(255,255,255,0)_18%,rgba(255,255,255,0.22)_38%,rgba(255,255,255,0.06)_52%,rgba(255,255,255,0)_72%)] opacity-60"
-          animate={reducedMotion || isExpanded ? {} : { x: ['-16%', '84%'] }}
-          transition={{ duration: 4.8, delay: 1.2 + delay, repeat: Infinity, repeatDelay: 7.5, ease: 'easeInOut' }}
-        />
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(130deg,rgba(255,255,255,0.2),rgba(255,255,255,0)_34%,rgba(255,255,255,0.08)_58%,rgba(255,255,255,0)_76%)] opacity-75" />
-      </motion.div>
-
-      {/* Ring */}
-      <div className="pointer-events-none absolute inset-0 rounded-[1.8rem] ring-1 ring-white/55" />
-
-      {/* ── EXPANDED: light map layer ── */}
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            className="pointer-events-none absolute inset-0"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.38, delay: 0.16 }}
-          >
-            <div className="absolute inset-0 bg-slate-50" />
-
-            {/* Street grid */}
-            <svg className="absolute inset-0 h-full w-full" preserveAspectRatio="none">
-              <motion.line x1="0%" y1="33%" x2="100%" y2="33%" stroke="rgba(148,163,184,0.55)" strokeWidth="3" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.7, delay: 0.2 }} />
-              <motion.line x1="0%" y1="62%" x2="100%" y2="62%" stroke="rgba(148,163,184,0.55)" strokeWidth="3" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.7, delay: 0.28 }} />
-              <motion.line x1="28%" y1="0%" x2="28%" y2="100%" stroke="rgba(148,163,184,0.45)" strokeWidth="2.5" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.6, delay: 0.36 }} />
-              <motion.line x1="68%" y1="0%" x2="68%" y2="100%" stroke="rgba(148,163,184,0.45)" strokeWidth="2.5" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.6, delay: 0.44 }} />
-              {[15, 48, 78].map((y, i) => (
-                <motion.line key={`sh${i}`} x1="0%" y1={`${y}%`} x2="100%" y2={`${y}%`} stroke="rgba(203,213,225,0.55)" strokeWidth="1.5" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.45, delay: 0.5 + i * 0.08 }} />
-              ))}
-              {[14, 44, 55, 82].map((x, i) => (
-                <motion.line key={`sv${i}`} x1={`${x}%`} y1="0%" x2={`${x}%`} y2="100%" stroke="rgba(203,213,225,0.55)" strokeWidth="1.5" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.45, delay: 0.58 + i * 0.08 }} />
-              ))}
-            </svg>
-
-            {/* Buildings */}
-            {(
-              [
-                { top: '36%', left: '8%', width: '14%', height: '19%', d: 0.40 },
-                { top: '10%', left: '32%', width: '11%', height: '14%', d: 0.48 },
-                { top: '65%', left: '70%', width: '16%', height: '17%', d: 0.52 },
-                { top: '16%', right: '7%', width: '10%', height: '22%', d: 0.44 },
-                { top: '50%', left: '3%', width: '7%', height: '12%', d: 0.58 },
-                { top: '5%', left: '71%', width: '13%', height: '9%', d: 0.64 },
-              ] as Array<{ top: string; left?: string; right?: string; width: string; height: string; d: number }>
-            ).map((b, i) => (
-              <motion.div
-                key={i}
-                className="absolute rounded-sm border border-slate-300/40 bg-slate-200/90"
-                style={{ top: b.top, left: b.left, right: b.right, width: b.width, height: b.height }}
-                initial={{ opacity: 0, scale: 0.85 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.32, delay: b.d }}
-              />
-            ))}
-
-            {/* Location pin */}
-            <motion.div
-              className="absolute left-1/2 top-[40%] -translate-x-1/2 -translate-y-1/2"
-              initial={{ scale: 0, y: -18 }}
-              animate={{ scale: 1, y: 0 }}
-              transition={{ type: 'spring', stiffness: 420, damping: 18, delay: 0.26 }}
-            >
-              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" style={{ filter: 'drop-shadow(0 3px 8px rgba(16,185,129,0.55))' }}>
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#10b981" />
-                <circle cx="12" cy="9" r="2.5" fill="white" />
-              </svg>
-            </motion.div>
-
-            {/* Bottom white fade so text is readable */}
-            <div className="absolute inset-x-0 bottom-0 h-[62%] bg-gradient-to-t from-white via-white/90 to-transparent" />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ── Content (always present) ── */}
-      <div className="relative z-10 flex h-full flex-col justify-between p-4 sm:p-5">
-
-        {/* Top row: pill + logo/close */}
-        <div className="flex items-start justify-between gap-2">
-          <motion.div
-            className="min-w-0 rounded-full border border-slate-200/80 bg-white/90 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500 backdrop-blur-md"
-            animate={{ opacity: isExpanded ? 0 : 1 }}
-            transition={{ duration: 0.2 }}
-          >
-            {compact ? 'Live event' : 'Featured event'}
-          </motion.div>
-
-          <AnimatePresence mode="wait">
-            {isExpanded ? (
-              <motion.button
-                key="close"
-                className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600"
-                initial={{ opacity: 0, scale: 0.7 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.7 }}
-                transition={{ duration: 0.2, delay: 0.32 }}
-                onClick={(e) => { e.stopPropagation(); setIsExpanded(false); }}
-                aria-label="Close"
-              >
-                <svg width="9" height="9" viewBox="0 0 10 10" fill="none">
-                  <path d="M1.5 1.5l7 7M8.5 1.5l-7 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                </svg>
-              </motion.button>
-            ) : logoSrc ? (
-              <motion.div
-                key="logo"
-                className="flex flex-shrink-0 items-center justify-center rounded-md border border-white/70 bg-white/90 px-2 py-1 shadow-sm backdrop-blur-sm"
-                initial={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-              >
-                {isAbiAssociation ? (
-                  <span className="text-[11px] font-semibold tracking-[0.16em] text-slate-950">ABI</span>
-                ) : (
-                  <img src={logoSrc} alt={event.associationName ?? ''} className="h-6 w-auto max-w-[4.5rem] object-contain sm:h-7" />
-                )}
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
-        </div>
-
-        {/* Bottom: event details */}
-        <div className="flex flex-col gap-1.5 pt-3">
-          <p
-            className="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500"
-            style={{ display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
-          >
-            {event.associationName ? getAssociationDisplayName(event.associationName) : 'Featured event'}
-          </p>
-          <p
-            className="min-w-0 text-[1.04rem] font-semibold leading-[1.08] tracking-[-0.03em] text-slate-950"
-            style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
-          >
-            {event.title}
-          </p>
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] font-medium text-slate-600">
-            <p className="font-semibold uppercase tracking-[0.15em] text-blue-600">{event.date}</p>
-            <span className="text-slate-300">•</span>
-            <p className="min-w-0" style={{ display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-              {event.city}, {event.country}
-            </p>
-          </div>
-
-          {/* CTA — only visible when expanded, fades in after map animation */}
-          <AnimatePresence>
-            {isExpanded && (
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 4 }}
-                transition={{ duration: 0.26, delay: 0.36 }}
-              >
-                <Link
-                  href={`/events/${event.slug}`}
-                  className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-4 py-2 text-[11px] font-semibold text-white shadow-sm transition-colors hover:bg-blue-700"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  View event
-                  <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
-                    <path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </Link>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
-    </motion.article>
-  );
-}
+/* ────────────────────────────────────────────── */
+/*  HomepageHero                                  */
+/* ────────────────────────────────────────────── */
 
 export function HomepageHero({ events, stats }: HomepageHeroProps) {
   const reducedMotion = useReducedMotion();
-  const [rotation, setRotation] = useState(0.45);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
-  const rotateX = useSpring(0, { stiffness: 90, damping: 22, mass: 0.9 });
 
+  /* ── Scroll-driven iPad animation ── */
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ['start start', 'end start'],
+  });
+  const ipadRotate = useTransform(scrollYProgress, [0, 0.65], [20, 0]);
+  const ipadScale = useTransform(
+    scrollYProgress,
+    [0, 0.65],
+    isMobile ? [0.78, 0.95] : [1.05, 1],
+  );
+  const headerY = useTransform(scrollYProgress, [0, 0.5], [0, -60]);
+
+  /* ── Mobile detection ── */
   useEffect(() => {
     const mql = window.matchMedia('(max-width: 639px)');
     setIsMobile(mql.matches);
@@ -453,342 +151,382 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
     mql.addEventListener('change', handler);
     return () => mql.removeEventListener('change', handler);
   }, []);
-  const rotateY = useSpring(0, { stiffness: 90, damping: 22, mass: 0.9 });
 
-  const globeEvents = useMemo<GlobeEventNode[]>(
+  /* Globe renders once with a fixed rotation — CSS handles the spin.
+     No requestAnimationFrame, no React re-renders, no d3 recalculations. */
+  const STATIC_ROTATION = 25; // degrees
+
+  /* ── Globe data ── */
+  const globeNodes = useMemo(
     () =>
-      events.slice(0, 4).map((event) => {
-        const coordinate = getEventCoordinate(event);
-
-        return {
-          id: event.id,
-          title: event.title,
-          city: event.city,
-          country: event.country,
-          date: formatEventDate(event),
-          slug: getEventSlug(event),
-          associationName: event.association ?? event.organiser,
-          coverImage: event.coverImage,
-          ...coordinate
-        };
-      }),
-    [events]
+      events.slice(0, 6).map((e) => ({
+        id: e.id,
+        ...getEventCoordinate(e),
+      })),
+    [events],
   );
 
-  useEffect(() => {
-    if (reducedMotion) {
-      return undefined;
-    }
-
-    let frame = 0;
-    let last = performance.now();
-
-    const animate = (now: number) => {
-      const delta = now - last;
-      last = now;
-      setRotation((current) => (current + delta * 0.00018) % (Math.PI * 2));
-      frame = window.requestAnimationFrame(animate);
-    };
-
-    frame = window.requestAnimationFrame(animate);
-
-    return () => window.cancelAnimationFrame(frame);
-  }, [reducedMotion]);
-
-  const projectedNodes = useMemo(
-    () =>
-      globeEvents.map((event) => {
-        const projection = projectPoint(event, rotation, 178, 204);
-        return {
-          ...event,
-          ...projection
-        };
-      }),
-    [globeEvents, rotation]
+  const globeScale = isMobile ? 280 : 400;
+  const landFeature = useMemo(
+    () => feature(landData as any, (landData as any).objects.land) as any,
+    [],
   );
-
-  const routePaths = useMemo(() => {
-    if (projectedNodes.length < 2) {
-      return [];
-    }
-
-    return projectedNodes.slice(0, -1).map((node, index) => {
-      const next = projectedNodes[index + 1];
-      return {
-        id: `${node.id}-${next.id}`,
-        d: buildArcPath(node, next),
-        opacity: Math.max(0.2, (node.z + next.z + 2) / 4)
-      };
-    });
-  }, [projectedNodes]);
-
-  const landFeature = useMemo(() => feature(landData as any, (landData as any).objects.land) as any, []);
 
   const projection = useMemo(
     () =>
       geoOrthographic()
-        .scale(188)
+        .scale(globeScale)
         .translate([0, 0])
-        .rotate([rotation * (180 / Math.PI), -15, 0])
+        .rotate([STATIC_ROTATION, -18, 0])
         .clipAngle(90),
-    [rotation]
+    [globeScale],
   );
 
   const pathGen = useMemo(() => geoPath(projection), [projection]);
   const landPath = useMemo(() => pathGen(landFeature) ?? '', [pathGen, landFeature]);
-  const graticulePath = useMemo(() => {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { geoGraticule } = require('d3-geo');
-    return pathGen(geoGraticule()()) ?? '';
-  }, [pathGen]);
+  const graticulePath = useMemo(
+    () => pathGen(geoGraticule()()) ?? '',
+    [pathGen],
+  );
+
+  /* ── Projected event dots ── */
+  const projectedDots = useMemo(
+    () =>
+      globeNodes
+        .map((node) => {
+          const coords = projection([node.lon, node.lat]);
+          return coords
+            ? { x: coords[0], y: coords[1], id: node.id }
+            : null;
+        })
+        .filter((d): d is NonNullable<typeof d> => d !== null),
+    [globeNodes, projection],
+  );
+
+  /* ── Route arcs between events ── */
+  const arcPaths = useMemo(() => {
+    if (globeNodes.length < 2) return [];
+    return globeNodes.slice(0, -1).map((node, i) => {
+      const next = globeNodes[i + 1];
+      const arc = {
+        type: 'Feature' as const,
+        properties: {},
+        geometry: {
+          type: 'LineString' as const,
+          coordinates: [
+            [node.lon, node.lat],
+            [next.lon, next.lat],
+          ],
+        },
+      };
+      return {
+        id: `${node.id}-${next.id}`,
+        d: pathGen(arc as any) ?? '',
+      };
+    });
+  }, [globeNodes, pathGen]);
+
+  const vb = globeScale + 60;
 
   return (
-    <section className="relative overflow-hidden pb-6 pt-4 sm:pb-24 sm:pt-10 lg:pb-28 lg:pt-14">
-      {/* Dark hero background — deep navy fading to light */}
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(165deg,#06091a_0%,#0a1228_30%,#0d1840_55%,#d4e4ff_84%,#f4f8ff_100%)]" />
-      {/* Glow orbs */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{ animation: 'orb-drift 18s ease-in-out infinite' }}
-      >
-        <div className="absolute left-[8%] top-[8%] h-[34rem] w-[34rem] rounded-full bg-[radial-gradient(ellipse,rgba(22,104,255,0.38),transparent_65%)] blur-3xl" />
-        <div className="absolute right-[10%] top-[4%] h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(ellipse,rgba(111,86,255,0.32),transparent_62%)] blur-3xl" />
-        <div className="absolute bottom-[10%] left-[40%] h-[20rem] w-[20rem] rounded-full bg-[radial-gradient(ellipse,rgba(20,184,255,0.2),transparent_60%)] blur-3xl" />
+    <div ref={containerRef} className="relative">
+      {/* ── Dark background ── */}
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(165deg,#06091a_0%,#0a1228_35%,#0d1840_60%,#0a1228_100%)]" />
+
+      {/* ── Ambient glow orbs (no blur filter, no animation — static gradient layers) ── */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-[-5%] top-[-5%] h-[38rem] w-[38rem] rounded-full bg-[radial-gradient(ellipse,rgba(22,104,255,0.18),transparent_55%)] sm:h-[46rem] sm:w-[46rem]" />
+        <div className="absolute right-[-4%] top-[-3%] h-[30rem] w-[30rem] rounded-full bg-[radial-gradient(ellipse,rgba(236,72,153,0.12),transparent_55%)] sm:h-[38rem] sm:w-[38rem]" />
+        <div className="absolute bottom-[15%] left-[25%] h-[24rem] w-[24rem] rounded-full bg-[radial-gradient(ellipse,rgba(14,165,233,0.1),transparent_55%)] sm:h-[30rem] sm:w-[30rem]" />
       </div>
-      {/* Mobile gradient mesh accents */}
-      <div className="pointer-events-none absolute left-[-20%] top-[30%] h-[18rem] w-[18rem] rounded-full bg-[radial-gradient(ellipse,rgba(236,72,153,0.22),transparent_65%)] blur-3xl sm:hidden" />
-      <div className="pointer-events-none absolute right-[-15%] top-[55%] h-[14rem] w-[14rem] rounded-full bg-[radial-gradient(ellipse,rgba(14,165,233,0.2),transparent_65%)] blur-3xl sm:hidden" />
-      {/* Noise/grain texture overlay for depth */}
-      <div className="pointer-events-none absolute inset-0 opacity-[0.018]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")', backgroundRepeat: 'repeat', backgroundSize: '180px 180px' }} />
-      <div className="container-shell relative">
-        <div className="app-mobile-shell flex flex-col gap-4 sm:gap-6 lg:grid lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-center lg:gap-14">
-          <motion.div
-            initial={reducedMotion ? false : { opacity: 0, y: 22 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            className="relative z-10 max-w-[36rem]"
+
+      {/* Noise texture removed — SVG feTurbulence filter in data URI is GPU-expensive */}
+
+      {/* ── Main content wrapper ── */}
+      <div className="relative" style={{ perspective: '1200px' }}>
+        {/* ── Wireframe Globe (behind text, CSS-rotated for zero JS cost) ── */}
+        <div
+          className="pointer-events-none absolute left-1/2 z-[1] -translate-x-1/2"
+          style={{
+            width: isMobile ? '34rem' : '56rem',
+            height: isMobile ? '34rem' : '56rem',
+            top: isMobile ? '18%' : '10%',
+          }}
+        >
+          {/* Globe glow — no blur filter, just a large soft gradient */}
+          <div className="absolute inset-[-18%] rounded-full bg-[radial-gradient(ellipse,rgba(22,104,255,0.1),rgba(236,72,153,0.05)_40%,transparent_65%)]" />
+
+          <svg
+            viewBox={`${-vb} ${-vb} ${vb * 2} ${vb * 2}`}
+            className="h-full w-full overflow-visible"
           >
-            <div className="inline-flex max-w-full items-center gap-2 overflow-hidden rounded-full border border-white/18 bg-white/10 px-3 py-1.5 shadow-[0_24px_60px_-34px_rgba(0,0,60,0.5)] backdrop-blur-xl sm:inline-flex" style={{ borderColor: 'rgba(255,255,255,0.18)' }}>
-              <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-cyan-400 shadow-[0_0_0_8px_rgba(34,211,238,0.22)]" style={{ animation: 'hero-pulse 3s ease-in-out infinite' }} />
-              <span className="min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.22em] text-white/80 sm:text-[11px] sm:tracking-[0.26em]">Private Investigator Events Calendar</span>
-            </div>
+            <defs>
+              <linearGradient
+                id="hero-land-wire"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="100%"
+              >
+                <stop offset="0%" stopColor="#1668ff" />
+                <stop offset="35%" stopColor="#10b8ff" />
+                <stop offset="70%" stopColor="#a855f7" />
+                <stop offset="100%" stopColor="#ec4899" />
+              </linearGradient>
+              <linearGradient
+                id="hero-arc-grad"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="0%"
+              >
+                <stop offset="0%" stopColor="#60a5fa" />
+                <stop offset="100%" stopColor="#f472b6" />
+              </linearGradient>
+              <radialGradient id="hero-globe-fill" cx="38%" cy="35%" r="65%">
+                <stop offset="0%" stopColor="rgba(30,64,140,0.08)" />
+                <stop offset="60%" stopColor="rgba(15,25,60,0.03)" />
+                <stop offset="100%" stopColor="transparent" />
+              </radialGradient>
+              {/* No SVG filter — filters are GPU-expensive */}
+            </defs>
 
-            <motion.h1
-              className="mt-4 max-w-[10ch] text-[3.2rem] font-bold leading-[0.84] tracking-[-0.065em] text-white sm:mt-6 sm:text-[4rem] sm:leading-[0.86] lg:mt-8 lg:text-[7.5rem]"
-              initial={reducedMotion ? false : { opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <span className="block">
-                <motion.span
-                  className="inline-block bg-[linear-gradient(92deg,#155eef_0%,#10b8ff_34%,#7c3aed_72%,#ec4899_100%)] bg-[length:180%_100%] bg-clip-text text-transparent will-change-transform"
-                  animate={
-                    reducedMotion
-                      ? undefined
-                      : {
-                          backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-                          y: [0, -2, 0]
-                        }
-                  }
-                  transition={{ duration: 5.4, repeat: Infinity, ease: 'easeInOut' }}
-                >
-                  Never
-                </motion.span>{' '}
-                <span className="text-white">Miss Another</span>
-              </span>
-              <span className="mt-1 block max-w-[10ch] font-bold leading-[0.88] tracking-[-0.065em] text-white">
-                Investigator
-              </span>
-              <span className="block font-bold leading-[0.88] tracking-[-0.065em] text-white">
-                Event
-              </span>
-            </motion.h1>
+            {/* Globe sphere */}
+            <circle
+              r={globeScale}
+              fill="url(#hero-globe-fill)"
+              stroke="rgba(59,130,246,0.15)"
+              strokeWidth="1.2"
+            />
 
-            <motion.p
-              className="mt-3.5 max-w-[26rem] text-[0.98rem] leading-6 text-blue-100/88 sm:mt-6 sm:max-w-xl sm:text-lg sm:leading-relaxed"
-              initial={reducedMotion ? false : { opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.14, ease: [0.16, 1, 0.3, 1] }}
-            >
-              Every confirmed conference, AGM, and training event for private investigators — free to browse, free to list.
-            </motion.p>
+            {/* Graticule grid */}
+            <path
+              d={graticulePath}
+              fill="none"
+              stroke="rgba(59,130,246,0.07)"
+              strokeWidth="0.5"
+            />
 
-            <motion.div
-              className="mt-4 flex flex-col gap-2.5 sm:mt-8 sm:flex-row sm:gap-3"
-              initial={reducedMotion ? false : { opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <Link href="/calendar" className="btn-primary min-h-[3.25rem] w-full px-5 py-2.5 text-[15px] sm:min-h-[3.5rem] sm:w-auto sm:px-7 sm:py-3">
-                Browse PI Events
-              </Link>
-              <Link href={"/list-your-event" as Route} className="btn-outline-light min-h-[3.25rem] w-full px-5 py-2.5 text-[15px] sm:min-h-[3.5rem] sm:w-auto sm:px-7 sm:py-3">
-                List Your Event Free
-              </Link>
-            </motion.div>
+            {/* Land — wireframe dotted style */}
+            <path
+              d={landPath}
+              fill="rgba(59,130,246,0.03)"
+              stroke="url(#hero-land-wire)"
+              strokeWidth="0.7"
+              strokeDasharray="3 5"
+              opacity="0.5"
+            />
+            <path
+              d={landPath}
+              fill="none"
+              stroke="url(#hero-land-wire)"
+              strokeWidth="1.2"
+              opacity="0.25"
+            />
 
-            <motion.div
-              className="mt-4 grid grid-cols-3 gap-1.5 sm:mt-8 sm:gap-3"
-              initial={reducedMotion ? false : { opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.85, delay: 0.26, ease: [0.16, 1, 0.3, 1] }}
-            >
-              {stats.map((item, index) => {
-                const gradients = [
-                  'bg-[linear-gradient(135deg,rgba(59,130,246,0.18),rgba(14,165,233,0.12))]',
-                  'bg-[linear-gradient(135deg,rgba(124,58,237,0.18),rgba(99,102,241,0.12))]',
-                  'bg-[linear-gradient(135deg,rgba(236,72,153,0.18),rgba(244,114,182,0.12))]',
-                ];
-                const textColors = [
-                  'bg-gradient-to-r from-cyan-300 to-blue-300 bg-clip-text text-transparent',
-                  'bg-gradient-to-r from-violet-300 to-purple-300 bg-clip-text text-transparent',
-                  'bg-gradient-to-r from-pink-300 to-rose-300 bg-clip-text text-transparent',
-                ];
-                return (
-                  <motion.div
-                    key={item.label}
-                    className={`min-w-0 rounded-[0.9rem] border ${gradients[index % 3]} px-1.5 py-2.5 text-center shadow-[0_22px_52px_-34px_rgba(0,0,50,0.4),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-xl sm:rounded-[1.7rem] sm:px-4 sm:py-5`}
-                    style={{ borderColor: 'rgba(255,255,255,0.16)' }}
-                    whileHover={{ scale: 1.04, boxShadow: '0 38px_90px_-46px rgba(76,90,255,0.55), inset 0 1px 0 rgba(255,255,255,0.18)' }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 24 }}
-                  >
-                    <p className="truncate text-[8px] font-semibold uppercase tracking-[0.14em] text-blue-100/80 sm:text-[10px] sm:tracking-[0.22em]">{item.label}</p>
-                    <p className={`mt-1 text-[1.35rem] font-bold tracking-[-0.05em] sm:mt-2 sm:text-[2.2rem] ${textColors[index % 3]}`}>{item.value}</p>
-                  </motion.div>
-                );
-              })}
-            </motion.div>
-          </motion.div>
-
-          <motion.div
-            className="pointer-events-auto relative mx-auto w-full max-w-[22rem] sm:max-w-[20.5rem] lg:mx-0 lg:max-w-none"
-            initial={reducedMotion ? false : { opacity: 0, scale: 0.96, y: 18 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 1.05, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <motion.div
-              className="relative mx-auto aspect-square w-full max-w-[22rem] sm:aspect-[1/0.98] sm:max-w-[20.5rem] lg:max-w-[46rem]"
-              onPointerMove={(event) => {
-                if (reducedMotion) return;
-                const bounds = event.currentTarget.getBoundingClientRect();
-                const x = (event.clientX - bounds.left) / bounds.width;
-                const y = (event.clientY - bounds.top) / bounds.height;
-                rotateY.set((x - 0.5) * 4.25);
-                rotateX.set((0.5 - y) * 3.5);
-              }}
-              onPointerLeave={() => {
-                rotateX.set(0);
-                rotateY.set(0);
-              }}
-              style={{
-                perspective: 1600,
-                rotateX: reducedMotion ? 0 : rotateX,
-                rotateY: reducedMotion ? 0 : rotateY,
-                transformStyle: 'preserve-3d'
-              }}
-            >
-              {/* Glowing orb behind globe — enhanced color glow */}
-              <div className="pointer-events-none absolute inset-[4%] rounded-full bg-[radial-gradient(ellipse,rgba(22,104,255,0.4),rgba(124,58,237,0.28)_30%,rgba(14,165,233,0.2)_55%,transparent_72%)] blur-3xl sm:inset-[2%]" style={{ animation: 'hero-pulse 6s ease-in-out infinite' }} />
-              <div className="pointer-events-none absolute inset-[12%] rounded-full bg-[radial-gradient(ellipse,rgba(236,72,153,0.15),rgba(99,102,241,0.12)_40%,transparent_70%)] blur-2xl" style={{ animation: 'hero-pulse 8s ease-in-out infinite 2s' }} />
-              <motion.div
-                className="absolute inset-[10%] rounded-[3rem] border bg-[linear-gradient(145deg,rgba(255,255,255,0.14),rgba(241,247,255,0.07))] shadow-[0_52px_162px_-64px_rgba(22,40,180,0.7),inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-2xl"
-                style={{ borderColor: 'rgba(255,255,255,0.2)' }}
-                animate={reducedMotion ? undefined : { y: [0, -4, 0, 2, 0], rotateZ: [0, 0.2, 0, -0.12, 0] }}
-                transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
+            {/* Route arcs between events (CSS-animated) */}
+            {arcPaths.map((arc) => (
+              <path
+                key={arc.id}
+                d={arc.d}
+                fill="none"
+                stroke="url(#hero-arc-grad)"
+                strokeWidth="1.4"
+                strokeDasharray="6 8"
+                opacity="0.35"
+                style={{
+                  animation: reducedMotion ? 'none' : 'hero-dash-flow 5s linear infinite',
+                }}
               />
+            ))}
 
-              <svg viewBox="-300 -270 600 540" className="absolute inset-0 h-full w-full overflow-visible">
-                <defs>
-                  <radialGradient id="hero-globe-shell" cx="50%" cy="42%" r="70%">
-                    <stop offset="0%" stopColor="rgba(255,255,255,0.96)" />
-                    <stop offset="58%" stopColor="rgba(226,240,255,0.86)" />
-                    <stop offset="100%" stopColor="rgba(199,223,255,0.26)" />
-                  </radialGradient>
-                  <radialGradient id="hero-node-glow" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stopColor="#f0abfc" />
-                    <stop offset="45%" stopColor="#818cf8" />
-                    <stop offset="100%" stopColor="rgba(129,140,248,0)" />
-                  </radialGradient>
-                  <linearGradient id="hero-route-stroke" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#60a5fa" />
-                    <stop offset="45%" stopColor="#a78bfa" />
-                    <stop offset="100%" stopColor="#e879f9" />
-                  </linearGradient>
-                  <linearGradient id="continent-gradient" x1="0%" y1="0%" x2="100%" y2="0%" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="#155eef" />
-                    <stop offset="25%" stopColor="#10b8ff" />
-                    <stop offset="50%" stopColor="#7c3aed" />
-                    <stop offset="75%" stopColor="#ec4899" />
-                    <stop offset="100%" stopColor="#155eef" />
-                    <animateTransform attributeName="gradientTransform" type="translate" from="-600 0" to="600 0" dur="5.4s" repeatCount="indefinite" />
-                  </linearGradient>
-                </defs>
-
-                <ellipse cx="0" cy="204" rx="164" ry="28" fill="rgba(22,104,255,0.28)" />
-                <ellipse cx="0" cy="204" rx="132" ry="18" fill="rgba(125,211,252,0.22)" />
-                <circle cx="0" cy="0" r="190" fill="url(#hero-globe-shell)" opacity="0.82" />
-                <circle cx="0" cy="0" r="190" fill="none" stroke="#22d3ee" strokeWidth="1.5" opacity="0.6" />
-
-                <path d={landPath} fill="url(#continent-gradient)" opacity="0.15" />
-                <path d={landPath} fill="url(#continent-gradient)" opacity="0.9" />
-                <path d={graticulePath} fill="none" stroke="rgba(139,92,246,0.15)" strokeWidth="0.5" />
-
-                {routePaths.map((route) => (
-                  <g key={route.id} opacity={route.opacity}>
-                    <path d={route.d} fill="none" stroke="rgba(95,135,255,0.16)" strokeWidth="4.4" strokeLinecap="round" />
-                    <motion.path
-                      d={route.d}
-                      fill="none"
-                      stroke="url(#hero-route-stroke)"
-                      strokeWidth="2.1"
-                      strokeLinecap="round"
-                      strokeDasharray="10 14"
-                      animate={reducedMotion ? undefined : { strokeDashoffset: [0, -96] }}
-                      transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
-                    />
-                  </g>
-                ))}
-
-                {projectedNodes.map((node, index) => (
-                  <g key={node.id} opacity={node.z > -0.22 ? 1 : 0.34}>
-                    <motion.circle
-                      cx={node.x}
-                      cy={node.y}
-                      r="18"
-                      fill="url(#hero-node-glow)"
-                      opacity="0.88"
-                      animate={reducedMotion ? undefined : { scale: [0.9, 1.1, 0.9], opacity: [0.28, 0.62, 0.28] }}
-                      transition={{ duration: 4.4, delay: index * 0.45, repeat: Infinity, ease: 'easeInOut' }}
-                    />
-                    <circle cx={node.x} cy={node.y} r="5.8" fill="#f8fdff" />
-                    <motion.circle
-                      cx={node.x}
-                      cy={node.y}
-                      r="9"
-                      fill="none"
-                      stroke="rgba(125,211,252,0.8)"
-                      strokeWidth="1.4"
-                      animate={reducedMotion ? undefined : { scale: [0.96, 1.1, 0.96], opacity: [0.42, 0.82, 0.42] }}
-                      transition={{ duration: 3.4, delay: index * 0.35, repeat: Infinity, ease: 'easeInOut' }}
-                    />
-                  </g>
-                ))}
-              </svg>
-
-              {globeEvents[0] ? (
-                <HeroEventCard event={globeEvents[0]} delay={0.24} collapsedW={isMobile ? 168 : 224} collapsedH={isMobile ? 144 : 200} className="left-[2%] top-[6%] sm:left-[2%] sm:top-[9%]" />
-              ) : null}
-              {globeEvents[1] ? (
-                <HeroEventCard event={globeEvents[1]} delay={0.34} compact collapsedW={isMobile ? 148 : 198} collapsedH={isMobile ? 124 : 155} className="right-[2%] bottom-[4%] sm:right-[4%] sm:top-[14%] sm:bottom-auto" />
-              ) : null}
-              {globeEvents[2] ? (
-                <HeroEventCard event={globeEvents[2]} delay={0.42} compact collapsedW={212} collapsedH={155} className="right-[10%] bottom-[8%] hidden sm:block" />
-              ) : null}
-            </motion.div>
-          </motion.div>
+            {/* Event location dots (CSS-animated, no React re-renders) */}
+            {projectedDots.map((dot, i) => (
+              <g key={dot.id}>
+                <circle
+                  cx={dot.x}
+                  cy={dot.y}
+                  r="14"
+                  fill="rgba(236,72,153,0.22)"
+                  opacity="0.35"
+                  style={{ animation: `hero-pulse ${3 + i * 0.5}s ease-in-out infinite` }}
+                />
+                <circle cx={dot.x} cy={dot.y} r="4" fill="#ec4899" />
+                <circle
+                  cx={dot.x}
+                  cy={dot.y}
+                  r="7"
+                  fill="none"
+                  stroke="rgba(236,72,153,0.5)"
+                  strokeWidth="1"
+                />
+              </g>
+            ))}
+          </svg>
         </div>
 
+        {/* ── Header content (centered, above globe) ── */}
+        <motion.div
+          style={{ translateY: headerY }}
+          className="relative z-10 px-4 pb-4 pt-6 text-center sm:pb-8 sm:pt-12 lg:pt-16"
+        >
+          {/* Badge pill */}
+          <motion.div
+            initial={reducedMotion ? false : { opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <div
+              className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 shadow-[0_20px_50px_-30px_rgba(0,0,60,0.5)]"
+              style={{
+                borderColor: 'rgba(255,255,255,0.15)',
+                background: 'rgba(255,255,255,0.07)',
+              }}
+            >
+              <span
+                className="h-2.5 w-2.5 shrink-0 rounded-full bg-cyan-400 shadow-[0_0_0_6px_rgba(34,211,238,0.18)]"
+                style={{ animation: 'hero-pulse 3s ease-in-out infinite' }}
+              />
+              <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/70 sm:text-[11px] sm:tracking-[0.26em]">
+                Private Investigator Events Calendar
+              </span>
+            </div>
+          </motion.div>
+
+          {/* Heading */}
+          <motion.h1
+            className="mx-auto mt-5 max-w-[10ch] text-[3.2rem] font-bold leading-[0.84] tracking-[-0.065em] text-white sm:mt-7 sm:text-[4.5rem] sm:leading-[0.86] lg:mt-8 lg:text-[7.5rem]"
+            initial={reducedMotion ? false : { opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.9,
+              delay: 0.08,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+          >
+            <span
+              className="inline-block bg-[linear-gradient(92deg,#3b82f6_0%,#22d3ee_30%,#a855f7_65%,#ec4899_100%)] bg-[length:200%_100%] bg-clip-text text-transparent"
+              style={{
+                animation: reducedMotion
+                  ? 'none'
+                  : 'gradient-text-cycle 5s ease-in-out infinite',
+              }}
+            >
+              Never
+            </span>{' '}
+            Miss Another Investigator Event
+          </motion.h1>
+
+          {/* Description */}
+          <motion.p
+            className="mx-auto mt-4 max-w-lg text-[0.95rem] leading-relaxed text-blue-100/60 sm:mt-6 sm:max-w-xl sm:text-lg"
+            initial={reducedMotion ? false : { opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.8,
+              delay: 0.14,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+          >
+            Every confirmed conference, AGM, and training event for private
+            investigators — free to browse, free to list.
+          </motion.p>
+
+          {/* CTA buttons */}
+          <motion.div
+            className="mt-5 flex flex-col items-center gap-2.5 sm:mt-8 sm:flex-row sm:justify-center sm:gap-3"
+            initial={reducedMotion ? false : { opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.8,
+              delay: 0.2,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+          >
+            <Link
+              href="/calendar"
+              className="btn-primary min-h-[3.25rem] w-full px-6 py-2.5 text-[15px] sm:min-h-[3.5rem] sm:w-auto sm:px-8 sm:py-3"
+            >
+              Browse PI Events
+            </Link>
+            <Link
+              href={'/list-your-event' as Route}
+              className="btn-outline-light min-h-[3.25rem] w-full px-6 py-2.5 text-[15px] sm:min-h-[3.5rem] sm:w-auto sm:px-8 sm:py-3"
+            >
+              List Your Event Free
+            </Link>
+          </motion.div>
+
+          {/* Stats row */}
+          <motion.div
+            className="mx-auto mt-5 grid max-w-sm grid-cols-3 gap-1.5 sm:mt-10 sm:max-w-md sm:gap-3"
+            initial={reducedMotion ? false : { opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.85,
+              delay: 0.26,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+          >
+            {stats.map((item, index) => {
+              const colors = [
+                'from-cyan-400 to-blue-400',
+                'from-violet-400 to-purple-400',
+                'from-pink-400 to-rose-400',
+              ];
+              return (
+                <div
+                  key={item.label}
+                  className="rounded-[0.9rem] border px-2 py-2.5 text-center sm:rounded-[1.4rem] sm:px-4 sm:py-4"
+                  style={{
+                    borderColor: 'rgba(255,255,255,0.1)',
+                    background: 'rgba(255,255,255,0.05)',
+                  }}
+                >
+                  <p className="truncate text-[8px] font-semibold uppercase tracking-[0.14em] text-blue-100/60 sm:text-[10px] sm:tracking-[0.2em]">
+                    {item.label}
+                  </p>
+                  <p
+                    className={`mt-1 bg-gradient-to-r ${colors[index % 3]} bg-clip-text text-xl font-bold tracking-tight text-transparent sm:mt-1.5 sm:text-[1.8rem]`}
+                  >
+                    {item.value}
+                  </p>
+                </div>
+              );
+            })}
+          </motion.div>
+        </motion.div>
+
+        {/* ── iPad scroll-animated card ── */}
+        <motion.div
+          style={{
+            rotateX: ipadRotate,
+            scale: ipadScale,
+            boxShadow:
+              '0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #00000026, 0 149px 60px #0000000a, 0 233px 65px #00000003',
+          }}
+          className="relative z-20 mx-auto w-[calc(100%-1.5rem)] max-w-5xl sm:w-[calc(100%-3rem)]"
+        >
+          <div className="overflow-hidden rounded-xl border-[3px] border-[#2a2a3e] bg-[#12122a] p-1 shadow-[0_0_80px_rgba(99,102,241,0.12)] sm:rounded-[1.8rem] sm:border-4 sm:p-3 lg:rounded-[2.2rem] lg:p-4">
+            {/* Shimmer top edge */}
+            <div className="absolute inset-x-0 top-0 z-10 h-px bg-[linear-gradient(90deg,transparent,rgba(99,102,241,0.5),rgba(236,72,153,0.4),transparent)]" />
+            <div className="overflow-hidden rounded-lg sm:rounded-xl lg:rounded-2xl">
+              <Image
+                src="/hero/ipad.png"
+                alt="Investigator Events Platform"
+                width={1536}
+                height={1024}
+                className="h-auto w-full"
+                priority
+                unoptimized
+              />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* ── Bottom fade to page background ── */}
+        <div className="pointer-events-none relative z-30 -mt-8 h-24 bg-gradient-to-b from-transparent via-[#0a1228]/60 to-[#f4f8fc] sm:-mt-12 sm:h-36" />
       </div>
-    </section>
+    </div>
   );
 }

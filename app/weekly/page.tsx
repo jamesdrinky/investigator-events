@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { NewsletterSignupForm } from '@/components/newsletter-signup-form';
+import { WeeklyStatCards } from '@/components/weekly/weekly-stat-cards';
 import { EventCoverMedia } from '@/components/event-cover-media';
 import { LocationSignature } from '@/components/location-signature';
 import { Reveal } from '@/components/motion/reveal';
@@ -38,18 +39,7 @@ export default async function WeeklyPage() {
                 <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate-600">
                   Use this page to check what was added recently, what is coming up soon, and which event is worth opening next.
                 </p>
-                <div className="mt-5 flex flex-wrap gap-3">
-                  {weekly.newlyAdded.length > 0 ? (
-                    <div className="rounded-2xl border border-sky-100 bg-[linear-gradient(145deg,rgba(239,246,255,0.96),rgba(255,255,255,0.9))] px-4 py-4 shadow-[0_18px_42px_-34px_rgba(36,76,170,0.12)]">
-                      <p className="text-[10px] uppercase tracking-[0.18em] text-sky-700">Newly added</p>
-                      <p className="mt-2 font-[var(--font-serif)] text-4xl text-slate-950">{weekly.newlyAdded.length}</p>
-                    </div>
-                  ) : null}
-                  <div className="rounded-2xl border border-violet-100 bg-[linear-gradient(145deg,rgba(245,243,255,0.96),rgba(255,255,255,0.9))] px-4 py-4 shadow-[0_18px_42px_-34px_rgba(111,86,255,0.12)]">
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-violet-700">Upcoming in 30 days</p>
-                    <p className="mt-2 font-[var(--font-serif)] text-4xl text-slate-950">{weekly.upcoming.length}</p>
-                  </div>
-                </div>
+                <WeeklyStatCards newlyAddedCount={weekly.newlyAdded.length} upcomingCount={weekly.upcoming.length} />
               </div>
 
               {leadEvent ? (

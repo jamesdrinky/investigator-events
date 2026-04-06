@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { AdvertiserLeadForm } from '@/components/advertiser-lead-form';
+import { AdvertiseReasonCards } from '@/components/advertise/advertise-feature-cards';
+import { AdvertiseInfoCards } from '@/components/advertise/advertise-info-cards';
 import { Reveal } from '@/components/motion/reveal';
 
 const advertiserTypes = [
@@ -25,12 +27,6 @@ const placementOptions = [
   }
 ];
 
-const reasons = [
-  'Specialist audience of investigators, organisers, and associations',
-  'Reviewed placements rather than open ad inventory',
-  'Global relevance across core private investigation markets'
-];
-
 export const metadata: Metadata = {
   title: 'Advertise',
   description: 'Advertising and partnership options for relevant suppliers, sponsors, and event organisers in the investigator events market.'
@@ -53,13 +49,7 @@ export default function AdvertisePage() {
                 </p>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                {reasons.map((reason) => (
-                  <div key={reason} className="rounded-[1.4rem] border border-white/80 bg-white/90 px-4 py-4 text-sm text-slate-700 shadow-[0_16px_34px_-28px_rgba(15,23,42,0.12)]">
-                    {reason}
-                  </div>
-                ))}
-              </div>
+              <AdvertiseReasonCards />
             </div>
           </div>
         </Reveal>
@@ -86,20 +76,7 @@ export default function AdvertisePage() {
           <Reveal delay={0.06}>
             <section className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-6 shadow-[0_24px_54px_-34px_rgba(15,23,42,0.16)] sm:p-7">
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(127,228,199,0.06),transparent_24%),radial-gradient(circle_at_18%_76%,rgba(183,138,255,0.06),transparent_28%)]" />
-              <div className="relative grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                <article className="rounded-xl border border-slate-200/80 bg-slate-50/90 p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-sky-700">Audience quality</p>
-                  <p className="mt-2 text-sm text-slate-700">Investigators, organisers, associations, and training decision-makers.</p>
-                </article>
-                <article className="rounded-xl border border-slate-200/80 bg-slate-50/90 p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-emerald-700">Market spread</p>
-                  <p className="mt-2 text-sm text-slate-700">Positioned across multiple regions rather than a single domestic audience.</p>
-                </article>
-                <article className="rounded-xl border border-slate-200/80 bg-slate-50/90 p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-violet-700">Format options</p>
-                  <p className="mt-2 text-sm text-slate-700">Get in touch to discuss how we can work together.</p>
-                </article>
-              </div>
+              <AdvertiseInfoCards />
             </section>
           </Reveal>
         </div>

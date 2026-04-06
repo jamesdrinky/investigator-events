@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { AssociationsDirectory } from '@/components/associations/associations-directory';
+import { AssociationFeatureCards } from '@/components/associations/association-feature-cards';
 import { Reveal } from '@/components/motion/reveal';
 import { buildAssociationDirectory, getAssociationStats } from '@/lib/data/associations';
 import { fetchAllEvents } from '@/lib/data/events';
@@ -33,20 +34,7 @@ export default async function AssociationsPage() {
                 </p>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] transition duration-500 hover:-translate-y-1 hover:shadow-[0_28px_64px_-36px_rgba(36,76,170,0.18)]">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-blue-700">Clear provenance</p>
-                  <p className="mt-2 text-sm text-slate-700">Real associations, visible logos when available, direct links, and linked event counts.</p>
-                </div>
-                <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] transition duration-500 hover:-translate-y-1 hover:shadow-[0_28px_64px_-36px_rgba(36,76,170,0.18)]">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-cyan-700">Browse faster</p>
-                  <p className="mt-2 text-sm text-slate-700">Filter by region or country before opening the connected calendar results.</p>
-                </div>
-                <div className="rounded-[1.5rem] border border-white/90 bg-white/88 p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.12)] transition duration-500 hover:-translate-y-1 hover:shadow-[0_28px_64px_-36px_rgba(36,76,170,0.18)]">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-violet-700">Useful context</p>
-                  <p className="mt-2 text-sm text-slate-700">This page helps you see which bodies are active before you open individual events.</p>
-                </div>
-              </div>
+              <AssociationFeatureCards />
             </div>
           </header>
         </Reveal>

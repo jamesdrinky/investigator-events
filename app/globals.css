@@ -295,6 +295,33 @@ a {
   50% { opacity: 1; transform: scale(1.08); }
 }
 
+/* Globe rotation — pure CSS, zero JS cost */
+@keyframes globe-css-spin {
+  from { transform: translateX(-50%) rotate(0deg); }
+  to { transform: translateX(-50%) rotate(360deg); }
+}
+
+@keyframes hero-dash-flow {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -56; }
+}
+
+/* 3D circular gallery — pure CSS, zero JS */
+@keyframes gallery-spin {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(360deg); }
+}
+
+.animate-gallery-spin {
+  animation: gallery-spin 50s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-gallery-spin {
+    animation: none;
+  }
+}
+
 /* ── Stripe-style gradient mesh blobs ── */
 @keyframes mesh-drift-1 {
   0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
@@ -330,49 +357,43 @@ a {
 }
 
 .mesh-blob {
-  position: fixed;
+  position: absolute;
   border-radius: 50%;
   pointer-events: none;
-  will-change: transform;
-  filter: blur(80px);
-  opacity: 0.35;
   z-index: 0;
+  /* Static — no animation, no blur. Just soft radial gradients. */
 }
 
 .mesh-blob-1 {
   width: 42rem;
   height: 42rem;
-  background: radial-gradient(ellipse at center, rgba(124, 58, 237, 0.5), rgba(99, 102, 241, 0.2) 50%, transparent 72%);
+  background: radial-gradient(ellipse at center, rgba(124, 58, 237, 0.22), rgba(99, 102, 241, 0.08) 40%, transparent 60%);
   top: -8%;
   left: -6%;
-  animation: mesh-drift-1 22s ease-in-out infinite;
 }
 
 .mesh-blob-2 {
   width: 36rem;
   height: 36rem;
-  background: radial-gradient(ellipse at center, rgba(14, 165, 233, 0.45), rgba(34, 211, 238, 0.18) 50%, transparent 72%);
+  background: radial-gradient(ellipse at center, rgba(14, 165, 233, 0.18), rgba(34, 211, 238, 0.06) 40%, transparent 60%);
   top: 12%;
   right: -8%;
-  animation: mesh-drift-2 26s ease-in-out infinite;
 }
 
 .mesh-blob-3 {
   width: 38rem;
   height: 38rem;
-  background: radial-gradient(ellipse at center, rgba(236, 72, 153, 0.35), rgba(244, 114, 182, 0.12) 50%, transparent 72%);
+  background: radial-gradient(ellipse at center, rgba(236, 72, 153, 0.15), rgba(244, 114, 182, 0.04) 40%, transparent 60%);
   bottom: 18%;
   left: 10%;
-  animation: mesh-drift-3 24s ease-in-out infinite;
 }
 
 .mesh-blob-4 {
   width: 32rem;
   height: 32rem;
-  background: radial-gradient(ellipse at center, rgba(22, 104, 255, 0.4), rgba(59, 130, 246, 0.15) 50%, transparent 72%);
+  background: radial-gradient(ellipse at center, rgba(22, 104, 255, 0.18), rgba(59, 130, 246, 0.06) 40%, transparent 60%);
   bottom: -4%;
   right: 15%;
-  animation: mesh-drift-4 20s ease-in-out infinite;
 }
 
 .signal-marquee {
@@ -440,4 +461,70 @@ a {
 
 .animate-loop-right {
   animation: loop-scroll-right 36s linear infinite;
+}
+
+/* ── Holographic card ── */
+.holo-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  --holo-bg-x: 50%;
+  --holo-bg-y: 50%;
+}
+
+.holo-card:hover {
+  box-shadow:
+    0 20px 60px -16px rgba(99, 102, 241, 0.18),
+    0 0 0 1px rgba(99, 102, 241, 0.06);
+}
+
+/* Prismatic shine overlay — follows cursor */
+.holo-shine {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: radial-gradient(
+    600px circle at var(--holo-bg-x) var(--holo-bg-y),
+    rgba(99, 102, 241, 0.08),
+    rgba(14, 165, 233, 0.06) 25%,
+    rgba(236, 72, 153, 0.04) 50%,
+    transparent 70%
+  );
+  mix-blend-mode: normal;
+}
+
+.holo-card:hover .holo-shine {
+  opacity: 1;
+}
+
+/* Top-edge prismatic stripe */
+.holo-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.12) 0%,
+    transparent 40%,
+    transparent 60%,
+    rgba(255, 255, 255, 0.06) 100%
+  );
+}
+
+.holo-card:hover::after {
+  opacity: 1;
+}
+
+/* On touch devices — no hover, just the base card */
+@media (hover: none) {
+  .holo-shine { display: none; }
+  .holo-card::after { display: none; }
+  .holo-card:hover { box-shadow: none; }
 }

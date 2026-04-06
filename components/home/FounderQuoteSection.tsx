@@ -9,15 +9,15 @@ export function FounderQuoteSection() {
     <section className="relative overflow-hidden py-12 sm:py-28">
       {/* Soft gradient background */}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(165deg,rgba(239,246,255,0.6)_0%,rgba(224,231,255,0.5)_25%,rgba(237,233,254,0.4)_50%,rgba(252,231,243,0.3)_75%,rgba(255,255,255,0)_100%)]" />
-      {/* Floating gradient accents */}
-      <div className="pointer-events-none absolute left-[5%] top-[10%] h-72 w-72 rounded-full bg-[radial-gradient(ellipse,rgba(99,102,241,0.12),transparent_65%)] blur-3xl" />
-      <div className="pointer-events-none absolute right-[8%] bottom-[10%] h-64 w-64 rounded-full bg-[radial-gradient(ellipse,rgba(236,72,153,0.1),transparent_65%)] blur-3xl" />
-      <div className="pointer-events-none absolute left-[40%] top-[5%] h-48 w-48 rounded-full bg-[radial-gradient(ellipse,rgba(14,165,233,0.1),transparent_65%)] blur-3xl" />
+      {/* Floating gradient accents — no blur filter, pre-softened gradients */}
+      <div className="pointer-events-none absolute left-[-2%] top-[2%] h-[22rem] w-[22rem] rounded-full bg-[radial-gradient(ellipse,rgba(99,102,241,0.08),transparent_55%)]" />
+      <div className="pointer-events-none absolute right-[0%] bottom-[2%] h-[20rem] w-[20rem] rounded-full bg-[radial-gradient(ellipse,rgba(236,72,153,0.06),transparent_55%)]" />
+      <div className="pointer-events-none absolute left-[32%] top-[-2%] h-[16rem] w-[16rem] rounded-full bg-[radial-gradient(ellipse,rgba(14,165,233,0.06),transparent_55%)]" />
 
       <div className="container-shell relative">
         <div className="app-mobile-shell">
           <Reveal>
-            <div className="mx-auto max-w-5xl overflow-hidden rounded-[1.6rem] border border-white/70 bg-white/80 p-5 shadow-[0_40px_100px_-40px_rgba(76,90,255,0.18)] backdrop-blur-xl sm:rounded-[2.5rem] sm:p-10 lg:p-14">
+            <div className="mx-auto max-w-5xl overflow-hidden rounded-[1.6rem] border border-white/70 bg-white/95 p-5 shadow-[0_40px_100px_-40px_rgba(76,90,255,0.18)] sm:rounded-[2.5rem] sm:p-10 lg:p-14">
               {/* Glass highlight */}
               <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.5),rgba(255,255,255,0)_30%,rgba(255,255,255,0.12)_55%,rgba(255,255,255,0)_100%)]" />
               {/* Gradient top shimmer line */}

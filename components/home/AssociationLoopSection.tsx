@@ -24,23 +24,16 @@ const ROW_2 = [
 function LogoChip({ src, name }: { src: string; name: string }) {
   return (
     <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-white p-2.5 shadow-[0_4px_20px_-6px_rgba(15,23,42,0.12),0_0_0_1px_rgba(226,232,240,0.7)]">
-      <img
-        src={src}
-        alt={name}
-        className="h-full w-full object-contain"
-        loading="lazy"
-      />
+      <img src={src} alt={name} className="h-full w-full object-contain" loading="lazy" />
     </div>
   );
 }
 
 function LoopRow({ logos, direction }: { logos: typeof ROW_1; direction: 'left' | 'right' }) {
-  const animationClass = direction === 'left' ? 'animate-loop-left' : 'animate-loop-right';
-
+  const cls = direction === 'left' ? 'animate-loop-left' : 'animate-loop-right';
   return (
     <div className="relative overflow-hidden">
-      <div className={`flex w-max gap-6 ${animationClass}`}>
-        {/* Duplicate the set 4x for seamless loop */}
+      <div className={`flex w-max gap-6 ${cls}`}>
         {[...logos, ...logos, ...logos, ...logos].map((logo, i) => (
           <LogoChip key={`${logo.name}-${i}`} src={logo.src} name={logo.name} />
         ))}

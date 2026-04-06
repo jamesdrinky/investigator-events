@@ -2,6 +2,7 @@
 
 import { CalendarX, PlusCircle, Search } from 'lucide-react';
 import { Reveal } from '@/components/motion/reveal';
+import { HolographicCard } from '@/components/ui/holographic-card';
 
 const PANELS = [
   {
@@ -47,7 +48,7 @@ export function WhyUseSection() {
           <div className="mt-6 grid gap-4 sm:mt-14 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
             {PANELS.map(({ title, description, Icon, gradient, iconBg, iconShadow }, index) => (
               <Reveal key={title} delay={0.06 * index} y={24}>
-                <article className="group relative overflow-hidden rounded-[1.6rem] border border-white/70 bg-white/80 p-5 shadow-[0_20px_50px_-20px_rgba(15,23,42,0.1)] backdrop-blur-xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-2 hover:shadow-[0_40px_80px_-20px_rgba(76,90,255,0.2)] sm:rounded-[2rem] sm:p-8">
+                <HolographicCard className="rounded-[1.6rem] border border-white/70 bg-white/95 shadow-[0_20px_50px_-20px_rgba(15,23,42,0.1)] sm:rounded-[2rem]">
                   {/* Gradient top border */}
                   <div className={`absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r ${gradient} opacity-80 transition-opacity duration-300 group-hover:opacity-100`} />
                   {/* Glass highlight */}
@@ -55,7 +56,7 @@ export function WhyUseSection() {
                   {/* Subtle radial glow on hover */}
                   <div className="pointer-events-none absolute inset-0 rounded-[1.6rem] bg-[radial-gradient(circle_at_50%_0%,rgba(99,102,241,0.06),transparent_60%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100 sm:rounded-[2rem]" />
 
-                  <div className="relative">
+                  <div className="relative p-5 sm:p-8">
                     <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${iconBg} ${iconShadow} transition-transform duration-500 group-hover:scale-110 sm:h-14 sm:w-14`}>
                       <Icon className="h-6 w-6 text-white" strokeWidth={2} aria-hidden="true" />
                     </div>
@@ -66,7 +67,7 @@ export function WhyUseSection() {
                       {description}
                     </p>
                   </div>
-                </article>
+                </HolographicCard>
               </Reveal>
             ))}
           </div>

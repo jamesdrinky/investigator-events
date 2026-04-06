@@ -48,10 +48,10 @@ export function LampSection({
 
         {/* Blur layer */}
         <div className="absolute top-1/2 h-48 w-full translate-y-12 scale-x-150 bg-[#06091a] blur-2xl" />
-        <div className="absolute top-1/2 z-50 h-48 w-full bg-transparent opacity-10 backdrop-blur-md" />
+        <div className="absolute top-1/2 z-10 h-48 w-full bg-transparent opacity-10 backdrop-blur-md" />
 
         {/* Glow orb */}
-        <div className="absolute inset-auto z-50 h-36 w-[28rem] -translate-y-1/2 rounded-full bg-blue-500 opacity-50 blur-3xl" />
+        <div className="absolute inset-auto z-10 h-36 w-[28rem] -translate-y-1/2 rounded-full bg-blue-500 opacity-50 blur-3xl" />
 
         {/* Animated inner glow */}
         <motion.div
@@ -68,7 +68,7 @@ export function LampSection({
           whileInView={{ width: '30rem' }}
           transition={{ delay: 0.3, duration: 0.8, ease: 'easeInOut' }}
           viewport={{ once: true }}
-          className="absolute inset-auto z-50 h-0.5 w-[30rem] -translate-y-[7rem] bg-cyan-400"
+          className="absolute inset-auto z-10 h-0.5 w-[30rem] -translate-y-[7rem] bg-cyan-400"
         />
 
         {/* Top mask */}
@@ -76,7 +76,7 @@ export function LampSection({
       </div>
 
       {/* ── Content area ── */}
-      <div className="relative z-50 -mt-44 flex w-full flex-col items-center px-5">
+      <div className="relative z-10 -mt-44 flex w-full flex-col items-center px-5">
         {children}
       </div>
     </div>

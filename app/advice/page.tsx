@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { AdviceContent } from '@/components/advice/advice-content';
+import { SpiralIntro } from '@/components/advice/spiral-intro';
 
 export const metadata: Metadata = {
   title: "Do's & Don'ts | Investigator Events",
@@ -8,5 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default function AdvicePage() {
-  return <AdviceContent />;
+  return (
+    <SpiralIntro>
+      <AdviceContent />
+    </SpiralIntro>
+  );
 }

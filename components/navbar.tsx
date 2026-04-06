@@ -67,7 +67,7 @@ export function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/88 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/92 backdrop-blur-md sm:bg-white/88 sm:backdrop-blur-xl">
         <div className="container-shell flex min-h-[3.25rem] items-center justify-between gap-2.5 py-1.5 sm:min-h-[4rem] sm:gap-3 md:min-h-[4.75rem] md:gap-5 md:py-0">
           {/* Logo */}
           <Link href="/" onClick={() => handleNavigation('/')} className="group flex min-w-0 items-center gap-2.5 sm:gap-3">
@@ -133,9 +133,23 @@ export function Navbar() {
         className={`fixed inset-0 z-[55] bg-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:hidden ${
           isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
         }`}
-        style={{ top: 0 }}
       >
-        <nav className="flex h-full flex-col justify-center px-8 pb-20 pt-24">
+        {/* Top bar with logo + close */}
+        <div className="flex items-center justify-between px-6 py-4">
+          <Link href="/" onClick={() => handleNavigation('/')} className="flex items-center gap-2.5">
+            <Image src="/logo/ie-none.png" alt="Investigator Events" width={40} height={40} className="h-9 w-auto object-contain" />
+          </Link>
+          <button
+            type="button"
+            aria-label="Close menu"
+            onClick={() => setIsOpen(false)}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition hover:text-slate-950"
+          >
+            <X className="h-5 w-5" strokeWidth={2} />
+          </button>
+        </div>
+
+        <nav className="flex h-[calc(100%-4rem)] flex-col justify-center px-8 pb-20">
           <ul className="space-y-1">
             {mobileMenuItems.map((item, i) => {
               const active = isActiveRoute(pathname, item.href);

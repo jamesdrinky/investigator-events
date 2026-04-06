@@ -70,7 +70,7 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/88 backdrop-blur-xl">
-      <div className="container-shell flex min-h-[3.5rem] items-center justify-between gap-3 py-2 sm:min-h-[4rem] md:min-h-[4.75rem] md:gap-5 md:py-0">
+      <div className="container-shell flex min-h-[3.25rem] items-center justify-between gap-2.5 py-1.5 sm:min-h-[4rem] sm:gap-3 md:min-h-[4.75rem] md:gap-5 md:py-0">
         <Link href="/" onClick={() => handleNavigation('/')} className="group flex min-w-0 items-center gap-2.5 sm:gap-3">
           <Image
             src="/ie-pink.png"
@@ -111,7 +111,7 @@ export function Navbar() {
           })}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <Link
             href={"/list-your-event" as Route}
             onClick={() => handleNavigation('/list-your-event' as Route)}
@@ -125,7 +125,7 @@ export function Navbar() {
             aria-expanded={isOpen}
             aria-label="Toggle mobile menu"
             onClick={() => setIsOpen((current) => !current)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/90 bg-white text-slate-700 transition hover:bg-slate-50 lg:hidden"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200/90 bg-white text-slate-700 transition hover:bg-slate-50 sm:h-10 sm:w-10 lg:hidden"
           >
             {isOpen ? <X className="h-[18px] w-[18px]" strokeWidth={2.1} aria-hidden="true" /> : <Menu className="h-[18px] w-[18px]" strokeWidth={2.1} aria-hidden="true" />}
           </button>
@@ -133,8 +133,8 @@ export function Navbar() {
       </div>
 
       <div className="border-t border-slate-200/70 lg:hidden">
-        <div className="container-shell py-2.5">
-          <nav aria-label="Mobile quick navigation" className="grid grid-cols-3 gap-1.5 rounded-[1.1rem] bg-slate-100/80 p-1">
+        <div className="container-shell py-2">
+          <nav aria-label="Mobile quick navigation" className="grid grid-cols-3 gap-1 rounded-[1rem] bg-slate-100/80 p-1 sm:gap-1.5 sm:rounded-[1.1rem]">
             {mobileCoreItems.map((item) => {
               const active = isActiveRoute(pathname, item.href) || (item.href === '/submit-event' && pathname === '/list-your-event');
 
@@ -143,7 +143,7 @@ export function Navbar() {
                   key={item.href}
                   href={item.href}
                   onClick={() => handleNavigation(item.href)}
-                  className={`rounded-[0.9rem] px-3 py-2.5 text-center text-xs font-semibold transition ${
+                  className={`rounded-[0.85rem] px-2.5 py-2.5 text-center text-[11px] font-semibold transition sm:rounded-[0.9rem] sm:px-3 sm:text-xs ${
                     active ? 'bg-white text-slate-950 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.2)]' : 'text-slate-600'
                   }`}
                 >

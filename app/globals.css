@@ -295,6 +295,86 @@ a {
   50% { opacity: 1; transform: scale(1.08); }
 }
 
+/* ── Stripe-style gradient mesh blobs ── */
+@keyframes mesh-drift-1 {
+  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  25% { transform: translate(6%, 12%) scale(1.08) rotate(4deg); }
+  50% { transform: translate(-4%, 8%) scale(0.96) rotate(-2deg); }
+  75% { transform: translate(10%, -6%) scale(1.04) rotate(6deg); }
+}
+
+@keyframes mesh-drift-2 {
+  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  30% { transform: translate(-8%, -10%) scale(1.12) rotate(-5deg); }
+  60% { transform: translate(6%, -4%) scale(0.94) rotate(3deg); }
+  80% { transform: translate(-3%, 8%) scale(1.06) rotate(-3deg); }
+}
+
+@keyframes mesh-drift-3 {
+  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  20% { transform: translate(5%, -8%) scale(1.06) rotate(3deg); }
+  45% { transform: translate(-6%, 6%) scale(0.98) rotate(-4deg); }
+  70% { transform: translate(8%, 4%) scale(1.1) rotate(5deg); }
+}
+
+@keyframes mesh-drift-4 {
+  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  35% { transform: translate(-10%, 6%) scale(1.1) rotate(-6deg); }
+  65% { transform: translate(4%, -10%) scale(0.92) rotate(4deg); }
+  85% { transform: translate(-6%, -4%) scale(1.04) rotate(-2deg); }
+}
+
+@keyframes gradient-text-cycle {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.mesh-blob {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform;
+  filter: blur(80px);
+  opacity: 0.35;
+  z-index: 0;
+}
+
+.mesh-blob-1 {
+  width: 42rem;
+  height: 42rem;
+  background: radial-gradient(ellipse at center, rgba(124, 58, 237, 0.5), rgba(99, 102, 241, 0.2) 50%, transparent 72%);
+  top: -8%;
+  left: -6%;
+  animation: mesh-drift-1 22s ease-in-out infinite;
+}
+
+.mesh-blob-2 {
+  width: 36rem;
+  height: 36rem;
+  background: radial-gradient(ellipse at center, rgba(14, 165, 233, 0.45), rgba(34, 211, 238, 0.18) 50%, transparent 72%);
+  top: 12%;
+  right: -8%;
+  animation: mesh-drift-2 26s ease-in-out infinite;
+}
+
+.mesh-blob-3 {
+  width: 38rem;
+  height: 38rem;
+  background: radial-gradient(ellipse at center, rgba(236, 72, 153, 0.35), rgba(244, 114, 182, 0.12) 50%, transparent 72%);
+  bottom: 18%;
+  left: 10%;
+  animation: mesh-drift-3 24s ease-in-out infinite;
+}
+
+.mesh-blob-4 {
+  width: 32rem;
+  height: 32rem;
+  background: radial-gradient(ellipse at center, rgba(22, 104, 255, 0.4), rgba(59, 130, 246, 0.15) 50%, transparent 72%);
+  bottom: -4%;
+  right: 15%;
+  animation: mesh-drift-4 20s ease-in-out infinite;
+}
+
 .signal-marquee {
   position: relative;
   overflow: hidden;

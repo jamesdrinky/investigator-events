@@ -75,7 +75,13 @@ export default async function HomePage() {
   ];
 
   return (
-    <div className="flex flex-col">
+    <div className="relative flex flex-col">
+      {/* ── Stripe-style animated gradient mesh blobs ── */}
+      <div className="mesh-blob mesh-blob-1" aria-hidden="true" />
+      <div className="mesh-blob mesh-blob-2" aria-hidden="true" />
+      <div className="mesh-blob mesh-blob-3" aria-hidden="true" />
+      <div className="mesh-blob mesh-blob-4" aria-hidden="true" />
+
       <div className="order-1 sm:order-none">
         <HomepageHero events={heroEvents} stats={heroStats} />
       </div>
@@ -88,14 +94,14 @@ export default async function HomePage() {
         <FounderQuoteSection />
       </div>
 
-      <section className="order-2 relative overflow-hidden py-8 sm:order-none sm:py-28">
+      <section className="order-2 relative overflow-hidden py-7 sm:order-none sm:py-28">
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0),rgba(234,244,255,0.84)_32%,rgba(255,255,255,0))]" />
         <div className="container-shell relative">
           <div className="app-mobile-shell">
-          <Reveal className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-5">
+          <Reveal className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-5">
             <div className="max-w-3xl">
               <p className="eyebrow">Featured Events</p>
-              <h2 className="mt-3 max-w-[12ch] text-[2.25rem] font-semibold leading-[0.94] tracking-[-0.05em] text-slate-950 sm:mt-4 sm:text-5xl lg:text-[4.2rem]">
+              <h2 className="mt-2.5 max-w-[12ch] text-[2rem] font-semibold leading-[0.95] tracking-[-0.05em] text-slate-950 sm:mt-4 sm:text-5xl lg:text-[4.2rem]">
                 Featured events worth planning around.
               </h2>
             </div>
@@ -223,14 +229,14 @@ export default async function HomePage() {
 
       <div className="signal-divider mx-4 opacity-50 sm:mx-10" />
 
-      <section className="order-5 relative overflow-hidden py-8 sm:order-none sm:py-28">
+      <section className="order-5 relative overflow-hidden py-7 sm:order-none sm:py-28">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(22,104,255,0.14),transparent_24%),radial-gradient(circle_at_82%_18%,rgba(20,184,255,0.14),transparent_20%),linear-gradient(180deg,rgba(240,246,255,0.7),rgba(255,255,255,0.98))]" />
         <div className="container-shell relative">
           <div className="app-mobile-shell">
-          <Reveal className="grid gap-7 sm:gap-10 xl:grid-cols-[minmax(0,0.86fr)_minmax(0,1.14fr)] xl:items-end">
+          <Reveal className="grid gap-6 sm:gap-10 xl:grid-cols-[minmax(0,0.86fr)_minmax(0,1.14fr)] xl:items-end">
             <div className="max-w-xl">
               <p className="eyebrow">Associations</p>
-              <h2 className="mt-3 max-w-[12ch] text-[2.15rem] font-semibold leading-[0.94] tracking-[-0.05em] text-slate-950 sm:mt-4 sm:text-5xl lg:text-[4rem]">
+              <h2 className="mt-2.5 max-w-[12ch] text-[1.95rem] font-semibold leading-[0.95] tracking-[-0.05em] text-slate-950 sm:mt-4 sm:text-5xl lg:text-[4rem]">
                 Trusted by the associations behind the calendar.
               </h2>
               <p className="mt-4 text-base leading-relaxed text-slate-600 sm:mt-6">
@@ -363,7 +369,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section id="newsletter" className="order-6 relative overflow-hidden pb-10 pt-8 sm:order-none sm:pb-28 sm:pt-28">
+      <section id="newsletter" className="order-6 relative overflow-hidden pb-9 pt-7 sm:order-none sm:pb-28 sm:pt-28">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_16%,rgba(22,104,255,0.12),transparent_24%),radial-gradient(circle_at_80%_18%,rgba(111,86,255,0.12),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0),rgba(241,246,255,0.84)_40%,rgba(255,255,255,0.98))]" />
         <div className="pointer-events-none absolute left-[8%] top-8 h-48 w-48 rounded-full bg-[radial-gradient(circle,rgba(14,182,255,0.16),transparent_72%)] blur-3xl" />
         <div className="pointer-events-none absolute right-[10%] bottom-[12%] h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(111,86,255,0.14),transparent_72%)] blur-3xl" />

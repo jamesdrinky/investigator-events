@@ -1,70 +1,75 @@
 'use client';
 
 import { CalendarX, PlusCircle, Search } from 'lucide-react';
+import { Reveal } from '@/components/motion/reveal';
 
 const PANELS = [
   {
     title: 'Find Events Fast',
     description: 'See upcoming investigator events across the world in one place.',
     Icon: Search,
-    iconClassName: 'border-blue-100 bg-blue-50 text-blue-600 group-hover:border-blue-200'
+    gradient: 'from-blue-500 via-cyan-400 to-blue-600',
+    iconBg: 'bg-gradient-to-br from-blue-500 to-cyan-500',
+    iconShadow: 'shadow-[0_8px_30px_-6px_rgba(59,130,246,0.5)]',
   },
   {
     title: 'List for Free',
     description: 'Add your event in minutes and reach investigators, associations, and organisers worldwide.',
     Icon: PlusCircle,
-    iconClassName: 'border-violet-100 bg-violet-50 text-violet-600 group-hover:border-violet-200'
+    gradient: 'from-violet-500 via-purple-400 to-indigo-600',
+    iconBg: 'bg-gradient-to-br from-violet-500 to-purple-600',
+    iconShadow: 'shadow-[0_8px_30px_-6px_rgba(124,58,237,0.5)]',
   },
   {
     title: 'Never Miss a Clash',
     description: 'Check what is already in the diary before you confirm your dates.',
     Icon: CalendarX,
-    iconClassName: 'border-emerald-100 bg-emerald-50 text-emerald-600 group-hover:border-emerald-200'
+    gradient: 'from-emerald-500 via-teal-400 to-cyan-500',
+    iconBg: 'bg-gradient-to-br from-emerald-500 to-teal-500',
+    iconShadow: 'shadow-[0_8px_30px_-6px_rgba(16,185,129,0.5)]',
   }
 ] as const;
 
-const ICON_DARK_RESPONSIVE_CLASSNAMES: Record<string, string> = {
-  'border-blue-100 bg-blue-50 text-blue-600 group-hover:border-blue-200':
-    'lg:border-blue-500/30 lg:bg-blue-500/15 lg:text-blue-400 lg:group-hover:border-blue-400/50',
-  'border-violet-100 bg-violet-50 text-violet-600 group-hover:border-violet-200':
-    'lg:border-violet-500/30 lg:bg-violet-500/15 lg:text-violet-400 lg:group-hover:border-violet-400/50',
-  'border-emerald-100 bg-emerald-50 text-emerald-600 group-hover:border-emerald-200':
-    'lg:border-emerald-500/30 lg:bg-emerald-500/15 lg:text-emerald-400 lg:group-hover:border-emerald-400/50',
-};
-
 export function WhyUseSection() {
   return (
-    <section className="relative overflow-hidden py-10 sm:py-20">
-      {/* Subtle section transition from dark hero above */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,#f4f8ff,transparent)]" />
+    <section className="relative overflow-hidden py-12 sm:py-28">
       <div className="container-shell relative">
         <div className="app-mobile-shell">
-        <div className="max-w-3xl">
-          <p className="eyebrow">WHY USE THIS SITE</p>
-          <h2 className="mt-3 text-[2rem] font-semibold leading-[0.98] tracking-[-0.045em] text-slate-950 sm:mt-4 sm:text-5xl">
-            A clearer way to plan the year ahead
-          </h2>
-        </div>
+          <Reveal>
+            <div className="max-w-3xl">
+              <p className="eyebrow">WHY USE THIS SITE</p>
+              <h2 className="mt-2.5 text-[2rem] font-semibold leading-[0.95] tracking-[-0.05em] text-slate-950 sm:mt-4 sm:text-5xl lg:text-[4.2rem]">
+                A clearer way to plan the year ahead
+              </h2>
+            </div>
+          </Reveal>
 
-        <div className="mt-6 grid gap-3.5 sm:mt-10 sm:gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-6">
-          {PANELS.map(({ title, description, Icon, iconClassName }) => (
-            <article
-              key={title}
-              className="group relative overflow-hidden rounded-[1.15rem] border border-slate-200/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(245,248,255,0.92))] p-3.5 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.12)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_24px_52px_-32px_rgba(15,23,42,0.16)] sm:rounded-[1.35rem] sm:p-5 lg:bg-[linear-gradient(145deg,#0d1525,#111e38)] lg:p-7 lg:shadow-[0_0_0_1px_rgba(99,102,241,0.12),0_28px_64px_-32px_rgba(0,0,40,0.7)] lg:hover:shadow-[0_0_0_1px_rgba(99,102,241,0.28),0_36px_80px_-30px_rgba(76,90,255,0.3)]"
-            >
-              <div className="absolute inset-x-0 top-0 hidden h-px bg-[linear-gradient(90deg,transparent,rgba(99,102,241,0.6),rgba(56,189,248,0.55),rgba(236,72,153,0.3),transparent)] lg:block" />
-              <div className={`flex h-10 w-10 items-center justify-center rounded-[0.8rem] border shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition-colors duration-200 sm:h-11 sm:w-11 lg:h-14 lg:w-14 lg:rounded-[0.95rem] ${iconClassName} ${ICON_DARK_RESPONSIVE_CLASSNAMES[iconClassName] ?? ''}`}>
-                <Icon className="h-6 w-6" strokeWidth={2.1} aria-hidden="true" />
-              </div>
-              <h3 className="mt-4 text-[1.1rem] font-semibold leading-[1.12] tracking-[-0.03em] text-slate-950 sm:text-[1.18rem] lg:mt-5 lg:text-[1.32rem] lg:tracking-[-0.035em] lg:text-white">
-                {title}
-              </h3>
-              <p className="mt-2.5 max-w-[31ch] text-sm leading-6 text-slate-600 lg:mt-3 lg:text-slate-400">
-                {description}
-              </p>
-            </article>
-          ))}
-        </div>
+          <div className="mt-6 grid gap-4 sm:mt-14 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+            {PANELS.map(({ title, description, Icon, gradient, iconBg, iconShadow }, index) => (
+              <Reveal key={title} delay={0.06 * index} y={24}>
+                <article className="group relative overflow-hidden rounded-[1.6rem] border border-white/70 bg-white/80 p-5 shadow-[0_20px_50px_-20px_rgba(15,23,42,0.1)] backdrop-blur-xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-2 hover:shadow-[0_40px_80px_-20px_rgba(76,90,255,0.2)] sm:rounded-[2rem] sm:p-8">
+                  {/* Gradient top border */}
+                  <div className={`absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r ${gradient} opacity-80 transition-opacity duration-300 group-hover:opacity-100`} />
+                  {/* Glass highlight */}
+                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.5),rgba(255,255,255,0)_40%,rgba(255,255,255,0.15)_60%,rgba(255,255,255,0)_100%)]" />
+                  {/* Subtle radial glow on hover */}
+                  <div className="pointer-events-none absolute inset-0 rounded-[1.6rem] bg-[radial-gradient(circle_at_50%_0%,rgba(99,102,241,0.06),transparent_60%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100 sm:rounded-[2rem]" />
+
+                  <div className="relative">
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${iconBg} ${iconShadow} transition-transform duration-500 group-hover:scale-110 sm:h-14 sm:w-14`}>
+                      <Icon className="h-6 w-6 text-white" strokeWidth={2} aria-hidden="true" />
+                    </div>
+                    <h3 className="mt-5 text-xl font-semibold leading-tight tracking-[-0.03em] text-slate-950 sm:mt-6 sm:text-2xl">
+                      {title}
+                    </h3>
+                    <p className="mt-3 max-w-[34ch] text-[0.94rem] leading-relaxed text-slate-600 sm:mt-4">
+                      {description}
+                    </p>
+                  </div>
+                </article>
+              </Reveal>
+            ))}
+          </div>
         </div>
       </div>
     </section>

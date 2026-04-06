@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import type { Route } from 'next';
-import { motion, useReducedMotion, useSpring } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion, useSpring } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 import { geoOrthographic, geoPath } from 'd3-geo';
 import { feature } from 'topojson-client';
@@ -29,6 +29,7 @@ interface GlobeEventNode extends GlobePoint {
   city: string;
   country: string;
   date: string;
+  slug: string;
   associationName?: string;
   coverImage?: string;
 }
@@ -162,112 +163,251 @@ function HeroEventCard({
   event,
   className,
   delay,
-  compact = false
+  compact = false,
+  collapsedW,
+  collapsedH,
 }: {
   event: GlobeEventNode;
   className: string;
   delay: number;
   compact?: boolean;
+  collapsedW: number;
+  collapsedH: number;
 }) {
   const reducedMotion = useReducedMotion();
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const EXPANDED_W = 290;
+  const EXPANDED_H = 272;
+
+  const logoSrc = event.associationName ? getAssociationBrandLogoSrc(event.associationName) : null;
+  const isAbiAssociation =
+    Boolean(event.associationName && /association of british investigators|\babi\b/i.test(event.associationName)) ||
+    Boolean(logoSrc?.includes('/abi.png'));
 
   return (
     <motion.article
-      className={`pointer-events-auto absolute overflow-hidden rounded-[1.8rem] border border-white/60 bg-[linear-gradient(155deg,rgba(255,255,255,0.92),rgba(241,245,255,0.86))] shadow-[0_28px_80px_-16px_rgba(0,0,50,0.55),0_2px_0_rgba(255,255,255,0.8)_inset] backdrop-blur-xl will-change-transform ${className}`}
-      initial={false}
-      animate={
-        reducedMotion ? undefined : { y: [0, compact ? -4 : -6, 0], rotateZ: [0, compact ? -0.45 : -0.6, 0, compact ? 0.35 : 0.45, 0] }
+      className={`pointer-events-auto absolute cursor-pointer overflow-hidden rounded-[1.8rem] border border-white/80 shadow-[0_32px_100px_-18px_rgba(0,0,50,0.6),0_2px_0_rgba(255,255,255,0.85)_inset,0_0_0_1px_rgba(255,255,255,0.2)] backdrop-blur-2xl will-change-transform ${isExpanded ? 'z-50' : ''} ${className}`}
+      initial={{ width: collapsedW, height: collapsedH }}
+      animate={{
+        width: isExpanded ? EXPANDED_W : collapsedW,
+        height: isExpanded ? EXPANDED_H : collapsedH,
+        y: isExpanded ? 0 : reducedMotion ? 0 : [0, compact ? -4 : -6, 0],
+        rotateZ: isExpanded ? 0 : reducedMotion ? 0 : [0, compact ? -0.45 : -0.6, 0, compact ? 0.35 : 0.45, 0],
+      }}
+      transition={
+        isExpanded
+          ? { type: 'spring', stiffness: 400, damping: 32 }
+          : {
+              y: {
+                duration: reducedMotion ? 0 : 11 + delay * 4,
+                delay: reducedMotion ? 0 : delay,
+                repeat: reducedMotion ? 0 : Infinity,
+                ease: 'easeInOut',
+              },
+              rotateZ: {
+                duration: reducedMotion ? 0 : 11 + delay * 4,
+                delay: reducedMotion ? 0 : delay,
+                repeat: reducedMotion ? 0 : Infinity,
+                ease: 'easeInOut',
+              },
+              width: { type: 'spring', stiffness: 400, damping: 32 },
+              height: { type: 'spring', stiffness: 400, damping: 32 },
+            }
       }
-      transition={reducedMotion ? undefined : { duration: 11 + delay * 4, delay, repeat: Infinity, ease: 'easeInOut' }}
       style={{ transformStyle: 'preserve-3d' }}
+      onClick={() => setIsExpanded((v) => !v)}
     >
-      <div className={`relative ${compact ? 'min-h-[9.5rem] max-h-[12rem] overflow-hidden' : 'flex min-h-[12.5rem] flex-col'}`}>
+      {/* ── Base background (light in both states) ── */}
+      <motion.div
+        className="absolute inset-0"
+        animate={{
+          background: isExpanded
+            ? 'linear-gradient(160deg, #ffffff 0%, #f1f5f9 100%)'
+            : 'linear-gradient(155deg, rgba(255,255,255,0.92) 0%, rgba(241,245,255,0.86) 100%)',
+        }}
+        transition={{ duration: 0.3 }}
+      />
+
+      {/* ── Collapsed decorative layers (shimmer + radials) ── */}
+      <motion.div
+        className="pointer-events-none absolute inset-0"
+        animate={{ opacity: isExpanded ? 0 : 1 }}
+        transition={{ duration: 0.2 }}
+      >
         <div
           className="absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(59,130,246,0.12),transparent_28%),radial-gradient(circle_at_82%_16%,rgba(14,165,233,0.1),transparent_22%),radial-gradient(circle_at_84%_80%,rgba(99,102,241,0.08),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.94),rgba(248,250,252,0.9))]"
           style={{ backgroundSize: '140% 140%' }}
         />
         <motion.div
-          className="pointer-events-none absolute inset-0 bg-[linear-gradient(118deg,rgba(255,255,255,0)_18%,rgba(255,255,255,0.22)_38%,rgba(255,255,255,0.06)_52%,rgba(255,255,255,0)_72%)] opacity-60"
-          animate={reducedMotion ? undefined : { x: ['-16%', '84%'] }}
+          className="absolute inset-0 bg-[linear-gradient(118deg,rgba(255,255,255,0)_18%,rgba(255,255,255,0.22)_38%,rgba(255,255,255,0.06)_52%,rgba(255,255,255,0)_72%)] opacity-60"
+          animate={reducedMotion || isExpanded ? {} : { x: ['-16%', '84%'] }}
           transition={{ duration: 4.8, delay: 1.2 + delay, repeat: Infinity, repeatDelay: 7.5, ease: 'easeInOut' }}
         />
-        <div className="pointer-events-none absolute inset-0 rounded-[1.8rem] ring-1 ring-white/55" />
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(130deg,rgba(255,255,255,0.2),rgba(255,255,255,0)_34%,rgba(255,255,255,0.08)_58%,rgba(255,255,255,0)_76%)] opacity-75" />
+      </motion.div>
 
-        <div className="absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-3 px-4 pt-4 sm:px-5 sm:pt-5">
-          <div className="min-w-0 rounded-full border border-slate-200/80 bg-white/78 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500 backdrop-blur-md">
+      {/* Ring */}
+      <div className="pointer-events-none absolute inset-0 rounded-[1.8rem] ring-1 ring-white/55" />
+
+      {/* ── EXPANDED: light map layer ── */}
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            className="pointer-events-none absolute inset-0"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.38, delay: 0.16 }}
+          >
+            <div className="absolute inset-0 bg-slate-50" />
+
+            {/* Street grid */}
+            <svg className="absolute inset-0 h-full w-full" preserveAspectRatio="none">
+              <motion.line x1="0%" y1="33%" x2="100%" y2="33%" stroke="rgba(148,163,184,0.55)" strokeWidth="3" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.7, delay: 0.2 }} />
+              <motion.line x1="0%" y1="62%" x2="100%" y2="62%" stroke="rgba(148,163,184,0.55)" strokeWidth="3" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.7, delay: 0.28 }} />
+              <motion.line x1="28%" y1="0%" x2="28%" y2="100%" stroke="rgba(148,163,184,0.45)" strokeWidth="2.5" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.6, delay: 0.36 }} />
+              <motion.line x1="68%" y1="0%" x2="68%" y2="100%" stroke="rgba(148,163,184,0.45)" strokeWidth="2.5" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.6, delay: 0.44 }} />
+              {[15, 48, 78].map((y, i) => (
+                <motion.line key={`sh${i}`} x1="0%" y1={`${y}%`} x2="100%" y2={`${y}%`} stroke="rgba(203,213,225,0.55)" strokeWidth="1.5" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.45, delay: 0.5 + i * 0.08 }} />
+              ))}
+              {[14, 44, 55, 82].map((x, i) => (
+                <motion.line key={`sv${i}`} x1={`${x}%`} y1="0%" x2={`${x}%`} y2="100%" stroke="rgba(203,213,225,0.55)" strokeWidth="1.5" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.45, delay: 0.58 + i * 0.08 }} />
+              ))}
+            </svg>
+
+            {/* Buildings */}
+            {(
+              [
+                { top: '36%', left: '8%', width: '14%', height: '19%', d: 0.40 },
+                { top: '10%', left: '32%', width: '11%', height: '14%', d: 0.48 },
+                { top: '65%', left: '70%', width: '16%', height: '17%', d: 0.52 },
+                { top: '16%', right: '7%', width: '10%', height: '22%', d: 0.44 },
+                { top: '50%', left: '3%', width: '7%', height: '12%', d: 0.58 },
+                { top: '5%', left: '71%', width: '13%', height: '9%', d: 0.64 },
+              ] as Array<{ top: string; left?: string; right?: string; width: string; height: string; d: number }>
+            ).map((b, i) => (
+              <motion.div
+                key={i}
+                className="absolute rounded-sm border border-slate-300/40 bg-slate-200/90"
+                style={{ top: b.top, left: b.left, right: b.right, width: b.width, height: b.height }}
+                initial={{ opacity: 0, scale: 0.85 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.32, delay: b.d }}
+              />
+            ))}
+
+            {/* Location pin */}
+            <motion.div
+              className="absolute left-1/2 top-[40%] -translate-x-1/2 -translate-y-1/2"
+              initial={{ scale: 0, y: -18 }}
+              animate={{ scale: 1, y: 0 }}
+              transition={{ type: 'spring', stiffness: 420, damping: 18, delay: 0.26 }}
+            >
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" style={{ filter: 'drop-shadow(0 3px 8px rgba(16,185,129,0.55))' }}>
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#10b981" />
+                <circle cx="12" cy="9" r="2.5" fill="white" />
+              </svg>
+            </motion.div>
+
+            {/* Bottom white fade so text is readable */}
+            <div className="absolute inset-x-0 bottom-0 h-[62%] bg-gradient-to-t from-white via-white/90 to-transparent" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Content (always present) ── */}
+      <div className="relative z-10 flex h-full flex-col justify-between p-4 sm:p-5">
+
+        {/* Top row: pill + logo/close */}
+        <div className="flex items-start justify-between gap-2">
+          <motion.div
+            className="min-w-0 rounded-full border border-slate-200/80 bg-white/90 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500 backdrop-blur-md"
+            animate={{ opacity: isExpanded ? 0 : 1 }}
+            transition={{ duration: 0.2 }}
+          >
             {compact ? 'Live event' : 'Featured event'}
-          </div>
-          <div className="absolute right-3 top-3 z-10 sm:right-4 sm:top-4">
-            {(() => {
-              const logoSrc = event.associationName ? getAssociationBrandLogoSrc(event.associationName) : null;
-              const isAbiAssociation =
-                Boolean(event.associationName && /association of british investigators|\babi\b/i.test(event.associationName)) ||
-                Boolean(logoSrc?.includes('/abi.png'));
-              return logoSrc ? (
-                <div className="flex items-center justify-center rounded-md border border-white/70 bg-white/90 px-2 py-1 shadow-sm backdrop-blur-sm">
-                  {isAbiAssociation ? (
-                    <span className="text-[11px] font-semibold tracking-[0.16em] text-slate-950">ABI</span>
-                  ) : (
-                    <img
-                      src={logoSrc}
-                      alt={event.associationName ?? ''}
-                      className="h-6 sm:h-7 w-auto max-w-[4.5rem] object-contain"
-                    />
-                  )}
-                </div>
-              ) : (
-                null
-              );
-            })()}
-          </div>
+          </motion.div>
+
+          <AnimatePresence mode="wait">
+            {isExpanded ? (
+              <motion.button
+                key="close"
+                className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600"
+                initial={{ opacity: 0, scale: 0.7 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.7 }}
+                transition={{ duration: 0.2, delay: 0.32 }}
+                onClick={(e) => { e.stopPropagation(); setIsExpanded(false); }}
+                aria-label="Close"
+              >
+                <svg width="9" height="9" viewBox="0 0 10 10" fill="none">
+                  <path d="M1.5 1.5l7 7M8.5 1.5l-7 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                </svg>
+              </motion.button>
+            ) : logoSrc ? (
+              <motion.div
+                key="logo"
+                className="flex flex-shrink-0 items-center justify-center rounded-md border border-white/70 bg-white/90 px-2 py-1 shadow-sm backdrop-blur-sm"
+                initial={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                {isAbiAssociation ? (
+                  <span className="text-[11px] font-semibold tracking-[0.16em] text-slate-950">ABI</span>
+                ) : (
+                  <img src={logoSrc} alt={event.associationName ?? ''} className="h-6 w-auto max-w-[4.5rem] object-contain sm:h-7" />
+                )}
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
         </div>
 
-        <motion.div
-          className={compact ? 'absolute inset-x-0 bottom-0 z-10 p-4 sm:p-5' : 'mt-auto z-10 px-5 pb-5'}
-          animate={reducedMotion ? undefined : { y: [0, -1.5, 0] }}
-          transition={{ duration: 10 + delay * 3, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          <div className="flex min-w-0 flex-col gap-1.5 pt-3">
-            <p
-              className="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500"
-              style={{
-                display: '-webkit-box',
-                WebkitLineClamp: 1,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden'
-              }}
-            >
-              {event.associationName ? getAssociationDisplayName(event.associationName) : 'Featured event'}
+        {/* Bottom: event details */}
+        <div className="flex flex-col gap-1.5 pt-3">
+          <p
+            className="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500"
+            style={{ display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+          >
+            {event.associationName ? getAssociationDisplayName(event.associationName) : 'Featured event'}
+          </p>
+          <p
+            className="min-w-0 text-[1.04rem] font-semibold leading-[1.08] tracking-[-0.03em] text-slate-950"
+            style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+          >
+            {event.title}
+          </p>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] font-medium text-slate-600">
+            <p className="font-semibold uppercase tracking-[0.15em] text-blue-600">{event.date}</p>
+            <span className="text-slate-300">•</span>
+            <p className="min-w-0" style={{ display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              {event.city}, {event.country}
             </p>
-            <p
-              className={`min-w-0 font-semibold leading-[1.08] tracking-[-0.03em] text-slate-950 ${compact ? 'line-clamp-2 text-[0.96rem]' : 'max-w-[14rem] text-[1.04rem]'}`}
-              style={{
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden'
-              }}
-            >
-              {event.title}
-            </p>
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] font-medium text-slate-600">
-              <p className="font-semibold uppercase tracking-[0.15em] text-blue-700">{event.date}</p>
-              <span className="text-slate-300">•</span>
-              <p
-                className="min-w-0"
-                style={{
-                  display: '-webkit-box',
-                  WebkitLineClamp: 1,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden'
-                }}
-              >
-                {event.city}, {event.country}
-              </p>
-            </div>
           </div>
-        </motion.div>
+
+          {/* CTA — only visible when expanded, fades in after map animation */}
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 4 }}
+                transition={{ duration: 0.26, delay: 0.36 }}
+              >
+                <Link
+                  href={`/events/${event.slug}`}
+                  className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-4 py-2 text-[11px] font-semibold text-white shadow-sm transition-colors hover:bg-blue-700"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  View event
+                  <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                    <path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </Link>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </motion.article>
   );
@@ -290,6 +430,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
           city: event.city,
           country: event.country,
           date: formatEventDate(event),
+          slug: getEventSlug(event),
           associationName: event.association ?? event.organiser,
           coverImage: event.coverImage,
           ...coordinate
@@ -394,7 +535,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
             </div>
 
             <motion.h1
-              className="mt-4 max-w-[10ch] text-[2.35rem] font-semibold leading-[0.84] tracking-[-0.065em] text-white sm:mt-6 sm:text-[3.25rem] sm:leading-[0.88] lg:mt-8 lg:text-[6.5rem]"
+              className="mt-4 max-w-[10ch] text-[2.65rem] font-bold leading-[0.84] tracking-[-0.065em] text-white sm:mt-6 sm:text-[4rem] sm:leading-[0.86] lg:mt-8 lg:text-[7.5rem]"
               initial={reducedMotion ? false : { opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
@@ -416,10 +557,10 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
                 </motion.span>{' '}
                 <span className="text-white">Miss Another</span>
               </span>
-              <span className="mt-1 block max-w-[10ch] font-semibold leading-[0.88] tracking-[-0.065em] text-white">
+              <span className="mt-1 block max-w-[10ch] font-bold leading-[0.88] tracking-[-0.065em] text-white">
                 Investigator
               </span>
-              <span className="block font-semibold leading-[0.88] tracking-[-0.065em] text-white">
+              <span className="block font-bold leading-[0.88] tracking-[-0.065em] text-white">
                 Event
               </span>
             </motion.h1>
@@ -453,17 +594,30 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.85, delay: 0.26, ease: [0.16, 1, 0.3, 1] }}
             >
-              {stats.map((item) => (
-                <motion.div
-                  key={item.label}
-                  className="min-w-0 rounded-[1.15rem] border bg-[linear-gradient(145deg,rgba(255,255,255,0.13),rgba(255,255,255,0.08))] px-2.5 py-3 text-center shadow-[0_18px_44px_-34px_rgba(0,0,50,0.34),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-xl sm:rounded-[1.7rem] sm:px-4 sm:py-4"
-                  style={{ borderColor: 'rgba(255,255,255,0.14)' }}
-                  whileHover={{ boxShadow: '0 34px 84px -46px rgba(76,90,255,0.5), inset 0 1px 0 rgba(255,255,255,0.16)' }}
-                >
-                  <p className="truncate text-[9px] font-semibold uppercase tracking-[0.16em] text-blue-100/80 sm:text-[10px] sm:tracking-[0.2em]">{item.label}</p>
-                  <p className="mt-1.5 text-[1.35rem] font-semibold tracking-[-0.04em] text-white sm:mt-2 sm:text-[1.75rem]">{item.value}</p>
-                </motion.div>
-              ))}
+              {stats.map((item, index) => {
+                const gradients = [
+                  'bg-[linear-gradient(135deg,rgba(59,130,246,0.18),rgba(14,165,233,0.12))]',
+                  'bg-[linear-gradient(135deg,rgba(124,58,237,0.18),rgba(99,102,241,0.12))]',
+                  'bg-[linear-gradient(135deg,rgba(236,72,153,0.18),rgba(244,114,182,0.12))]',
+                ];
+                const textColors = [
+                  'bg-gradient-to-r from-cyan-300 to-blue-300 bg-clip-text text-transparent',
+                  'bg-gradient-to-r from-violet-300 to-purple-300 bg-clip-text text-transparent',
+                  'bg-gradient-to-r from-pink-300 to-rose-300 bg-clip-text text-transparent',
+                ];
+                return (
+                  <motion.div
+                    key={item.label}
+                    className={`min-w-0 rounded-[1.15rem] border ${gradients[index % 3]} px-2.5 py-3.5 text-center shadow-[0_22px_52px_-34px_rgba(0,0,50,0.4),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-xl sm:rounded-[1.7rem] sm:px-4 sm:py-5`}
+                    style={{ borderColor: 'rgba(255,255,255,0.16)' }}
+                    whileHover={{ scale: 1.04, boxShadow: '0 38px_90px_-46px rgba(76,90,255,0.55), inset 0 1px 0 rgba(255,255,255,0.18)' }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 24 }}
+                  >
+                    <p className="truncate text-[9px] font-semibold uppercase tracking-[0.18em] text-blue-100/80 sm:text-[10px] sm:tracking-[0.22em]">{item.label}</p>
+                    <p className={`mt-1.5 text-[1.6rem] font-bold tracking-[-0.05em] sm:mt-2 sm:text-[2.2rem] ${textColors[index % 3]}`}>{item.value}</p>
+                  </motion.div>
+                );
+              })}
             </motion.div>
           </motion.div>
 
@@ -494,8 +648,9 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
                 transformStyle: 'preserve-3d'
               }}
             >
-              {/* Glowing orb behind globe */}
-              <div className="pointer-events-none absolute inset-[7%] rounded-full bg-[radial-gradient(ellipse,rgba(22,104,255,0.3),rgba(111,86,255,0.2)_42%,transparent_72%)] blur-2xl sm:inset-[5%]" style={{ animation: 'hero-pulse 6s ease-in-out infinite' }} />
+              {/* Glowing orb behind globe — enhanced color glow */}
+              <div className="pointer-events-none absolute inset-[4%] rounded-full bg-[radial-gradient(ellipse,rgba(22,104,255,0.4),rgba(124,58,237,0.28)_30%,rgba(14,165,233,0.2)_55%,transparent_72%)] blur-3xl sm:inset-[2%]" style={{ animation: 'hero-pulse 6s ease-in-out infinite' }} />
+              <div className="pointer-events-none absolute inset-[12%] rounded-full bg-[radial-gradient(ellipse,rgba(236,72,153,0.15),rgba(99,102,241,0.12)_40%,transparent_70%)] blur-2xl" style={{ animation: 'hero-pulse 8s ease-in-out infinite 2s' }} />
               <motion.div
                 className="absolute inset-[10%] rounded-[3rem] border bg-[linear-gradient(145deg,rgba(255,255,255,0.14),rgba(241,247,255,0.07))] shadow-[0_52px_162px_-64px_rgba(22,40,180,0.7),inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-2xl"
                 style={{ borderColor: 'rgba(255,255,255,0.2)' }}
@@ -582,22 +737,13 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               </svg>
 
               {globeEvents[0] ? (
-                <HeroEventCard event={globeEvents[0]} delay={0.24} className="left-[10%] top-[14%] w-[58%] max-w-[9rem] sm:left-[2%] sm:top-[9%] sm:w-[42%] sm:max-w-[15rem]" />
+                <HeroEventCard event={globeEvents[0]} delay={0.24} collapsedW={224} collapsedH={200} className="left-[10%] top-[14%] sm:left-[2%] sm:top-[9%]" />
               ) : null}
               {globeEvents[1] ? (
-                <HeroEventCard event={globeEvents[1]} delay={0.34} compact className="right-[4%] top-[14%] hidden w-[34%] min-w-[12rem] sm:block" />
+                <HeroEventCard event={globeEvents[1]} delay={0.34} compact collapsedW={198} collapsedH={155} className="right-[4%] top-[14%] hidden sm:block" />
               ) : null}
               {globeEvents[2] ? (
-                <HeroEventCard event={globeEvents[2]} delay={0.42} compact className="right-[10%] bottom-[8%] hidden w-[38%] min-w-[13rem] sm:block" />
-              ) : null}
-
-              {globeEvents[0] ? (
-                <Link
-                  href={`/events/${getEventSlug(events[0])}`}
-                  className="pointer-events-auto absolute bottom-[5%] left-1/2 inline-flex w-[82%] -translate-x-1/2 items-center justify-center gap-2 rounded-full border border-white/90 bg-white/92 px-2.5 py-2 text-[11px] font-semibold text-slate-900 shadow-[0_28px_70px_-28px_rgba(0,0,50,0.5),0_2px_0_rgba(255,255,255,0.8)_inset] backdrop-blur-xl transition duration-300 hover:shadow-[0_36px_78px_-30px_rgba(76,90,255,0.4)] sm:bottom-[13%] sm:left-[6%] sm:w-auto sm:-translate-x-0 sm:justify-start sm:px-4 sm:py-2.5 sm:text-sm"
-                >
-                  Open featured event
-                </Link>
+                <HeroEventCard event={globeEvents[2]} delay={0.42} compact collapsedW={212} collapsedH={155} className="right-[10%] bottom-[8%] hidden sm:block" />
               ) : null}
             </motion.div>
           </motion.div>

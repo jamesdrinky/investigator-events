@@ -156,6 +156,22 @@ a {
     min-height: 3.25rem;
     font-size: 0.938rem;
   }
+
+}
+
+/* Stripe-style thin dividers between sections — mobile only */
+.mobile-section-divider::before {
+  content: '';
+  display: block;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 5%, rgba(203,213,225,0.5) 30%, rgba(203,213,225,0.5) 70%, transparent 95%);
+  margin: 0 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .mobile-section-divider::before {
+    display: none;
+  }
 }
 
 .eyebrow {

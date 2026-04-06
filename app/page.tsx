@@ -39,7 +39,7 @@ export default async function HomePage() {
   ];
 
   return (
-    <div className="relative flex flex-col">
+    <div className="relative flex flex-col overflow-x-hidden">
       {/* ── Stripe-style animated gradient mesh blobs ── */}
       <div className="mesh-blob mesh-blob-1" aria-hidden="true" />
       <div className="mesh-blob mesh-blob-2" aria-hidden="true" />
@@ -50,11 +50,11 @@ export default async function HomePage() {
         <HomepageHero events={heroEvents} stats={heroStats} />
       </div>
 
-      <div className="order-2 sm:order-none">
+      <div className="order-2 mobile-section-divider sm:order-none ">
         <AssociationLoopSection />
       </div>
 
-      <div className="order-3 sm:order-none">
+      <div className="order-3 mobile-section-divider sm:order-none ">
         <UpcomingEventsGallery events={upcomingEvents} />
       </div>
 
@@ -62,7 +62,7 @@ export default async function HomePage() {
         <WhyUseSection />
       </div>
 
-      <div className="order-5 sm:order-none">
+      <div className="order-5 mobile-section-divider sm:order-none ">
         <FounderQuoteSection />
       </div>
 

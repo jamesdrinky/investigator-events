@@ -129,6 +129,25 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
   const reducedMotion = useReducedMotion();
   const containerRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [introComplete, setIntroComplete] = useState(false);
+
+  /* Poll for intro completion — checks if the overlay is gone */
+  useEffect(() => {
+    // If no intro overlay exists at all, animate immediately
+    if (!document.querySelector('[data-site-intro]')) {
+      setIntroComplete(true);
+      return;
+    }
+    // Otherwise poll until it's removed
+    const interval = setInterval(() => {
+      if (!document.querySelector('[data-site-intro]')) {
+        setIntroComplete(true);
+        clearInterval(interval);
+      }
+    }, 200);
+    return () => clearInterval(interval);
+  }, []);
+
 
   /* ── Scroll-driven iPad animation ── */
   const { scrollYProgress } = useScroll({
@@ -289,9 +308,12 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
 
       {/* ── Main content wrapper ── */}
       <div className="relative" style={{ perspective: '1200px' }}>
-        {/* ── Wireframe Globe (behind text, CSS-rotated for zero JS cost) ── */}
-        <div
+        {/* ── Wireframe Globe ── */}
+        <motion.div
           className="pointer-events-none absolute left-1/2 z-[1] -translate-x-1/2"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={introComplete ? { opacity: 1, scale: 1 } : undefined}
+          transition={{ duration: 2, delay: 0, ease: [0.16, 1, 0.3, 1] }}
           style={{
             width: isMobile ? '34rem' : '56rem',
             height: isMobile ? '34rem' : '56rem',
@@ -360,7 +382,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               ))}
             </g>
           </svg>
-        </div>
+        </motion.div>
 
         {/* ── Header content (centered, above globe) ── */}
         <motion.div
@@ -369,9 +391,9 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
         >
           {/* Badge pill */}
           <motion.div
-            initial={reducedMotion ? false : { opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            initial={reducedMotion ? false : { opacity: 0, y: 20, scale: 0.95 }}
+            animate={introComplete ? { opacity: 1, y: 0, scale: 1 } : undefined}
+            transition={{ duration: 1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
           >
             <div
               className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 shadow-[0_20px_50px_-30px_rgba(0,0,60,0.5)]"
@@ -393,11 +415,11 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
           {/* Heading */}
           <motion.h1
             className="mx-auto mt-8 max-w-[10ch] text-5xl font-bold leading-[0.9] tracking-[-0.06em] text-white sm:mt-7 sm:text-[4.5rem] sm:leading-[0.86] lg:mt-8 lg:text-[7.5rem]"
-            initial={reducedMotion ? false : { opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={reducedMotion ? false : { opacity: 0, y: 30 }}
+            animate={introComplete ? { opacity: 1, y: 0 } : undefined}
             transition={{
-              duration: 0.9,
-              delay: 0.08,
+              duration: 1.2,
+              delay: 0.3,
               ease: [0.16, 1, 0.3, 1],
             }}
           >
@@ -417,11 +439,11 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
           {/* Description */}
           <motion.p
             className="mx-auto mt-7 max-w-md text-base leading-[1.65] text-blue-100/55 sm:mt-6 sm:max-w-xl sm:text-lg"
-            initial={reducedMotion ? false : { opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={reducedMotion ? false : { opacity: 0, y: 20 }}
+            animate={introComplete ? { opacity: 1, y: 0 } : undefined}
             transition={{
-              duration: 0.8,
-              delay: 0.14,
+              duration: 1,
+              delay: 0.6,
               ease: [0.16, 1, 0.3, 1],
             }}
           >
@@ -432,11 +454,11 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
           {/* CTA buttons */}
           <motion.div
             className="mt-10 flex flex-col items-center gap-3.5 sm:mt-8 sm:flex-row sm:justify-center sm:gap-3"
-            initial={reducedMotion ? false : { opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={reducedMotion ? false : { opacity: 0, y: 20 }}
+            animate={introComplete ? { opacity: 1, y: 0 } : undefined}
             transition={{
-              duration: 0.8,
-              delay: 0.2,
+              duration: 1,
+              delay: 0.85,
               ease: [0.16, 1, 0.3, 1],
             }}
           >
@@ -457,11 +479,11 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
           {/* Stats row */}
           <motion.div
             className="mx-auto mt-10 grid max-w-md grid-cols-3 gap-3 sm:mt-10 sm:max-w-md sm:gap-3"
-            initial={reducedMotion ? false : { opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={reducedMotion ? false : { opacity: 0, y: 20 }}
+            animate={introComplete ? { opacity: 1, y: 0 } : undefined}
             transition={{
-              duration: 0.85,
-              delay: 0.26,
+              duration: 1,
+              delay: 1.1,
               ease: [0.16, 1, 0.3, 1],
             }}
           >

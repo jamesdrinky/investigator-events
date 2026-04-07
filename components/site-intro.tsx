@@ -10,15 +10,14 @@ export function SiteIntro() {
   const [skipVisible, setSkipVisible] = useState(false);
   const dismissedRef = useRef(false);
 
-  // TODO: Re-enable for production
-  // useEffect(() => {
-  //   const seen = localStorage.getItem('ie-intro-seen');
-  //   if (seen) {
-  //     setShow(false);
-  //     window.dispatchEvent(new CustomEvent('intro-complete'));
-  //     return;
-  //   }
-  // }, []);
+  useEffect(() => {
+    const seen = localStorage.getItem('ie-intro-seen');
+    if (seen) {
+      setShow(false);
+      window.dispatchEvent(new CustomEvent('intro-complete'));
+      return;
+    }
+  }, []);
 
   useEffect(() => {
     if (!show) return;
@@ -38,7 +37,7 @@ export function SiteIntro() {
       const el = document.querySelector('[data-site-intro]');
       if (el) el.removeAttribute('data-site-intro');
     }, 300);
-    // localStorage.setItem('ie-intro-seen', '1'); // TODO: re-enable
+    localStorage.setItem('ie-intro-seen', '1');
     setTimeout(() => setShow(false), 1600);
   }
 

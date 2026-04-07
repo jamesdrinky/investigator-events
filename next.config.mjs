@@ -21,6 +21,13 @@ const nextConfig = {
   experimental: {
     typedRoutes: true
   },
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
+      { protocol: 'https', hostname: 'cdn1.iconfinder.com' },
+      { protocol: 'https', hostname: 'dbeyznsxcetpwfcicimz.supabase.co' },
+    ],
+  },
   async headers() {
     return [
       {

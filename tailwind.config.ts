@@ -27,6 +27,20 @@ const config: Config = {
         glass: '0 0 0 1px rgba(255,255,255,0.05), 0 28px 60px -28px rgba(0, 0, 0, 0.9)',
         atlas: '0 32px 120px -48px rgba(4, 11, 24, 0.95)'
       },
+      animation: {
+        ripple: 'ripple 2s ease calc(var(--i, 0) * 0.2s) infinite',
+        orbit: 'orbit calc(var(--duration) * 1s) linear infinite',
+      },
+      keyframes: {
+        ripple: {
+          '0%, 100%': { transform: 'translate(-50%, -50%) scale(1)' },
+          '50%': { transform: 'translate(-50%, -50%) scale(0.9)' },
+        },
+        orbit: {
+          '0%': { transform: 'rotate(0deg) translateY(calc(var(--radius) * 1px)) rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg) translateY(calc(var(--radius) * 1px)) rotate(-360deg)' },
+        },
+      },
       backgroundImage: {
         grain:
           'radial-gradient(circle at 12% 16%, rgba(54,168,255,0.16), transparent 34%), radial-gradient(circle at 82% 9%, rgba(242,124,255,0.12), transparent 26%), radial-gradient(circle at 50% 85%, rgba(255,191,102,0.08), transparent 34%)'

@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import { AdviceContent } from '@/components/advice/advice-content';
 
 export const metadata: Metadata = {
-  title: "Do's & Don'ts | Investigator Events",
+  title: "Your First PI Conference | Investigator Events",
   description:
-    "Dos and don'ts for investigators attending forensic and investigative conferences. How to make the most of every room you walk into.",
+    "The practical dos and don'ts for investigators attending an industry conference for the first time — from preparation and networking to follow-up.",
 };
 
 export default function AdvicePage() {

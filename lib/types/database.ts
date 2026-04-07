@@ -162,6 +162,162 @@ export type Database = {
         };
         Relationships: [];
       };
+      profile_sections: {
+        Row: { id: string; user_id: string; type: string; title: string; content: string | null; sort_order: number; visible: boolean };
+        Insert: { id?: string; user_id: string; type: string; title: string; content?: string | null; sort_order?: number; visible?: boolean };
+        Update: { id?: string; user_id?: string; type?: string; title?: string; content?: string | null; sort_order?: number; visible?: boolean };
+        Relationships: [];
+      };
+      profiles: {
+        Row: {
+          id: string;
+          full_name: string | null;
+          avatar_url: string | null;
+          country: string | null;
+          username: string | null;
+          website: string | null;
+          specialisation: string | null;
+          profile_color: string | null;
+          is_public: boolean;
+          bio: string | null;
+          badges: string[] | null;
+          created_at: string;
+        };
+        Insert: {
+          id: string;
+          full_name?: string | null;
+          avatar_url?: string | null;
+          country?: string | null;
+          username?: string | null;
+          website?: string | null;
+          specialisation?: string | null;
+          profile_color?: string | null;
+          is_public?: boolean;
+          bio?: string | null;
+          badges?: string[] | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          full_name?: string | null;
+          avatar_url?: string | null;
+          country?: string | null;
+          username?: string | null;
+          website?: string | null;
+          specialisation?: string | null;
+          profile_color?: string | null;
+          is_public?: boolean;
+          bio?: string | null;
+          badges?: string[] | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      user_associations: {
+        Row: { id: string; user_id: string; association_name: string; association_slug: string; member_since: string | null; role: string | null };
+        Insert: { id?: string; user_id: string; association_name: string; association_slug: string; member_since?: string | null; role?: string | null };
+        Update: { id?: string; user_id?: string; association_name?: string; association_slug?: string; member_since?: string | null; role?: string | null };
+        Relationships: [];
+      };
+      member_verifications: {
+        Row: { id: string; user_id: string; association_name: string; status: 'pending' | 'verified' | 'rejected'; created_at: string };
+        Insert: { id?: string; user_id: string; association_name: string; status?: 'pending' | 'verified' | 'rejected'; created_at?: string };
+        Update: { id?: string; user_id?: string; association_name?: string; status?: 'pending' | 'verified' | 'rejected'; created_at?: string };
+        Relationships: [];
+      };
+      event_reviews: {
+        Row: { id: string; user_id: string; event_id: string; rating: number; review_text: string | null; created_at: string };
+        Insert: { id?: string; user_id: string; event_id: string; rating: number; review_text?: string | null; created_at?: string };
+        Update: { id?: string; user_id?: string; event_id?: string; rating?: number; review_text?: string | null; created_at?: string };
+        Relationships: [];
+      };
+      event_attendees: {
+        Row: { id: string; user_id: string; event_id: string; visibility: string | null; is_going: boolean; created_at: string };
+        Insert: { id?: string; user_id: string; event_id: string; visibility?: string | null; is_going?: boolean; created_at?: string };
+        Update: { id?: string; user_id?: string; event_id?: string; visibility?: string | null; is_going?: boolean; created_at?: string };
+        Relationships: [];
+      };
+      event_messages: {
+        Row: { id: string; event_id: string; user_id: string; message: string; created_at: string };
+        Insert: { id?: string; event_id: string; user_id: string; message: string; created_at?: string };
+        Update: { id?: string; event_id?: string; user_id?: string; message?: string; created_at?: string };
+        Relationships: [];
+      };
+      event_speakers: {
+        Row: { id: string; event_id: string; user_id: string | null; name: string; bio: string | null; topic: string | null; avatar_url: string | null };
+        Insert: { id?: string; event_id: string; user_id?: string | null; name: string; bio?: string | null; topic?: string | null; avatar_url?: string | null };
+        Update: { id?: string; event_id?: string; user_id?: string | null; name?: string; bio?: string | null; topic?: string | null; avatar_url?: string | null };
+        Relationships: [];
+      };
+      posts: {
+        Row: { id: string; user_id: string; content: string; image_url: string | null; link_url: string | null; likes_count: number; comments_count: number; created_at: string };
+        Insert: { id?: string; user_id: string; content: string; image_url?: string | null; link_url?: string | null; likes_count?: number; comments_count?: number; created_at?: string };
+        Update: { id?: string; user_id?: string; content?: string; image_url?: string | null; link_url?: string | null; likes_count?: number; comments_count?: number; created_at?: string };
+        Relationships: [];
+      };
+      post_likes: {
+        Row: { id: string; user_id: string; post_id: string; created_at: string };
+        Insert: { id?: string; user_id: string; post_id: string; created_at?: string };
+        Update: { id?: string; user_id?: string; post_id?: string; created_at?: string };
+        Relationships: [];
+      };
+      post_comments: {
+        Row: { id: string; user_id: string; post_id: string; content: string; created_at: string };
+        Insert: { id?: string; user_id: string; post_id: string; content: string; created_at?: string };
+        Update: { id?: string; user_id?: string; post_id?: string; content?: string; created_at?: string };
+        Relationships: [];
+      };
+      followers: {
+        Row: { id: string; follower_id: string; following_id: string; created_at: string };
+        Insert: { id?: string; follower_id: string; following_id: string; created_at?: string };
+        Update: { id?: string; follower_id?: string; following_id?: string; created_at?: string };
+        Relationships: [];
+      };
+      connections: {
+        Row: { id: string; requester_id: string; addressee_id: string; status: string; created_at: string };
+        Insert: { id?: string; requester_id: string; addressee_id: string; status?: string; created_at?: string };
+        Update: { id?: string; requester_id?: string; addressee_id?: string; status?: string; created_at?: string };
+        Relationships: [];
+      };
+      job_posts: {
+        Row: { id: string; user_id: string; title: string; description: string; location: string | null; country: string | null; type: string | null; specialisation: string | null; contact_email: string; is_active: boolean; created_at: string };
+        Insert: { id?: string; user_id: string; title: string; description: string; location?: string | null; country?: string | null; type?: string | null; specialisation?: string | null; contact_email: string; is_active?: boolean; created_at?: string };
+        Update: { id?: string; user_id?: string; title?: string; description?: string; location?: string | null; country?: string | null; type?: string | null; specialisation?: string | null; contact_email?: string; is_active?: boolean; created_at?: string };
+        Relationships: [];
+      };
+      resources: {
+        Row: { id: string; user_id: string; title: string; description: string | null; url: string; category: string | null; association_slug: string | null; approved: boolean; created_at: string };
+        Insert: { id?: string; user_id: string; title: string; description?: string | null; url: string; category?: string | null; association_slug?: string | null; approved?: boolean; created_at?: string };
+        Update: { id?: string; user_id?: string; title?: string; description?: string | null; url?: string; category?: string | null; association_slug?: string | null; approved?: boolean; created_at?: string };
+        Relationships: [];
+      };
+      clash_checks: {
+        Row: { id: string; user_id: string | null; proposed_start: string; proposed_end: string; region: string | null; clashing_events: string[] | null; created_at: string };
+        Insert: { id?: string; user_id?: string | null; proposed_start: string; proposed_end: string; region?: string | null; clashing_events?: string[] | null; created_at?: string };
+        Update: { id?: string; user_id?: string | null; proposed_start?: string; proposed_end?: string; region?: string | null; clashing_events?: string[] | null; created_at?: string };
+        Relationships: [];
+      };
+      saved_events: {
+        Row: {
+          id: string;
+          user_id: string;
+          event_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          event_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          event_id?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       newsletter_subscriptions: {
         Row: {
           id: string;

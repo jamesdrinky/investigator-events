@@ -2,8 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Hide scrollbar for jump-bar etc */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Auth form styles */
+.g-button { border-color: var(--btn-border); }
+
 :root {
   color-scheme: light;
+  --skeleton: hsl(0, 0%, 90%);
+  --btn-border: hsl(214deg, 31.8%, 91.4%);
+  --foreground: hsl(0, 0%, 0%);
   --bg-night: #081120;
   --bg-navy: #10264a;
   --bg-atlas: #1668ff;

@@ -7,6 +7,7 @@ import { UpcomingEventsGallery } from '@/components/home/UpcomingEventsGallery';
 import { WhyUseSection } from '@/components/home/WhyUseSection';
 import { HomepageHero } from '@/components/home/homepage-hero';
 import { Reveal } from '@/components/motion/reveal';
+import { SiteIntro } from '@/components/site-intro';
 import { fetchAllEvents, fetchFeaturedEvents } from '@/lib/data/events';
 import { getCoverageMetrics } from '@/lib/utils/coverage';
 import { parseDate, sortEventsByDate } from '@/lib/utils/date';
@@ -40,6 +41,7 @@ export default async function HomePage() {
 
   return (
     <div className="relative flex flex-col">
+      <SiteIntro />
       {/* ── Stripe-style animated gradient mesh blobs ── */}
       <div className="mesh-blob mesh-blob-1" aria-hidden="true" />
       <div className="mesh-blob mesh-blob-2" aria-hidden="true" />

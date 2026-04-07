@@ -9,6 +9,7 @@ import { fetchAllEvents, fetchEventBySlug } from '@/lib/data/events';
 import { formatEventDate, parseDate } from '@/lib/utils/date';
 import { getCountryFlag } from '@/lib/utils/location';
 import { getAssociationBrandLogoSrc } from '@/lib/utils/association-branding';
+import { EventCommunityTabs } from '@/components/EventCommunityTabs';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,6 +46,8 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
   const imageSrc = (event.image_path && /^(\/(cities|events|images)\/|https?:\/\/)/.test(event.image_path) ? event.image_path : event.coverImage) ?? '/cities/fallback.jpg';
   // Video support — if the event has a video URL field
   const videoUrl = (event as any).videoUrl as string | undefined;
+
+  const isPastEvent = event.date ? parseDate(event.date).getTime() < Date.now() : false;
 
   const relatedEvents = events
     .filter((e) => e.id !== event.id && e.eventScope === 'main')
@@ -177,6 +180,9 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
             </div>
           </div>
         </div>
+
+        {/* Community — Going / Discussion / Reviews */}
+        <EventCommunityTabs eventId={event.id} isPast={isPastEvent} />
 
         {/* Related events */}
         {relatedEvents.length > 0 && (

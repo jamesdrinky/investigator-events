@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Save, Plus, ShieldCheck, Trash2, Flame, Award, Zap, Crown, Star, Shield, Globe2, Sparkles } from 'lucide-react';
+import { Save, Plus, ShieldCheck, Trash2, Flame, Award, Zap, Crown, Star, Shield, Globe2, Sparkles, ImagePlus, X } from 'lucide-react';
+import Image from 'next/image';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { AvatarCropUpload } from '@/components/AvatarCropUpload';
 
@@ -67,6 +68,8 @@ export default function EditProfilePage() {
   const [website, setWebsite] = useState('');
   const [profileColor, setProfileColor] = useState('#3b82f6');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [bannerUrl, setBannerUrl] = useState<string | null>(null);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
   const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
 
   // Profile sections
@@ -101,6 +104,7 @@ export default function EditProfilePage() {
         setWebsite(profile.website ?? '');
         setProfileColor(profile.profile_color ?? '#3b82f6');
         setAvatarUrl(profile.avatar_url);
+        setBannerUrl((profile as any).banner_url ?? null);
 
         // Check if specialisation is custom (not in list)
         const spec = profile.specialisation ?? '';
@@ -221,9 +225,10 @@ export default function EditProfilePage() {
       website: website || null,
       profile_color: profileColor,
       avatar_url: avatarUrl,
+      banner_url: bannerUrl,
       badges: selectedBadges.length > 0 ? selectedBadges : null,
       is_public: true,
-    });
+    } as any);
 
     // Sync associations
     await supabase.from('user_associations').delete().eq('user_id', userId);
@@ -283,15 +288,64 @@ export default function EditProfilePage() {
             )}
           </div>
 
-          {/* Avatar with crop */}
-          <div className="mt-8">
-            <AvatarCropUpload
-              currentAvatar={avatarUrl}
-              fallbackInitial={fullName.charAt(0) || '?'}
-              accentColor={profileColor}
-              onUploaded={(url) => setAvatarUrl(url)}
-              userId={userId}
-            />
+          {/* Banner + Avatar */}
+          <div className="mt-8 rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm sm:p-6">
+            {/* Banner */}
+            <div>
+              <label className="text-sm font-medium text-slate-700">Profile banner</label>
+              <p className="mb-2 text-xs text-slate-400">A cover image at the top of your profile. Recommended: 1200x400px.</p>
+              <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-slate-100" style={{ aspectRatio: '3/1' }}>
+                {bannerUrl ? (
+                  <>
+                    <Image src={bannerUrl} alt="Banner" fill className="object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setBannerUrl(null)}
+                      className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/70"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </>
+                ) : (
+                  <label className="flex h-full cursor-pointer flex-col items-center justify-center gap-2 text-slate-400 transition hover:text-slate-600">
+                    <ImagePlus className="h-6 w-6" />
+                    <span className="text-xs font-medium">{uploadingBanner ? 'Uploading...' : 'Upload banner image'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file || !userId) return;
+                        setUploadingBanner(true);
+                        const supabase = createSupabaseBrowserClient();
+                        const ext = file.name.split('.').pop();
+                        const path = `banners/${userId}/${Date.now()}.${ext}`;
+                        const { error } = await supabase.storage.from('avatars').upload(path, file);
+                        if (!error) {
+                          const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path);
+                          if (urlData?.publicUrl) setBannerUrl(urlData.publicUrl);
+                        }
+                        setUploadingBanner(false);
+                      }}
+                    />
+                  </label>
+                )}
+              </div>
+            </div>
+
+            {/* Avatar */}
+            <div className="mt-6">
+              <label className="text-sm font-medium text-slate-700">Profile photo</label>
+              <p className="mb-2 text-xs text-slate-400">Click or drag to upload, then crop</p>
+              <AvatarCropUpload
+                currentAvatar={avatarUrl}
+                fallbackInitial={fullName.charAt(0) || '?'}
+                accentColor={profileColor}
+                onUploaded={(url) => setAvatarUrl(url)}
+                userId={userId}
+              />
+            </div>
           </div>
 
           {/* Form fields */}

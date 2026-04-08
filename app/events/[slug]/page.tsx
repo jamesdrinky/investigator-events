@@ -12,6 +12,7 @@ import { getAssociationBrandLogoSrc } from '@/lib/utils/association-branding';
 import { EventCommunityTabs } from '@/components/EventCommunityTabs';
 import { AttendeeAvatars } from '@/components/AttendeeAvatars';
 import { StickyGoingBar } from '@/components/StickyGoingBar';
+import { EventShareButtons } from '@/components/EventShareButtons';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,9 +25,25 @@ async function resolveEvent(slug: string) {
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const { event } = await resolveEvent(params?.slug?.trim() ?? '');
   if (!event) return { title: 'Event Not Found | Investigator Events' };
+  const title = event.title;
+  const description = `${event.title} — ${event.city}, ${event.country}. ${event.description || 'View event details, attendees, and discussion on Investigator Events.'}`.slice(0, 200);
+  const imageSrc = (event.image_path && /^(\/(cities|events|images)\/|https?:\/\/)/.test(event.image_path) ? event.image_path : event.coverImage) ?? '/cities/fallback.jpg';
   return {
-    title: `${event.title} | Investigator Events`,
-    description: `${event.title} in ${event.city}, ${event.country}. ${event.description || ''}`.trim(),
+    title: `${title} | Investigator Events`,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'article',
+      siteName: 'Investigator Events',
+      ...(imageSrc.startsWith('http') ? { images: [{ url: imageSrc }] } : {}),
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      ...(imageSrc.startsWith('http') ? { images: [imageSrc] } : {}),
+    },
   };
 }
 
@@ -72,7 +89,7 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
         )}
 
         {/* Hero content over image */}
-        <div className="absolute inset-x-0 bottom-0 pb-8 sm:pb-12">
+        <div className="absolute inset-x-0 bottom-0 pb-6 sm:pb-12">
           <div className="container-shell">
             <div className="flex flex-wrap gap-2">
               <span className="rounded-full bg-blue-500/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-blue-200">{category}</span>
@@ -82,6 +99,12 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
             <h1 className="mt-4 max-w-3xl text-[2rem] font-bold leading-[0.95] tracking-[-0.04em] text-white sm:text-[3rem] lg:text-[4rem]">
               {title}
             </h1>
+            {/* Mobile: Who's going overlay */}
+            <div className="mt-4 lg:hidden">
+              <div className="inline-flex items-center gap-3 rounded-2xl border border-white/20 bg-black/40 px-4 py-3 backdrop-blur-md">
+                <AttendeeAvatars eventId={event.id} />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -114,6 +137,7 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
               {website ? (
                 <a href={website} target="_blank" rel="noreferrer" className="btn-primary px-6 py-3">Official website</a>
               ) : null}
+              <EventShareButtons eventTitle={title} eventSlug={slug} />
               <Link href="/calendar" className="btn-secondary px-5 py-2.5">Back to calendar</Link>
               <SaveDateLinks event={event} />
             </div>
@@ -153,9 +177,9 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
 
           {/* Right column — sidebar */}
           <div className="space-y-4">
-            {/* Who's going — prominent */}
+            {/* Who's going — desktop only (mobile is in hero) */}
             <Reveal delay={0.02}>
-              <div className="rounded-2xl border border-blue-200/60 bg-gradient-to-b from-blue-50/40 to-white p-5 shadow-sm">
+              <div className="hidden rounded-2xl border border-blue-200/60 bg-gradient-to-b from-blue-50/40 to-white p-5 shadow-sm lg:block">
                 <h3 className="mb-3 text-sm font-bold text-slate-950">Who&apos;s going</h3>
                 <AttendeeAvatars eventId={event.id} />
               </div>

@@ -22,7 +22,18 @@ export const metadata: Metadata = {
     default: 'Investigator Events',
     template: '%s | Investigator Events'
   },
-  description: 'Confirmed conferences, AGMs, training events, and association meetings across the private investigations sector.'
+  description: 'Confirmed conferences, AGMs, training events, and association meetings across the private investigations sector.',
+  openGraph: {
+    title: 'Investigator Events',
+    description: 'Confirmed conferences, AGMs, training events, and association meetings across the private investigations sector.',
+    siteName: 'Investigator Events',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Investigator Events',
+    description: 'Confirmed conferences, AGMs, training events, and association meetings across the private investigations sector.',
+  },
 };
 
 export default function RootLayout({

@@ -1,7 +1,7 @@
 'use client';
 
 import type { Route } from 'next';
-import { Menu, X, LogOut, User, MessageCircle } from 'lucide-react';
+import { Menu, X, LogOut, User, Send } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
@@ -12,6 +12,7 @@ import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 const desktopNavItems: Array<{ href: Route; label: string }> = [
   { href: '/calendar', label: 'Events' },
+  { href: '/calendar?view=calendar' as Route, label: 'Calendar' },
   { href: '/associations', label: 'Associations' },
   { href: '/people', label: 'Community' },
   { href: '/advice', label: 'Advice' },
@@ -47,6 +48,7 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const isDark = DARK_ROUTES.includes(pathname);
 
@@ -62,7 +64,7 @@ export function Navbar() {
 
   const [profileAvatar, setProfileAvatar] = useState<string | null>(null);
 
-  // Auth state
+  // Auth state + unread count
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
     supabase.auth.getUser().then(({ data }) => {
@@ -71,6 +73,12 @@ export function Navbar() {
         supabase.from('profiles').select('avatar_url').eq('id', data.user.id).single().then(({ data: p }) => {
           if (p?.avatar_url) setProfileAvatar(p.avatar_url);
         });
+        // Fetch unread message count
+        supabase.from('messages' as any).select('id', { count: 'exact', head: true }).eq('receiver_id', data.user.id).eq('is_read', false).then(({ count }) => {
+          setUnreadCount(count ?? 0);
+        });
+        // Update last_seen
+        supabase.from('profiles').update({ last_seen: new Date().toISOString() } as any).eq('id', data.user.id).then(() => {});
       }
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -78,6 +86,20 @@ export function Navbar() {
     });
     return () => subscription.unsubscribe();
   }, []);
+
+  // Poll unread count every 15s
+  useEffect(() => {
+    if (!user) return;
+    const supabase = createSupabaseBrowserClient();
+    const interval = setInterval(() => {
+      supabase.from('messages' as any).select('id', { count: 'exact', head: true }).eq('receiver_id', user.id).eq('is_read', false).then(({ count }) => {
+        setUnreadCount(count ?? 0);
+      });
+      // Update last_seen
+      supabase.from('profiles').update({ last_seen: new Date().toISOString() } as any).eq('id', user.id).then(() => {});
+    }, 15000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -161,13 +183,22 @@ export function Navbar() {
           <div className="flex items-center gap-2">
             <GlobalSearch isDark={isDark} />
             {user ? (
-              <div ref={dropdownRef} className="relative">
+              <div ref={dropdownRef} className="relative flex items-center gap-2">
                 <Link
                   href="/messages"
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200/80 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-blue-600"
+                  className={`relative flex h-8 w-8 items-center justify-center rounded-full border transition ${
+                    isDark
+                      ? 'border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
+                      : 'border-slate-200/80 bg-white text-slate-500 hover:bg-slate-50 hover:text-blue-600'
+                  }`}
                   title="Messages"
                 >
-                  <MessageCircle className="h-4 w-4" />
+                  <Send className="h-4 w-4" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-none text-white shadow-sm">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
                 </Link>
                 <button
                   type="button"
@@ -184,6 +215,14 @@ export function Navbar() {
                       className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
                     >
                       <User className="h-4 w-4" /> My Profile
+                    </Link>
+                    <Link
+                      href="/admin"
+                      onClick={() => { handleNavigation('/admin' as Route); setShowDropdown(false); }}
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                    >
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                      Admin
                     </Link>
                     <button
                       type="button"

@@ -41,16 +41,14 @@ export default function ProfileSetupPage() {
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) { router.push('/signin'); return; }
 
-      // Google OAuth users already have profile data — skip setup
-      const meta = data.user.user_metadata;
-      if (meta?.avatar_url || meta?.picture) {
-        router.push('/calendar');
-        return;
-      }
+      // Check if profile already exists with a username — if so, skip setup
+      const { data: profile } = await supabase.from('profiles').select('username').eq('id', data.user.id).single();
+      if (profile?.username) { router.push(`/profile/${profile.username}`); return; }
 
+      const meta = data.user.user_metadata;
       setUserId(data.user.id);
       setFullName(meta?.full_name ?? '');
     });
@@ -117,6 +115,7 @@ export default function ProfileSetupPage() {
             <div className="text-center">
               <h1 className="text-2xl font-bold text-slate-900">Add a profile photo</h1>
               <p className="mt-2 text-sm text-slate-500">Help other investigators recognise you</p>
+              <p className="mt-1 text-xs text-slate-400">Use a real photo of your face — it builds trust at events</p>
 
               <div className="mx-auto mt-8 flex justify-center">
                 <AvatarCropUpload

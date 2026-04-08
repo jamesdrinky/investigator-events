@@ -21,6 +21,7 @@ interface CalendarViewProps {
   initialSearch?: string;
   initialRegion?: string;
   initialMonth?: string;
+  initialView?: 'list' | 'calendar';
 }
 
 function getCurrentMonthKey() { return new Date().toISOString().slice(0, 7); }
@@ -141,7 +142,7 @@ function MonthEventStrip({ events, label, countryCount }: { events: EventItem[];
   );
 }
 
-export function CalendarView({ events, initialAssociation, initialSearch, initialRegion, initialMonth }: CalendarViewProps) {
+export function CalendarView({ events, initialAssociation, initialSearch, initialRegion, initialMonth, initialView }: CalendarViewProps) {
   const sorted = useMemo(() => sortEventsByDate(events), [events]);
   const countries = useMemo(() => [...new Set(sorted.map((e) => e.country))].sort(), [sorted]);
   const categories = useMemo(() => [...new Set(sorted.map((e) => e.category))].sort(), [sorted]);
@@ -150,10 +151,13 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
 
   const [filters, setFilters] = useState({ search: initialSearch ?? '', country: 'All', region: initialRegion ?? 'All', month: initialMonth ?? 'All', category: 'All', association: initialAssociation ?? 'All' });
   const [scope, setScope] = useState<'main' | 'all'>('main');
-  const [view, setView] = useState<'list' | 'calendar'>('list');
+  const [view, setView] = useState<'list' | 'calendar'>(initialView ?? 'list');
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
   const [previewDate, setPreviewDate] = useState<string | null>(null);
-  const [calendarMK, setCalendarMK] = useState(() => monthKeys[0] ?? getCurrentMonthKey());
+  const [calendarMK, setCalendarMK] = useState(() => {
+    const current = getCurrentMonthKey();
+    return monthKeys.includes(current) ? current : monthKeys.find((mk) => mk >= current) ?? monthKeys[0] ?? current;
+  });
   const calRef = useRef<HTMLElement | null>(null);
 
   const regions = useMemo(() => {

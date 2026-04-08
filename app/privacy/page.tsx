@@ -67,7 +67,7 @@ export default function PrivacyPage() {
               <p className="eyebrow">Legal</p>
               <h1 className="section-title">Privacy Policy</h1>
               <p className="section-copy max-w-3xl">
-                Last updated: April 2025. This policy applies to data collected through investigatorevents.com.
+                Last updated: April 2026. This policy applies to data collected through investigatorevents.com.
               </p>
             </div>
           </header>

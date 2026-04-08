@@ -18,7 +18,7 @@ export function EventCommunityTabs({ eventId, isPast }: { eventId: string; isPas
   return (
     <div className="mt-10 overflow-hidden rounded-2xl border border-slate-200/60 bg-white shadow-sm">
       {/* Tab header */}
-      <div className="flex border-b border-slate-100">
+      <div className="flex">
         {tabs.map((tab) => {
           const isActive = active === tab.id;
           const Icon = tab.icon;
@@ -29,14 +29,14 @@ export function EventCommunityTabs({ eventId, isPast }: { eventId: string; isPas
               onClick={() => setActive(tab.id)}
               className={`relative flex flex-1 items-center justify-center gap-2 px-3 py-3.5 text-sm font-semibold transition-colors sm:py-4 ${
                 isActive
-                  ? 'text-blue-600'
+                  ? 'text-slate-950'
                   : 'text-slate-400 hover:text-slate-600'
               }`}
             >
-              <Icon className={`h-4 w-4 ${isActive ? 'text-blue-500' : ''}`} />
+              <Icon className={`h-4 w-4 ${isActive ? 'text-indigo-500' : ''}`} />
               {tab.label}
               {isActive && (
-                <span className="absolute inset-x-0 -bottom-px h-[2px] rounded-full bg-blue-500" />
+                <span className="absolute inset-x-0 bottom-0 h-[2px] rounded-full bg-gradient-to-r from-indigo-500 to-purple-500" />
               )}
             </button>
           );
@@ -44,9 +44,13 @@ export function EventCommunityTabs({ eventId, isPast }: { eventId: string; isPas
       </div>
 
       {/* Tab content */}
-      <div className="p-4 sm:p-6">
+      <div>
         {active === 'discussion' && <EventChat eventId={eventId} />}
-        {active === 'reviews' && <EventReview eventId={eventId} isPast={isPast} />}
+        {active === 'reviews' && (
+          <div className="p-4 sm:p-6">
+            <EventReview eventId={eventId} isPast={isPast} />
+          </div>
+        )}
       </div>
     </div>
   );

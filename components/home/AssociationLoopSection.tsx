@@ -48,7 +48,7 @@ export function AssociationLoopSection() {
       <div className="container-shell relative">
         <Reveal>
           <p className="text-center text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400 sm:text-base">
-            Trusted by associations worldwide
+            Associations on the calendar
           </p>
         </Reveal>
       </div>

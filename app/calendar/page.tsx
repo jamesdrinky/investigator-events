@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 export default async function CalendarPage({
   searchParams
 }: {
-  searchParams?: { association?: string; search?: string; region?: string; month?: string };
+  searchParams?: { association?: string; search?: string; region?: string; month?: string; view?: string };
 }) {
   const events = await fetchAllEvents();
   const mainEvents = sortEventsByDate(events.filter((e) => e.eventScope === 'main'));
@@ -105,6 +105,7 @@ export default async function CalendarPage({
           initialSearch={initialSearch}
           initialRegion={initialRegion}
           initialMonth={initialMonth}
+          initialView={searchParams?.view === 'calendar' ? 'calendar' : undefined}
         />
       </div>
     </section>

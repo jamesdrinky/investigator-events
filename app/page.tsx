@@ -33,10 +33,11 @@ export default async function HomePage() {
   const heroEvents = (featuredEvents.length > 0 ? featuredEvents : upcomingEvents).slice(0, 4);
   const featuredCarouselEvents = featuredEvents.length > 0 ? featuredEvents : upcomingEvents.slice(0, 8);
 
+  const uniqueAssociations = new Set(mainEvents.map((e) => e.association ?? e.organiser)).size;
   const heroStats = [
     { label: 'Countries', value: coverage.totalCountries },
     { label: 'Live events', value: coverage.totalEvents },
-    { label: 'Associations', value: '12+' }
+    { label: 'Associations', value: `${uniqueAssociations - 1}+` }
   ];
 
   return (

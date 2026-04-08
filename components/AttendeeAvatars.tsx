@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ThumbsUp, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { ThumbsUp, X, ChevronDown, ChevronUp, Send } from 'lucide-react';
+import Link from 'next/link';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { UserAvatar } from '@/components/UserAvatar';
 
@@ -144,20 +145,33 @@ export function AttendeeAvatars({ eventId }: { eventId: string }) {
 
       {/* Expanded attendee list */}
       {showAll && attendees.length > 0 && (
-        <div className="mt-4 space-y-2 rounded-xl border border-slate-100 bg-slate-50/50 p-3 animate-in fade-in slide-in-from-top-2 duration-200">
-          {attendees.map((a) => (
-            <a
-              key={a.id}
-              href={a.username ? `/profile/${a.username}` : '#'}
-              className="flex items-center gap-3 rounded-lg p-2 transition hover:bg-white hover:shadow-sm"
-            >
-              <UserAvatar src={a.avatar_url} name={a.full_name} size={36} />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-slate-900">{a.full_name ?? 'Investigator'}</p>
-                {a.specialisation && <p className="truncate text-[11px] text-slate-400">{a.specialisation}</p>}
+        <div className="mt-4 space-y-1 rounded-xl border border-slate-100 bg-slate-50/50 p-2 animate-in fade-in slide-in-from-top-2 duration-200">
+          {attendees.map((a) => {
+            const isMe = a.user_id === userId;
+            return (
+              <div
+                key={a.id}
+                className="flex items-center gap-3 rounded-lg p-2 transition hover:bg-white hover:shadow-sm"
+              >
+                <a href={a.username ? `/profile/${a.username}` : '#'} className="flex-shrink-0">
+                  <UserAvatar src={a.avatar_url} name={a.full_name} size={36} />
+                </a>
+                <a href={a.username ? `/profile/${a.username}` : '#'} className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-slate-900">{a.full_name ?? 'Investigator'}</p>
+                  {a.specialisation && <p className="truncate text-[11px] text-slate-400">{a.specialisation}</p>}
+                </a>
+                {userId && !isMe && (
+                  <Link
+                    href={`/messages?to=${a.user_id}`}
+                    className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
+                    title={`Message ${a.full_name}`}
+                  >
+                    <Send className="h-3.5 w-3.5" />
+                  </Link>
+                )}
               </div>
-            </a>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

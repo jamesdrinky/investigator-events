@@ -1,0 +1,240 @@
+'use client';
+
+import React, { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
+import { MeshGradient } from '@paper-design/shaders-react';
+
+const GoogleIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 48 48">
+    <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z" />
+    <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z" />
+    <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0124 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z" />
+    <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 01-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z" />
+  </svg>
+);
+
+export interface Testimonial {
+  avatarSrc: string;
+  name: string;
+  role: string;
+  text: string;
+}
+
+interface AuthPageProps {
+  mode: 'signin' | 'signup';
+  heroImageSrc?: string;
+  testimonials?: Testimonial[];
+  onSubmit: (data: { email: string; password: string; name?: string }) => void;
+  onGoogleSignIn?: () => void;
+  onSwitchMode?: () => void;
+  loading?: boolean;
+  error?: string;
+  success?: string;
+}
+
+const GlassInput = ({ children }: { children: React.ReactNode }) => (
+  <div className="rounded-xl border border-slate-200 bg-slate-50/80 backdrop-blur-sm transition-all focus-within:border-blue-400 focus-within:bg-blue-50/30 focus-within:ring-2 focus-within:ring-blue-100">
+    {children}
+  </div>
+);
+
+const TestimonialCard = ({ testimonial, className }: { testimonial: Testimonial; className?: string }) => (
+  <div className={`flex items-start gap-3 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 p-4 w-60 ${className ?? ''}`}>
+    <img src={testimonial.avatarSrc} className="h-9 w-9 object-cover rounded-xl" alt="" />
+    <div className="text-xs leading-snug">
+      <p className="font-semibold text-white">{testimonial.name}</p>
+      <p className="text-white/50">{testimonial.role}</p>
+      <p className="mt-1 text-white/75">{testimonial.text}</p>
+    </div>
+  </div>
+);
+
+export function AuthPage({
+  mode,
+  heroImageSrc = '/cities/fallback.jpg',
+  testimonials = [],
+  onSubmit,
+  onGoogleSignIn,
+  onSwitchMode,
+  loading,
+  error,
+  success,
+}: AuthPageProps) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const isSignUp = mode === 'signup';
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit({ email, password, ...(isSignUp ? { name } : {}) });
+  };
+
+  return (
+    <div className="flex min-h-screen w-full bg-white">
+      {/* Left — form */}
+      <section className="flex flex-1 items-center justify-center px-6 py-12 sm:px-12">
+        <div className="w-full max-w-md">
+          <div className="flex flex-col gap-5">
+            {/* Logo */}
+            <div className="mb-2">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-blue-600">Investigator Events</p>
+            </div>
+
+            <h1
+              className="text-4xl font-bold leading-tight tracking-tight text-slate-900 sm:text-5xl"
+              style={{ opacity: 0, animation: 'fadeSlideIn 0.5s ease forwards 0.1s' }}
+            >
+              {isSignUp ? 'Create an account' : 'Welcome back'}
+            </h1>
+            <p
+              className="text-slate-500"
+              style={{ opacity: 0, animation: 'fadeSlideIn 0.5s ease forwards 0.2s' }}
+            >
+              {isSignUp
+                ? 'Join the global network of investigators'
+                : 'Sign in to your Investigator Events account'}
+            </p>
+
+            {/* Google */}
+            <button
+              type="button"
+              onClick={onGoogleSignIn}
+              className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white py-3.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
+              style={{ opacity: 0, animation: 'fadeSlideIn 0.5s ease forwards 0.3s' }}
+            >
+              <GoogleIcon />
+              Continue with Google
+            </button>
+
+            <div className="relative flex items-center justify-center" style={{ opacity: 0, animation: 'fadeSlideIn 0.5s ease forwards 0.35s' }}>
+              <span className="w-full border-t border-slate-200" />
+              <span className="absolute bg-white px-4 text-xs text-slate-400">or</span>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {isSignUp && (
+                <div style={{ opacity: 0, animation: 'fadeSlideIn 0.5s ease forwards 0.4s' }}>
+                  <label className="mb-1 block text-sm font-medium text-slate-600">Full Name</label>
+                  <GlassInput>
+                    <input
+                      type="text"
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Your full name"
+                      className="w-full bg-transparent px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400"
+                    />
+                  </GlassInput>
+                </div>
+              )}
+
+              <div style={{ opacity: 0, animation: `fadeSlideIn 0.5s ease forwards ${isSignUp ? '0.45s' : '0.4s'}` }}>
+                <label className="mb-1 block text-sm font-medium text-slate-600">Email</label>
+                <GlassInput>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    className="w-full bg-transparent px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400"
+                  />
+                </GlassInput>
+              </div>
+
+              <div style={{ opacity: 0, animation: `fadeSlideIn 0.5s ease forwards ${isSignUp ? '0.5s' : '0.45s'}` }}>
+                <label className="mb-1 block text-sm font-medium text-slate-600">Password</label>
+                <GlassInput>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      minLength={6}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder={isSignUp ? 'Min 6 characters' : 'Enter your password'}
+                      className="w-full bg-transparent px-4 py-3 pr-12 text-sm text-slate-900 outline-none placeholder:text-slate-400"
+                    />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-3 flex items-center">
+                      {showPassword ? <EyeOff className="h-4 w-4 text-slate-400 hover:text-slate-600" /> : <Eye className="h-4 w-4 text-slate-400 hover:text-slate-600" />}
+                    </button>
+                  </div>
+                </GlassInput>
+              </div>
+
+              {error && (
+                <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>
+              )}
+              {success && (
+                <p className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">{success}</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-xl bg-slate-900 py-3.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-60"
+                style={{ opacity: 0, animation: `fadeSlideIn 0.5s ease forwards ${isSignUp ? '0.55s' : '0.5s'}` }}
+              >
+                {loading ? (isSignUp ? 'Creating account...' : 'Signing in...') : (isSignUp ? 'Create account' : 'Sign in')}
+              </button>
+            </form>
+
+            <p
+              className="text-center text-sm text-slate-500"
+              style={{ opacity: 0, animation: `fadeSlideIn 0.5s ease forwards ${isSignUp ? '0.6s' : '0.55s'}` }}
+            >
+              {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+              <button type="button" onClick={onSwitchMode} className="font-semibold text-blue-600 hover:underline">
+                {isSignUp ? 'Sign in' : 'Create one'}
+              </button>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Right — spiral nebula animation */}
+      <section className="hidden flex-1 p-3 lg:block">
+        <div
+          className="relative h-full w-full overflow-hidden rounded-2xl"
+          style={{ opacity: 0, animation: 'slideRightIn 0.6s ease forwards 0.3s' }}
+        >
+          {/* Shader background */}
+          <div className="absolute inset-0">
+            <MeshGradient
+              width="100%"
+              height="100%"
+              colors={['#000000', '#0a0a1a', '#1668ff', '#ffffff']}
+              speed={0.4}
+              distortion={0.4}
+              swirl={0.3}
+              grainOverlay={0.12}
+            />
+          </div>
+
+          {/* Branding overlay */}
+          <div className="absolute left-8 top-8 z-10">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-cyan-400/50">Investigator Events</p>
+            <p className="mt-2 text-lg font-bold leading-snug text-white/90">Every investigator event.<br />One global calendar.</p>
+          </div>
+
+          {/* Testimonials at bottom */}
+          {testimonials.length > 0 && (
+            <div className="absolute bottom-6 left-0 right-0 z-10 flex justify-center gap-3 px-6">
+              {testimonials.slice(0, 3).map((t, i) => (
+                <TestimonialCard
+                  key={i}
+                  testimonial={t}
+                  className={i > 0 ? 'hidden xl:flex' : ''}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}

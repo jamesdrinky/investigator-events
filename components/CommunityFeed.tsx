@@ -2,18 +2,21 @@
 
 import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
-import { Heart, MessageCircle, Send, ImagePlus, LinkIcon, X, Trash2 } from 'lucide-react';
+import { Heart, MessageCircle, Send, ImagePlus, LinkIcon, X, Trash2, Pin } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { UserAvatar } from '@/components/UserAvatar';
+import { WelcomeBanner } from '@/components/WelcomeBanner';
 
 type Post = {
   id: string;
   user_id: string;
+  title: string | null;
   content: string;
   image_url: string | null;
   link_url: string | null;
   likes_count: number;
   comments_count: number;
+  is_pinned: boolean;
   created_at: string;
   full_name: string | null;
   avatar_url: string | null;
@@ -40,6 +43,7 @@ export function CommunityFeed() {
 
   // Compose state
   const [showCompose, setShowCompose] = useState(false);
+  const [postTitle, setPostTitle] = useState('');
   const [postText, setPostText] = useState('');
   const [postImage, setPostImage] = useState<string | null>(null);
   const [postLink, setPostLink] = useState('');
@@ -68,17 +72,18 @@ export function CommunityFeed() {
       }
     });
 
-    // Fetch posts with profile join
+    // Fetch posts with profile join — pinned first, then by date
     supabase
       .from('posts')
-      .select('id, user_id, content, image_url, link_url, likes_count, comments_count, created_at, profiles:user_id(full_name, avatar_url, specialisation, country)')
+      .select('id, user_id, title, content, image_url, link_url, likes_count, comments_count, is_pinned, created_at, profiles:user_id(full_name, avatar_url, specialisation, country)')
+      .order('is_pinned', { ascending: false })
       .order('created_at', { ascending: false })
       .limit(50)
       .then(({ data }) => {
         const rows = (data ?? []).map((r: any) => ({
-          id: r.id, user_id: r.user_id, content: r.content, image_url: r.image_url,
+          id: r.id, user_id: r.user_id, title: r.title ?? null, content: r.content, image_url: r.image_url,
           link_url: r.link_url, likes_count: r.likes_count ?? 0, comments_count: r.comments_count ?? 0,
-          created_at: r.created_at,
+          is_pinned: r.is_pinned ?? false, created_at: r.created_at,
           full_name: r.profiles?.full_name ?? null, avatar_url: r.profiles?.avatar_url ?? null,
           specialisation: r.profiles?.specialisation ?? null, country: r.profiles?.country ?? null,
         }));
@@ -89,24 +94,38 @@ export function CommunityFeed() {
 
   const handlePost = async () => {
     if (!userId || !postText.trim()) return;
+
+    // Basic content filter — block slurs/hate speech
+    const blocked = /\b(nigger|nigga|faggot|retard|kike|spic|chink|wetback|coon|darkie|gook|tranny)\b/i;
+    if (blocked.test(postText)) {
+      alert('Your post contains language that violates our community guidelines. Please edit and try again.');
+      return;
+    }
+
     setPosting(true);
     const supabase = createSupabaseBrowserClient();
     const { data } = await supabase
       .from('posts')
       .insert({
         user_id: userId,
+        title: postTitle.trim() || null,
         content: postText.trim(),
         image_url: postImage,
         link_url: postLink.trim() || null,
-      })
-      .select('id, user_id, content, image_url, link_url, likes_count, comments_count, created_at')
+      } as any)
+      .select('id, user_id, title, content, image_url, link_url, likes_count, comments_count, is_pinned, created_at')
       .single();
 
     if (data) {
+      const d = data as any;
       setPosts((prev) => [{
-        ...data, likes_count: data.likes_count ?? 0, comments_count: data.comments_count ?? 0,
+        id: d.id, user_id: d.user_id, title: d.title ?? null, content: d.content,
+        image_url: d.image_url, link_url: d.link_url,
+        likes_count: d.likes_count ?? 0, comments_count: d.comments_count ?? 0,
+        is_pinned: false, created_at: d.created_at,
         full_name: userName, avatar_url: userAvatar, specialisation: null, country: null,
       }, ...prev]);
+      setPostTitle('');
       setPostText('');
       setPostImage(null);
       setPostLink('');
@@ -169,6 +188,11 @@ export function CommunityFeed() {
 
   const submitComment = async (postId: string) => {
     if (!userId || !commentText[postId]?.trim()) return;
+    const blocked = /\b(nigger|nigga|faggot|retard|kike|spic|chink|wetback|coon|darkie|gook|tranny)\b/i;
+    if (blocked.test(commentText[postId])) {
+      alert('Your comment contains language that violates our community guidelines.');
+      return;
+    }
     const supabase = createSupabaseBrowserClient();
     const { data } = await supabase
       .from('post_comments')
@@ -222,13 +246,20 @@ export function CommunityFeed() {
               </button>
             ) : (
               <div className="flex-1">
+                <input
+                  type="text"
+                  className="w-full border-0 bg-transparent text-base font-bold text-slate-900 outline-none placeholder:text-slate-400 placeholder:font-normal"
+                  placeholder="Post title (optional)"
+                  value={postTitle}
+                  onChange={(e) => setPostTitle(e.target.value)}
+                  autoFocus
+                />
                 <textarea
-                  className="w-full resize-none border-0 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
+                  className="mt-1 w-full resize-none border-0 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
                   rows={3}
-                  placeholder="What's on your mind? Share news, advice, opportunities..."
+                  placeholder="Share news, advice, event experiences..."
                   value={postText}
                   onChange={(e) => setPostText(e.target.value)}
-                  autoFocus
                 />
                 {postImage && (
                   <div className="relative mt-2 inline-block">
@@ -250,7 +281,7 @@ export function CommunityFeed() {
                     </button>
                   </div>
                   <div className="flex gap-2">
-                    <button type="button" onClick={() => { setShowCompose(false); setPostText(''); setPostImage(null); setPostLink(''); }} className="px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-slate-600">Cancel</button>
+                    <button type="button" onClick={() => { setShowCompose(false); setPostTitle(''); setPostText(''); setPostImage(null); setPostLink(''); }} className="px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-slate-600">Cancel</button>
                     <button type="button" onClick={handlePost} disabled={posting || !postText.trim()} className="rounded-full bg-blue-600 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50">
                       {posting ? 'Posting...' : 'Post'}
                     </button>
@@ -284,19 +315,26 @@ export function CommunityFeed() {
             const postComments = comments[post.id] ?? [];
 
             return (
-              <div key={post.id} className="rounded-2xl border border-slate-200/60 bg-white shadow-sm">
+              <div key={post.id} className={`rounded-2xl border bg-white shadow-sm ${post.is_pinned ? 'border-blue-200/80' : 'border-slate-200/60'}`}>
+                {/* Pinned badge */}
+                {post.is_pinned && (
+                  <div className="flex items-center gap-1.5 border-b border-blue-100 bg-blue-50/50 px-5 py-2 text-[11px] font-semibold text-blue-600">
+                    <Pin className="h-3 w-3" /> Pinned
+                  </div>
+                )}
+
                 {/* Post header */}
-                <div className="flex items-start justify-between px-5 pt-5">
-                  <div className="flex gap-3">
-                    <UserAvatar src={post.avatar_url} name={post.full_name} size={40} />
+                <div className="flex items-start justify-between px-5 pt-4">
+                  <a href={post.full_name ? `/profile/${post.full_name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}` : '#'} className="flex gap-3 group">
+                    <UserAvatar src={post.avatar_url} name={post.full_name} size={44} />
                     <div>
-                      <p className="text-sm font-semibold text-slate-900">{post.full_name ?? 'Investigator'}</p>
+                      <p className="text-sm font-semibold text-slate-900 group-hover:text-blue-600 group-hover:underline">{post.full_name ?? 'Investigator'}</p>
                       <p className="text-xs text-slate-400">
-                        {post.specialisation ?? (post.country ?? '')}
-                        {post.specialisation || post.country ? ' · ' : ''}{timeAgo(post.created_at)}
+                        {post.specialisation && <span className="text-slate-500">{post.specialisation}</span>}
+                        {post.specialisation && ' · '}{timeAgo(post.created_at)}
                       </p>
                     </div>
-                  </div>
+                  </a>
                   {post.user_id === userId && (
                     <button type="button" onClick={() => deletePost(post.id)} className="rounded-lg p-1.5 text-slate-300 transition hover:bg-red-50 hover:text-red-500" title="Delete">
                       <Trash2 className="h-4 w-4" />
@@ -304,17 +342,25 @@ export function CommunityFeed() {
                   )}
                 </div>
 
-                {/* Content */}
+                {/* Title + Content */}
                 <div className="px-5 pt-3">
+                  {post.title && (
+                    <h3 className="mb-1 text-base font-bold text-slate-900">{post.title}</h3>
+                  )}
                   <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{post.content}</p>
                 </div>
 
                 {/* Image */}
-                {post.image_url && (
+                {/* Welcome banner for pinned welcome post, or regular image */}
+                {post.is_pinned && post.title?.toLowerCase().includes('welcome') && !post.image_url ? (
+                  <div className="mt-3 px-5">
+                    <WelcomeBanner />
+                  </div>
+                ) : post.image_url ? (
                   <div className="mt-3 px-5">
                     <Image src={post.image_url} alt="" width={600} height={400} className="w-full rounded-xl object-cover" />
                   </div>
-                )}
+                ) : null}
 
                 {/* Link */}
                 {post.link_url && (

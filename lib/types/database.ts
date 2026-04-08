@@ -177,6 +177,7 @@ export type Database = {
           username: string | null;
           website: string | null;
           specialisation: string | null;
+          headline: string | null;
           profile_color: string | null;
           is_public: boolean;
           bio: string | null;
@@ -191,6 +192,7 @@ export type Database = {
           username?: string | null;
           website?: string | null;
           specialisation?: string | null;
+          headline?: string | null;
           profile_color?: string | null;
           is_public?: boolean;
           bio?: string | null;
@@ -205,6 +207,7 @@ export type Database = {
           username?: string | null;
           website?: string | null;
           specialisation?: string | null;
+          headline?: string | null;
           profile_color?: string | null;
           is_public?: boolean;
           bio?: string | null;
@@ -343,6 +346,18 @@ export type Database = {
           status?: string;
           created_at?: string;
         };
+        Relationships: [];
+      };
+      organisations: {
+        Row: { id: string; name: string; slug: string; type: string; logo_url: string | null; website: string | null; country: string | null; description: string | null; created_at: string };
+        Insert: { id?: string; name: string; slug: string; type?: string; logo_url?: string | null; website?: string | null; country?: string | null; description?: string | null };
+        Update: { id?: string; name?: string; slug?: string; type?: string; logo_url?: string | null; website?: string | null; country?: string | null; description?: string | null };
+        Relationships: [];
+      };
+      work_experience: {
+        Row: { id: string; user_id: string; organisation_id: string | null; company_name: string; company_logo_url: string | null; job_title: string; description: string | null; start_year: number; end_year: number | null; is_current: boolean; sort_order: number; created_at: string };
+        Insert: { id?: string; user_id: string; organisation_id?: string | null; company_name: string; company_logo_url?: string | null; job_title: string; description?: string | null; start_year: number; end_year?: number | null; is_current?: boolean; sort_order?: number };
+        Update: { id?: string; user_id?: string; organisation_id?: string | null; company_name?: string; company_logo_url?: string | null; job_title?: string; description?: string | null; start_year?: number; end_year?: number | null; is_current?: boolean; sort_order?: number };
         Relationships: [];
       };
     };

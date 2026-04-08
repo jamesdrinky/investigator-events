@@ -13,6 +13,7 @@ import type { EventItem } from '@/lib/data/events';
 import { formatEventDate, formatMonthLabel, getMonthKey, parseDate, sortEventsByDate } from '@/lib/utils/date';
 import { getEventSlug } from '@/lib/utils/event-slugs';
 import { getAssociationBrandLogoSrc } from '@/lib/utils/association-branding';
+import { EventCardAttendees } from '@/components/EventCardAttendees';
 
 interface CalendarViewProps {
   events: EventItem[];
@@ -124,10 +125,13 @@ function MonthEventStrip({ events, label, countryCount }: { events: EventItem[];
               </div>
 
               {/* Bottom details */}
-              <div className="flex items-center gap-2 px-3 py-2.5">
-                <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-slate-400" />
-                <p className="text-xs text-slate-500 line-clamp-1">{event.city}, {event.country}</p>
-                <span className="ml-auto rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-medium text-slate-500">{event.category}</span>
+              <div className="space-y-2 px-3 py-2.5">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-slate-400" />
+                  <p className="text-xs text-slate-500 line-clamp-1">{event.city}, {event.country}</p>
+                  <span className="ml-auto rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-medium text-slate-500">{event.category}</span>
+                </div>
+                <EventCardAttendees eventId={event.id} />
               </div>
             </Link>
           );

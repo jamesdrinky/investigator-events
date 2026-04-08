@@ -203,6 +203,7 @@ class AnimationController {
     }
   }
 
+  public setSpeed(s: number) { this.timeline.timeScale(s); }
   public pause() { this.timeline.pause(); }
   public resume() { this.timeline.play(); }
   public destroy() { this.timeline.kill(); }
@@ -295,7 +296,7 @@ class Star {
   }
 }
 
-export function SpiralAnimation() {
+export function SpiralAnimation({ speed = 1 }: { speed?: number } = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<AnimationController | null>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -321,7 +322,9 @@ export function SpiralAnimation() {
     canvas.style.width = `${dimensions.width}px`;
     canvas.style.height = `${dimensions.height}px`;
     ctx.scale(dpr, dpr);
-    animationRef.current = new AnimationController(canvas, ctx, dpr, size);
+    const controller = new AnimationController(canvas, ctx, dpr, size);
+    if (speed !== 1) controller.setSpeed(speed);
+    animationRef.current = controller;
     return () => {
       if (animationRef.current) {
         animationRef.current.destroy();

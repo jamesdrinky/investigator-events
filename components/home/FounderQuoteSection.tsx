@@ -46,7 +46,7 @@ export function FounderQuoteSection() {
                   <div className="min-w-0 flex-1">
                     <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-blue-600">Founder&apos;s Note</p>
                     <blockquote className="mt-2 text-[1.1rem] font-semibold leading-[1.35] tracking-[-0.02em] text-slate-950">
-                      &ldquo;No one could see what was already in the diary. One shared calendar changes that.&rdquo;
+                      &ldquo;I have spent my career in this industry and I still get a buzz walking into a room full of investigators. The problem was never a lack of good events. It was that nobody could see them all in one place.&rdquo;
                     </blockquote>
                     <p className="mt-3 text-sm font-semibold text-slate-950">Mike LaCorte</p>
                     <p className="mt-0.5 text-xs text-slate-400">Founder · CEO, Conflict International</p>
@@ -94,9 +94,7 @@ export function FounderQuoteSection() {
                   <div className="text-center lg:text-left">
                     <p className="eyebrow">Founder&apos;s Note</p>
                     <blockquote className="mt-6 text-[1.8rem] font-semibold leading-[1.32] tracking-[-0.025em] text-slate-950 lg:text-[2.2rem] lg:leading-[1.28]">
-                      &ldquo;I built this site because I kept missing events I wanted to attend, not through lack
-                      of interest, but because no one could see what was already in the diary. One shared
-                      calendar changes that.&rdquo;
+                      &ldquo;I have spent my career in this industry and I still get a buzz walking into a room full of investigators. It has given me everything. The problem was never a lack of good events. It was that nobody could see them all in one place.&rdquo;
                     </blockquote>
                     <div className="mt-8">
                       <p className="text-lg font-semibold text-slate-950">Mike LaCorte</p>

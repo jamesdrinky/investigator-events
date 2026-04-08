@@ -1,7 +1,7 @@
 'use client';
 
 import type { Route } from 'next';
-import { Menu, X, LogOut, User } from 'lucide-react';
+import { Menu, X, LogOut, User, MessageCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
@@ -14,7 +14,6 @@ const desktopNavItems: Array<{ href: Route; label: string }> = [
   { href: '/calendar', label: 'Events' },
   { href: '/associations', label: 'Associations' },
   { href: '/people', label: 'Community' },
-  { href: '/weekly', label: 'Weekly' },
   { href: '/advice', label: 'Advice' },
   { href: '/about', label: 'About' }
 ];
@@ -23,7 +22,6 @@ const mobileMenuItems: Array<{ href: Route; label: string }> = [
   { href: '/calendar', label: 'Events' },
   { href: '/associations', label: 'Associations' },
   { href: '/people', label: 'Community' },
-  { href: '/weekly', label: 'Weekly' },
   { href: '/submit-event', label: 'Submit Event' },
   { href: '/advice', label: 'Advice' },
   { href: '/about', label: 'About' }
@@ -121,7 +119,7 @@ export function Navbar() {
       <header className={`sticky top-0 z-50 border-b backdrop-blur-md sm:backdrop-blur-xl ${isDark ? 'border-white/[0.06] bg-[#080f1e]/90' : 'border-slate-200/70 bg-white/92 sm:bg-white/88'}`}>
         <div className="container-shell flex min-h-[3.25rem] items-center justify-between gap-2.5 py-1.5 sm:min-h-[4rem] sm:gap-3 md:min-h-[4.75rem] md:gap-5 md:py-0">
           {/* Logo */}
-          <Link href="/" onClick={() => handleNavigation('/')} className="group flex min-w-0 items-center gap-2.5 sm:gap-3">
+          <Link href="/" onClick={() => handleNavigation('/')} className="group flex shrink-0 items-center gap-2.5 sm:gap-3">
             <Image
               src="/logo/ie-none.png"
               alt="Investigator Events"
@@ -131,9 +129,9 @@ export function Navbar() {
               className="h-10 w-auto shrink-0 object-contain sm:h-11 md:h-12"
               sizes="(max-width: 639px) 96px, 112px"
             />
-            <div className="hidden min-w-0 sm:block">
-              <p className={`truncate text-[11px] font-semibold tracking-[0.22em] sm:text-sm sm:tracking-[0.26em] ${isDark ? 'text-white' : 'text-slate-950'}`}>INVESTIGATOR EVENTS</p>
-              <p className={`hidden text-[10px] uppercase tracking-[0.2em] md:block ${isDark ? 'text-white/40' : 'text-slate-500'}`}>Global event discovery</p>
+            <div className="hidden sm:block">
+              <p className={`whitespace-nowrap text-[11px] font-semibold tracking-[0.22em] sm:text-sm sm:tracking-[0.26em] ${isDark ? 'text-white' : 'text-slate-950'}`}>INVESTIGATOR EVENTS</p>
+              <p className={`hidden whitespace-nowrap text-[10px] uppercase tracking-[0.2em] md:block ${isDark ? 'text-white/40' : 'text-slate-500'}`}>Global event discovery</p>
             </div>
           </Link>
 
@@ -164,6 +162,13 @@ export function Navbar() {
             <GlobalSearch isDark={isDark} />
             {user ? (
               <div ref={dropdownRef} className="relative">
+                <Link
+                  href="/messages"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200/80 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-blue-600"
+                  title="Messages"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                </Link>
                 <button
                   type="button"
                   onClick={() => setShowDropdown((c) => !c)}
@@ -200,7 +205,7 @@ export function Navbar() {
                   Sign in
                 </Link>
                 <Link
-                  href="/#newsletter"
+                  href="/weekly"
                   className="btn-glow-nav hidden min-h-[2.5rem] px-3.5 text-xs sm:inline-flex sm:px-4 md:text-sm"
                 >
                   Subscribe Free
@@ -281,8 +286,8 @@ export function Navbar() {
             }}
           >
             <Link
-              href="/#newsletter"
-              onClick={() => { handleNavigation('/' as Route); }}
+              href="/weekly"
+              onClick={() => { handleNavigation('/weekly' as Route); }}
               className="btn-glow inline-flex w-full justify-center px-6 py-4 text-base"
             >
               Subscribe Free

@@ -6,7 +6,7 @@ import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { getCountryFlag } from '@/lib/utils/location';
 import { UserAvatar } from '@/components/UserAvatar';
 
-type EventResult = { id: string; title: string; slug: string; start_date: string; city: string; country: string; association: string | null };
+type EventResult = { id: string; title: string; slug: string; start_date: string; city: string; country: string; association: string | null; organiser: string | null; description: string | null };
 type PersonResult = { id: string; full_name: string | null; username: string | null; avatar_url: string | null; country: string | null; specialisation: string | null };
 
 export function GlobalSearch({ isDark }: { isDark?: boolean }) {
@@ -27,9 +27,12 @@ export function GlobalSearch({ isDark }: { isDark?: boolean }) {
     if (q.length < 2) { setEvents([]); setPeople([]); return; }
     setLoading(true);
     const supabase = createSupabaseBrowserClient();
+    // Sanitize search term for PostgREST - escape special chars
+    const safe = q.replace(/[%_\\()\[\]]/g, '');
+    if (!safe) { setEvents([]); setPeople([]); setLoading(false); return; }
     const [{ data: ev }, { data: ppl }] = await Promise.all([
-      supabase.from('events').select('id, title, slug, start_date, city, country, association').eq('approved', true).ilike('title', `%${q}%`).limit(5),
-      supabase.from('profiles').select('id, full_name, username, avatar_url, country, specialisation').eq('is_public', true).or(`full_name.ilike.%${q}%,username.ilike.%${q}%`).limit(5),
+      supabase.from('events').select('id, title, slug, start_date, city, country, association, organiser, description').eq('approved', true).or(`title.ilike.%${safe}%,city.ilike.%${safe}%,country.ilike.%${safe}%,association.ilike.%${safe}%,organiser.ilike.%${safe}%,description.ilike.%${safe}%`).limit(8),
+      supabase.from('profiles').select('id, full_name, username, avatar_url, country, specialisation').eq('is_public', true).or(`full_name.ilike.%${safe}%,username.ilike.%${safe}%,specialisation.ilike.%${safe}%,country.ilike.%${safe}%`).limit(5),
     ]);
     setEvents(ev ?? []);
     setPeople(ppl ?? []);

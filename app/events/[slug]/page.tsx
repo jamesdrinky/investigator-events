@@ -10,6 +10,8 @@ import { formatEventDate, parseDate } from '@/lib/utils/date';
 import { getCountryFlag } from '@/lib/utils/location';
 import { getAssociationBrandLogoSrc } from '@/lib/utils/association-branding';
 import { EventCommunityTabs } from '@/components/EventCommunityTabs';
+import { AttendeeAvatars } from '@/components/AttendeeAvatars';
+import { StickyGoingBar } from '@/components/StickyGoingBar';
 
 export const dynamic = 'force-dynamic';
 
@@ -151,6 +153,14 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
 
           {/* Right column — sidebar */}
           <div className="space-y-4">
+            {/* Who's going — prominent */}
+            <Reveal delay={0.02}>
+              <div className="rounded-2xl border border-blue-200/60 bg-gradient-to-b from-blue-50/40 to-white p-5 shadow-sm">
+                <h3 className="mb-3 text-sm font-bold text-slate-950">Who&apos;s going</h3>
+                <AttendeeAvatars eventId={event.id} />
+              </div>
+            </Reveal>
+
             {/* Event details card */}
             <Reveal delay={0.04}>
               <div className="rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm">
@@ -172,12 +182,11 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
               </div>
             </Reveal>
 
-            {/* Submit CTA */}
-            <div className="rounded-2xl border border-indigo-200/60 bg-indigo-50/50 p-5">
-              <p className="text-sm font-bold text-slate-950">Have an event to list?</p>
-              <p className="mt-1 text-xs text-slate-500">Free to submit, reviewed within 48 hours.</p>
-              <Link href="/submit-event" className="btn-primary mt-3 w-full px-4 py-2.5 text-sm">Submit an event</Link>
-            </div>
+            {/* Submit CTA — compact */}
+            <Link href="/submit-event" className="flex items-center justify-between rounded-xl border border-slate-200/60 bg-white px-4 py-3 text-sm transition hover:border-blue-200 hover:shadow-sm">
+              <span className="text-slate-500">Have an event to list?</span>
+              <span className="font-semibold text-blue-600">Submit &rarr;</span>
+            </Link>
           </div>
         </div>
 
@@ -198,6 +207,9 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
           </Reveal>
         )}
       </div>
+
+      {/* Sticky mobile "I'm going" bar */}
+      <StickyGoingBar eventId={event.id} eventTitle={title} />
     </section>
   );
 }

@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Plus_Jakarta_Sans } from 'next/font/google';
 import { CookieBanner } from '@/components/CookieBanner';
 import { Footer } from '@/components/footer';
 import { Navbar } from '@/components/navbar';
+import { NewsletterBanner } from '@/components/NewsletterBanner';
 import './globals.css';
 
 const sans = Plus_Jakarta_Sans({
@@ -37,6 +38,7 @@ export default function RootLayout({
           <main className="flex-1">{children}</main>
           <Footer />
         </div>
+        <NewsletterBanner />
         <CookieBanner />
       </body>
     </html>

@@ -7,6 +7,7 @@ import { Search, ShieldCheck, UserPlus, UserCheck, Users, TrendingUp } from 'luc
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { getCountryFlag } from '@/lib/utils/location';
 import { CommunityFeed } from '@/components/CommunityFeed';
+import { LFGBoard } from '@/components/LFGBoard';
 
 type Person = {
   id: string; full_name: string | null; avatar_url: string | null;
@@ -18,7 +19,7 @@ export default function PeoplePage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [following, setFollowing] = useState<Set<string>>(new Set());
   const [togglingFollow, setTogglingFollow] = useState<string | null>(null);
-  const [tab, setTab] = useState<'feed' | 'discover'>('feed');
+  const [tab, setTab] = useState<'feed' | 'discover' | 'lfg'>('feed');
 
   // Discover state
   const [allPeople, setAllPeople] = useState<Person[]>([]);
@@ -142,6 +143,13 @@ export default function PeoplePage() {
             </button>
             <button
               type="button"
+              onClick={() => setTab('lfg')}
+              className={`flex items-center gap-1.5 rounded-full px-5 py-2 text-sm font-semibold transition ${tab === 'lfg' ? 'bg-blue-600 text-white shadow' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              Looking For
+            </button>
+            <button
+              type="button"
               onClick={() => setTab('discover')}
               className={`flex items-center gap-1.5 rounded-full px-5 py-2 text-sm font-semibold transition ${tab === 'discover' ? 'bg-blue-600 text-white shadow' : 'text-slate-500 hover:text-slate-700'}`}
             >
@@ -152,7 +160,9 @@ export default function PeoplePage() {
       </div>
 
       <div className="container-shell py-8 sm:py-12">
-        {tab === 'feed' ? (
+        {tab === 'lfg' ? (
+          <LFGBoard />
+        ) : tab === 'feed' ? (
           <div className="grid gap-8 lg:grid-cols-[1fr_20rem]">
             {/* Main feed */}
             <CommunityFeed />

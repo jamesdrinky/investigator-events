@@ -6,6 +6,7 @@ import type { EventItem } from '@/lib/data/events';
 import { formatEventDate } from '@/lib/utils/date';
 import { getEventSlug } from '@/lib/utils/event-slugs';
 import { getAssociationBrandLogoSrc } from '@/lib/utils/association-branding';
+import { EventCardAttendees } from '@/components/EventCardAttendees';
 
 interface EventCardProps {
   event: EventItem;
@@ -96,8 +97,9 @@ export function EventCard({ event, priority = 'default', isSignalActive = false,
           <p className="text-sm leading-relaxed text-slate-500 line-clamp-2">{description}</p>
         ) : null}
 
-        {/* CTA */}
-        <div className="mt-auto pt-1">
+        {/* Attendees + CTA */}
+        <div className="mt-auto flex items-center justify-between pt-1">
+          <EventCardAttendees eventId={event.id} />
           <span className="text-sm font-semibold text-blue-600 transition group-hover:text-blue-500">
             View event <span className="transition-transform duration-200 group-hover:translate-x-1 inline-block">→</span>
           </span>

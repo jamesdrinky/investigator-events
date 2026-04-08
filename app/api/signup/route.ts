@@ -1,0 +1,50 @@
+import { NextResponse } from 'next/server';
+import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json().catch(() => null);
+    const email = body?.email?.trim().toLowerCase();
+    const password = body?.password;
+    const fullName = body?.full_name?.trim();
+
+    if (!email || !password) {
+      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
+    }
+    if (password.length < 6) {
+      return NextResponse.json({ error: 'Password must be at least 6 characters' }, { status: 400 });
+    }
+
+    const admin = createSupabaseAdminServerClient();
+
+    // Create user with admin client — auto-confirms email
+    const { data, error } = await admin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { full_name: fullName || null },
+    });
+
+    if (error) {
+      if (error.message.includes('already been registered') || error.message.includes('already exists')) {
+        return NextResponse.json({ error: 'An account with this email already exists. Try signing in.' }, { status: 409 });
+      }
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    // Create profile row
+    if (data.user) {
+      await admin.from('profiles').upsert({
+        id: data.user.id,
+        full_name: fullName || null,
+        username: fullName ? fullName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') : null,
+        is_public: true,
+      });
+    }
+
+    return NextResponse.json({ message: 'Account created', userId: data.user?.id });
+  } catch (err) {
+    console.error('signup error:', err);
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
+  }
+}

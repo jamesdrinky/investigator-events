@@ -62,6 +62,7 @@ export default function EditProfilePage() {
   const [specialisation, setSpecialisation] = useState('');
   const [customTitle, setCustomTitle] = useState('');
   const [useCustomTitle, setUseCustomTitle] = useState(false);
+  const [headline, setHeadline] = useState('');
   const [bio, setBio] = useState('');
   const [website, setWebsite] = useState('');
   const [profileColor, setProfileColor] = useState('#3b82f6');
@@ -78,6 +79,13 @@ export default function EditProfilePage() {
   const [newYear, setNewYear] = useState('');
   const [verifications, setVerifications] = useState<Record<string, string>>({});
 
+  // Work experience
+  type Experience = { id?: string; company_name: string; organisation_id: string | null; job_title: string; description: string; start_year: string; end_year: string; is_current: boolean };
+  const [experience, setExperience] = useState<Experience[]>([]);
+  const [orgSearch, setOrgSearch] = useState('');
+  const [orgResults, setOrgResults] = useState<Array<{ id: string; name: string; type: string }>>([]);
+  const [showOrgDropdown, setShowOrgDropdown] = useState(false);
+
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
     supabase.auth.getUser().then(async ({ data }) => {
@@ -88,6 +96,7 @@ export default function EditProfilePage() {
       if (profile) {
         setFullName(profile.full_name ?? '');
         setCountry(profile.country ?? '');
+        setHeadline(profile.headline ?? '');
         setBio(profile.bio ?? '');
         setWebsite(profile.website ?? '');
         setProfileColor(profile.profile_color ?? '#3b82f6');
@@ -127,6 +136,17 @@ export default function EditProfilePage() {
         verifs.forEach((v) => { map[v.association_name] = v.status; });
         setVerifications(map);
       }
+
+      // Load work experience
+      const { data: expRows } = await supabase.from('work_experience').select('*').eq('user_id', data.user.id).order('sort_order');
+      if (expRows) {
+        setExperience(expRows.map((e: any) => ({
+          id: e.id, company_name: e.company_name, organisation_id: e.organisation_id,
+          job_title: e.job_title, description: e.description ?? '',
+          start_year: e.start_year?.toString() ?? '', end_year: e.end_year?.toString() ?? '',
+          is_current: e.is_current ?? false,
+        })));
+      }
     });
   }, [router]);
 
@@ -153,6 +173,29 @@ export default function EditProfilePage() {
     setVerifications((prev) => ({ ...prev, [assocName]: 'pending' }));
   };
 
+  // Organisation search for experience
+  const searchOrgs = async (q: string) => {
+    setOrgSearch(q);
+    if (q.length < 2) { setOrgResults([]); setShowOrgDropdown(false); return; }
+    const supabase = createSupabaseBrowserClient();
+    const { data } = await supabase.from('organisations').select('id, name, type').ilike('name', `%${q}%`).limit(8);
+    setOrgResults((data as any[]) ?? []);
+    setShowOrgDropdown(true);
+  };
+
+  const addExperience = (orgName: string, orgId: string | null) => {
+    setExperience((prev) => [...prev, { company_name: orgName, organisation_id: orgId, job_title: '', description: '', start_year: '', end_year: '', is_current: false }]);
+    setOrgSearch('');
+    setOrgResults([]);
+    setShowOrgDropdown(false);
+  };
+
+  const updateExperience = (index: number, field: string, value: string | boolean) => {
+    setExperience((prev) => prev.map((e, i) => i === index ? { ...e, [field]: value } : e));
+  };
+
+  const removeExperience = (index: number) => setExperience((prev) => prev.filter((_, i) => i !== index));
+
   const toggleBadge = (id: string) => {
     setSelectedBadges((prev) =>
       prev.includes(id) ? prev.filter((b) => b !== id) : prev.length < 3 ? [...prev, id] : prev
@@ -173,6 +216,7 @@ export default function EditProfilePage() {
       username: fullName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || null,
       country: country || null,
       specialisation: finalSpec || null,
+      headline: headline || null,
       bio: bio || null,
       website: website || null,
       profile_color: profileColor,
@@ -188,6 +232,20 @@ export default function EditProfilePage() {
         associations.map((a) => ({
           user_id: userId, association_name: a.association_name, association_slug: a.association_slug,
           role: a.role || null, member_since: a.member_since || null,
+        }))
+      );
+    }
+
+    // Sync work experience
+    await supabase.from('work_experience').delete().eq('user_id', userId);
+    if (experience.length > 0) {
+      await supabase.from('work_experience').insert(
+        experience.filter((e) => e.company_name && e.job_title).map((e, i) => ({
+          user_id: userId, company_name: e.company_name, organisation_id: e.organisation_id || null,
+          job_title: e.job_title, description: e.description || null,
+          start_year: parseInt(e.start_year) || new Date().getFullYear(),
+          end_year: e.is_current ? null : (parseInt(e.end_year) || null),
+          is_current: e.is_current, sort_order: i,
         }))
       );
     }
@@ -213,8 +271,17 @@ export default function EditProfilePage() {
     <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-white">
       <div className="container-shell py-24 sm:py-32">
         <div className="mx-auto max-w-2xl">
-          <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">Edit profile</h1>
-          <p className="mt-1 text-sm text-slate-500">Your professional presence on Investigator Events</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">Edit profile</h1>
+              <p className="mt-1 text-sm text-slate-500">Build your professional presence. The more you add, the more you stand out.</p>
+            </div>
+            {fullName && (
+              <a href={`/profile/${fullName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`} className="hidden rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 sm:inline-flex">
+                View profile
+              </a>
+            )}
+          </div>
 
           {/* Avatar with crop */}
           <div className="mt-8">
@@ -232,6 +299,13 @@ export default function EditProfilePage() {
             <div>
               <label className="text-sm font-medium text-slate-700">Full name</label>
               <input className="field-input mt-1.5 w-full" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Your full name" />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-slate-700">Headline</label>
+              <p className="mb-1.5 text-xs text-slate-400">A short tagline that appears under your name. Like LinkedIn&apos;s headline.</p>
+              <input className="field-input w-full" value={headline} onChange={(e) => { if (e.target.value.length <= 200) setHeadline(e.target.value); }} placeholder="e.g. CEO, Conflict International | ABI President | International Speaker" />
+              <p className="mt-1 text-xs text-slate-400">{headline.length}/200</p>
             </div>
 
             <div className="grid gap-5 sm:grid-cols-2">
@@ -261,9 +335,10 @@ export default function EditProfilePage() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-slate-700">Bio</label>
-              <textarea className="field-input mt-1.5 w-full" rows={3} value={bio} onChange={(e) => setBio(e.target.value)} placeholder="A short bio about your work and expertise" />
-              <p className="mt-1 text-xs text-slate-400">{bio.length}/280 characters</p>
+              <label className="text-sm font-medium text-slate-700">About</label>
+              <p className="mb-1.5 text-xs text-slate-400">Describe your work, expertise, and what makes you stand out. Shown as an "About" section on your profile.</p>
+              <textarea className="field-input w-full" rows={4} value={bio} onChange={(e) => { if (e.target.value.length <= 500) setBio(e.target.value); }} placeholder="With 15+ years in corporate investigation, I specialise in..." />
+              <p className="mt-1 text-xs text-slate-400">{bio.length}/500</p>
             </div>
 
             <div>
@@ -364,6 +439,74 @@ export default function EditProfilePage() {
             </div>
           </div>
 
+          {/* Work Experience */}
+          <div className="mt-10 rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm sm:p-6">
+            <h2 className="text-lg font-bold text-slate-900">Experience</h2>
+            <p className="text-sm text-slate-400">Add your work history. Search for organisations or type a custom company name.</p>
+
+            {experience.map((exp, i) => (
+              <div key={i} className="mt-4 rounded-xl border border-slate-100 bg-slate-50/50 p-4">
+                <div className="flex items-start justify-between">
+                  <p className="text-sm font-semibold text-slate-900">{exp.company_name}</p>
+                  <button type="button" onClick={() => removeExperience(i)} className="text-slate-300 hover:text-red-500"><Trash2 className="h-4 w-4" /></button>
+                </div>
+                <div className="mt-3 space-y-3">
+                  <input className="field-input w-full" value={exp.job_title} onChange={(e) => updateExperience(i, 'job_title', e.target.value)} placeholder="Job title *" />
+                  <div className="flex flex-wrap items-center gap-2">
+                    <select className="field-input w-28" value={exp.start_year} onChange={(e) => updateExperience(i, 'start_year', e.target.value)}>
+                      <option value="">Start year</option>
+                      {Array.from({ length: 50 }, (_, j) => new Date().getFullYear() - j).map((y) => (
+                        <option key={y} value={y}>{y}</option>
+                      ))}
+                    </select>
+                    <span className="text-slate-400">to</span>
+                    {exp.is_current ? (
+                      <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 border border-emerald-200">Present</span>
+                    ) : (
+                      <select className="field-input w-28" value={exp.end_year} onChange={(e) => updateExperience(i, 'end_year', e.target.value)}>
+                        <option value="">End year</option>
+                        {Array.from({ length: 50 }, (_, j) => new Date().getFullYear() + 1 - j).map((y) => (
+                          <option key={y} value={y}>{y}</option>
+                        ))}
+                      </select>
+                    )}
+                    <label className="flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 cursor-pointer hover:bg-slate-50 transition">
+                      <input type="checkbox" checked={exp.is_current} onChange={(e) => updateExperience(i, 'is_current', e.target.checked)} className="accent-blue-600" />
+                      I currently work here
+                    </label>
+                  </div>
+                  <textarea className="field-input w-full" rows={2} value={exp.description} onChange={(e) => updateExperience(i, 'description', e.target.value)} placeholder="Describe your role, responsibilities, key achievements..." />
+                </div>
+              </div>
+            ))}
+
+            {/* Add new experience — search orgs */}
+            <div className="relative mt-4">
+              <input
+                className="field-input w-full"
+                value={orgSearch}
+                onChange={(e) => searchOrgs(e.target.value)}
+                onFocus={() => orgSearch.length >= 2 && setShowOrgDropdown(true)}
+                placeholder="Search organisations, companies, or type a new one..."
+              />
+              {showOrgDropdown && orgResults.length > 0 && (
+                <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-48 overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg">
+                  {orgResults.map((org) => (
+                    <button key={org.id} type="button" onClick={() => addExperience(org.name, org.id)} className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm hover:bg-slate-50">
+                      <span className="font-medium text-slate-900">{org.name}</span>
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">{org.type}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {orgSearch.length >= 2 && (
+                <button type="button" onClick={() => addExperience(orgSearch, null)} className="mt-2 flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700">
+                  <Plus className="h-4 w-4" /> Add &quot;{orgSearch}&quot; as custom company
+                </button>
+              )}
+            </div>
+          </div>
+
           {/* Profile sections — customisable */}
           <div className="mt-10 rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm sm:p-6">
             <h2 className="text-lg font-bold text-slate-900">Profile sections</h2>
@@ -394,11 +537,43 @@ export default function EditProfilePage() {
           </div>
 
           {/* Save */}
-          <div className="mt-8 flex items-center gap-4">
+          <div className="mt-8 flex flex-wrap items-center gap-4">
             <button type="button" onClick={handleSave} disabled={saving} className="btn-primary flex items-center gap-2 px-6 py-3 text-sm">
               <Save className="h-4 w-4" /> {saving ? 'Saving...' : 'Save profile'}
             </button>
-            {message && <span className="text-sm font-medium text-emerald-600">{message}</span>}
+            {message && (
+              <span className="flex items-center gap-2 text-sm font-medium text-emerald-600">
+                {message}
+                {fullName && (
+                  <a href={`/profile/${fullName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`} className="font-medium text-blue-600 underline">
+                    View your profile
+                  </a>
+                )}
+              </span>
+            )}
+          </div>
+          {/* Danger zone */}
+          <div className="mt-16 rounded-2xl border border-red-200/60 bg-red-50/30 p-5 sm:p-6">
+            <h2 className="text-base font-bold text-red-700">Delete account</h2>
+            <p className="mt-1 text-sm text-red-600/70">Permanently delete your account, profile, posts, and all associated data. This cannot be undone.</p>
+            <button
+              type="button"
+              onClick={async () => {
+                if (!confirm('Are you sure you want to delete your account? This permanently removes your profile, posts, connections, and all data. This cannot be undone.')) return;
+                if (!confirm('This is your last chance — are you absolutely sure?')) return;
+                const res = await fetch('/api/delete-account', { method: 'POST' });
+                if (res.ok) {
+                  const supabase = createSupabaseBrowserClient();
+                  await supabase.auth.signOut();
+                  window.location.href = '/';
+                } else {
+                  alert('Failed to delete account. Please try again or contact support.');
+                }
+              }}
+              className="mt-4 rounded-full border border-red-300 bg-white px-5 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+            >
+              Delete my account
+            </button>
           </div>
         </div>
       </div>

@@ -737,3 +737,13 @@ a {
   .holo-card::after { display: none; }
   .holo-card:hover { box-shadow: none; }
 }
+
+/* Auth page animations */
+@keyframes fadeSlideIn {
+  from { opacity: 0; filter: blur(4px); transform: translateY(12px); }
+  to { opacity: 1; filter: blur(0); transform: translateY(0); }
+}
+@keyframes slideRightIn {
+  from { opacity: 0; filter: blur(4px); transform: translateX(24px); }
+  to { opacity: 1; filter: blur(0); transform: translateX(0); }
+}

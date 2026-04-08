@@ -135,6 +135,38 @@ export default async function AboutPage() {
           </div>
         </Reveal>
 
+        {/* Founder's Note */}
+        <Reveal delay={0.04}>
+          <div className="mt-10 sm:mt-14">
+            <div className="mx-auto max-w-3xl">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-indigo-500 sm:text-xs">From the Founder</p>
+              <h2 className="mt-2 text-xl font-bold tracking-[-0.03em] text-slate-950 sm:text-2xl lg:text-3xl">Why this exists</h2>
+
+              <div className="mt-6 space-y-4 text-[15px] leading-[1.75] text-slate-600">
+                <p>I have spent my career in international investigations and I still feel lucky to be part of this world. It is a community before it is an industry. The people in it are sharp, generous, fiercely independent, and surprisingly good company at a hotel bar after a long day of conference sessions.</p>
+
+                <p>Over the years I have been fortunate enough to hold senior positions across several of the associations that serve this profession, as President of the Association of British Investigators, Secretary General of the IKD, and through President and Chairman roles within the World Association of Detectives. Those roles gave me a front-row seat to an industry with great events, run by good people, that many investigators never heard about until it was too late.</p>
+
+                <p>The problem was never a shortage of conferences, training, or association gatherings. The problem was that nobody could see the full picture. Every organisation promoted its own calendar, on its own website, to its own members. Dates clashed without anyone realising. Investigators booked one event and missed another they would have loved. Organisers set dates in the dark.</p>
+
+                <p>I care about this because I have seen what happens when people actually show up. Conferences are where investigators meet the person they will trust with a referral three years later. They are where someone early in their career realises how far this profession can take them. They are where association leaders sit together and quietly move things forward for everyone else. When those gatherings are easy to find and well attended, the whole community benefits.</p>
+
+                <p>I also care about the associations themselves. The people who run them do it because they believe in the profession, often voluntarily, often without much thanks. If a shared calendar means better attendance at their events and fewer avoidable clashes, that alone makes this worth doing.</p>
+
+                <p>Investigator Events is a free platform, built for a community I am proud to be part of. It is not a commercial layer between associations and their members. It is a single calendar that makes the industry easier to see, easier to plan around, and a little harder to miss.</p>
+              </div>
+
+              <div className="mt-8 flex items-center gap-4">
+                <Image src="/faces/mike2.png" alt="Mike LaCorte" width={56} height={56} className="h-14 w-14 rounded-full object-cover shadow-md" />
+                <div>
+                  <p className="text-sm font-bold text-slate-900">Mike LaCorte</p>
+                  <p className="text-xs text-slate-500">Founder, Investigator Events</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+
         {/* What you can expect */}
         <Reveal delay={0.06}>
           <div className="mt-10 grid gap-8 sm:mt-14 lg:grid-cols-2 lg:gap-12">

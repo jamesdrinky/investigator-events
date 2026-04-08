@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { Send, ArrowLeft, Search, ImagePlus } from 'lucide-react';
+import { Send, ArrowLeft, Search, ImagePlus, Calendar } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { UserAvatar } from '@/components/UserAvatar';
 
@@ -37,6 +37,9 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
   const [search, setSearch] = useState('');
   const [searchResults, setSearchResults] = useState<Array<{ id: string; full_name: string | null; avatar_url: string | null; username: string | null }>>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [showEventPicker, setShowEventPicker] = useState(false);
+  const [eventSearch, setEventSearch] = useState('');
+  const [eventResults, setEventResults] = useState<Array<{ id: string; title: string; slug: string; city: string; country: string; image_path: string | null }>>([]);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval>>();
@@ -184,6 +187,29 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
     }
     setUploadingImage(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const searchEvents = async (q: string) => {
+    setEventSearch(q);
+    if (q.length < 2) { setEventResults([]); return; }
+    const { data } = await supabase.from('events').select('id, title, slug, city, country, image_path').eq('approved', true).ilike('title', `%${q}%`).order('start_date', { ascending: false }).limit(6);
+    setEventResults((data ?? []) as any[]);
+  };
+
+  const sendEvent = async (event: { title: string; slug: string }) => {
+    if (!userId || !activeChat) return;
+    const url = `${window.location.origin}/events/${event.slug}`;
+    await sendMessage();
+    setSending(true);
+    const { data } = await supabase.from('messages' as any).insert({ sender_id: userId, receiver_id: activeChat, content: `Check out ${event.title}\n${url}` } as any).select('*').single();
+    if (data) {
+      setMessages((prev) => [...prev, data as unknown as Message]);
+      loadConversations();
+    }
+    setSending(false);
+    setShowEventPicker(false);
+    setEventSearch('');
+    setEventResults([]);
   };
 
   const searchUsers = async (q: string) => {
@@ -372,6 +398,47 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
                 >
                   <ImagePlus className="h-5 w-5" />
                 </button>
+                {/* Share event button */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowEventPicker(!showEventPicker)}
+                    className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl transition ${showEventPicker ? 'bg-indigo-500/20 text-indigo-400' : 'text-slate-500 hover:bg-white/5 hover:text-slate-300'}`}
+                  >
+                    <Calendar className="h-5 w-5" />
+                  </button>
+                  {showEventPicker && (
+                    <div className="absolute bottom-full left-0 z-20 mb-2 w-72 overflow-hidden rounded-xl border border-white/10 bg-slate-900/95 shadow-xl backdrop-blur-lg">
+                      <div className="p-3">
+                        <p className="text-xs font-semibold text-slate-400">Share an event</p>
+                        <input
+                          className="mt-2 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 outline-none focus:border-indigo-500/40"
+                          placeholder="Search events..."
+                          value={eventSearch}
+                          onChange={(e) => searchEvents(e.target.value)}
+                          autoFocus
+                        />
+                      </div>
+                      {eventResults.length > 0 && (
+                        <div className="max-h-48 overflow-y-auto border-t border-white/5">
+                          {eventResults.map((ev) => (
+                            <button
+                              key={ev.id}
+                              type="button"
+                              onClick={() => sendEvent(ev)}
+                              className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition hover:bg-white/5"
+                            >
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm font-medium text-white">{ev.title}</p>
+                                <p className="truncate text-[11px] text-slate-500">{ev.city}, {ev.country}</p>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
                 <input
                   className="flex-1 rounded-xl border border-white/5 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition focus:border-indigo-500/40 focus:bg-white/8"
                   value={newMsg}

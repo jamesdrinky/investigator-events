@@ -219,6 +219,189 @@ export const associationRecords: AssociationRecord[] = [
     website: 'https://www.detektivska-zbornica-rs.si/',
     aliases: ['DZRS'],
     logoFileName: 'dzrs.png'
+  },
+  // ── Major International ──
+  {
+    slug: 'abi',
+    shortName: 'ABI',
+    name: 'Association of British Investigators',
+    country: 'United Kingdom',
+    region: 'Europe',
+    website: 'https://www.theabi.org.uk',
+    aliases: ['ABI', 'Association of British Investigators', 'Association of British Investigators (ABI)'],
+    logoFileName: 'abi.png'
+  },
+  {
+    slug: 'wad',
+    shortName: 'WAD',
+    name: 'World Association of Detectives',
+    country: 'United States',
+    region: 'North America',
+    website: 'https://www.wad.net',
+    aliases: ['WAD', 'World Association of Detectives'],
+    logoFileName: 'wad.png'
+  },
+  {
+    slug: 'ikd',
+    shortName: 'IKD',
+    name: 'Internationale Kommission der Detektiv-Verbände',
+    country: 'Austria',
+    region: 'Europe',
+    website: 'https://www.i-k-d.com',
+    aliases: ['IKD', 'Internationale Kommission der Detektiv-Verbande', 'Internationale Kommission der Detektiv-Verbände'],
+    logoFileName: 'ikd.png'
+  },
+  // ── Additional European ──
+  {
+    slug: 'apdpe',
+    shortName: 'APDPE',
+    name: 'APDPE',
+    country: 'Spain',
+    region: 'Europe',
+    website: 'https://www.apdpe.es',
+    aliases: ['APDPE'],
+    logoFileName: 'apdpe.png'
+  },
+  {
+    slug: 'apdu',
+    shortName: 'APDU',
+    name: 'APDU',
+    country: 'Portugal',
+    region: 'Europe',
+    website: 'https://www.apdu.pt',
+    aliases: ['APDU'],
+    logoFileName: 'apdu.png'
+  },
+  {
+    slug: 'codpc',
+    shortName: 'CODPC',
+    name: 'CODPC',
+    country: 'France',
+    region: 'Europe',
+    website: 'https://www.codpc.fr',
+    aliases: ['CODPC'],
+    logoFileName: 'codpc.png'
+  },
+  {
+    slug: 'fapi',
+    shortName: 'FAPI',
+    name: 'FAPI',
+    country: 'Italy',
+    region: 'Europe',
+    website: 'https://www.fapi.it',
+    aliases: ['FAPI'],
+    logoFileName: 'fapi.png'
+  },
+  {
+    slug: 'fspd',
+    shortName: 'FSPD',
+    name: 'FSPD',
+    country: 'Switzerland',
+    region: 'Europe',
+    website: 'https://www.fspd.ch',
+    aliases: ['FSPD'],
+    logoFileName: 'fspd.png'
+  },
+  {
+    slug: 'iaiace',
+    shortName: 'IAIACE',
+    name: 'IAIACE',
+    country: 'Belgium',
+    region: 'Europe',
+    website: 'https://www.iaiace.be',
+    aliases: ['IAIACE'],
+    logoFileName: 'iaiace.png'
+  },
+  {
+    slug: 'sfpp',
+    shortName: 'SFPP',
+    name: 'SFPP',
+    country: 'France',
+    region: 'Europe',
+    website: 'https://www.sfpp.fr',
+    aliases: ['SFPP'],
+    logoFileName: 'sfpp.png'
+  },
+  // ── North America ──
+  {
+    slug: 'intellenet',
+    shortName: 'Intellenet',
+    name: 'International Intelligence Network',
+    country: 'United States',
+    region: 'North America',
+    website: 'https://www.intellenetwork.org',
+    aliases: ['Intellenet', 'INTELLENET'],
+    logoFileName: 'intellenet.png'
+  },
+  {
+    slug: 'cii',
+    shortName: 'CII',
+    name: 'Council of International Investigators',
+    country: 'United States',
+    region: 'North America',
+    website: 'https://www.cii2.org',
+    aliases: ['CII', 'Council of International Investigators'],
+    logoFileName: 'cii.png'
+  },
+  {
+    slug: 'fali',
+    shortName: 'FALI',
+    name: 'Florida Association of Licensed Investigators',
+    country: 'United States',
+    region: 'North America',
+    website: 'https://www.fali.org',
+    aliases: ['FALI'],
+    logoFileName: 'fali.png'
+  },
+  {
+    slug: 'cali',
+    shortName: 'CALI',
+    name: 'California Association of Licensed Investigators',
+    country: 'United States',
+    region: 'North America',
+    website: 'https://www.cali-pi.org',
+    aliases: ['CALI'],
+    logoFileName: 'cali.png'
+  },
+  {
+    slug: 'ncapi',
+    shortName: 'NCAPI',
+    name: 'North Carolina Association of Private Investigators',
+    country: 'United States',
+    region: 'North America',
+    website: 'https://www.ncapi.org',
+    aliases: ['NCAPI'],
+    logoFileName: 'ncapi.png'
+  },
+  {
+    slug: 'tali',
+    shortName: 'TALI',
+    name: 'Texas Association of Licensed Investigators',
+    country: 'United States',
+    region: 'North America',
+    website: 'https://www.tali.org',
+    aliases: ['TALI'],
+    logoFileName: 'tali.png'
+  },
+  {
+    slug: 'nciss',
+    shortName: 'NCISS',
+    name: 'National Council of Investigation & Security Services',
+    country: 'United States',
+    region: 'North America',
+    website: 'https://www.nciss.org',
+    aliases: ['NCISS'],
+    logoFileName: 'nciss.png'
+  },
+  {
+    slug: 'fewa',
+    shortName: 'FEWA',
+    name: 'Forensic Expert Witness Association',
+    country: 'United States',
+    region: 'North America',
+    website: 'https://www.fewa.org',
+    aliases: ['FEWA'],
+    logoFileName: 'fewa.png'
   }
 ];
 

@@ -1,7 +1,9 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import { Camera, MapPin, Calendar, Clock, Globe, FileText, Mail, User, Building2, Tag, Layers, ImageIcon } from 'lucide-react';
+import { useRef, useState, useEffect, useCallback } from 'react';
+import { Camera, MapPin, Calendar, Clock, Globe, FileText, Mail, User, Building2, Tag, Layers, ImageIcon, AlertTriangle } from 'lucide-react';
+import Link from 'next/link';
+import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 
 interface SubmitEventFormProps {
   action: (formData: FormData) => void;
@@ -30,6 +32,38 @@ export function SubmitEventForm({
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
+
+  // Clash detection
+  type ClashEvent = { id: string; title: string; slug: string; start_date: string; end_date: string | null; city: string; country: string; association: string | null };
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [clashes, setClashes] = useState<ClashEvent[]>([]);
+  const [checkingClash, setCheckingClash] = useState(false);
+
+  const checkClashes = useCallback(async (start: string, end: string) => {
+    if (!start) { setClashes([]); return; }
+    const effectiveEnd = end || start;
+    setCheckingClash(true);
+    const supabase = createSupabaseBrowserClient();
+    const { data } = await supabase
+      .from('events')
+      .select('id, title, slug, start_date, end_date, city, country, association')
+      .eq('approved', true)
+      .lte('start_date', effectiveEnd)
+      .or(`end_date.gte.${start},and(end_date.is.null,start_date.gte.${start})`)
+      .order('start_date');
+    const results = (data ?? []).filter((e: any) => {
+      const eEnd = e.end_date ?? e.start_date;
+      return e.start_date <= effectiveEnd && eEnd >= start;
+    });
+    setClashes(results as ClashEvent[]);
+    setCheckingClash(false);
+  }, []);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => checkClashes(startDate, endDate), 300);
+    return () => clearTimeout(timeout);
+  }, [startDate, endDate, checkClashes]);
 
   const handleImageChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -140,22 +174,60 @@ export function SubmitEventForm({
 
           {/* Date/time row */}
           <div className="space-y-2">
-            <div className="flex items-center gap-3 rounded-[1.2rem] bg-slate-50/80 px-4 py-3">
+            <div className={`flex items-center gap-3 rounded-[1.2rem] px-4 py-3 transition-all duration-500 ${
+              clashes.length > 0
+                ? 'bg-red-50 ring-2 ring-red-400/60 shadow-[0_0_20px_-4px_rgba(239,68,68,0.3)]'
+                : 'bg-slate-50/80'
+            }`}>
               <div className="flex items-center gap-2 text-slate-400">
-                <Calendar className="h-4 w-4" />
-                <span className="text-xs font-medium text-slate-500 w-12">Start</span>
+                <Calendar className={`h-4 w-4 ${clashes.length > 0 ? 'text-red-500' : ''}`} />
+                <span className={`text-xs font-medium w-12 ${clashes.length > 0 ? 'text-red-600' : 'text-slate-500'}`}>Start</span>
               </div>
-              <input type="date" name="startDate" required className="flex-1 border-0 bg-transparent text-sm font-medium text-slate-900 focus:outline-none" />
+              <input type="date" name="startDate" required value={startDate} onChange={(e) => setStartDate(e.target.value)} className="flex-1 border-0 bg-transparent text-sm font-medium text-slate-900 focus:outline-none" />
             </div>
-            <div className="relative flex items-center gap-3 rounded-[1.2rem] bg-slate-50/80 px-4 py-3">
-              {/* Timeline connector */}
-              <div className="absolute -top-2 left-[1.65rem] h-2 w-px bg-slate-200" />
+            <div className={`relative flex items-center gap-3 rounded-[1.2rem] px-4 py-3 transition-all duration-500 ${
+              clashes.length > 0
+                ? 'bg-red-50 ring-2 ring-red-400/60 shadow-[0_0_20px_-4px_rgba(239,68,68,0.3)]'
+                : 'bg-slate-50/80'
+            }`}>
+              <div className={`absolute -top-2 left-[1.65rem] h-2 w-px ${clashes.length > 0 ? 'bg-red-300' : 'bg-slate-200'}`} />
               <div className="flex items-center gap-2 text-slate-400">
-                <Clock className="h-4 w-4" />
-                <span className="text-xs font-medium text-slate-500 w-12">End</span>
+                <Clock className={`h-4 w-4 ${clashes.length > 0 ? 'text-red-500' : ''}`} />
+                <span className={`text-xs font-medium w-12 ${clashes.length > 0 ? 'text-red-600' : 'text-slate-500'}`}>End</span>
               </div>
-              <input type="date" name="endDate" className="flex-1 border-0 bg-transparent text-sm font-medium text-slate-900 focus:outline-none" />
+              <input type="date" name="endDate" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="flex-1 border-0 bg-transparent text-sm font-medium text-slate-900 focus:outline-none" />
             </div>
+
+            {/* Clash warning */}
+            {clashes.length > 0 && (
+              <div className="overflow-hidden rounded-[1.2rem] border-2 border-red-400/50 bg-gradient-to-r from-red-50 to-orange-50 shadow-[0_0_24px_-6px_rgba(239,68,68,0.25)]" style={{ animation: 'pulse-border 2s ease-in-out infinite' }}>
+                <div className="flex items-center gap-2.5 border-b border-red-200/60 bg-red-100/50 px-4 py-2.5">
+                  <AlertTriangle className="h-4 w-4 flex-shrink-0 text-red-600" style={{ animation: 'pulse 2s ease-in-out infinite' }} />
+                  <p className="text-sm font-bold text-red-700">
+                    Date clash — {clashes.length} existing {clashes.length === 1 ? 'event overlaps' : 'events overlap'}
+                  </p>
+                </div>
+                <div className="space-y-1 p-2">
+                  {clashes.slice(0, 5).map((c) => (
+                    <Link
+                      key={c.id}
+                      href={`/events/${c.slug}`}
+                      target="_blank"
+                      className="flex items-center justify-between rounded-xl px-3 py-2 transition hover:bg-red-100/50"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-slate-900">{c.title}</p>
+                        <p className="text-[11px] text-slate-500">{c.city}, {c.country} &middot; {c.start_date}{c.end_date ? ` – ${c.end_date}` : ''}</p>
+                      </div>
+                      {c.association && <span className="ml-2 flex-shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-medium text-red-600">{c.association}</span>}
+                    </Link>
+                  ))}
+                  {clashes.length > 5 && (
+                    <p className="px-3 py-1 text-xs text-red-500">+{clashes.length - 5} more overlapping events</p>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Location */}

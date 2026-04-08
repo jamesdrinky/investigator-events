@@ -461,6 +461,11 @@ a {
 }
 
 /* Globe rotation — pure CSS, zero JS cost */
+@keyframes pulse-border {
+  0%, 100% { box-shadow: 0 0 20px -6px rgba(239, 68, 68, 0.25); }
+  50% { box-shadow: 0 0 30px -4px rgba(239, 68, 68, 0.4); }
+}
+
 @keyframes globe-css-spin {
   from { transform: translateX(-50%) rotate(0deg); }
   to { transform: translateX(-50%) rotate(360deg); }

@@ -28,6 +28,11 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const title = event.title;
   const description = `${event.title} — ${event.city}, ${event.country}. ${event.description || 'View event details, attendees, and discussion on Investigator Events.'}`.slice(0, 200);
   const imageSrc = (event.image_path && /^(\/(cities|events|images)\/|https?:\/\/)/.test(event.image_path) ? event.image_path : event.coverImage) ?? '/cities/fallback.jpg';
+
+  // Build absolute image URL for OG tags
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://investigatorevents.com';
+  const ogImage = imageSrc.startsWith('http') ? imageSrc : `${baseUrl}${imageSrc}`;
+
   return {
     title: `${title} | Investigator Events`,
     description,
@@ -36,13 +41,13 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       description,
       type: 'article',
       siteName: 'Investigator Events',
-      ...(imageSrc.startsWith('http') ? { images: [{ url: imageSrc }] } : {}),
+      images: [{ url: ogImage, width: 1200, height: 630, alt: title }],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      ...(imageSrc.startsWith('http') ? { images: [imageSrc] } : {}),
+      images: [ogImage],
     },
   };
 }

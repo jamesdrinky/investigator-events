@@ -100,7 +100,7 @@ export function GlobalSearch({ isDark }: { isDark?: boolean }) {
           onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
           onKeyDown={handleKeyDown}
-          placeholder="Search events & investigators..."
+          placeholder="Search site..."
           className={`w-32 border-0 bg-transparent text-xs outline-none placeholder:text-inherit lg:w-44 ${isDark ? 'text-white' : 'text-slate-800'}`}
         />
       </div>
@@ -176,7 +176,7 @@ export function GlobalSearch({ isDark }: { isDark?: boolean }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Search events & investigators..."
+          placeholder="Search site..."
           className="flex-1 border-0 bg-transparent text-base text-slate-900 outline-none"
           autoFocus
         />

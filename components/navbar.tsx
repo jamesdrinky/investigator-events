@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { GlobalSearch } from '@/components/GlobalSearch';
 import { UserAvatar } from '@/components/UserAvatar';
+import { ShinyButton } from '@/components/ui/shiny-button';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 const desktopNavItems: Array<{ href: Route; label: string }> = [
@@ -21,6 +22,7 @@ const desktopNavItems: Array<{ href: Route; label: string }> = [
 
 const mobileMenuItems: Array<{ href: Route; label: string }> = [
   { href: '/calendar', label: 'Events' },
+  { href: '/calendar?view=calendar' as Route, label: 'Calendar' },
   { href: '/associations', label: 'Associations' },
   { href: '/people', label: 'Community' },
   { href: '/submit-event', label: 'Submit Event' },
@@ -139,7 +141,7 @@ export function Navbar() {
   return (
     <>
       <header className={`sticky top-0 z-50 border-b backdrop-blur-md sm:backdrop-blur-xl ${isDark ? 'border-white/[0.06] bg-[#080f1e]/90' : 'border-slate-200/70 bg-white/92 sm:bg-white/88'}`}>
-        <div className="container-shell flex min-h-[3.25rem] items-center justify-between gap-2.5 py-1.5 sm:min-h-[4rem] sm:gap-3 md:min-h-[4.75rem] md:gap-5 md:py-0">
+        <div className="mx-auto flex min-h-[3.25rem] max-w-7xl items-center gap-2 px-4 py-1.5 sm:min-h-[4rem] sm:gap-2 sm:px-5 md:min-h-[4.75rem] md:gap-3 md:py-0 lg:px-6">
           {/* Logo */}
           <Link href="/" onClick={() => handleNavigation('/')} className="group flex shrink-0 items-center gap-2.5 sm:gap-3">
             <Image
@@ -152,13 +154,13 @@ export function Navbar() {
               sizes="(max-width: 639px) 96px, 112px"
             />
             <div className="hidden sm:block">
-              <p className={`whitespace-nowrap text-[11px] font-semibold tracking-[0.22em] sm:text-sm sm:tracking-[0.26em] ${isDark ? 'text-white' : 'text-slate-950'}`}>INVESTIGATOR EVENTS</p>
-              <p className={`hidden whitespace-nowrap text-[10px] uppercase tracking-[0.2em] md:block ${isDark ? 'text-white/40' : 'text-slate-500'}`}>Global event discovery</p>
+              <p className={`whitespace-nowrap text-[11px] font-semibold tracking-[0.14em] sm:text-[13px] sm:tracking-[0.16em] ${isDark ? 'text-white' : 'text-slate-950'}`}>INVESTIGATOR EVENTS</p>
+              <p className={`hidden whitespace-nowrap text-[10px] uppercase tracking-[0.14em] md:block ${isDark ? 'text-white/40' : 'text-slate-500'}`}>Global event discovery</p>
             </div>
           </Link>
 
           {/* Desktop nav */}
-          <nav aria-label="Main navigation" className="hidden items-center gap-6 lg:flex">
+          <nav aria-label="Main navigation" className="hidden min-w-0 flex-1 items-center gap-0.5 lg:flex">
             {desktopNavItems.map((item) => {
               const active = isActiveRoute(pathname, item.href);
               return (
@@ -166,21 +168,20 @@ export function Navbar() {
                   key={item.href}
                   href={item.href}
                   onClick={() => handleNavigation(item.href)}
-                  className={`relative py-2 text-sm font-medium ${
+                  className={`rounded-full px-3 py-1.5 text-[13px] font-semibold transition-all duration-200 ${
                     isDark
-                      ? (active ? 'text-white' : 'text-white/50 hover:text-white')
-                      : (active ? 'text-slate-950' : 'text-slate-600 hover:text-slate-950')
+                      ? (active ? 'bg-white/15 text-white' : 'text-white/50 hover:bg-white/8 hover:text-white')
+                      : (active ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900')
                   }`}
                 >
                   {item.label}
-                  <span className={`absolute inset-x-0 -bottom-[1px] h-[2px] rounded-full bg-[linear-gradient(90deg,#1668ff,#14b8ff,#645bff)] transition ${active ? 'scale-x-100' : 'scale-x-0'}`} />
                 </Link>
               );
             })}
           </nav>
 
           {/* Search + Right side */}
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <GlobalSearch isDark={isDark} />
             {user ? (
               <div ref={dropdownRef} className="relative flex items-center gap-2">
@@ -239,15 +240,12 @@ export function Navbar() {
                 <Link
                   href="/signin"
                   onClick={() => handleNavigation('/signin' as Route)}
-                  className={`hidden text-sm font-medium sm:inline-flex ${isDark ? 'text-white/70 hover:text-white' : 'text-slate-600 hover:text-slate-950'}`}
+                  className={`hidden whitespace-nowrap rounded-full px-4 py-1.5 text-xs font-semibold transition sm:inline-flex ${isDark ? 'bg-white/15 text-white hover:bg-white/25' : 'bg-slate-900 text-white hover:bg-slate-800 shadow-sm'}`}
                 >
                   Sign in
                 </Link>
-                <Link
-                  href="/weekly"
-                  className="btn-glow-nav hidden min-h-[2.5rem] px-3.5 text-xs sm:inline-flex sm:px-4 md:text-sm"
-                >
-                  Subscribe Free
+                <Link href="/weekly" className="hidden sm:inline-flex">
+                  <ShinyButton className="whitespace-nowrap px-3 py-1.5 text-xs">Subscribe Free</ShinyButton>
                 </Link>
               </>
             )}
@@ -324,17 +322,22 @@ export function Navbar() {
               transition: 'transform 0.4s cubic-bezier(0.16,1,0.3,1) 0.35s, opacity 0.3s ease 0.35s',
             }}
           >
-            <Link
-              href="/weekly"
-              onClick={() => { handleNavigation('/weekly' as Route); }}
-              className="btn-glow inline-flex w-full justify-center px-6 py-4 text-base"
-            >
-              Subscribe Free
+            {!user && (
+              <Link
+                href="/signin"
+                onClick={() => handleNavigation('/signin' as Route)}
+                className="inline-flex w-full justify-center rounded-full border-2 border-slate-900 bg-slate-900 px-6 py-3.5 text-base font-semibold text-white transition hover:bg-slate-800"
+              >
+                Sign in
+              </Link>
+            )}
+            <Link href="/weekly" onClick={() => { handleNavigation('/weekly' as Route); }}>
+              <ShinyButton className="w-full px-6 py-4 text-base">Subscribe Free</ShinyButton>
             </Link>
             <Link
               href="/calendar"
               onClick={() => handleNavigation('/calendar')}
-              className="btn-glow-outline inline-flex w-full justify-center px-6 py-3.5 text-sm"
+              className="inline-flex w-full justify-center rounded-full border border-slate-200 bg-white px-6 py-3.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
             >
               Browse Events
             </Link>

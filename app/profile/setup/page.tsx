@@ -45,17 +45,31 @@ export default function ProfileSetupPage() {
       if (!data.user) { router.push('/signin'); return; }
 
       // Check if profile already exists with a username — if so, skip setup
-      const { data: profile } = await supabase.from('profiles').select('username').eq('id', data.user.id).single();
+      const { data: profile } = await supabase.from('profiles').select('username, full_name, avatar_url, country').eq('id', data.user.id).single();
       if (profile?.username) { router.push(`/profile/${profile.username}`); return; }
+
+      // If profile exists with a name but no username (partial setup), auto-fix it
+      if (profile?.full_name && !profile.username) {
+        const autoUsername = profile.full_name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        if (autoUsername) {
+          await supabase.from('profiles').update({
+            username: autoUsername,
+            country: profile.country || 'United Kingdom',
+          }).eq('id', data.user.id);
+          router.push(`/profile/${autoUsername}`);
+          return;
+        }
+      }
 
       const meta = data.user.user_metadata;
       setUserId(data.user.id);
       setFullName(meta?.full_name ?? '');
+      if (profile?.avatar_url) setAvatarUrl(profile.avatar_url);
     });
   }, [router]);
 
   const canContinue = () => {
-    if (step === 1) return !!avatarUrl;
+    if (step === 1) return true; // Avatar is optional — can skip
     if (step === 2) return !!fullName.trim();
     if (step === 3) return !!country;
     return false;

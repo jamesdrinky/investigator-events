@@ -279,7 +279,7 @@ export function CalendarGrid({ events, monthKey, selectedDate, onSelectDate }: C
                         <div className="flex items-center justify-between">
                           <span className={`text-sm font-bold transition-colors duration-300 ${
                             isHovered && hasEvents ? 'text-white' : today && !hasEvents ? 'text-white' : 'text-slate-900'
-                          }`}>{cell.day}</span>
+                          }`}>{cell.day}{today && <span className="ml-1 text-[9px] font-semibold uppercase tracking-wider opacity-60">Today</span>}</span>
                           {isClash && (
                             <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold transition-all duration-300 ${
                               isHovered ? 'bg-red-500 text-white shadow-lg shadow-red-500/40' : 'bg-red-50 text-red-600 border border-red-200'

@@ -11,7 +11,7 @@ import { getEventSlug } from '@/lib/utils/event-slugs';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Calendar',
+  title: 'PI Events Calendar 2026',
   description: 'Browse confirmed PI conferences, AGMs, training, and association events by month, region, country, and organiser.'
 };
 

@@ -4,7 +4,7 @@ const ROW_1 = [
   { src: '/associations/abi.png', name: 'ABI' },
   { src: '/associations/cii.png', name: 'CII' },
   { src: '/associations/wad.png', name: 'WAD' },
-  { src: '/associations/budeg.png', name: 'BUDEG' },
+  { src: '/associations/budeg.png', name: 'BuDEG' },
   { src: '/associations/cali.png', name: 'CALI' },
   { src: '/associations/fali.png', name: 'FALI' },
   { src: '/associations/federpol.png', name: 'Federpol' },
@@ -34,7 +34,7 @@ function LoopRow({ logos, direction }: { logos: typeof ROW_1; direction: 'left' 
   return (
     <div className="relative overflow-hidden">
       <div className={`flex w-max gap-6 ${cls}`}>
-        {[...logos, ...logos, ...logos, ...logos].map((logo, i) => (
+        {[...logos, ...logos].map((logo, i) => (
           <LogoChip key={`${logo.name}-${i}`} src={logo.src} name={logo.name} />
         ))}
       </div>

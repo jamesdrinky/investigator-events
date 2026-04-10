@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Hide scrollbar globally */
+html { scrollbar-width: none; }
+html::-webkit-scrollbar { display: none; }
+
 /* Hide scrollbar for jump-bar etc */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

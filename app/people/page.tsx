@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Search, ShieldCheck, UserPlus, UserCheck, Users, TrendingUp } from 'lucide-react';
+import { Search, ShieldCheck, UserPlus, UserCheck, Users, TrendingUp, Globe, BookUser } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { getCountryFlag } from '@/lib/utils/location';
 import { CommunityFeed } from '@/components/CommunityFeed';
-import { LFGBoard } from '@/components/LFGBoard';
+import { CaseReferralBoard } from '@/components/CaseReferralBoard';
 
 type Person = {
   id: string; full_name: string | null; avatar_url: string | null;
@@ -146,7 +146,7 @@ export default function PeoplePage() {
               onClick={() => setTab('lfg')}
               className={`flex items-center gap-1.5 rounded-full px-5 py-2 text-sm font-semibold transition ${tab === 'lfg' ? 'bg-blue-600 text-white shadow' : 'text-slate-500 hover:text-slate-700'}`}
             >
-              Looking For
+              Referrals
             </button>
             <button
               type="button"
@@ -156,12 +156,22 @@ export default function PeoplePage() {
               <Users className="h-4 w-4" /> Discover
             </button>
           </div>
+
+          {/* Quick links */}
+          <div className="mx-auto mt-4 flex flex-wrap items-center justify-center gap-3">
+            <Link href="/directory" className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white px-4 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:border-blue-200 hover:text-blue-600">
+              <BookUser className="h-3.5 w-3.5" /> Find a PI
+            </Link>
+            <Link href="/network" className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white px-4 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:border-blue-200 hover:text-blue-600">
+              <Globe className="h-3.5 w-3.5" /> Global Network Map
+            </Link>
+          </div>
         </div>
       </div>
 
       <div className="container-shell py-8 sm:py-12">
         {tab === 'lfg' ? (
-          <LFGBoard />
+          <CaseReferralBoard />
         ) : tab === 'feed' ? (
           <div className="grid gap-8 lg:grid-cols-[1fr_20rem]">
             {/* Main feed */}

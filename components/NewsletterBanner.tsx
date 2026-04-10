@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Mail } from 'lucide-react';
+import { X, Zap } from 'lucide-react';
 
 const STORAGE_KEY = 'ie_newsletter_dismissed';
 
@@ -12,17 +12,18 @@ export function NewsletterBanner() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    // Show after a short delay, only if not dismissed
     const dismissed = localStorage.getItem(STORAGE_KEY);
-    if (!dismissed) {
-      const timer = setTimeout(() => setVisible(true), 3000);
-      return () => clearTimeout(timer);
+    if (dismissed === 'subscribed') return;
+    if (dismissed) {
+      const dismissedAt = parseInt(dismissed, 10);
+      if (Date.now() - dismissedAt < 24 * 60 * 60 * 1000) return;
     }
+    const timer = setTimeout(() => setVisible(true), 4000);
+    return () => clearTimeout(timer);
   }, []);
 
   const dismiss = () => {
     setVisible(false);
-    // Dismiss for 7 days
     localStorage.setItem(STORAGE_KEY, Date.now().toString());
   };
 
@@ -46,9 +47,8 @@ export function NewsletterBanner() {
       }
 
       setStatus('success');
-      setMessage(data?.message ?? 'Subscribed!');
+      setMessage('You\'re in! Check your inbox.');
       setEmail('');
-      // Permanently dismiss after subscribing
       localStorage.setItem(STORAGE_KEY, 'subscribed');
       setTimeout(() => setVisible(false), 3000);
     } catch {
@@ -61,39 +61,43 @@ export function NewsletterBanner() {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-[60] animate-in slide-in-from-bottom duration-500">
-      <div className="mx-auto max-w-3xl px-4 pb-4">
-        <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white/95 p-4 shadow-2xl backdrop-blur-xl sm:p-5">
-          {/* Close button */}
+      <div className="mx-auto max-w-2xl px-4 pb-4">
+        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-slate-950 shadow-2xl shadow-black/40">
+          {/* Ambient glow */}
+          <div className="pointer-events-none absolute -left-20 -top-20 h-40 w-40 rounded-full bg-blue-500/20 blur-[60px]" />
+          <div className="pointer-events-none absolute -bottom-20 -right-20 h-40 w-40 rounded-full bg-indigo-500/15 blur-[60px]" />
+
+          {/* Close */}
           <button
             type="button"
             onClick={dismiss}
-            className="absolute right-3 top-3 rounded-full p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            className="absolute right-3 top-3 z-10 rounded-full p-1.5 text-white/30 transition hover:bg-white/10 hover:text-white/60"
           >
             <X className="h-4 w-4" />
           </button>
 
           {status === 'success' ? (
-            <div className="flex items-center gap-3 pr-8">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100">
-                <Mail className="h-5 w-5 text-emerald-600" />
+            <div className="relative flex items-center gap-3 p-5">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500/20">
+                <Zap className="h-5 w-5 text-emerald-400" />
               </div>
-              <p className="text-sm font-medium text-emerald-700">{message}</p>
+              <p className="text-sm font-semibold text-emerald-400">{message}</p>
             </div>
           ) : (
-            <>
-              <div className="mb-3 flex items-start gap-3 pr-8">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-50">
-                  <Mail className="h-5 w-5 text-blue-600" />
+            <div className="relative p-5 sm:p-6">
+              <div className="flex items-start gap-3 pr-8">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/25">
+                  <Zap className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">Stay in the loop</p>
-                  <p className="text-xs text-slate-500">
-                    Weekly brief — new events, approaching dates, one featured listing. Free, no spam.
+                  <p className="text-base font-bold text-white">Don&apos;t miss the next big event</p>
+                  <p className="mt-0.5 text-sm text-slate-400">
+                    Join <span className="font-semibold text-blue-400">500+ investigators</span> getting the weekly brief — new events, dates, and one featured listing.
                   </p>
                 </div>
               </div>
 
-              <form onSubmit={handleSubmit} className="flex gap-2">
+              <form onSubmit={handleSubmit} className="mt-4 flex gap-2">
                 <input
                   type="email"
                   required
@@ -101,26 +105,26 @@ export function NewsletterBanner() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Your email"
                   disabled={status === 'loading'}
-                  className="h-10 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
+                  className="h-11 flex-1 rounded-xl border border-white/10 bg-white/5 px-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-blue-500/50 focus:bg-white/8 focus:ring-2 focus:ring-blue-500/20"
                 />
                 <button
                   type="submit"
                   disabled={status === 'loading'}
-                  className="h-10 rounded-xl bg-blue-600 px-4 text-sm font-medium text-white transition hover:bg-blue-700 disabled:opacity-60 sm:px-5"
+                  className="h-11 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 px-5 text-sm font-bold text-white shadow-lg shadow-blue-500/25 transition hover:from-blue-400 hover:to-indigo-500 disabled:opacity-60 sm:px-6"
                 >
-                  {status === 'loading' ? 'Subscribing...' : 'Subscribe'}
+                  {status === 'loading' ? '...' : 'Subscribe free'}
                 </button>
               </form>
 
               {status === 'error' && (
-                <p className="mt-2 text-xs text-rose-600">{message}</p>
+                <p className="mt-2 text-xs text-rose-400">{message}</p>
               )}
 
-              <p className="mt-2 text-[10px] text-slate-400">
-                By subscribing you consent to receive our weekly newsletter. Unsubscribe anytime.{' '}
-                <a href="/privacy" className="underline hover:text-slate-600">Privacy policy</a>
+              <p className="mt-3 text-[10px] text-slate-500">
+                Free forever. No spam. Unsubscribe anytime.{' '}
+                <a href="/privacy" className="underline hover:text-slate-400">Privacy policy</a>
               </p>
-            </>
+            </div>
           )}
         </div>
       </div>

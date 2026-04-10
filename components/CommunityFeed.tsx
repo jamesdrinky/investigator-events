@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
-import { Heart, MessageCircle, Send, ImagePlus, LinkIcon, X, Trash2, Pin } from 'lucide-react';
+import { Heart, MessageCircle, Send, ImagePlus, LinkIcon, X, Trash2, Pin, Share2 } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { UserAvatar } from '@/components/UserAvatar';
 import { WelcomeBanner } from '@/components/WelcomeBanner';
@@ -375,7 +375,12 @@ export function CommunityFeed() {
                 {/* Stats */}
                 {(post.likes_count > 0 || post.comments_count > 0) && (
                   <div className="mx-5 mt-3 flex items-center gap-4 text-xs text-slate-400">
-                    {post.likes_count > 0 && <span>{post.likes_count} like{post.likes_count !== 1 ? 's' : ''}</span>}
+                    {post.likes_count > 0 && (
+                      <span className="flex items-center gap-1">
+                        <Heart className="h-3 w-3 fill-blue-500 text-blue-500" />
+                        {post.likes_count}
+                      </span>
+                    )}
                     {post.comments_count > 0 && (
                       <button type="button" onClick={() => toggleComments(post.id)} className="hover:text-slate-600">
                         {post.comments_count} comment{post.comments_count !== 1 ? 's' : ''}
@@ -401,6 +406,21 @@ export function CommunityFeed() {
                     className="flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-50"
                   >
                     <MessageCircle className="h-4 w-4" /> Comment
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const url = `${window.location.origin}/people?post=${post.id}`;
+                      const text = `${post.full_name ?? 'Someone'} on Investigator Events: "${post.content.slice(0, 100)}${post.content.length > 100 ? '...' : ''}"`;
+                      if (navigator.share) {
+                        await navigator.share({ title: 'Investigator Events', text, url });
+                      } else {
+                        window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
+                      }
+                    }}
+                    className="flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-50"
+                  >
+                    <Share2 className="h-4 w-4" /> Share
                   </button>
                 </div>
 

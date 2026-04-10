@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import type { Route } from 'next';
+import { ShinyButton } from '@/components/ui/shiny-button';
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import { useMemo, useRef, useState, useEffect, useCallback } from 'react';
 import { geoOrthographic, geoPath, geoGraticule } from 'd3-geo';
@@ -462,17 +462,14 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               ease: [0.16, 1, 0.3, 1],
             }}
           >
-            <Link
-              href="/calendar"
-              className="btn-glow min-h-[3.5rem] w-full px-8 py-3.5 text-[15px] sm:w-auto sm:px-10 sm:py-4 sm:text-base"
-            >
-              Browse PI Events
+            <Link href="/calendar">
+              <ShinyButton className="min-h-[3.5rem] w-full px-8 py-3.5 text-[15px] sm:w-auto sm:px-10 sm:py-4 sm:text-base">Browse PI Events</ShinyButton>
             </Link>
             <Link
-              href={'/list-your-event' as Route}
-              className="btn-glow-outline min-h-[3.5rem] w-full px-8 py-3.5 text-[15px] sm:w-auto sm:px-10 sm:py-4 sm:text-base"
+              href="/submit-event"
+              className="inline-flex min-h-[3.5rem] w-full items-center justify-center rounded-full border border-slate-300 bg-white px-8 py-3.5 text-[15px] font-semibold text-slate-700 transition hover:bg-slate-50 sm:w-auto sm:px-10 sm:py-4 sm:text-base"
             >
-              List Your Event Free
+              Submit Your Event
             </Link>
           </motion.div>
 

@@ -159,6 +159,8 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
     return monthKeys.includes(current) ? current : monthKeys.find((mk) => mk >= current) ?? monthKeys[0] ?? current;
   });
   const calRef = useRef<HTMLElement | null>(null);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const [visibleMonths, setVisibleMonths] = useState(3);
 
   const regions = useMemo(() => {
     const f = filters.country === 'All' ? sorted : sorted.filter((e) => e.country === filters.country);
@@ -193,9 +195,41 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
   const monthOpts = monthKeys.map((mk) => formatMonthLabel(mk));
   const empty = filtered.length === 0;
 
+  // Reset visible months when month groups change (e.g. filters change)
+  useEffect(() => { setVisibleMonths(3); }, [monthGroups]);
+
+  // IntersectionObserver to load more month groups on scroll
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setVisibleMonths((prev) => prev + 3);
+        }
+      },
+      { rootMargin: '200px' },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [visibleMonths, monthGroups]);
+
   useEffect(() => { if (filters.month === 'All') return; const m = monthKeys.find((mk) => formatMonthLabel(mk) === filters.month); if (m) setCalendarMK(m); }, [filters.month, monthKeys]);
   useEffect(() => { setPreviewDate(null); }, [calendarMK]);
   useEffect(() => { if (view === 'calendar') calRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, [view]);
+
+  // When filters change, jump calendar to first month with results
+  const prevFiltersRef = useRef(filters);
+  useEffect(() => {
+    const prev = prevFiltersRef.current;
+    prevFiltersRef.current = filters;
+    const changed = prev.country !== filters.country || prev.region !== filters.region || prev.association !== filters.association || prev.category !== filters.category;
+    if (!changed || filtered.length === 0) return;
+    const firstMonth = getMonthKey(filtered[0].date);
+    if (view === 'calendar') {
+      setCalendarMK(firstMonth);
+    }
+  }, [filters, filtered, view]);
 
   return (
     <div className="space-y-6">
@@ -233,9 +267,12 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
           {/* Month-by-month horizontal scrolling strips */}
           {!empty ? (
             <div className="space-y-8">
-              {monthGroups.map((g) => (
+              {monthGroups.slice(0, visibleMonths).map((g) => (
                 <MonthEventStrip key={g.monthKey} events={g.events} label={g.label} countryCount={g.countryCount} />
               ))}
+              {visibleMonths < monthGroups.length && (
+                <div ref={sentinelRef} className="h-px" />
+              )}
             </div>
           ) : (
             <div className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-600">

@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Reveal } from '@/components/motion/reveal';
+import { ShinyButton } from '@/components/ui/shiny-button';
 
 export function FounderQuoteSection() {
   const reducedMotion = useReducedMotion();
@@ -49,12 +50,12 @@ export function FounderQuoteSection() {
                       &ldquo;I have spent my career in this industry and I still get a buzz walking into a room full of investigators. The problem was never a lack of good events. It was that nobody could see them all in one place.&rdquo;
                     </blockquote>
                     <p className="mt-3 text-sm font-semibold text-slate-950">Mike LaCorte</p>
-                    <p className="mt-0.5 text-xs text-slate-400">Founder · CEO, Conflict International</p>
+                    <p className="mt-0.5 text-xs text-slate-400">Founder, Investigator Events</p>
                     <Link
-                      href="/about"
+                      href="/profile/mikelacorte"
                       className="mt-3 inline-flex items-center text-sm font-semibold text-blue-600"
                     >
-                      Read more →
+                      View profile →
                     </Link>
                   </div>
                 </div>
@@ -99,15 +100,11 @@ export function FounderQuoteSection() {
                     <div className="mt-8">
                       <p className="text-lg font-semibold text-slate-950">Mike LaCorte</p>
                       <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-slate-500 lg:mx-0">
-                        Founder, Investigator Events · CEO, Conflict International · President, Association
-                        of British Investigators · Secretary General, IKD
+                        Founder, Investigator Events
                       </p>
                     </div>
-                    <Link
-                      href="/about"
-                      className="btn-glow mt-8 inline-flex px-6 py-3 text-sm"
-                    >
-                      Read the full story →
+                    <Link href="/profile/mikelacorte" className="mt-8 inline-flex">
+                      <ShinyButton className="px-6 py-3 text-sm">View profile</ShinyButton>
                     </Link>
                   </div>
                 </div>

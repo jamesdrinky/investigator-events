@@ -238,7 +238,7 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
   if (!userId) return <div className="flex min-h-[60vh] items-center justify-center"><p className="text-sm text-slate-400">Please sign in to use messaging.</p></div>;
 
   return (
-    <div className="relative mx-auto flex h-[calc(100vh-8rem)] max-w-5xl overflow-hidden rounded-2xl border border-white/10 bg-slate-950 shadow-2xl shadow-black/40">
+    <div className="relative mx-auto flex h-full w-full max-w-5xl overflow-hidden rounded-2xl border border-white/10 bg-slate-950 shadow-2xl shadow-black/40">
       {/* Ambient glow effects */}
       <div className="pointer-events-none absolute -left-32 -top-32 h-80 w-80 rounded-full bg-indigo-500/10 blur-[100px]" />
       <div className="pointer-events-none absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-purple-500/8 blur-[100px]" />

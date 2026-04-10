@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { motion, useScroll, useTransform } from 'framer-motion';
@@ -479,6 +480,12 @@ export function AdviceContent() {
         />
       </div>
 
+      {/* ── Photo divider — roundtable ── */}
+      <div className="relative h-48 w-full overflow-hidden sm:h-64 lg:h-80" style={{ contain: 'layout paint' }}>
+        <Image src="/conference/conference2.jpg" alt="Investigators in discussion at a roundtable session" fill className="object-cover object-[center_35%]" sizes="100vw" loading="eager" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#f0f4ff]/60 via-transparent to-[#080f1e]/80" />
+      </div>
+
       {/* ══════════════════════════════════════════
           SECTION 3 — DARK: Networking (with shader)
          ══════════════════════════════════════════ */}
@@ -527,6 +534,12 @@ export function AdviceContent() {
             </div>
           </Reveal>
         </div>
+      </div>
+
+      {/* ── Photo divider — networking ── */}
+      <div className="relative h-48 w-full overflow-hidden sm:h-64 lg:h-80" style={{ contain: 'layout paint' }}>
+        <Image src="/conference/conference3.jpg" alt="Investigators networking between conference sessions" fill className="object-cover" sizes="100vw" loading="eager" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#f8faff]/40 via-transparent to-white/60" />
       </div>
 
       {/* ══════════════════════════════════════════

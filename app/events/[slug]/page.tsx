@@ -79,8 +79,40 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
     .sort((a, b) => Math.abs(parseDate(a.date).getTime() - parseDate(event.date ?? a.date).getTime()) - Math.abs(parseDate(b.date).getTime() - parseDate(event.date ?? b.date).getTime()))
     .slice(0, 3);
 
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://investigatorevents.com';
+  const absoluteImageUrl = imageSrc.startsWith('http') ? imageSrc : `${baseUrl}${imageSrc}`;
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: title,
+    description: event.description,
+    startDate: event.date,
+    endDate: event.endDate || event.date,
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    location: {
+      '@type': 'Place',
+      name: `${city}, ${country}`,
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: city,
+        addressCountry: country,
+      },
+    },
+    organizer: {
+      '@type': 'Organization',
+      name: organiser,
+    },
+    image: absoluteImageUrl,
+    url: `${baseUrl}/events/${slug}`,
+  };
+
   return (
     <section className="relative overflow-hidden">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* ── Hero — full-width cover image ── */}
       <div className="relative h-[28rem] w-full overflow-hidden sm:h-[36rem] lg:h-[40rem]">
         <Image src={imageSrc} alt={title} fill className="object-cover" priority />

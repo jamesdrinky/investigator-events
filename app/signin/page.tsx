@@ -7,8 +7,6 @@ import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 
 const testimonials = [
   { avatarSrc: '/faces/mike2.png', name: 'Mike LaCorte', role: 'CEO, Conflict International', text: 'One calendar for the entire industry. This is what we needed.' },
-  { avatarSrc: 'https://randomuser.me/api/portraits/men/32.jpg', name: 'David Chen', role: 'Corporate Investigator', text: "I've found three conferences I would have missed. Already booked two." },
-  { avatarSrc: 'https://randomuser.me/api/portraits/women/44.jpg', name: 'Sarah Williams', role: 'Due Diligence Specialist', text: 'Finally a place to see what\'s happening across the profession globally.' },
 ];
 
 export default function SignInPage() {

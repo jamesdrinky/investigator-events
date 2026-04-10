@@ -1,6 +1,7 @@
 import { createSupabasePublicServerClient } from '@/lib/supabase/public';
 import type { Database } from '@/lib/types/database';
 import { slugifyEventTitle } from '@/lib/utils/event-slugs';
+import { getEventImage, getCityHeroImageUrl } from '@/lib/utils/city-media';
 
 export interface EventItem {
   id: string;
@@ -69,7 +70,7 @@ export function mapEventRowToItem(row: CompatEventRow): EventItem | null {
     description: row.description ?? '',
     website: row.website,
     image_path: row.image_path ?? undefined,
-    coverImage: row.image_path ?? row.cover_image_url ?? row.image_url ?? row.image ?? undefined,
+    coverImage: row.image_path ?? row.cover_image_url ?? row.image_url ?? row.image ?? getEventImage(row.slug ?? slugifyEventTitle(row.title)) ?? getCityHeroImageUrl(row.city) ?? undefined,
     coverImageAlt: row.cover_image_alt ?? undefined,
     featured: row.featured ?? false,
     approved: row.approved ?? true,

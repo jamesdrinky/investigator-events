@@ -66,18 +66,23 @@ export async function GET(request: Request) {
             // Redirect new OAuth users to profile setup
             return NextResponse.redirect(`${origin}/profile/setup`);
           } else {
-            // Existing user — update auth_provider if not set, backfill avatar if missing
-            const updates: Record<string, string> = {};
+            // Existing user — always update auth_provider, backfill missing data
+            const updates: Record<string, string | null> = {
+              auth_provider: provider,
+            };
             if (!existing.avatar_url && avatarUrl) updates.avatar_url = avatarUrl;
             if (!existing.full_name && fullName) updates.full_name = fullName;
-            if (linkedinUrl) updates.linkedin_url = linkedinUrl;
-
-            if (Object.keys(updates).length > 0 || provider !== 'email') {
-              await admin.from('profiles').update({
-                ...updates,
-                auth_provider: provider,
-              } as any).eq('id', user.id);
+            if (provider === 'linkedin_oidc') {
+              // Build LinkedIn profile URL from user identity if not in metadata
+              const linkedinIdentity = user.identities?.find((i) => i.provider === 'linkedin_oidc');
+              const resolvedLinkedinUrl = linkedinUrl
+                || (linkedinIdentity?.identity_data as any)?.profile_url
+                || (linkedinIdentity?.identity_data as any)?.linkedin_url
+                || null;
+              if (resolvedLinkedinUrl) updates.linkedin_url = resolvedLinkedinUrl;
             }
+
+            await admin.from('profiles').update(updates as any).eq('id', user.id);
           }
         }
       } catch (e) {

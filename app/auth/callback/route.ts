@@ -35,7 +35,11 @@ export async function GET(request: Request) {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          const provider = user.app_metadata?.provider ?? 'email';
+          // provider = original signup method, providers = all linked methods
+          const providers: string[] = user.app_metadata?.providers ?? [];
+          const currentProvider = user.app_metadata?.provider ?? 'email';
+          // Use the best provider: prefer linkedin_oidc if it's linked
+          const provider = providers.includes('linkedin_oidc') ? 'linkedin_oidc' : currentProvider;
           const meta = user.user_metadata ?? {};
           const fullName = meta.full_name || meta.name || null;
           const avatarUrl = meta.avatar_url || meta.picture || null;
@@ -45,9 +49,10 @@ export async function GET(request: Request) {
           // Check if profile exists
           const { data: existing } = await admin.from('profiles').select('id, full_name, avatar_url').eq('id', user.id).single();
 
-          // Extract LinkedIn profile URL from identity data if available
-          const linkedinUrl = provider === 'linkedin_oidc'
-            ? (meta.linkedin_url || meta.profile_url || (user.identities?.[0]?.identity_data as any)?.profile_url || null)
+          // Extract LinkedIn profile URL from the LinkedIn identity specifically
+          const linkedinIdentity = user.identities?.find((i) => i.provider === 'linkedin_oidc');
+          const linkedinUrl = linkedinIdentity
+            ? ((linkedinIdentity.identity_data as any)?.profile_url || (linkedinIdentity.identity_data as any)?.linkedin_url || meta.linkedin_url || meta.profile_url || null)
             : null;
 
           if (!existing) {
@@ -72,15 +77,7 @@ export async function GET(request: Request) {
             };
             if (!existing.avatar_url && avatarUrl) updates.avatar_url = avatarUrl;
             if (!existing.full_name && fullName) updates.full_name = fullName;
-            if (provider === 'linkedin_oidc') {
-              // Build LinkedIn profile URL from user identity if not in metadata
-              const linkedinIdentity = user.identities?.find((i) => i.provider === 'linkedin_oidc');
-              const resolvedLinkedinUrl = linkedinUrl
-                || (linkedinIdentity?.identity_data as any)?.profile_url
-                || (linkedinIdentity?.identity_data as any)?.linkedin_url
-                || null;
-              if (resolvedLinkedinUrl) updates.linkedin_url = resolvedLinkedinUrl;
-            }
+            if (linkedinUrl) updates.linkedin_url = linkedinUrl;
 
             await admin.from('profiles').update(updates as any).eq('id', user.id);
           }

@@ -125,7 +125,12 @@ export default function EditProfilePage() {
         const profileBadges = profile.badges as string[] | null;
         if (profileBadges) setSelectedBadges(profileBadges);
         setLinkedinUrl((profile as any).linkedin_url ?? '');
-        setAuthProvider((profile as any).auth_provider ?? null);
+
+        // Check auth_provider from profile, but also check live auth state
+        const storedProvider = (profile as any).auth_provider;
+        const providers: string[] = data.user?.app_metadata?.providers ?? [];
+        const hasLinkedIn = providers.includes('linkedin_oidc') || storedProvider === 'linkedin_oidc';
+        setAuthProvider(hasLinkedIn ? 'linkedin_oidc' : storedProvider ?? null);
       }
 
       // Load profile sections

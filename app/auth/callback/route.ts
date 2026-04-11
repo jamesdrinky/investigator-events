@@ -79,7 +79,7 @@ export async function GET(request: Request) {
             if (!existing.full_name && fullName) updates.full_name = fullName;
             if (linkedinUrl) updates.linkedin_url = linkedinUrl;
 
-            await admin.from('profiles').update(updates as any).eq('id', user.id);
+            await (admin.from('profiles') as any).update(updates).eq('id', user.id);
           }
         }
       } catch (e) {

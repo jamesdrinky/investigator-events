@@ -49,6 +49,13 @@ export default async function PublicProfilePage({ params }: { params: { username
   const flag = profile.country ? getCountryFlag(profile.country) : '';
   const badges = (profile.badges as string[] | null) ?? [];
 
+  // Determine auth provider — check DB field, but also check live auth for the profile owner
+  const dbAuthProvider = (profile as any).auth_provider as string | null;
+  const liveProviders: string[] = (isOwner && user?.app_metadata?.providers) || [];
+  const authProvider = (liveProviders.includes('linkedin_oidc') || dbAuthProvider === 'linkedin_oidc')
+    ? 'linkedin_oidc'
+    : dbAuthProvider;
+
   const { data: assocs } = await supabase.from('user_associations').select('*').eq('user_id', profile.id);
   const { data: verifs } = await supabase.from('member_verifications').select('association_name, status, expires_at').eq('user_id', profile.id);
   const activeVerifications = (verifs ?? []).filter((v: any) => v.status === 'verified' && (!v.expires_at || new Date(v.expires_at) > new Date()));
@@ -79,7 +86,6 @@ export default async function PublicProfilePage({ params }: { params: { username
     ? await supabase.from('events').select('id, title, slug, city, country').in('id', reviewEventIds) : { data: [] };
   const eventMap = new Map((reviewedEvents ?? []).map((e) => [e.id, e]));
 
-  const authProvider = (profile as any).auth_provider as string | null;
   const isLinkedInVerified = authProvider === 'linkedin_oidc';
   const isFullyVerified = isLinkedInVerified || activeVerifications.length > 0;
   const hasHeadline = !!(profile.headline || profile.specialisation);

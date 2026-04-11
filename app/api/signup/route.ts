@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
+import { enforceRateLimit, assertSameOriginRequest } from '@/lib/security/server';
 
 export async function POST(request: Request) {
   try {
+    enforceRateLimit('signup', { maxRequests: 5, windowMs: 60_000 });
+    assertSameOriginRequest();
+
     const body = await request.json().catch(() => null);
     const email = body?.email?.trim().toLowerCase();
     const password = body?.password;

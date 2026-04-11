@@ -52,7 +52,7 @@ export function ExpandingEventCards({ items }: { items: ExpandingEventItem[] }) 
       className="grid w-full gap-2"
       style={{
         ...gridStyle,
-        height: isDesktop ? '480px' : '600px',
+        height: isDesktop ? '480px' : 'min(600px, 75vh)',
         transition: 'grid-template-columns 0.45s cubic-bezier(0.4,0,0.2,1), grid-template-rows 0.45s cubic-bezier(0.4,0,0.2,1)',
         willChange: 'grid-template-columns, grid-template-rows',
         contain: 'layout style',

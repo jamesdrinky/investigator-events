@@ -67,7 +67,7 @@ export function CinematicNewsletterPage() {
   const heroScale = useTransform(scrollYProgress, [0, 0.15], [1, 1.08]);
 
   return (
-    <div ref={containerRef} className="relative min-h-[280vh]">
+    <div ref={containerRef} className="relative min-h-[200vh] sm:min-h-[280vh]">
       {/* ── Sticky viewport ── */}
       <div className="sticky top-0 h-screen overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_25%,#f0e8ff_50%,#f4f0ff_75%,#f8fbff_100%)]" />
@@ -91,7 +91,7 @@ export function CinematicNewsletterPage() {
 
         {/* Dark card */}
         <motion.div style={{ scale: cardScale, y: cardY }} className="absolute inset-0 z-20 flex items-center justify-center px-3 sm:px-4">
-          <div className="relative w-full max-w-5xl overflow-hidden rounded-[1.5rem] border border-white/10 bg-[linear-gradient(145deg,#06091a,#0d1840)] p-5 shadow-[0_40px_120px_-40px_rgba(0,0,50,0.5)] sm:rounded-[2.5rem] sm:p-10 lg:p-12">
+          <div className="relative w-full max-w-5xl overflow-hidden rounded-[1.2rem] border border-white/10 bg-[linear-gradient(145deg,#06091a,#0d1840)] p-4 shadow-[0_40px_120px_-40px_rgba(0,0,50,0.5)] sm:rounded-[2.5rem] sm:p-10 lg:p-12">
             <div className="pointer-events-none absolute left-[5%] top-[10%] h-48 w-48 rounded-full bg-[radial-gradient(ellipse,rgba(59,130,246,0.18),transparent_60%)]" />
             <div className="pointer-events-none absolute bottom-[10%] right-[8%] h-40 w-40 rounded-full bg-[radial-gradient(ellipse,rgba(139,92,246,0.12),transparent_60%)]" />
 

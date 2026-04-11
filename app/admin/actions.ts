@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import { timingSafeEqual } from 'crypto';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import type { EventInsert, EventUpdate } from '@/lib/data/events';
 import type { EventSubmissionInsert } from '@/lib/data/event-submissions';
@@ -163,7 +164,9 @@ export async function adminLoginAction(formData: FormData) {
     redirect('/admin?error=config');
   }
 
-  if (submittedPassword !== expectedPassword) {
+  const a = Buffer.from(submittedPassword);
+  const b = Buffer.from(expectedPassword);
+  if (a.length !== b.length || !timingSafeEqual(a, b)) {
     redirect('/admin?error=invalid');
   }
 

@@ -176,12 +176,12 @@ export function FilterBar({
             </div>
 
             <div className="grid grid-cols-[1fr_auto] gap-2 lg:hidden">
-              <div className="min-w-0">
+              <div className="min-w-0 overflow-hidden">
                 <Segmented
                   value={scope}
                   onChange={(next) => onChangeScope(next as 'main' | 'all')}
                   options={[
-                    { value: 'main', label: 'Flagship Events' },
+                    { value: 'main', label: 'Flagship' },
                     { value: 'all', label: 'All Events' }
                   ]}
                 />
@@ -193,7 +193,7 @@ export function FilterBar({
               >
                 Filters
               </button>
-              <div className="col-span-2 min-w-0">
+              <div className="col-span-2 min-w-0 overflow-hidden">
                 <Segmented
                   value={view}
                   onChange={(next) => onChangeView(next as 'calendar' | 'list')}
@@ -237,16 +237,6 @@ export function FilterBar({
                   Reset
                 </button>
               ) : null}
-            </div>
-            <div className="flex items-center gap-2 max-lg:hidden">
-              <Segmented
-                value={scope}
-                onChange={(next) => onChangeScope(next as 'main' | 'all')}
-                options={[
-                  { value: 'main', label: 'Flagship Events' },
-                  { value: 'all', label: 'All Events' }
-                ]}
-              />
             </div>
           </div>
         </div>

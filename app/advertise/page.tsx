@@ -38,7 +38,7 @@ export default function AdvertisePage() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_14%,rgba(22,104,255,0.08),transparent_24%),radial-gradient(circle_at_84%_18%,rgba(20,184,255,0.08),transparent_20%)]" />
       <div className="container-shell space-y-8">
         <Reveal>
-          <div className="relative overflow-hidden rounded-[2.2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(239,246,255,0.9))] p-8 shadow-[0_32px_76px_-42px_rgba(15,23,42,0.16)] sm:p-10">
+          <div className="relative overflow-hidden rounded-[1.5rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(239,246,255,0.9))] p-5 shadow-[0_32px_76px_-42px_rgba(15,23,42,0.16)] sm:rounded-[2.2rem] sm:p-8 lg:p-10">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(52,179,255,0.12),transparent_30%),radial-gradient(circle_at_78%_20%,rgba(41,211,163,0.1),transparent_22%)]" />
             <div className="relative grid gap-8 lg:grid-cols-[1fr_0.9fr] lg:items-end">
               <div>
@@ -56,7 +56,7 @@ export default function AdvertisePage() {
 
         <div className="grid gap-6 lg:grid-cols-[1.08fr_0.92fr]">
           <Reveal>
-            <section className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-6 shadow-[0_24px_54px_-34px_rgba(15,23,42,0.16)] sm:p-7">
+            <section className="relative overflow-hidden rounded-[1.5rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-5 shadow-[0_24px_54px_-34px_rgba(15,23,42,0.16)] sm:rounded-[2rem] sm:p-7">
               <div className="relative">
                 <p className="text-xs uppercase tracking-[0.18em] text-sky-700">Partner Intelligence</p>
                 <h2 className="mt-3 font-[var(--font-serif)] text-3xl text-slate-950">What you are actually buying into.</h2>
@@ -74,7 +74,7 @@ export default function AdvertisePage() {
           </Reveal>
 
           <Reveal delay={0.06}>
-            <section className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-6 shadow-[0_24px_54px_-34px_rgba(15,23,42,0.16)] sm:p-7">
+            <section className="relative overflow-hidden rounded-[1.5rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-5 shadow-[0_24px_54px_-34px_rgba(15,23,42,0.16)] sm:rounded-[2rem] sm:p-7">
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(127,228,199,0.06),transparent_24%),radial-gradient(circle_at_18%_76%,rgba(183,138,255,0.06),transparent_28%)]" />
               <AdvertiseInfoCards />
             </section>
@@ -84,7 +84,7 @@ export default function AdvertisePage() {
         <div className="grid gap-8 lg:grid-cols-[1.05fr_1fr]">
           <div className="space-y-8">
             <Reveal>
-              <section className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-7 shadow-[0_24px_54px_-34px_rgba(15,23,42,0.16)] sm:p-8">
+              <section className="relative overflow-hidden rounded-[1.5rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-5 shadow-[0_24px_54px_-34px_rgba(15,23,42,0.16)] sm:rounded-[2rem] sm:p-7 lg:p-8">
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(52,179,255,0.06),transparent_24%)]" />
                 <h2 className="font-[var(--font-serif)] text-3xl text-slate-950">Who this page is for.</h2>
                 <p className="mt-3 text-sm leading-relaxed text-slate-600">
@@ -102,7 +102,7 @@ export default function AdvertisePage() {
             </Reveal>
 
             <Reveal delay={0.1}>
-              <section className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-7 shadow-[0_24px_54px_-34px_rgba(15,23,42,0.16)] sm:p-8">
+              <section className="relative overflow-hidden rounded-[1.5rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-5 shadow-[0_24px_54px_-34px_rgba(15,23,42,0.16)] sm:rounded-[2rem] sm:p-7 lg:p-8">
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_20%,rgba(41,211,163,0.08),transparent_24%),radial-gradient(circle_at_18%_80%,rgba(123,124,255,0.06),transparent_22%)]" />
                 <h2 className="font-[var(--font-serif)] text-3xl text-slate-950">Ways to appear on the site.</h2>
                 <p className="mt-3 text-sm leading-relaxed text-slate-600">

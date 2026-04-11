@@ -97,7 +97,7 @@ export function NewsletterBanner() {
                 </div>
               </div>
 
-              <form onSubmit={handleSubmit} className="mt-4 flex gap-2">
+              <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-2 sm:flex-row">
                 <input
                   type="email"
                   required

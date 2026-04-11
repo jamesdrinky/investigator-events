@@ -61,7 +61,7 @@ export default function PrivacyPage() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_14%,rgba(22,104,255,0.08),transparent_24%),radial-gradient(circle_at_86%_20%,rgba(20,184,255,0.08),transparent_20%)]" />
       <div className="container-shell relative space-y-8">
         <Reveal>
-          <header className="overflow-hidden rounded-[2.4rem] border border-white/80 bg-[linear-gradient(135deg,#ffffff_0%,#eff6ff_54%,#f4fbff_100%)] p-6 shadow-[0_34px_84px_-52px_rgba(15,23,42,0.16)] sm:p-8 lg:p-10">
+          <header className="overflow-hidden rounded-[1.5rem] border border-white/80 bg-[linear-gradient(135deg,#ffffff_0%,#eff6ff_54%,#f4fbff_100%)] p-5 shadow-[0_34px_84px_-52px_rgba(15,23,42,0.16)] sm:rounded-[2.4rem] sm:p-8 lg:p-10">
             <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.24),rgba(255,255,255,0)_28%,rgba(255,255,255,0.1)_56%,rgba(255,255,255,0)_100%)]" />
             <div>
               <p className="eyebrow">Legal</p>
@@ -74,7 +74,7 @@ export default function PrivacyPage() {
         </Reveal>
 
         <Reveal delay={0.05}>
-          <article className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-6 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.16)] sm:p-8 lg:p-10">
+          <article className="relative overflow-hidden rounded-[1.5rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-5 shadow-[0_24px_54px_-36px_rgba(15,23,42,0.16)] sm:rounded-[2rem] sm:p-8 lg:p-10">
             <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.22),rgba(255,255,255,0)_30%,rgba(255,255,255,0.08)_56%,rgba(255,255,255,0)_100%)]" />
             <div className="relative max-w-3xl space-y-10">
               {sections.map((section) => (

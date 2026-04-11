@@ -102,7 +102,7 @@ function MonthEventStrip({ events, label, countryCount }: { events: EventItem[];
             <Link
               key={event.id}
               href={`/events/${getEventSlug(event)}`}
-              className="group w-[17rem] flex-shrink-0 overflow-hidden rounded-2xl border border-slate-200/60 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_-12px_rgba(59,130,246,0.15)] sm:w-[19rem]"
+              className="group w-[15rem] flex-shrink-0 overflow-hidden rounded-2xl border border-slate-200/60 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_-12px_rgba(59,130,246,0.15)] sm:w-[19rem]"
             >
               {/* Image with logo */}
               <div className="relative h-40 w-full overflow-hidden sm:h-44">

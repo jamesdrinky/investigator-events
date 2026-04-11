@@ -62,7 +62,7 @@ export default function SubmitEventPage({
       {/* ── Form — clean single column on mobile ── */}
       <div className="container-shell relative -mt-2 pb-10 sm:pb-16">
         <Reveal delay={0.05}>
-          <div className="mx-auto max-w-3xl rounded-2xl border border-slate-200/60 bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.08)] sm:rounded-[2rem] sm:p-8 lg:p-10">
+          <div className="mx-auto max-w-3xl rounded-2xl border border-slate-200/60 bg-white p-5 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.08)] sm:rounded-[2rem] sm:p-8 lg:p-10">
             <SubmitEventForm
               action={submitEventAction}
               issuedAt={formState.issuedAt}

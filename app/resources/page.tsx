@@ -60,13 +60,13 @@ export default function ResourcesPage() {
       </div>
 
       <div className="container-shell py-10 sm:py-14">
-        <div className="flex flex-wrap items-center gap-3">
-          <select className="field-input text-sm" value={filterCat} onChange={(e) => setFilterCat(e.target.value)}>
+        <div className="grid grid-cols-1 gap-3 sm:flex sm:flex-wrap sm:items-center">
+          <select className="field-input w-full text-sm sm:w-auto" value={filterCat} onChange={(e) => setFilterCat(e.target.value)}>
             <option value="">All categories</option>
             {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
           {userId && (
-            <button type="button" onClick={() => setShowForm(true)} className="btn-primary ml-auto flex items-center gap-1.5 px-5 py-2.5 text-sm">
+            <button type="button" onClick={() => setShowForm(true)} className="btn-primary flex w-full items-center justify-center gap-1.5 px-5 py-2.5 text-sm sm:ml-auto sm:w-auto">
               <Plus className="h-4 w-4" /> Submit resource
             </button>
           )}
@@ -99,7 +99,7 @@ export default function ResourcesPage() {
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.length === 0 && <p className="col-span-full py-12 text-center text-sm text-slate-400">No resources found.</p>}
           {filtered.map((r) => (
-            <div key={r.id} className="group rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+            <div key={r.id} className="group flex flex-col rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50">
                   <BookOpen className="h-5 w-5 text-blue-600" />

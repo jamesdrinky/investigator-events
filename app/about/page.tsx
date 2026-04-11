@@ -174,7 +174,7 @@ export default async function AboutPage() {
         </Reveal>
 
         {/* Conference audience */}
-        <div className="relative -mx-4 mt-10 h-48 overflow-hidden sm:-mx-6 sm:mt-14 sm:h-64 sm:rounded-2xl lg:-mx-10 lg:h-72" style={{ contain: 'layout paint' }}>
+        <div className="relative mt-10 h-48 overflow-hidden rounded-xl sm:-mx-6 sm:mt-14 sm:h-64 sm:rounded-2xl lg:-mx-10 lg:h-72" style={{ contain: 'layout paint' }}>
           <Image src="/conference/conference7.avif" alt="Audience at an industry conference" fill className="object-cover object-[center_45%]" sizes="100vw" />
           <div className="absolute inset-0 bg-gradient-to-t from-white/30 via-transparent to-transparent" />
         </div>

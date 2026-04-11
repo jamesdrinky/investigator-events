@@ -111,7 +111,7 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
     <section className="relative overflow-hidden">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
       {/* ── Hero — full-width cover image ── */}
       <div className="relative h-[28rem] w-full overflow-hidden sm:h-[36rem] lg:h-[40rem]">
@@ -153,7 +153,7 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
           <div className="space-y-6">
             {/* Quick info pills */}
             <Reveal>
-              <div className="flex flex-wrap gap-3">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 <div className="rounded-xl border border-slate-200/60 bg-white px-4 py-3 shadow-sm">
                   <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-400">Date</p>
                   <p className="mt-1 text-sm font-bold text-slate-950">{eventDate}</p>
@@ -162,17 +162,17 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
                   <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-400">Location</p>
                   <p className="mt-1 text-sm font-bold text-slate-950">{city}, {country}</p>
                 </div>
-                <div className="rounded-xl border border-slate-200/60 bg-white px-4 py-3 shadow-sm">
+                <div className="col-span-2 rounded-xl border border-slate-200/60 bg-white px-4 py-3 shadow-sm sm:col-span-1">
                   <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-400">Organiser</p>
-                  <p className="mt-1 text-sm font-bold text-slate-950">{organiser}</p>
+                  <p className="mt-1 truncate text-sm font-bold text-slate-950">{organiser}</p>
                 </div>
               </div>
             </Reveal>
 
             {/* CTAs */}
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2 sm:gap-3">
               {website ? (
-                <a href={website} target="_blank" rel="noreferrer" className="btn-primary px-6 py-3">Official website</a>
+                <a href={website} target="_blank" rel="noreferrer" className="btn-primary w-full px-6 py-3 sm:w-auto">Official website</a>
               ) : null}
               <EventShareButtons eventTitle={title} eventSlug={slug} />
               <Link href="/calendar" className="btn-secondary px-5 py-2.5">Back to calendar</Link>
@@ -268,6 +268,9 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
           </Reveal>
         )}
       </div>
+
+      {/* Bottom padding so sticky bar doesn't overlap content on mobile */}
+      <div className="h-16 lg:hidden" />
 
       {/* Sticky mobile "I'm going" bar */}
       <StickyGoingBar eventId={event.id} eventTitle={title} />

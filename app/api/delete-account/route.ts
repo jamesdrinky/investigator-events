@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { createSupabaseSSRServerClient } from '@/lib/supabase/ssr-server';
+import { enforceRateLimit, assertSameOriginRequest } from '@/lib/security/server';
 
 export async function POST() {
   try {
+    enforceRateLimit('delete-account', { maxRequests: 3, windowMs: 60_000 });
+    assertSameOriginRequest();
+
     const supabase = await createSupabaseSSRServerClient();
     const { data: { user } } = await supabase.auth.getUser();
 

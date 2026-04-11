@@ -362,7 +362,12 @@ export default function NetworkMapPage() {
 
     const zoomBehavior = d3Zoom()
       .scaleExtent([1, 8])
-      .translateExtent([[0, 0], [width, height]])
+      .translateExtent([[-100, -50], [width + 100, height + 50]])
+      .filter((event: any) => {
+        // Allow wheel events and touch events, block double-click zoom
+        if (event.type === 'dblclick') return false;
+        return true;
+      })
       .on('zoom', (event: any) => {
         const t = event.transform;
         setTransform({ x: t.x, y: t.y, k: t.k });
@@ -376,9 +381,8 @@ export default function NetworkMapPage() {
 
     svg.call(zoomBehavior as any);
 
-    // Prevent default touch behavior for smooth pinch zoom
-    svg.on('touchstart.zoom', null);
-    svg.style('touch-action', 'pan-x pan-y');
+    // Allow touch zoom (pinch) while preventing page scroll on the map
+    svg.style('touch-action', 'none');
 
     zoomBehaviorRef.current = zoomBehavior;
 

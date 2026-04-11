@@ -214,15 +214,18 @@ export default function EditProfilePage() {
 
     const finalSpec = useCustomTitle ? customTitle.trim() : specialisation;
 
+    // Validate website URL — only allow http/https
+    const sanitizedWebsite = website && /^https?:\/\//i.test(website.trim()) ? website.trim() : null;
+
     await supabase.from('profiles').upsert({
       id: userId,
-      full_name: fullName || null,
-      username: fullName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || null,
+      full_name: (fullName || '').slice(0, 100) || null,
+      username: fullName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').slice(0, 50) || null,
       country: country || null,
-      specialisation: finalSpec || null,
-      headline: headline || null,
-      bio: bio || null,
-      website: website || null,
+      specialisation: (finalSpec || '').slice(0, 100) || null,
+      headline: (headline || '').slice(0, 200) || null,
+      bio: (bio || '').slice(0, 2000) || null,
+      website: sanitizedWebsite,
       profile_color: profileColor,
       avatar_url: avatarUrl,
       banner_url: bannerUrl,

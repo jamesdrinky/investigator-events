@@ -215,7 +215,9 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
   const searchUsers = async (q: string) => {
     setSearch(q);
     if (q.length < 2) { setSearchResults([]); return; }
-    const { data } = await supabase.from('profiles').select('id, full_name, avatar_url, username').eq('is_public', true).or(`full_name.ilike.%${q}%,username.ilike.%${q}%`).neq('id', userId!).limit(6);
+    const safeQ = q.replace(/[,%().*\\]/g, '');
+    if (!safeQ) { setSearchResults([]); return; }
+    const { data } = await supabase.from('profiles').select('id, full_name, avatar_url, username').eq('is_public', true).or(`full_name.ilike.%${safeQ}%,username.ilike.%${safeQ}%`).neq('id', userId!).limit(6);
     setSearchResults((data ?? []) as any[]);
   };
 

@@ -315,9 +315,9 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
           animate={introComplete ? { opacity: 1, scale: 1 } : undefined}
           transition={{ duration: 2, delay: 0, ease: [0.16, 1, 0.3, 1] }}
           style={{
-            width: isMobile ? '34rem' : '56rem',
-            height: isMobile ? '34rem' : '56rem',
-            top: isMobile ? '18%' : '10%',
+            width: isMobile ? '22rem' : '56rem',
+            height: isMobile ? '22rem' : '56rem',
+            top: isMobile ? '22%' : '10%',
           }}
         >
           {/* Globe glow — no blur filter, just a large soft gradient */}
@@ -516,7 +516,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
         {/* ── Mobile: skewed perspective dashboard ── */}
         <div className="relative z-20 -mt-4 block overflow-hidden sm:hidden">
           <div
-            className="mx-auto max-w-7xl pl-10"
+            className="mx-auto max-w-7xl pl-4"
             style={{
               maskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)',
               WebkitMaskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)',

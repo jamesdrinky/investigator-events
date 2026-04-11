@@ -16,7 +16,7 @@ function SubmitButton({ pending }: { pending: boolean }) {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex h-12 w-full items-center justify-center rounded-[1.05rem] bg-[linear-gradient(135deg,#1668ff,#14b8ff,#645bff)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_28px_58px_-28px_rgba(22,104,255,0.48)] transition duration-500 hover:-translate-y-1 hover:scale-[1.01] hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70 sm:h-13 sm:w-auto sm:rounded-[1.15rem] sm:px-6"
+      className="inline-flex h-12 w-full items-center justify-center rounded-[1.05rem] bg-[linear-gradient(135deg,#1668ff,#14b8ff,#645bff)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_28px_58px_-28px_rgba(22,104,255,0.48)] transition duration-500 hover:-translate-y-1 hover:scale-[1.01] hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70 lg:h-13 lg:w-auto lg:rounded-[1.15rem] lg:px-6"
     >
       {pending ? 'Subscribing...' : 'Subscribe'}
     </button>

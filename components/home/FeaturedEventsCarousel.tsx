@@ -111,13 +111,16 @@ export function FeaturedEventsCarousel({ items }: { items: FeaturedEventCard[] }
       </div>
 
       {/* Dots */}
-      <div className="mt-6 flex justify-center gap-2">
+      <div className="mt-6 flex justify-center gap-1">
         {items.map((_, i) => (
           <button
             key={i}
-            className={`h-1.5 rounded-full transition-all ${current === i ? 'w-6 bg-cyan-400' : 'w-1.5 bg-white/20'}`}
+            className="flex h-8 items-center justify-center px-1"
             onClick={() => emblaApi?.scrollTo(i)}
-          />
+            aria-label={`Go to slide ${i + 1}`}
+          >
+            <span className={`block h-1.5 rounded-full transition-all ${current === i ? 'w-6 bg-cyan-400' : 'w-1.5 bg-white/20'}`} />
+          </button>
         ))}
       </div>
     </div>

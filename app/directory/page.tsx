@@ -263,7 +263,7 @@ export default function DirectoryPage() {
       </section>
 
       {/* ---- Sticky filter bar ---- */}
-      <div className="sticky top-16 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
+      <div className="sticky top-[3.25rem] z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-md sm:top-16 md:top-[4.75rem]">
         <div className="container-shell flex flex-wrap items-center gap-3 py-3">
           <Filter className="hidden h-4 w-4 text-slate-400 sm:block" />
 
@@ -272,7 +272,7 @@ export default function DirectoryPage() {
             <select
               value={countryFilter}
               onChange={(e) => setCountryFilter(e.target.value)}
-              className="appearance-none rounded-lg border border-slate-200 bg-white py-1.5 pl-3 pr-8 text-xs font-medium text-slate-700 outline-none transition hover:border-slate-300 focus:border-blue-400 focus:ring-1 focus:ring-blue-400/30"
+              className="appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3 pr-8 text-sm font-medium text-slate-700 outline-none transition hover:border-slate-300 focus:border-blue-400 focus:ring-1 focus:ring-blue-400/30 sm:py-1.5 sm:text-xs"
             >
               <option value="">All Countries</option>
               {countries.map((c) => (
@@ -289,7 +289,7 @@ export default function DirectoryPage() {
             <select
               value={specFilter}
               onChange={(e) => setSpecFilter(e.target.value)}
-              className="appearance-none rounded-lg border border-slate-200 bg-white py-1.5 pl-3 pr-8 text-xs font-medium text-slate-700 outline-none transition hover:border-slate-300 focus:border-blue-400 focus:ring-1 focus:ring-blue-400/30"
+              className="appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3 pr-8 text-sm font-medium text-slate-700 outline-none transition hover:border-slate-300 focus:border-blue-400 focus:ring-1 focus:ring-blue-400/30 sm:py-1.5 sm:text-xs"
             >
               <option value="">All Specialisations</option>
               {SPECIALISATIONS.map((s) => (
@@ -306,7 +306,7 @@ export default function DirectoryPage() {
             <select
               value={assocFilter}
               onChange={(e) => setAssocFilter(e.target.value)}
-              className="appearance-none rounded-lg border border-slate-200 bg-white py-1.5 pl-3 pr-8 text-xs font-medium text-slate-700 outline-none transition hover:border-slate-300 focus:border-blue-400 focus:ring-1 focus:ring-blue-400/30"
+              className="appearance-none rounded-lg border border-slate-200 bg-white py-2.5 pl-3 pr-8 text-sm font-medium text-slate-700 outline-none transition hover:border-slate-300 focus:border-blue-400 focus:ring-1 focus:ring-blue-400/30 sm:py-1.5 sm:text-xs"
             >
               <option value="">All Associations</option>
               {associations.map((a) => (

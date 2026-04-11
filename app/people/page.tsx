@@ -133,25 +133,25 @@ export default function PeoplePage() {
           <p className="mx-auto mt-3 max-w-lg text-sm text-slate-500">Share insights, promote your services, and connect with investigators worldwide.</p>
 
           {/* Tabs */}
-          <div className="mx-auto mt-6 inline-flex rounded-full border border-slate-200/80 bg-white p-1 shadow-sm">
+          <div className="mx-auto mt-6 inline-flex max-w-full overflow-x-auto rounded-full border border-slate-200/80 bg-white p-1 shadow-sm [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
             <button
               type="button"
               onClick={() => setTab('feed')}
-              className={`flex items-center gap-1.5 rounded-full px-5 py-2 text-sm font-semibold transition ${tab === 'feed' ? 'bg-blue-600 text-white shadow' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold transition sm:px-5 sm:text-sm ${tab === 'feed' ? 'bg-blue-600 text-white shadow' : 'text-slate-500 hover:text-slate-700'}`}
             >
               <TrendingUp className="h-4 w-4" /> Feed
             </button>
             <button
               type="button"
               onClick={() => setTab('lfg')}
-              className={`flex items-center gap-1.5 rounded-full px-5 py-2 text-sm font-semibold transition ${tab === 'lfg' ? 'bg-blue-600 text-white shadow' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold transition sm:px-5 sm:text-sm ${tab === 'lfg' ? 'bg-blue-600 text-white shadow' : 'text-slate-500 hover:text-slate-700'}`}
             >
               Referrals
             </button>
             <button
               type="button"
               onClick={() => setTab('discover')}
-              className={`flex items-center gap-1.5 rounded-full px-5 py-2 text-sm font-semibold transition ${tab === 'discover' ? 'bg-blue-600 text-white shadow' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold transition sm:px-5 sm:text-sm ${tab === 'discover' ? 'bg-blue-600 text-white shadow' : 'text-slate-500 hover:text-slate-700'}`}
             >
               <Users className="h-4 w-4" /> Discover
             </button>

@@ -29,7 +29,7 @@ export function EventModal({ event, onClose }: EventModalProps) {
           transition={{ duration: 0.2 }}
         >
           <motion.article
-            className="surface-elevated max-h-[90vh] w-full max-w-xl overflow-y-auto p-6"
+            className="surface-elevated max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-t-2xl p-5 sm:rounded-xl sm:p-6"
             onClick={(e) => e.stopPropagation()}
             initial={{ y: 28, opacity: 0, scale: 0.98 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
@@ -44,7 +44,7 @@ export function EventModal({ event, onClose }: EventModalProps) {
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-full border border-slate-200 px-3 py-1 text-sm text-slate-600 hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
+                className="rounded-full border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
               >
                 Close
               </button>
@@ -94,7 +94,7 @@ export function EventModal({ event, onClose }: EventModalProps) {
                 Open the full event page for the official source link and the rest of the live event record.
               </p>
             )}
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <a
                 href={event.website}
                 target="_blank"

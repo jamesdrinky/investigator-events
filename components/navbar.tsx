@@ -288,7 +288,7 @@ export function Navbar() {
           </button>
         </div>
 
-        <nav className="flex h-[calc(100%-4rem)] flex-col justify-center px-8 pb-20">
+        <nav className="flex h-[calc(100%-4rem)] flex-col justify-center px-8 pb-[max(5rem,calc(5rem+env(safe-area-inset-bottom)))]">
           <ul className="space-y-1">
             {mobileMenuItems.map((item, i) => {
               const active = isActiveRoute(pathname, item.href);

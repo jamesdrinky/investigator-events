@@ -53,7 +53,7 @@ export default async function AssociationPage({ params }: { params: { slug: stri
       <div className="relative bg-slate-900 pb-20 pt-24 sm:pb-28 sm:pt-32">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-slate-900 to-slate-900" />
         <div className="container-shell relative">
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4 sm:gap-6">
             {logoSrc && (
               <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-white/20 bg-white p-3 shadow-xl sm:h-24 sm:w-24">
                 <Image src={logoSrc} alt={page.name} width={80} height={80} className="h-auto max-h-14 w-auto object-contain sm:max-h-16" />

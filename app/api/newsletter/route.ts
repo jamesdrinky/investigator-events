@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
+import { enforceRateLimit } from '@/lib/security/server';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -9,6 +10,8 @@ function normalizeEmail(value: unknown) {
 
 export async function POST(request: Request) {
   try {
+    enforceRateLimit('newsletter', { maxRequests: 10, windowMs: 60_000 });
+
     const body = await request.json().catch(() => null);
     const email = normalizeEmail(body?.email);
 

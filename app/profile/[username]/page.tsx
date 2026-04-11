@@ -113,10 +113,12 @@ export default async function PublicProfilePage({ params }: { params: { username
 
           <div className="relative px-6 pb-6 sm:px-8 sm:pb-8">
             {/* Avatar + actions */}
-            <div className="-mt-16 flex items-end justify-between sm:-mt-20">
+            <div className="-mt-14 flex items-end justify-between gap-3 sm:-mt-20">
               <div className="relative z-10 rounded-full border-4 border-white shadow-xl" style={{ boxShadow: `0 8px 30px -8px ${accentColor}40, 0 4px 12px -4px rgba(0,0,0,0.1)` }}>
                 <div className="overflow-hidden rounded-full">
-                  <UserAvatar src={profile.avatar_url} name={profile.full_name} size={128} color={accentColor} />
+                  <div className="h-24 w-24 sm:h-32 sm:w-32">
+                    <UserAvatar src={profile.avatar_url} name={profile.full_name} size={128} color={accentColor} />
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-2 pb-1">
@@ -155,7 +157,7 @@ export default async function PublicProfilePage({ params }: { params: { username
                 <p className="mt-1.5 text-[15px] leading-snug text-slate-600">{profile.headline || profile.specialisation}</p>
               )}
 
-              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-slate-400">
+              <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-slate-400 sm:text-sm">
                 {profile.country && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {profile.country}</span>}
                 <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" /> <strong className="text-slate-700">{connectionCount ?? 0}</strong> connections</span>
                 {profile.website && (

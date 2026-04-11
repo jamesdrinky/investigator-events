@@ -363,7 +363,7 @@ export function CommunityFeed() {
                 ) : null}
 
                 {/* Link */}
-                {post.link_url && (
+                {post.link_url && /^https?:\/\//i.test(post.link_url) && (
                   <div className="mx-5 mt-3">
                     <a href={post.link_url} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-blue-600 transition hover:bg-slate-100">
                       <LinkIcon className="h-3.5 w-3.5 flex-shrink-0" />

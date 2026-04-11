@@ -26,20 +26,66 @@ const sections = [
       {
         title: 'Advertiser and partner enquiries',
         text: 'When you complete the advertiser or partner enquiry form we collect your name, email address, organisation, and any details you choose to include. We use this to respond to your enquiry and assess whether a commercial relationship is appropriate. The lawful basis is legitimate interests.'
+      },
+      {
+        title: 'User accounts and profiles',
+        text: 'When you create an account we collect your name, email address, and password (stored securely via hashing). You may optionally provide additional profile information including your location, firm name, specialisation, bio, and avatar. If you sign in via Google or LinkedIn, we receive your name, email, and profile photo from those services. This data is used to operate your account and display your public profile. The lawful basis is contract performance (providing the service you signed up for) and legitimate interests.'
+      },
+      {
+        title: 'Messaging',
+        text: 'When you send messages to other users through the Platform, the content of those messages is stored in our database and is accessible to the sender and recipient. We do not read or monitor private messages except when reviewing a report submitted by a participant in the conversation. The lawful basis is contract performance.'
+      },
+      {
+        title: 'Community posts and forum content',
+        text: 'Content you post in public areas of the Platform (forum discussions, assistance requests, comments) is visible to all users and is stored in our database. The lawful basis is contract performance and legitimate interests (operating the community features).'
+      },
+      {
+        title: 'Association membership and badges',
+        text: 'If you are verified as a member of a partner association, we store your association membership status as provided by the association. This information is displayed on your public profile via a Verified Association Badge. The lawful basis is legitimate interests (operating the badge system) and, where applicable, consent provided via the partner association.'
+      },
+      {
+        title: 'Reports and moderation',
+        text: 'When you report another user or piece of content, we collect the details of your report and may retain related content for moderation and enforcement purposes. Reporter identity is kept confidential from the reported user. The lawful basis is legitimate interests (maintaining platform safety).'
+      },
+      {
+        title: 'Terms of Service acceptance',
+        text: 'We record the date and time you accepted our Terms of Service and Community Guidelines. This is retained for legal compliance purposes.'
       }
     ]
   },
   {
     heading: 'How long we keep your data',
-    body: 'Newsletter subscribers: your email is retained until you unsubscribe. Event submissions: contact details are retained for as long as the listing remains live, and for up to 12 months after removal. Advertiser enquiries: retained for up to 12 months from receipt, unless an ongoing relationship is established.'
+    body: 'Newsletter subscribers: your email is retained until you unsubscribe. Event submissions: contact details are retained for as long as the listing remains live, and for up to 12 months after removal. Advertiser enquiries: retained for up to 12 months from receipt, unless an ongoing relationship is established. User accounts: profile data and content are retained for as long as your account is active. If you delete your account, personal data is removed within 30 days, though anonymised content (e.g. forum posts) may be retained. Messages: retained for as long as both the sender and recipient accounts are active. Reports: retained for up to 24 months after resolution.'
   },
   {
     heading: 'Who we share your data with',
-    body: 'We do not sell or rent personal data. We may share data with service providers who support the operation of this site (for example, email delivery and database hosting). These providers are bound by data processing agreements and are not permitted to use your data for their own purposes. We do not transfer personal data outside the UK or EEA without appropriate safeguards in place.'
+    body: null,
+    subsections: [
+      {
+        title: 'Service providers',
+        text: 'We share data with service providers who support the operation of this site, including database hosting (Supabase), email delivery, and authentication services. These providers are bound by data processing agreements and are not permitted to use your data for their own purposes.'
+      },
+      {
+        title: 'Partner associations',
+        text: 'We may share anonymised, aggregated data with partner associations (such as the number of users in a region or interest in particular event types). We do not share individual user data with associations without your consent, except to confirm badge eligibility when you have opted into the badge verification process.'
+      },
+      {
+        title: 'Other users',
+        text: 'Information you include in your public profile, forum posts, and community content is visible to other registered users and, depending on your privacy settings, to the public. Private messages are visible only to the sender and recipient.'
+      },
+      {
+        title: 'Legal requirements',
+        text: 'We may disclose personal data if required by law, regulation, or legal process, or if we believe in good faith that disclosure is necessary to protect our rights, your safety, or the safety of others.'
+      }
+    ]
+  },
+  {
+    heading: 'International transfers',
+    body: 'Our services use infrastructure located in the EU and United States. Where personal data is transferred outside the UK or EEA, we ensure appropriate safeguards are in place, including standard contractual clauses approved by the ICO.'
   },
   {
     heading: 'Cookies',
-    body: 'We use a single cookie to store your cookie consent preference. This cookie does not track you across sites and contains no personal data. We do not currently use analytics or advertising cookies. If this changes we will update this policy and ask for your consent again.'
+    body: 'We use a single cookie to store your cookie consent preference. Authentication cookies are used to maintain your login session. These cookies do not track you across sites and contain no personal data beyond session identifiers. We do not currently use analytics or advertising cookies. If this changes we will update this policy and ask for your consent again.'
   },
   {
     heading: 'Your rights',

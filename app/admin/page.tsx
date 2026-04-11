@@ -12,7 +12,9 @@ import {
   rejectSubmissionAction,
   updateEventAction
 } from '@/app/admin/actions';
-import { Calendar, Users, FileText, Megaphone, Globe, MapPin, Tag, ExternalLink, CheckCircle2, XCircle, Plus, Trash2 } from 'lucide-react';
+import { Calendar, Users, FileText, Megaphone, Globe, MapPin, Tag, ExternalLink, CheckCircle2, XCircle, Plus, Trash2, ShieldCheck } from 'lucide-react';
+import { VerificationCodeManager } from '@/components/admin/VerificationCodeManager';
+import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -154,11 +156,14 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
     );
   }
 
-  const [events, pendingSubmissions, advertiserLeads] = await Promise.all([
+  const admin = createSupabaseAdminServerClient();
+  const [events, pendingSubmissions, advertiserLeads, assocPagesResult] = await Promise.all([
     fetchAllEvents(),
     fetchPendingEventSubmissions(),
-    fetchAdvertiserLeads(20)
+    fetchAdvertiserLeads(20),
+    admin.from('association_pages').select('id, name, slug').order('name'),
   ]);
+  const associationPages = (assocPagesResult.data ?? []) as { id: string; name: string; slug: string }[];
 
   const activeTab = searchParams?.tab ?? 'overview';
   const countries = new Set(events.map((e) => e.country));
@@ -196,6 +201,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
             { id: 'submissions', label: `Submissions (${pendingSubmissions.length})`, icon: FileText },
             { id: 'events', label: `All Events (${events.length})`, icon: Calendar },
             { id: 'inquiries', label: `Inquiries (${advertiserLeads.length})`, icon: Megaphone },
+            { id: 'verification', label: 'Verification Codes', icon: ShieldCheck },
           ].map((tab) => (
             <a
               key={tab.id}
@@ -374,6 +380,12 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
           )}
 
           {/* Advertising Inquiries */}
+          {activeTab === 'verification' && (
+            <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
+              <VerificationCodeManager associations={associationPages} />
+            </div>
+          )}
+
           {activeTab === 'inquiries' && (
             <div className="space-y-4">
               {advertiserLeads.length === 0 ? (

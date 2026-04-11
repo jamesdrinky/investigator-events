@@ -35,6 +35,14 @@ export default function SignInPage() {
     });
   };
 
+  const handleLinkedIn = async () => {
+    const supabase = createSupabaseBrowserClient();
+    await supabase.auth.signInWithOAuth({
+      provider: 'linkedin_oidc',
+      options: { redirectTo: window.location.origin + '/auth/callback' },
+    });
+  };
+
   return (
     <AuthPage
       mode="signin"
@@ -42,6 +50,7 @@ export default function SignInPage() {
       testimonials={testimonials}
       onSubmit={handleSignIn}
       onGoogleSignIn={handleGoogle}
+      onLinkedInSignIn={handleLinkedIn}
       onSwitchMode={() => router.push('/signup')}
       loading={loading}
       error={error}

@@ -13,6 +13,13 @@ const GoogleIcon = () => (
   </svg>
 );
 
+const LinkedInIcon = ({ white }: { white?: boolean } = {}) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 48 48">
+    <path fill={white ? '#ffffff' : '#0288D1'} d="M42 37a5 5 0 01-5 5H11a5 5 0 01-5-5V11a5 5 0 015-5h26a5 5 0 015 5v26z" />
+    <path fill={white ? '#0077B5' : '#FFF'} d="M12 19h5v17h-5V19zm2.485-2h-.028C12.965 17 12 15.888 12 14.499 12 13.08 12.995 12 14.514 12c1.521 0 2.458 1.08 2.486 2.499C17 15.887 16.035 17 14.485 17zM36 36h-5v-9.099c0-2.198-1.225-3.698-3.192-3.698-1.501 0-2.313 1.012-2.707 1.99-.144.35-.101.858-.101 1.365V36h-5s.07-16 0-17h5v2.616C25.721 21.865 27.085 20 30.1 20c3.386 0 5.9 2.215 5.9 6.978V36z" />
+  </svg>
+);
+
 export interface Testimonial {
   avatarSrc: string;
   name: string;
@@ -24,8 +31,9 @@ interface AuthPageProps {
   mode: 'signin' | 'signup';
   heroImageSrc?: string;
   testimonials?: Testimonial[];
-  onSubmit: (data: { email: string; password: string; name?: string }) => void;
+  onSubmit: (data: { email: string; password: string; name?: string; tosAccepted?: boolean }) => void;
   onGoogleSignIn?: () => void;
+  onLinkedInSignIn?: () => void;
   onSwitchMode?: () => void;
   loading?: boolean;
   error?: string;
@@ -55,6 +63,7 @@ export function AuthPage({
   testimonials = [],
   onSubmit,
   onGoogleSignIn,
+  onLinkedInSignIn,
   onSwitchMode,
   loading,
   error,
@@ -64,12 +73,13 @@ export function AuthPage({
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [tosAccepted, setTosAccepted] = useState(false);
 
   const isSignUp = mode === 'signup';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ email, password, ...(isSignUp ? { name } : {}) });
+    onSubmit({ email, password, ...(isSignUp ? { name, tosAccepted } : {}) });
   };
 
   return (
@@ -98,20 +108,35 @@ export function AuthPage({
                 : 'Sign in to your Investigator Events account'}
             </p>
 
-            {/* Google */}
+            {/* LinkedIn — primary */}
+            {onLinkedInSignIn && (
+              <div style={{ opacity: 0, animation: 'fadeSlideIn 0.5s ease forwards 0.3s' }}>
+                <button
+                  type="button"
+                  onClick={onLinkedInSignIn}
+                  className="flex w-full items-center justify-center gap-3 rounded-xl bg-[#0077B5] py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#006097]"
+                >
+                  <LinkedInIcon white />
+                  Continue with LinkedIn
+                </button>
+                <p className="mt-1.5 text-center text-[11px] text-slate-400">Recommended for professionals — verifies your identity</p>
+              </div>
+            )}
+
+            {/* Google — secondary */}
             <button
               type="button"
               onClick={onGoogleSignIn}
-              className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white py-3.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
-              style={{ opacity: 0, animation: 'fadeSlideIn 0.5s ease forwards 0.3s' }}
+              className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white py-3 text-sm font-medium text-slate-600 shadow-sm transition hover:bg-slate-50"
+              style={{ opacity: 0, animation: 'fadeSlideIn 0.5s ease forwards 0.35s' }}
             >
               <GoogleIcon />
               Continue with Google
             </button>
 
-            <div className="relative flex items-center justify-center" style={{ opacity: 0, animation: 'fadeSlideIn 0.5s ease forwards 0.35s' }}>
+            <div className="relative flex items-center justify-center" style={{ opacity: 0, animation: 'fadeSlideIn 0.5s ease forwards 0.4s' }}>
               <span className="w-full border-t border-slate-200" />
-              <span className="absolute bg-white px-4 text-xs text-slate-400">or</span>
+              <span className="absolute bg-white px-4 text-xs text-slate-400">or use email</span>
             </div>
 
             {/* Form */}
@@ -166,6 +191,28 @@ export function AuthPage({
                 </GlassInput>
               </div>
 
+              {isSignUp && (
+                <div
+                  className="flex items-start gap-3"
+                  style={{ opacity: 0, animation: 'fadeSlideIn 0.5s ease forwards 0.52s' }}
+                >
+                  <input
+                    type="checkbox"
+                    id="tos-accept"
+                    checked={tosAccepted}
+                    onChange={(e) => setTosAccepted(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <label htmlFor="tos-accept" className="text-xs leading-relaxed text-slate-500">
+                    I agree to the{' '}
+                    <a href="/terms" target="_blank" className="font-medium text-blue-600 hover:underline">Terms of Service</a>
+                    {' '}and{' '}
+                    <a href="/guidelines" target="_blank" className="font-medium text-blue-600 hover:underline">Community Guidelines</a>.
+                    I understand that Investigator Events does not verify user identities or professional credentials.
+                  </label>
+                </div>
+              )}
+
               {error && (
                 <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>
               )}
@@ -175,7 +222,7 @@ export function AuthPage({
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || (isSignUp && !tosAccepted)}
                 className="w-full rounded-xl bg-slate-900 py-3.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-60"
                 style={{ opacity: 0, animation: `fadeSlideIn 0.5s ease forwards ${isSignUp ? '0.55s' : '0.5s'}` }}
               >

@@ -29,6 +29,8 @@ export function Footer() {
             <li><Link href="/network" className="premium-link hover:text-slate-950">Network map</Link></li>
             <li><Link href="/about" className="premium-link hover:text-slate-950">About</Link></li>
             <li><Link href="/privacy" className="premium-link hover:text-slate-950">Privacy</Link></li>
+            <li><Link href="/terms" className="premium-link hover:text-slate-950">Terms of Service</Link></li>
+            <li><Link href="/guidelines" className="premium-link hover:text-slate-950">Community Guidelines</Link></li>
           </ul>
         </div>
 

@@ -35,6 +35,9 @@ type Investigator = {
   available_for_referrals: boolean;
   last_seen: string | null;
   is_verified: boolean;
+  auth_provider: string | null;
+  linkedin_url: string | null;
+  verified_associations: { association_name: string; status: string; expires_at?: string }[];
   associations: { association_name: string; role: string | null }[];
   follower_count: number;
 };
@@ -104,7 +107,7 @@ export default function DirectoryPage() {
       // Fetch public profiles
       const { data: profiles } = await (supabase
         .from('profiles')
-        .select('id, full_name, avatar_url, username, country, specialisation, headline, profile_color, bio, badges, available_for_referrals, last_seen') as any)
+        .select('id, full_name, avatar_url, username, country, specialisation, headline, profile_color, bio, badges, available_for_referrals, last_seen, auth_provider, linkedin_url') as any)
         .eq('is_public', true)
         .order('last_seen', { ascending: false, nullsFirst: false })
         .limit(500);
@@ -116,16 +119,23 @@ export default function DirectoryPage() {
 
       const userIds = profiles.map((p: any) => p.id);
 
-      // Fetch verifications
+      // Fetch verifications (check expiry)
       const { data: verifications } = await supabase
         .from('member_verifications' as any)
-        .select('user_id, status')
+        .select('user_id, status, association_name, expires_at')
         .eq('status', 'verified')
         .in('user_id', userIds);
 
-      const verifiedSet = new Set(
-        (verifications ?? []).map((v: any) => v.user_id)
-      );
+      const verifiedSet = new Set<string>();
+      const userVerifications: Record<string, { association_name: string; status: string; expires_at?: string }[]> = {};
+      (verifications ?? []).forEach((v: any) => {
+        const isExpired = v.expires_at && new Date(v.expires_at) < new Date();
+        if (!isExpired) {
+          verifiedSet.add(v.user_id);
+          if (!userVerifications[v.user_id]) userVerifications[v.user_id] = [];
+          userVerifications[v.user_id].push({ association_name: v.association_name, status: v.status, expires_at: v.expires_at });
+        }
+      });
 
       // Fetch associations
       const { data: userAssocs } = await supabase
@@ -170,6 +180,9 @@ export default function DirectoryPage() {
           available_for_referrals: !!(p as any).available_for_referrals,
           last_seen: p.last_seen as string | null,
           is_verified: verifiedSet.has(p.id),
+          auth_provider: p.auth_provider ?? null,
+          linkedin_url: p.linkedin_url ?? null,
+          verified_associations: userVerifications[p.id] ?? [],
           associations: assocMap[p.id] ?? [],
           follower_count: followerCounts[p.id] ?? 0,
         };
@@ -411,9 +424,16 @@ export default function DirectoryPage() {
                     </Link>
                     <div className="min-w-0 flex-1">
                       <Link href={profileHref} className="group/name">
-                        <h3 className="truncate text-sm font-bold text-slate-900 transition group-hover/name:text-blue-600">
-                          {inv.full_name ?? 'Investigator'}
-                        </h3>
+                        <div className="flex items-center gap-1.5">
+                          <h3 className="truncate text-sm font-bold text-slate-900 transition group-hover/name:text-blue-600">
+                            {inv.full_name ?? 'Investigator'}
+                          </h3>
+                          {inv.auth_provider === 'linkedin_oidc' && (
+                            <span className="flex-shrink-0 rounded-full bg-[#0077B5]/10 p-0.5" title="LinkedIn Verified">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-[#0077B5]" viewBox="0 0 48 48"><path fill="currentColor" d="M42 37a5 5 0 01-5 5H11a5 5 0 01-5-5V11a5 5 0 015-5h26a5 5 0 015 5v26z" /><path fill="white" d="M12 19h5v17h-5V19zm2.485-2h-.028C12.965 17 12 15.888 12 14.499 12 13.08 12.995 12 14.514 12c1.521 0 2.458 1.08 2.486 2.499C17 15.887 16.035 17 14.485 17zM36 36h-5v-9.099c0-2.198-1.225-3.698-3.192-3.698-1.501 0-2.313 1.012-2.707 1.99-.144.35-.101.858-.101 1.365V36h-5s.07-16 0-17h5v2.616C25.721 21.865 27.085 20 30.1 20c3.386 0 5.9 2.215 5.9 6.978V36z" /></svg>
+                            </span>
+                          )}
+                        </div>
                       </Link>
                       {inv.headline && (
                         <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-slate-500">
@@ -437,14 +457,18 @@ export default function DirectoryPage() {
                         {inv.specialisation}
                       </span>
                     )}
-                    {inv.associations.slice(0, 2).map((a) => (
-                      <span
-                        key={a.association_name}
-                        className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-medium text-slate-600"
-                      >
-                        {a.association_name}
-                      </span>
-                    ))}
+                    {inv.associations.slice(0, 2).map((a) => {
+                      const isVerifiedAssoc = inv.verified_associations.some((va) => va.association_name === a.association_name);
+                      return (
+                        <span
+                          key={a.association_name}
+                          className={`flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-medium ${isVerifiedAssoc ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : 'bg-slate-100 text-slate-600'}`}
+                        >
+                          {isVerifiedAssoc && <ShieldCheck className="h-2.5 w-2.5" />}
+                          {a.association_name}
+                        </span>
+                      );
+                    })}
                     {inv.associations.length > 2 && (
                       <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-400">
                         +{inv.associations.length - 2}

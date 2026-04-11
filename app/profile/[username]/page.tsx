@@ -8,6 +8,8 @@ import { UserAvatar } from '@/components/UserAvatar';
 import { ExpandableText } from '@/components/ExpandableText';
 import { ConnectionButton } from './follow-button';
 import { EventsAttendanceStack } from '@/components/EventsAttendanceStack';
+import { ReportButton } from '@/components/ReportButton';
+import { VerifiedBadges } from '@/components/VerifiedBadges';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,8 +50,10 @@ export default async function PublicProfilePage({ params }: { params: { username
   const badges = (profile.badges as string[] | null) ?? [];
 
   const { data: assocs } = await supabase.from('user_associations').select('*').eq('user_id', profile.id);
-  const { data: verifs } = await supabase.from('member_verifications').select('association_name, status').eq('user_id', profile.id).eq('status', 'verified');
-  const verifiedSet = new Set((verifs ?? []).map((v) => v.association_name));
+  const { data: verifs } = await supabase.from('member_verifications').select('association_name, status, expires_at').eq('user_id', profile.id);
+  const activeVerifications = (verifs ?? []).filter((v: any) => v.status === 'verified' && (!v.expires_at || new Date(v.expires_at) > new Date()));
+  const verifiedSet = new Set(activeVerifications.map((v: any) => v.association_name));
+  const linkedinUrl = (profile as any).linkedin_url as string | null;
 
   const { count: connectionCount } = await supabase
     .from('connections').select('id', { count: 'exact', head: true })
@@ -75,6 +79,7 @@ export default async function PublicProfilePage({ params }: { params: { username
     ? await supabase.from('events').select('id, title, slug, city, country').in('id', reviewEventIds) : { data: [] };
   const eventMap = new Map((reviewedEvents ?? []).map((e) => [e.id, e]));
 
+  const authProvider = (profile as any).auth_provider as string | null;
   const hasHeadline = !!(profile.headline || profile.specialisation);
   const hasAbout = !!profile.bio;
   const hasAssociations = (assocs ?? []).length > 0;
@@ -132,6 +137,7 @@ export default async function PublicProfilePage({ params }: { params: { username
                       <MessageCircle className="h-3.5 w-3.5" /> Message
                     </Link>
                     <ConnectionButton targetUserId={profile.id} />
+                    <ReportButton reportedUserId={profile.id} contentType="profile" />
                   </>
                 )}
               </div>
@@ -152,6 +158,17 @@ export default async function PublicProfilePage({ params }: { params: { username
                   );
                 })}
               </div>
+
+              {/* Verified badges */}
+              {(activeVerifications.length > 0 || authProvider === 'linkedin_oidc') && (
+                <div className="mt-2">
+                  <VerifiedBadges
+                    verifications={activeVerifications.map((v: any) => ({ association_name: v.association_name, status: v.status, expires_at: v.expires_at }))}
+                    authProvider={authProvider}
+                    linkedinUrl={linkedinUrl}
+                  />
+                </div>
+              )}
 
               {hasHeadline && (
                 <p className="mt-1.5 text-[15px] leading-snug text-slate-600">{profile.headline || profile.specialisation}</p>

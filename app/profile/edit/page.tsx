@@ -80,7 +80,13 @@ export default function EditProfilePage() {
   const [newAssoc, setNewAssoc] = useState('');
   const [newRole, setNewRole] = useState('');
   const [newYear, setNewYear] = useState('');
-  const [verifications, setVerifications] = useState<Record<string, string>>({});
+  const [verifications, setVerifications] = useState<Record<string, { status: string; expires_at?: string }>>({});
+  const [verifyCode, setVerifyCode] = useState('');
+  const [verifyAssoc, setVerifyAssoc] = useState('');
+  const [verifyLoading, setVerifyLoading] = useState(false);
+  const [verifyMessage, setVerifyMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [linkedinUrl, setLinkedinUrl] = useState('');
+  const [authProvider, setAuthProvider] = useState<string | null>(null);
 
   // Work experience
   type Experience = { id?: string; company_name: string; organisation_id: string | null; job_title: string; description: string; start_year: string; end_year: string; is_current: boolean };
@@ -118,6 +124,8 @@ export default function EditProfilePage() {
         // Load badges
         const profileBadges = profile.badges as string[] | null;
         if (profileBadges) setSelectedBadges(profileBadges);
+        setLinkedinUrl((profile as any).linkedin_url ?? '');
+        setAuthProvider((profile as any).auth_provider ?? null);
       }
 
       // Load profile sections
@@ -134,10 +142,14 @@ export default function EditProfilePage() {
         })));
       }
 
-      const { data: verifs } = await supabase.from('member_verifications').select('association_name, status').eq('user_id', data.user.id);
+      const { data: verifs } = await supabase.from('member_verifications').select('association_name, status, expires_at').eq('user_id', data.user.id);
       if (verifs) {
-        const map: Record<string, string> = {};
-        verifs.forEach((v) => { map[v.association_name] = v.status; });
+        const map: Record<string, { status: string; expires_at?: string }> = {};
+        verifs.forEach((v: any) => {
+          // Only count as verified if not expired
+          const isExpired = v.expires_at && new Date(v.expires_at) < new Date();
+          map[v.association_name] = { status: isExpired ? 'expired' : v.status, expires_at: v.expires_at };
+        });
         setVerifications(map);
       }
 
@@ -170,11 +182,31 @@ export default function EditProfilePage() {
     setProfileSections((prev) => prev.map((s, i) => i === index ? { ...s, [field]: value } : s));
   };
 
-  const requestVerification = async (assocName: string) => {
-    if (!userId) return;
-    const supabase = createSupabaseBrowserClient();
-    await supabase.from('member_verifications').insert({ user_id: userId, association_name: assocName, status: 'pending' });
-    setVerifications((prev) => ({ ...prev, [assocName]: 'pending' }));
+  const verifyWithCode = async () => {
+    if (!userId || !verifyCode.trim() || !verifyAssoc) return;
+    setVerifyLoading(true);
+    setVerifyMessage(null);
+
+    try {
+      const res = await fetch('/api/verify-membership', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: verifyCode.trim().toUpperCase(), association_name: verifyAssoc }),
+      });
+      const result = await res.json();
+
+      if (!res.ok) {
+        setVerifyMessage({ type: 'error', text: result.error || 'Verification failed.' });
+      } else {
+        setVerifyMessage({ type: 'success', text: `Verified as a member of ${verifyAssoc}! Badge active for 12 months.` });
+        setVerifications((prev) => ({ ...prev, [verifyAssoc]: { status: 'verified', expires_at: result.expires_at } }));
+        setVerifyCode('');
+        setVerifyAssoc('');
+      }
+    } catch {
+      setVerifyMessage({ type: 'error', text: 'Something went wrong.' });
+    }
+    setVerifyLoading(false);
   };
 
   // Organisation search for experience
@@ -450,27 +482,37 @@ export default function EditProfilePage() {
           {/* Associations */}
           <div className="mt-10 rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm sm:p-6">
             <h2 className="text-lg font-bold text-slate-900">Professional memberships</h2>
-            <p className="text-sm text-slate-400">Add your association memberships for credibility</p>
+            <p className="text-sm text-slate-400">Add your association memberships and verify them with your association's code</p>
 
             {associations.length > 0 && (
               <div className="mt-4 space-y-2">
                 {associations.map((a, i) => {
-                  const status = verifications[a.association_name];
+                  const v = verifications[a.association_name];
+                  const status = v?.status;
+                  const expiresAt = v?.expires_at;
+                  const expiryDate = expiresAt ? new Date(expiresAt).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }) : null;
                   return (
-                    <div key={i} className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/50 px-4 py-3">
+                    <div key={i} className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${status === 'verified' ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-100 bg-slate-50/50'}`}>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-semibold text-slate-900">{a.association_name}</span>
-                          {status === 'verified' && <ShieldCheck className="h-4 w-4 flex-shrink-0 text-blue-500" />}
-                          {status === 'pending' && <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-600">Pending</span>}
+                          {status === 'verified' && (
+                            <span className="flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                              <ShieldCheck className="h-3 w-3" /> Verified
+                            </span>
+                          )}
+                          {status === 'expired' && (
+                            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-600">Expired — re-verify below</span>
+                          )}
+                          {status === 'pending' && (
+                            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-600">Pending</span>
+                          )}
                         </div>
-                        <p className="text-xs text-slate-400">{a.role}{a.role && a.member_since ? ' · ' : ''}{a.member_since ? `Since ${a.member_since}` : ''}</p>
+                        <p className="text-xs text-slate-400">
+                          {a.role}{a.role && a.member_since ? ' · ' : ''}{a.member_since ? `Since ${a.member_since}` : ''}
+                          {status === 'verified' && expiryDate && <span className="ml-1"> · Renews {expiryDate}</span>}
+                        </p>
                       </div>
-                      {!status && (
-                        <button type="button" onClick={() => requestVerification(a.association_name)} className="flex-shrink-0 rounded-full bg-blue-50 px-3 py-1 text-[11px] font-medium text-blue-600 hover:bg-blue-100">
-                          Request verify
-                        </button>
-                      )}
                       <button type="button" onClick={() => removeAssociation(i)} className="flex-shrink-0 text-slate-300 hover:text-red-500">
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -480,7 +522,7 @@ export default function EditProfilePage() {
               </div>
             )}
 
-            {/* Add new */}
+            {/* Add new association */}
             <div className="mt-4 grid gap-3 sm:grid-cols-4">
               <select className="field-input sm:col-span-1" value={newAssoc} onChange={(e) => setNewAssoc(e.target.value)}>
                 <option value="">Association</option>
@@ -494,6 +536,99 @@ export default function EditProfilePage() {
                 <Plus className="h-4 w-4" /> Add
               </button>
             </div>
+
+            {/* Verify with code */}
+            <div className="mt-6 rounded-xl border border-blue-200/60 bg-blue-50/30 p-4">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-blue-600" />
+                <h3 className="text-sm font-bold text-slate-900">Verify your membership</h3>
+              </div>
+              <p className="mt-1 text-xs text-slate-500">
+                Enter the verification code provided by your association. Codes are shared exclusively with active members. Verification lasts 12 months.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <select
+                  className="field-input flex-1 min-w-[140px]"
+                  value={verifyAssoc}
+                  onChange={(e) => setVerifyAssoc(e.target.value)}
+                >
+                  <option value="">Select association</option>
+                  {associations
+                    .filter((a) => verifications[a.association_name]?.status !== 'verified')
+                    .map((a) => (
+                      <option key={a.association_name} value={a.association_name}>{a.association_name}</option>
+                    ))}
+                </select>
+                <input
+                  className="field-input flex-1 min-w-[160px] font-mono uppercase tracking-wider"
+                  value={verifyCode}
+                  onChange={(e) => setVerifyCode(e.target.value)}
+                  placeholder="Enter code"
+                  maxLength={20}
+                />
+                <button
+                  type="button"
+                  onClick={verifyWithCode}
+                  disabled={verifyLoading || !verifyCode.trim() || !verifyAssoc}
+                  className="flex items-center gap-1.5 rounded-2xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-40"
+                >
+                  <ShieldCheck className="h-4 w-4" />
+                  {verifyLoading ? 'Verifying...' : 'Verify'}
+                </button>
+              </div>
+              {verifyMessage && (
+                <p className={`mt-2 rounded-lg border p-2 text-xs ${verifyMessage.type === 'success' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-red-200 bg-red-50 text-red-700'}`}>
+                  {verifyMessage.text}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* LinkedIn verification */}
+          <div className="mt-10 rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm sm:p-6">
+            <div className="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 48 48"><path fill="#0288D1" d="M42 37a5 5 0 01-5 5H11a5 5 0 01-5-5V11a5 5 0 015-5h26a5 5 0 015 5v26z" /><path fill="#FFF" d="M12 19h5v17h-5V19zm2.485-2h-.028C12.965 17 12 15.888 12 14.499 12 13.08 12.995 12 14.514 12c1.521 0 2.458 1.08 2.486 2.499C17 15.887 16.035 17 14.485 17zM36 36h-5v-9.099c0-2.198-1.225-3.698-3.192-3.698-1.501 0-2.313 1.012-2.707 1.99-.144.35-.101.858-.101 1.365V36h-5s.07-16 0-17h5v2.616C25.721 21.865 27.085 20 30.1 20c3.386 0 5.9 2.215 5.9 6.978V36z" /></svg>
+              <h2 className="text-lg font-bold text-slate-900">LinkedIn verification</h2>
+            </div>
+
+            {authProvider === 'linkedin_oidc' ? (
+              <div className="mt-3">
+                <div className="flex items-center gap-2 rounded-xl border border-emerald-200/60 bg-emerald-50/30 px-4 py-3">
+                  <span className="flex items-center gap-1.5 rounded-full bg-[#0077B5]/10 px-2.5 py-0.5 text-[10px] font-bold text-[#0077B5]" style={{ border: '1px solid rgba(0,119,181,0.2)' }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 48 48"><path fill="currentColor" d="M42 37a5 5 0 01-5 5H11a5 5 0 01-5-5V11a5 5 0 015-5h26a5 5 0 015 5v26z" /><path fill="white" d="M12 19h5v17h-5V19zm2.485-2h-.028C12.965 17 12 15.888 12 14.499 12 13.08 12.995 12 14.514 12c1.521 0 2.458 1.08 2.486 2.499C17 15.887 16.035 17 14.485 17zM36 36h-5v-9.099c0-2.198-1.225-3.698-3.192-3.698-1.501 0-2.313 1.012-2.707 1.99-.144.35-.101.858-.101 1.365V36h-5s.07-16 0-17h5v2.616C25.721 21.865 27.085 20 30.1 20c3.386 0 5.9 2.215 5.9 6.978V36z" /></svg>
+                    Connected via LinkedIn
+                  </span>
+                  <span className="text-sm text-emerald-700">Your identity is verified through LinkedIn</span>
+                </div>
+                {linkedinUrl && (
+                  <p className="mt-2 text-xs text-slate-400">
+                    Linked profile: <a href={linkedinUrl} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">{linkedinUrl}</a>
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="mt-3">
+                <p className="text-sm text-slate-500">
+                  Connect your LinkedIn account to verify your identity. This proves you are who you say you are and displays a LinkedIn Verified badge on your profile.
+                </p>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const supabase = createSupabaseBrowserClient();
+                    const { error } = await supabase.auth.signInWithOAuth({
+                      provider: 'linkedin_oidc',
+                      options: { redirectTo: window.location.origin + '/auth/callback?next=/profile/edit' },
+                    });
+                    if (error) console.error('LinkedIn OAuth error:', error);
+                  }}
+                  className="mt-3 flex items-center gap-2 rounded-xl bg-[#0077B5] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#006097]"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 48 48"><path fill="#ffffff" d="M42 37a5 5 0 01-5 5H11a5 5 0 01-5-5V11a5 5 0 015-5h26a5 5 0 015 5v26z" /><path fill="#0077B5" d="M12 19h5v17h-5V19zm2.485-2h-.028C12.965 17 12 15.888 12 14.499 12 13.08 12.995 12 14.514 12c1.521 0 2.458 1.08 2.486 2.499C17 15.887 16.035 17 14.485 17zM36 36h-5v-9.099c0-2.198-1.225-3.698-3.192-3.698-1.501 0-2.313 1.012-2.707 1.99-.144.35-.101.858-.101 1.365V36h-5s.07-16 0-17h5v2.616C25.721 21.865 27.085 20 30.1 20c3.386 0 5.9 2.215 5.9 6.978V36z" /></svg>
+                  Connect LinkedIn to verify
+                </button>
+                <p className="mt-2 text-[11px] text-slate-400">You cannot manually enter a LinkedIn URL. Verification requires signing in through LinkedIn.</p>
+              </div>
+            )}
           </div>
 
           {/* Work Experience */}

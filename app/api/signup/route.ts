@@ -11,12 +11,16 @@ export async function POST(request: Request) {
     const email = body?.email?.trim().toLowerCase();
     const password = body?.password;
     const fullName = body?.full_name?.trim();
+    const tosAccepted = body?.tos_accepted === true;
 
     if (!email || !password) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
     }
     if (password.length < 6) {
       return NextResponse.json({ error: 'Password must be at least 6 characters' }, { status: 400 });
+    }
+    if (!tosAccepted) {
+      return NextResponse.json({ error: 'You must accept the Terms of Service' }, { status: 400 });
     }
 
     const admin = createSupabaseAdminServerClient();
@@ -43,7 +47,8 @@ export async function POST(request: Request) {
         full_name: fullName || null,
         username: fullName ? fullName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') : null,
         is_public: true,
-      });
+        tos_accepted_at: new Date().toISOString(),
+      } as any);
     }
 
     return NextResponse.json({ message: 'Account created', userId: data.user?.id });

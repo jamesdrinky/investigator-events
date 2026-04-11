@@ -17,7 +17,7 @@ export default function SignUpPage() {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSignUp = async ({ email, password, name }: { email: string; password: string; name?: string }) => {
+  const handleSignUp = async ({ email, password, name, tosAccepted }: { email: string; password: string; name?: string; tosAccepted?: boolean }) => {
     setError('');
     setSuccess('');
     setLoading(true);
@@ -29,10 +29,16 @@ export default function SignUpPage() {
         return;
       }
 
+      if (!tosAccepted) {
+        setLoading(false);
+        setError('You must agree to the Terms of Service and Community Guidelines.');
+        return;
+      }
+
       const res = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, full_name: name }),
+        body: JSON.stringify({ email, password, full_name: name, tos_accepted: true }),
       });
       const result = await res.json();
 
@@ -67,6 +73,14 @@ export default function SignUpPage() {
     });
   };
 
+  const handleLinkedIn = async () => {
+    const supabase = createSupabaseBrowserClient();
+    await supabase.auth.signInWithOAuth({
+      provider: 'linkedin_oidc',
+      options: { redirectTo: window.location.origin + '/auth/callback' },
+    });
+  };
+
   return (
     <AuthPage
       mode="signup"
@@ -74,6 +88,7 @@ export default function SignUpPage() {
       testimonials={testimonials}
       onSubmit={handleSignUp}
       onGoogleSignIn={handleGoogle}
+      onLinkedInSignIn={handleLinkedIn}
       onSwitchMode={() => router.push('/signin')}
       loading={loading}
       error={error}

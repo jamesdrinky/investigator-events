@@ -128,8 +128,8 @@ export default function PeoplePage() {
     <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-white">
       <div className="relative overflow-hidden bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_25%,#f0e8ff_50%,#f4f0ff_75%,#f8fbff_100%)] pb-6 pt-24 sm:pb-10 sm:pt-32">
         <div className="container-shell relative text-center">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-blue-600 sm:text-xs">Community</p>
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Community</h1>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-blue-600 sm:text-xs">Forum</p>
+          <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Forum</h1>
           <p className="mx-auto mt-3 max-w-lg text-sm text-slate-500">Share insights, promote your services, and connect with investigators worldwide.</p>
 
           {/* Tabs */}
@@ -163,7 +163,7 @@ export default function PeoplePage() {
               <BookUser className="h-3.5 w-3.5" /> Find a PI
             </Link>
             <Link href="/network" className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white px-4 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:border-blue-200 hover:text-blue-600">
-              <Globe className="h-3.5 w-3.5" /> Global Network Map
+              <Globe className="h-3.5 w-3.5" /> Global Directory Map
             </Link>
           </div>
         </div>

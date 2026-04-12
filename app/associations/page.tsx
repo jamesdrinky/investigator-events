@@ -4,10 +4,11 @@ import { AssociationLogoMarquee } from '@/components/associations/association-lo
 import { Reveal } from '@/components/motion/reveal';
 import { buildAssociationDirectory, getAssociationStats } from '@/lib/data/associations';
 import { fetchAllEvents } from '@/lib/data/events';
+import { createSupabaseSSRServerClient } from '@/lib/supabase/ssr-server';
 
 export const metadata: Metadata = {
   title: 'Associations | Investigator Events',
-  description: 'Professional investigator associations and industry bodies across the global Investigator Events network.'
+  description: 'Browse professional investigator associations and industry bodies. Find your association, see upcoming events, and verify your membership.'
 };
 
 export const dynamic = 'force-dynamic';
@@ -15,6 +16,13 @@ export const dynamic = 'force-dynamic';
 export default async function AssociationsPage() {
   const events = await fetchAllEvents();
   const associations = buildAssociationDirectory(events);
+
+  // Check which associations have dedicated pages in the DB
+  const supabase = await createSupabaseSSRServerClient();
+  const { data: pages } = await supabase.from('association_pages' as any).select('slug');
+  const pageSlugs = new Set((pages ?? []).map((p: any) => p.slug));
+  associations.forEach((a) => { a.hasPage = pageSlugs.has(a.slug); });
+
   const stats = getAssociationStats(associations);
 
   const marqueeItems = associations.map((a) => ({

@@ -115,7 +115,7 @@ export function AssociationsDirectory({ associations }: AssociationsDirectoryPro
                 />
 
                 <Link
-                  href={`/calendar?association=${encodeURIComponent(association.calendarAssociation)}`}
+                  href={association.hasPage ? `/associations/${association.slug}` : `/calendar?association=${encodeURIComponent(association.calendarAssociation)}`}
                   className="relative flex h-full flex-col items-center overflow-hidden rounded-xl border border-slate-200/60 bg-white p-4 text-center transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-2 sm:rounded-2xl sm:p-6"
                   style={{
                     boxShadow: '0 4px 16px -8px rgba(15,23,42,0.06)',

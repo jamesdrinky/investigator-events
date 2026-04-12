@@ -104,7 +104,7 @@ export function AuthPage({
               style={{ opacity: 0, animation: 'fadeSlideIn 0.5s ease forwards 0.2s' }}
             >
               {isSignUp
-                ? 'Join the global network of investigators'
+                ? 'Join the global investigations directory'
                 : 'Sign in to your Investigator Events account'}
             </p>
 

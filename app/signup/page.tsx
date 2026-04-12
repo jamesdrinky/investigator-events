@@ -6,9 +6,9 @@ import { AuthPage } from '@/components/ui/sign-in';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 
 const testimonials = [
-  { avatarSrc: '/faces/mike2.png', name: 'Mike LaCorte', role: 'CEO, Conflict International', text: 'Built for the community, by someone in it. Free, open, and genuinely useful.' },
-  { avatarSrc: 'https://randomuser.me/api/portraits/women/68.jpg', name: 'Emma Richardson', role: 'Insurance Investigator', text: 'Signed up in 30 seconds. Already connected with three new contacts.' },
-  { avatarSrc: 'https://randomuser.me/api/portraits/men/75.jpg', name: 'Tom Bradley', role: 'Private Investigator', text: 'The community feed alone is worth it. Great to see what others are attending.' },
+  { avatarSrc: '/faces/mike2.png', name: 'Mike LaCorte', role: 'Founder, Investigator Events', text: 'The front door to the profession. We connect investigators — associations elevate them.' },
+  { avatarSrc: 'https://randomuser.me/api/portraits/women/68.jpg', name: 'Emma Richardson', role: 'Insurance Investigator', text: 'Signed up in 30 seconds. Already found three events I would have missed.' },
+  { avatarSrc: 'https://randomuser.me/api/portraits/men/75.jpg', name: 'Tom Bradley', role: 'Private Investigator', text: 'Finally one place for every event in the industry. The verified badges are a great touch.' },
 ];
 
 export default function SignUpPage() {

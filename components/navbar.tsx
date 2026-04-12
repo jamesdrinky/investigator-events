@@ -15,7 +15,8 @@ const desktopNavItems: Array<{ href: Route; label: string }> = [
   { href: '/calendar', label: 'Events' },
   { href: '/calendar?view=calendar' as Route, label: 'Calendar' },
   { href: '/associations', label: 'Associations' },
-  { href: '/people', label: 'Community' },
+  { href: '/people', label: 'Forum' },
+  { href: '/why-join-an-association' as Route, label: 'Why Join?' },
   { href: '/advice', label: 'Advice' },
   { href: '/about', label: 'About' }
 ];
@@ -24,7 +25,8 @@ const mobileMenuItems: Array<{ href: Route; label: string }> = [
   { href: '/calendar', label: 'Events' },
   { href: '/calendar?view=calendar' as Route, label: 'Calendar' },
   { href: '/associations', label: 'Associations' },
-  { href: '/people', label: 'Community' },
+  { href: '/people', label: 'Forum' },
+  { href: '/why-join-an-association' as Route, label: 'Why Join?' },
   { href: '/submit-event', label: 'Submit Event' },
   { href: '/advice', label: 'Advice' },
   { href: '/about', label: 'About' }

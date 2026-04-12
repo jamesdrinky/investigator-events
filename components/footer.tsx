@@ -26,7 +26,8 @@ export function Footer() {
             <li><Link href="/associations" className="premium-link hover:text-slate-950">Associations</Link></li>
             <li><Link href="/weekly" className="premium-link hover:text-slate-950">Weekly</Link></li>
             <li><Link href="/directory" className="premium-link hover:text-slate-950">Find a PI</Link></li>
-            <li><Link href="/network" className="premium-link hover:text-slate-950">Network map</Link></li>
+            <li><Link href="/network" className="premium-link hover:text-slate-950">Directory map</Link></li>
+            <li><Link href="/why-join-an-association" className="premium-link hover:text-slate-950">Why join an association?</Link></li>
             <li><Link href="/about" className="premium-link hover:text-slate-950">About</Link></li>
             <li><Link href="/privacy" className="premium-link hover:text-slate-950">Privacy</Link></li>
             <li><Link href="/terms" className="premium-link hover:text-slate-950">Terms of Service</Link></li>

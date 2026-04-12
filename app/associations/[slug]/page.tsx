@@ -1,19 +1,20 @@
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
-import Image from 'next/image';
-import { Calendar, MapPin, Users, Globe, ShieldCheck, ExternalLink } from 'lucide-react';
 import { createSupabaseSSRServerClient } from '@/lib/supabase/ssr-server';
 import { fetchAllEvents } from '@/lib/data/events';
 import { getAssociationBrandLogoSrc } from '@/lib/utils/association-branding';
 import { formatEventDate } from '@/lib/utils/date';
-import { UserAvatar } from '@/components/UserAvatar';
+import { AssociationPageTabs } from '@/components/associations/AssociationPageTabs';
 
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const supabase = await createSupabaseSSRServerClient();
-  const { data: page } = await supabase.from('association_pages' as any).select('name').eq('slug', params.slug).single();
-  return { title: page ? `${(page as any).name} | Investigator Events` : 'Association' };
+  const { data: page } = await supabase.from('association_pages' as any).select('name, description').eq('slug', params.slug).single();
+  if (!page) return { title: 'Association' };
+  return {
+    title: `${(page as any).name} | Investigator Events`,
+    description: (page as any).description || `${(page as any).name} — professional investigator association on Investigator Events.`,
+  };
 }
 
 export default async function AssociationPage({ params }: { params: { slug: string } }) {
@@ -24,7 +25,7 @@ export default async function AssociationPage({ params }: { params: { slug: stri
 
   const logoSrc = getAssociationBrandLogoSrc(page.name) || getAssociationBrandLogoSrc(page.slug.toUpperCase());
 
-  // Get events for this association
+  // Get ALL events for this association
   const allEvents = await fetchAllEvents();
   const assocEvents = allEvents.filter((e) => {
     const assocLower = (e.association ?? e.organiser ?? '').toLowerCase();
@@ -32,145 +33,123 @@ export default async function AssociationPage({ params }: { params: { slug: stri
   });
 
   const now = new Date();
-  const upcoming = assocEvents.filter((e) => new Date(e.date) >= now).slice(0, 6);
-  const past = assocEvents.filter((e) => new Date(e.date) < now).slice(0, 4);
+  const upcoming = assocEvents
+    .filter((e) => new Date(e.date) >= now)
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .map((e) => ({
+      id: e.id, title: e.title, slug: e.slug, date: e.date,
+      city: e.city, country: e.country, category: e.category,
+      image_path: e.image_path, coverImage: (e as any).coverImage,
+      formattedDate: formatEventDate(e),
+    }));
 
-  // Get verified members
-  const { data: members } = await supabase
+  const past = assocEvents
+    .filter((e) => new Date(e.date) < now)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .map((e) => ({
+      id: e.id, title: e.title, slug: e.slug, date: e.date,
+      city: e.city, country: e.country, category: e.category,
+      image_path: e.image_path, coverImage: (e as any).coverImage,
+      formattedDate: formatEventDate(e),
+    }));
+
+  // Get members
+  const { data: memberRows } = await supabase
     .from('user_associations')
-    .select('user_id, role, profiles:user_id(full_name, avatar_url, username, specialisation)')
+    .select('user_id, role, member_since, profiles:user_id(full_name, avatar_url, username, specialisation, headline, country, profile_color)')
     .ilike('association_name', `%${page.slug}%`)
-    .limit(12);
+    .limit(50);
 
   const { count: memberCount } = await supabase
     .from('user_associations')
     .select('id', { count: 'exact', head: true })
     .ilike('association_name', `%${page.slug}%`);
 
+  // Get verified status for members
+  const memberIds = (memberRows ?? []).map((m: any) => m.user_id);
+  const { data: verifiedRows } = memberIds.length > 0
+    ? await supabase.from('member_verifications').select('user_id, status').eq('status', 'verified').in('user_id', memberIds)
+    : { data: [] };
+  const verifiedSet = new Set((verifiedRows ?? []).map((v: any) => v.user_id));
+
+  const members = (memberRows ?? []).map((m: any) => ({
+    user_id: m.user_id,
+    role: m.role,
+    member_since: m.member_since,
+    profile: m.profiles ? {
+      full_name: m.profiles.full_name,
+      avatar_url: m.profiles.avatar_url,
+      username: m.profiles.username,
+      specialisation: m.profiles.specialisation,
+      headline: m.profiles.headline,
+      country: m.profiles.country,
+      profile_color: m.profiles.profile_color,
+    } : null,
+    isVerified: verifiedSet.has(m.user_id),
+  }));
+
+  // Sort: verified first
+  members.sort((a, b) => (a.isVerified === b.isVerified ? 0 : a.isVerified ? -1 : 1));
+
+  // Get association posts
+  const { data: postRows } = await supabase
+    .from('association_posts' as any)
+    .select('id, title, content, image_url, link_url, is_pinned, likes_count, created_at, author_id')
+    .eq('association_page_id', page.id)
+    .order('is_pinned', { ascending: false })
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  const posts = (postRows ?? []).map((p: any) => ({
+    id: p.id, title: p.title, content: p.content,
+    image_url: p.image_url, link_url: p.link_url,
+    is_pinned: p.is_pinned, likes_count: p.likes_count,
+    created_at: p.created_at,
+    author_name: null, author_avatar: null,
+  }));
+
+  // Get jobs linked to this association
+  const { data: jobRows } = await supabase
+    .from('job_posts' as any)
+    .select('id, title, description, location, country, type, specialisation, created_at')
+    .eq('association_page_id', page.id)
+    .eq('is_active', true)
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  const jobs = (jobRows ?? []).map((j: any) => ({
+    id: j.id, title: j.title, description: j.description,
+    location: j.location, country: j.country,
+    type: j.type, specialisation: j.specialisation,
+    created_at: j.created_at,
+  }));
+
   return (
-    <main className="min-h-screen bg-slate-50">
-      {/* Hero banner */}
-      <div className="relative bg-slate-900 pb-20 pt-24 sm:pb-28 sm:pt-32">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-slate-900 to-slate-900" />
-        <div className="container-shell relative">
-          <div className="flex items-center gap-4 sm:gap-6">
-            {logoSrc && (
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-white/20 bg-white p-3 shadow-xl sm:h-24 sm:w-24">
-                <Image src={logoSrc} alt={page.name} width={80} height={80} className="h-auto max-h-14 w-auto object-contain sm:max-h-16" />
-              </div>
-            )}
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold text-white sm:text-4xl">{page.name}</h1>
-                {page.is_verified && <ShieldCheck className="h-6 w-6 text-blue-400" />}
-              </div>
-              {page.country && <p className="mt-1 text-sm text-white/60">{page.country}</p>}
-              <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-white/50">
-                {(memberCount ?? 0) > 0 && <span className="flex items-center gap-1"><Users className="h-4 w-4" /> {memberCount} members</span>}
-                <span className="flex items-center gap-1"><Calendar className="h-4 w-4" /> {assocEvents.length} events listed</span>
-                {page.website && (
-                  <a href={page.website} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-blue-400 hover:underline">
-                    <Globe className="h-4 w-4" /> Website <ExternalLink className="h-3 w-3" />
-                  </a>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="container-shell -mt-8 pb-16">
-        <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
-          {/* Main content */}
-          <div className="space-y-6">
-            {/* About */}
-            {page.description && (
-              <div className="rounded-xl border border-slate-200/60 bg-white p-6 shadow-sm">
-                <h2 className="text-lg font-bold text-slate-900">About</h2>
-                <p className="mt-3 text-sm leading-relaxed text-slate-600">{page.description}</p>
-              </div>
-            )}
-
-            {/* Upcoming events */}
-            {upcoming.length > 0 && (
-              <div className="rounded-xl border border-slate-200/60 bg-white p-6 shadow-sm">
-                <h2 className="text-lg font-bold text-slate-900">Upcoming events</h2>
-                <div className="mt-4 space-y-3">
-                  {upcoming.map((e) => {
-                    const imgSrc = (e.image_path && /^(\/(cities|events|images)\/|https?:\/\/)/.test(e.image_path) ? e.image_path : e.coverImage) ?? '/cities/fallback.jpg';
-                    return (
-                      <Link key={e.id} href={`/events/${e.slug ?? e.id}`} className="group flex items-center gap-4 rounded-lg border border-slate-100 p-3 transition hover:border-blue-200 hover:shadow-sm">
-                        <div className="relative h-16 w-24 flex-shrink-0 overflow-hidden rounded-lg">
-                          <Image src={imgSrc} alt={e.title} fill className="object-cover" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold text-slate-900 group-hover:text-blue-600">{e.title}</p>
-                          <p className="mt-0.5 flex items-center gap-2 text-xs text-slate-400">
-                            <Calendar className="h-3 w-3" /> {formatEventDate(e)}
-                            <MapPin className="h-3 w-3" /> {e.city}, {e.country}
-                          </p>
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Past events */}
-            {past.length > 0 && (
-              <div className="rounded-xl border border-slate-200/60 bg-white p-6 shadow-sm">
-                <h2 className="text-lg font-bold text-slate-900">Past events</h2>
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  {past.map((e) => (
-                    <Link key={e.id} href={`/events/${e.slug ?? e.id}`} className="group rounded-lg border border-slate-100 p-3 transition hover:border-blue-200">
-                      <p className="truncate text-sm font-semibold text-slate-900 group-hover:text-blue-600">{e.title}</p>
-                      <p className="text-xs text-slate-400">{formatEventDate(e)} · {e.city}</p>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Sidebar — members */}
-          <div className="space-y-6">
-            <div className="rounded-xl border border-slate-200/60 bg-white p-5 shadow-sm">
-              <h3 className="text-sm font-bold text-slate-900">Members on platform</h3>
-              {(members ?? []).length > 0 ? (
-                <div className="mt-4 space-y-3">
-                  {(members ?? []).map((m: any) => (
-                    <a key={m.user_id} href={m.profiles?.username ? `/profile/${m.profiles.username}` : '#'} className="flex items-center gap-3 group">
-                      <UserAvatar src={m.profiles?.avatar_url} name={m.profiles?.full_name} size={36} />
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-slate-900 group-hover:text-blue-600">{m.profiles?.full_name ?? 'Member'}</p>
-                        <p className="truncate text-[11px] text-slate-400">{m.role || m.profiles?.specialisation || ''}</p>
-                      </div>
-                    </a>
-                  ))}
-                </div>
-              ) : (
-                <p className="mt-3 text-sm text-slate-400">No members have added this association to their profile yet.</p>
-              )}
-            </div>
-
-            {/* Quick stats */}
-            <div className="rounded-xl border border-slate-200/60 bg-white p-5 shadow-sm">
-              <h3 className="text-sm font-bold text-slate-900">Quick facts</h3>
-              <dl className="mt-3 space-y-2 text-sm">
-                {page.founded_year && (
-                  <div className="flex justify-between"><dt className="text-slate-400">Founded</dt><dd className="font-medium text-slate-700">{page.founded_year}</dd></div>
-                )}
-                <div className="flex justify-between"><dt className="text-slate-400">Events listed</dt><dd className="font-medium text-slate-700">{assocEvents.length}</dd></div>
-                <div className="flex justify-between"><dt className="text-slate-400">Members here</dt><dd className="font-medium text-slate-700">{memberCount ?? 0}</dd></div>
-                {page.country && (
-                  <div className="flex justify-between"><dt className="text-slate-400">Based in</dt><dd className="font-medium text-slate-700">{page.country}</dd></div>
-                )}
-              </dl>
-            </div>
-          </div>
-        </div>
-      </div>
+    <main className="min-h-screen bg-slate-50/80">
+      <AssociationPageTabs
+        page={{
+          name: page.name,
+          slug: page.slug,
+          description: page.description,
+          country: page.country,
+          website: page.website,
+          founded_year: page.founded_year,
+          member_count: page.member_count,
+          contact_email: page.contact_email,
+          social_links: page.social_links,
+          is_verified: page.is_verified,
+          logo_url: page.logo_url,
+          cover_image_url: page.cover_image_url,
+        }}
+        logoSrc={logoSrc ?? null}
+        upcoming={upcoming}
+        past={past}
+        members={members}
+        posts={posts}
+        jobs={jobs}
+        platformMembers={memberCount ?? 0}
+        verifiedCount={verifiedSet.size}
+      />
     </main>
   );
 }

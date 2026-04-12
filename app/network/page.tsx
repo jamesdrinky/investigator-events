@@ -604,7 +604,7 @@ export default function NetworkMapPage() {
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
-          Back to Community
+          Back to Forum
         </Link>
       </div>
 
@@ -620,14 +620,14 @@ export default function NetworkMapPage() {
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5">
               <span className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.5)]" />
               <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-300/80">
-                Global Network
+                Global Directory
               </span>
             </div>
           </div>
 
           {/* Title */}
           <h1 className="mx-auto mt-5 max-w-3xl text-center text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
-            The investigator network,{' '}
+            The global directory,{' '}
             <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent">
               visualised
             </span>

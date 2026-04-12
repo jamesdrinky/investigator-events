@@ -17,6 +17,7 @@ export interface AssociationDirectoryItem extends AssociationRecord {
   logoSrc?: string;
   eventCount: number;
   calendarAssociation: string;
+  hasPage?: boolean;
 }
 
 export const associationRecords: AssociationRecord[] = [

@@ -12,8 +12,9 @@ import {
   rejectSubmissionAction,
   updateEventAction
 } from '@/app/admin/actions';
-import { Calendar, Users, FileText, Megaphone, Globe, MapPin, Tag, ExternalLink, CheckCircle2, XCircle, Plus, Trash2, ShieldCheck } from 'lucide-react';
+import { Calendar, Users, FileText, Megaphone, Globe, MapPin, Tag, ExternalLink, CheckCircle2, XCircle, Plus, Trash2, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { VerificationCodeManager } from '@/components/admin/VerificationCodeManager';
+import { ModerationPanel } from '@/components/admin/ModerationPanel';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 
 export const dynamic = 'force-dynamic';
@@ -202,6 +203,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
             { id: 'events', label: `All Events (${events.length})`, icon: Calendar },
             { id: 'inquiries', label: `Inquiries (${advertiserLeads.length})`, icon: Megaphone },
             { id: 'verification', label: 'Verification Codes', icon: ShieldCheck },
+            { id: 'moderation', label: 'Moderation', icon: AlertTriangle },
           ].map((tab) => (
             <a
               key={tab.id}
@@ -383,6 +385,12 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
           {activeTab === 'verification' && (
             <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
               <VerificationCodeManager associations={associationPages} />
+            </div>
+          )}
+
+          {activeTab === 'moderation' && (
+            <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
+              <ModerationPanel />
             </div>
           )}
 

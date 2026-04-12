@@ -149,18 +149,10 @@ a {
   @apply py-16 sm:py-28;
 }
 
-/* ── Mobile performance: reduce paint for off-screen content ── */
+/* ── Mobile performance ── */
 @media (max-width: 639px) {
-  /* Promote scrolling layers to GPU */
   main {
     -webkit-overflow-scrolling: touch;
-  }
-
-  /* Reduce paint cost for sections not in viewport */
-  section {
-    contain: layout style paint;
-    content-visibility: auto;
-    contain-intrinsic-size: auto 500px;
   }
 }
 

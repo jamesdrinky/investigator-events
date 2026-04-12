@@ -40,3 +40,19 @@ export const eventCountries = [
   'United Kingdom',
   'United States'
 ] as const;
+
+// Region → Country mapping for cascading validation
+export const regionCountryMap: Record<string, string[]> = {
+  'Africa': ['South Africa'],
+  'Asia-Pacific': ['Australia', 'India', 'Japan', 'New Zealand', 'Singapore'],
+  'Europe': ['Austria', 'Belgium', 'Czech Republic', 'Denmark', 'France', 'Germany', 'Ireland', 'Italy', 'Netherlands', 'Norway', 'Portugal', 'Spain', 'Sweden', 'Switzerland', 'United Kingdom'],
+  'Latin America': ['Argentina', 'Brazil', 'Chile', 'Costa Rica', 'Mexico'],
+  'Middle East': ['United Arab Emirates'],
+  'North America': ['Canada', 'United States'],
+  'Online / Global': ['Online'],
+};
+
+// Get countries for a given region
+export function getCountriesForRegion(region: string): string[] {
+  return regionCountryMap[region] ?? [...eventCountries];
+}

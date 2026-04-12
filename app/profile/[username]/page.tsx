@@ -10,6 +10,7 @@ import { ConnectionButton } from './follow-button';
 import { EventsAttendanceStack } from '@/components/EventsAttendanceStack';
 import { ReportButton } from '@/components/ReportButton';
 import { VerifiedBadges } from '@/components/VerifiedBadges';
+import { ProfileCompletion } from '@/components/ProfileCompletion';
 
 export const dynamic = 'force-dynamic';
 
@@ -95,6 +96,30 @@ export default async function PublicProfilePage({ params }: { params: { username
   const hasActivity = (recentPosts ?? []).length > 0;
   const hasReviews = (reviewRows ?? []).length > 0;
   const hasExperience = (experienceRows ?? []).length > 0;
+
+  // Check newsletter subscription (for profile completion)
+  const userEmail = user?.email;
+  let isNewsletterSubscribed = false;
+  if (isOwner && userEmail) {
+    const { data: sub } = await supabase.from('newsletter_subscribers' as any).select('id').eq('email', userEmail).maybeSingle();
+    isNewsletterSubscribed = !!sub;
+  }
+
+  const hasAvatar = !!profile.avatar_url;
+  const hasCountry = !!profile.country;
+  const hasWebsite = !!profile.website;
+
+  const profileSteps = isOwner ? [
+    { id: 'avatar', label: 'Add a profile photo', done: hasAvatar, icon: <Pencil className="h-3 w-3" />, href: '/profile/edit', priority: 'high' as const },
+    { id: 'headline', label: 'Add a headline', done: hasHeadline, icon: <Pencil className="h-3 w-3" />, href: '/profile/edit', priority: 'high' as const },
+    { id: 'bio', label: 'Write an about section', done: hasAbout, icon: <Pencil className="h-3 w-3" />, href: '/profile/edit', priority: 'high' as const },
+    { id: 'country', label: 'Set your country', done: hasCountry, icon: <MapPin className="h-3 w-3" />, href: '/profile/edit', priority: 'high' as const },
+    { id: 'linkedin', label: 'Verify with LinkedIn', done: isLinkedInVerified, icon: <ShieldCheck className="h-3 w-3" />, href: '/profile/edit', priority: 'high' as const },
+    { id: 'associations', label: 'Add association memberships', done: hasAssociations, icon: <Users className="h-3 w-3" />, href: '/profile/edit', priority: 'medium' as const },
+    { id: 'experience', label: 'Add work experience', done: hasExperience, icon: <Briefcase className="h-3 w-3" />, href: '/profile/edit', priority: 'medium' as const },
+    { id: 'newsletter', label: 'Subscribe to newsletter', done: isNewsletterSubscribed, icon: <Calendar className="h-3 w-3" />, href: '/weekly', priority: 'low' as const },
+    { id: 'website', label: 'Add your website', done: hasWebsite, icon: <Globe className="h-3 w-3" />, href: '/profile/edit', priority: 'low' as const },
+  ] : [];
 
   const missing: string[] = [];
   if (!hasHeadline) missing.push('headline');
@@ -203,33 +228,50 @@ export default async function PublicProfilePage({ params }: { params: { username
               </Link>
             )}
 
-            {/* Verified identity banner */}
+            {/* Verified identity banner — BIG and prominent */}
             {isFullyVerified && (
-              <div className="mt-4 flex items-center gap-2.5 rounded-xl px-4 py-2.5" style={{
+              <div className="mt-4 overflow-hidden rounded-2xl" style={{
                 background: isLinkedInVerified
-                  ? 'linear-gradient(135deg, rgba(0,119,181,0.08) 0%, rgba(16,185,129,0.06) 100%)'
-                  : 'linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(59,130,246,0.06) 100%)',
-                border: `1px solid ${isLinkedInVerified ? 'rgba(0,119,181,0.15)' : 'rgba(16,185,129,0.15)'}`,
+                  ? 'linear-gradient(135deg, #0077B5 0%, #005f8f 50%, #004d73 100%)'
+                  : 'linear-gradient(135deg, #059669 0%, #047857 50%, #065f46 100%)',
               }}>
-                <div className="flex h-6 w-6 items-center justify-center rounded-full" style={{ background: isLinkedInVerified ? '#0077B5' : '#10b981' }}>
-                  <ShieldCheck className="h-3.5 w-3.5 text-white" />
+                <div className="relative px-5 py-4 sm:px-6">
+                  {/* Decorative elements */}
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,rgba(255,255,255,0.1),transparent_50%)]" />
+                  <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 opacity-10">
+                    <ShieldCheck className="h-20 w-20 text-white" />
+                  </div>
+
+                  <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-white/20 shadow-lg shadow-black/10">
+                        <ShieldCheck className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-white">
+                          {isLinkedInVerified ? 'LinkedIn Verified Identity' : 'Verified Association Member'}
+                        </p>
+                        <p className="text-xs text-white/60">
+                          {isLinkedInVerified && 'Authenticated through LinkedIn — identity confirmed. '}
+                          {activeVerifications.length > 0 && `Verified member of ${activeVerifications.map((v: any) => v.association_name).join(', ')}.`}
+                        </p>
+                      </div>
+                    </div>
+
+                    {isLinkedInVerified && linkedinUrl && (
+                      <a
+                        href={linkedinUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-[#0077B5] shadow-lg transition hover:shadow-xl hover:scale-[1.02]"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 48 48"><path fill="#0077B5" d="M42 37a5 5 0 01-5 5H11a5 5 0 01-5-5V11a5 5 0 015-5h26a5 5 0 015 5v26z" /><path fill="#FFF" d="M12 19h5v17h-5V19zm2.485-2h-.028C12.965 17 12 15.888 12 14.499 12 13.08 12.995 12 14.514 12c1.521 0 2.458 1.08 2.486 2.499C17 15.887 16.035 17 14.485 17zM36 36h-5v-9.099c0-2.198-1.225-3.698-3.192-3.698-1.501 0-2.313 1.012-2.707 1.99-.144.35-.101.858-.101 1.365V36h-5s.07-16 0-17h5v2.616C25.721 21.865 27.085 20 30.1 20c3.386 0 5.9 2.215 5.9 6.978V36z" /></svg>
+                        View LinkedIn Profile
+                        <ExternalLink className="h-3 w-3 opacity-50" />
+                      </a>
+                    )}
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="text-xs font-bold" style={{ color: isLinkedInVerified ? '#0077B5' : '#059669' }}>
-                    Verified Identity
-                  </p>
-                  <p className="text-[11px] text-slate-500">
-                    {isLinkedInVerified && 'Authenticated via LinkedIn. '}
-                    {activeVerifications.length > 0 && `Confirmed member of ${activeVerifications.map((v: any) => v.association_name).join(', ')}.`}
-                    {isLinkedInVerified && activeVerifications.length === 0 && 'This user verified their identity through LinkedIn.'}
-                  </p>
-                </div>
-                {isLinkedInVerified && linkedinUrl && (
-                  <a href={linkedinUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 rounded-full bg-[#0077B5]/10 px-3 py-1 text-[11px] font-bold text-[#0077B5] transition hover:bg-[#0077B5]/20">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 48 48"><path fill="currentColor" d="M42 37a5 5 0 01-5 5H11a5 5 0 01-5-5V11a5 5 0 015-5h26a5 5 0 015 5v26z" /><path fill="white" d="M12 19h5v17h-5V19zm2.485-2h-.028C12.965 17 12 15.888 12 14.499 12 13.08 12.995 12 14.514 12c1.521 0 2.458 1.08 2.486 2.499C17 15.887 16.035 17 14.485 17zM36 36h-5v-9.099c0-2.198-1.225-3.698-3.192-3.698-1.501 0-2.313 1.012-2.707 1.99-.144.35-.101.858-.101 1.365V36h-5s.07-16 0-17h5v2.616C25.721 21.865 27.085 20 30.1 20c3.386 0 5.9 2.215 5.9 6.978V36z" /></svg>
-                    View LinkedIn
-                  </a>
-                )}
               </div>
             )}
 
@@ -290,20 +332,10 @@ export default async function PublicProfilePage({ params }: { params: { username
           </div>
         </div>
 
-        {/* ═══ OWNER PROMPTS ═══ */}
-        {isOwner && missing.length > 0 && (
-          <div className="mt-4 rounded-2xl border p-5" style={{ borderColor: `${accentColor}20`, backgroundColor: `${accentColor}05` }}>
-            <p className="text-sm font-bold" style={{ color: accentColor }}>Strengthen your profile</p>
-            <div className="mt-2.5 flex flex-wrap gap-2">
-              {missing.map((key) => {
-                const prompt = SECTION_PROMPTS[key];
-                return (
-                  <Link key={key} href="/profile/edit" className="flex items-center gap-1.5 rounded-full border bg-white px-3.5 py-2 text-xs font-semibold shadow-sm transition hover:shadow-md" style={{ borderColor: `${accentColor}25`, color: accentColor }}>
-                    {prompt.title} <ArrowRight className="h-3 w-3" />
-                  </Link>
-                );
-              })}
-            </div>
+        {/* ═══ PROFILE COMPLETION ═══ */}
+        {isOwner && profileSteps.length > 0 && (
+          <div className="mt-4">
+            <ProfileCompletion steps={profileSteps} />
           </div>
         )}
 

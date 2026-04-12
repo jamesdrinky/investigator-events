@@ -4,6 +4,7 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 import { Camera, MapPin, Calendar, Clock, Globe, FileText, Mail, User, Building2, Tag, Layers, ImageIcon, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
+import { getCountriesForRegion } from '@/lib/forms/event-form-options';
 
 interface SubmitEventFormProps {
   action: (formData: FormData) => void;
@@ -30,6 +31,8 @@ export function SubmitEventForm({
 }: SubmitEventFormProps) {
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [selectedRegion, setSelectedRegion] = useState('');
+  const [filteredCountries, setFilteredCountries] = useState<string[]>([...countries]);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
@@ -230,16 +233,35 @@ export function SubmitEventForm({
             )}
           </div>
 
-          {/* Location */}
+          {/* Location — cascading: Region → Country → City */}
           <div className="flex items-start gap-3 rounded-[1.2rem] border border-slate-200/60 bg-white px-4 py-3 transition-colors hover:border-slate-300">
             <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-slate-400" />
             <div className="flex-1 grid gap-2 sm:grid-cols-3">
-              <input name="city" required maxLength={120} placeholder="City" className="border-0 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none" />
-              <input name="country" list="submit-event-country-options" required maxLength={120} placeholder="Country" className="border-0 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none" />
-              <select name="region" required defaultValue="" className="border-0 bg-transparent text-sm text-slate-900 focus:outline-none">
-                <option value="" disabled>Region</option>
+              <select
+                name="region"
+                required
+                value={selectedRegion}
+                onChange={(e) => {
+                  const region = e.target.value;
+                  setSelectedRegion(region);
+                  setFilteredCountries(getCountriesForRegion(region));
+                }}
+                className="border-0 bg-transparent text-sm text-slate-900 focus:outline-none"
+              >
+                <option value="" disabled>1. Region</option>
                 {regions.map((r) => <option key={r} value={r}>{r}</option>)}
               </select>
+              <select
+                name="country"
+                required
+                defaultValue=""
+                disabled={!selectedRegion}
+                className="border-0 bg-transparent text-sm text-slate-900 focus:outline-none disabled:text-slate-300"
+              >
+                <option value="" disabled>2. Country</option>
+                {filteredCountries.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+              <input name="city" required maxLength={120} placeholder="3. City" disabled={!selectedRegion} className="border-0 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none disabled:text-slate-300 disabled:placeholder:text-slate-300" />
             </div>
           </div>
 
@@ -313,9 +335,6 @@ export function SubmitEventForm({
           </div>
         </form>
 
-        <datalist id="submit-event-country-options">
-          {countries.map((c) => <option key={c} value={c} />)}
-        </datalist>
       </div>
     </div>
   );

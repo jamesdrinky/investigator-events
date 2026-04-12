@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Search, MapPin, Globe, ArrowRight, ShieldCheck, ExternalLink } from 'lucide-react';
+import { AssociationMap } from './AssociationMap';
 
 interface Association {
   slug: string;
@@ -33,6 +34,15 @@ export function AssociationFinder({ associations }: { associations: Association[
   const countries = useMemo(() => {
     const set = new Set(associations.map((a) => a.country));
     return Array.from(set).sort();
+  }, [associations]);
+
+  // Map data — count associations per country
+  const mapData = useMemo(() => {
+    const counts = new Map<string, number>();
+    associations.forEach((a) => {
+      counts.set(a.country, (counts.get(a.country) ?? 0) + 1);
+    });
+    return Array.from(counts.entries()).map(([country, count]) => ({ country, count }));
   }, [associations]);
 
   // International associations (those with "International" or "World" in region/name handling)
@@ -110,6 +120,19 @@ export function AssociationFinder({ associations }: { associations: Association[
         </div>
       </div>
 
+      {/* Interactive map */}
+      <div className="mt-6">
+        <AssociationMap
+          associations={mapData}
+          onCountryClick={(country) => {
+            setSearch(country);
+            setSelectedRegion(null);
+          }}
+          selectedCountry={search && countries.includes(search) ? search : undefined}
+        />
+        <p className="mt-2 text-center text-[11px] text-slate-400">Click a highlighted country to filter associations</p>
+      </div>
+
       {/* International associations — always show */}
       <div className="mt-8">
         <div className="flex items-center gap-2">
@@ -183,18 +206,16 @@ function AssociationCard({ association: a }: { association: Association }) {
         </div>
       </div>
       <div className="flex items-center gap-2 border-t border-slate-100 px-4 py-2.5">
-        {a.hasPage ? (
-          <Link href={`/associations/${a.slug}`} className="flex items-center gap-1 text-xs font-semibold text-blue-600 transition hover:gap-2">
-            View page <ArrowRight className="h-3 w-3" />
-          </Link>
-        ) : (
-          <a href={a.website} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline">
-            Visit website <ExternalLink className="h-3 w-3" />
-          </a>
+        {a.hasPage && (
+          <>
+            <Link href={`/associations/${a.slug}`} className="flex items-center gap-1 text-xs font-semibold text-blue-600 transition hover:gap-2">
+              View on IE <ArrowRight className="h-3 w-3" />
+            </Link>
+            <span className="mx-0.5 text-slate-200">|</span>
+          </>
         )}
-        <span className="mx-1 text-slate-200">|</span>
         <a href={a.website} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs font-semibold text-emerald-600 hover:underline">
-          <ShieldCheck className="h-3 w-3" /> Join now
+          <ShieldCheck className="h-3 w-3" /> Join now <ExternalLink className="h-2.5 w-2.5 ml-0.5 opacity-50" />
         </a>
       </div>
     </div>

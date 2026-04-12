@@ -5,6 +5,7 @@ import { ShieldCheck, Globe, Award, Users, ArrowRight, Handshake } from 'lucide-
 import { Reveal } from '@/components/motion/reveal';
 import { associationRecords } from '@/lib/data/associations';
 import { AssociationFinder } from '@/components/associations/AssociationFinder';
+import { AnimatedCounter } from '@/components/motion/counter';
 import { createSupabaseSSRServerClient } from '@/lib/supabase/ssr-server';
 
 export const metadata: Metadata = {
@@ -82,20 +83,22 @@ export default async function WhyJoinPage() {
             </div>
           </div>
 
-          {/* Stats */}
+          {/* Animated stats */}
+          <Reveal delay={0.3}>
           <div className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
             {[
-              { value: `${associationRecords.length}+`, label: 'Associations listed', color: 'from-blue-500/20 to-blue-600/10 border-blue-400/15 text-blue-300' },
-              { value: '30+', label: 'Countries covered', color: 'from-violet-500/20 to-violet-600/10 border-violet-400/15 text-violet-300' },
-              { value: '6', label: 'Regions worldwide', color: 'from-cyan-500/20 to-cyan-600/10 border-cyan-400/15 text-cyan-300' },
-              { value: '100+', label: 'Events per year', color: 'from-emerald-500/20 to-emerald-600/10 border-emerald-400/15 text-emerald-300' },
+              { value: associationRecords.length, suffix: '+', label: 'Associations listed', color: 'from-blue-500/20 to-blue-600/10 border-blue-400/15 text-blue-300' },
+              { value: 30, suffix: '+', label: 'Countries covered', color: 'from-violet-500/20 to-violet-600/10 border-violet-400/15 text-violet-300' },
+              { value: 6, suffix: '', label: 'Regions worldwide', color: 'from-cyan-500/20 to-cyan-600/10 border-cyan-400/15 text-cyan-300' },
+              { value: 100, suffix: '+', label: 'Events per year', color: 'from-emerald-500/20 to-emerald-600/10 border-emerald-400/15 text-emerald-300' },
             ].map((s) => (
               <div key={s.label} className={`rounded-2xl border bg-gradient-to-br p-4 sm:p-5 ${s.color}`}>
-                <p className="text-2xl font-bold sm:text-3xl">{s.value}</p>
+                <AnimatedCounter value={s.value} suffix={s.suffix} className="text-2xl font-bold sm:text-3xl" />
                 <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider opacity-60">{s.label}</p>
               </div>
             ))}
           </div>
+          </Reveal>
         </div>
       </div>
 

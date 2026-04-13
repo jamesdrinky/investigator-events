@@ -128,11 +128,11 @@ export default async function PublicProfilePage({ params }: { params: { username
 
   return (
     <main className="min-h-screen bg-slate-50/80">
-      {/* Ambient page glow — enhanced for verified users */}
+      {/* Ambient page glow — uses profile accent color */}
       <div className="pointer-events-none fixed inset-x-0 top-0 h-[50vh]" style={{
-        opacity: isFullyVerified ? 0.5 : 0.3,
+        opacity: isFullyVerified ? 0.45 : 0.3,
         background: isFullyVerified
-          ? `radial-gradient(ellipse at 50% 0%, ${isLinkedInVerified ? 'rgba(0,119,181,0.15)' : 'rgba(16,185,129,0.15)'} 0%, transparent 60%), radial-gradient(ellipse at 30% 10%, ${accentColor}10 0%, transparent 50%)`
+          ? `radial-gradient(ellipse at 50% 0%, ${accentColor}20 0%, transparent 60%), radial-gradient(ellipse at 30% 10%, ${accentColor}10 0%, transparent 50%)`
           : `radial-gradient(ellipse at 50% 0%, ${accentColor}15 0%, transparent 70%)`
       }} />
 
@@ -141,11 +141,12 @@ export default async function PublicProfilePage({ params }: { params: { username
         {/* ═══ TOP CARD ═══ */}
         <div className={`rounded-2xl border bg-white shadow-lg ${
           isFullyVerified
-            ? 'border-emerald-200/80 shadow-emerald-100/50 ring-1 ring-emerald-200/30'
+            ? 'border-slate-200/60'
             : 'border-slate-200/60 shadow-slate-200/50'
         }`}
           style={isFullyVerified ? {
-            boxShadow: `0 0 0 1px rgba(16,185,129,0.1), 0 4px 24px -4px rgba(16,185,129,0.15), 0 12px 40px -8px rgba(16,185,129,0.1)`
+            borderColor: `${accentColor}30`,
+            boxShadow: `0 0 0 1px ${accentColor}10, 0 4px 24px -4px ${accentColor}20, 0 12px 40px -8px ${accentColor}12`
           } : undefined}
         >
           {/* Banner */}
@@ -167,16 +168,14 @@ export default async function PublicProfilePage({ params }: { params: { username
               <div className="relative z-10">
                 {/* Verified glow ring */}
                 {isFullyVerified && (
-                  <div className="absolute -inset-1 rounded-full opacity-60" style={{
-                    background: isLinkedInVerified
-                      ? 'linear-gradient(135deg, #0077B5, #10b981, #0077B5)'
-                      : 'linear-gradient(135deg, #10b981, #3b82f6, #10b981)',
-                    filter: 'blur(4px)',
+                  <div className="absolute -inset-1 rounded-full opacity-50" style={{
+                    background: `linear-gradient(135deg, ${accentColor}, ${accentColor}80, ${accentColor})`,
+                    filter: 'blur(5px)',
                   }} />
                 )}
-                <div className={`relative rounded-full border-4 shadow-xl ${isFullyVerified ? 'border-white' : 'border-white'}`} style={{
+                <div className="relative rounded-full border-4 border-white shadow-xl" style={{
                   boxShadow: isFullyVerified
-                    ? `0 8px 30px -8px rgba(16,185,129,0.5), 0 4px 12px -4px rgba(0,0,0,0.15)`
+                    ? `0 8px 30px -8px ${accentColor}50, 0 4px 12px -4px rgba(0,0,0,0.15)`
                     : `0 8px 30px -8px ${accentColor}40, 0 4px 12px -4px rgba(0,0,0,0.1)`
                 }}>
                   <div className="overflow-hidden rounded-full">
@@ -188,9 +187,7 @@ export default async function PublicProfilePage({ params }: { params: { username
                 {/* Verified checkmark on avatar */}
                 {isFullyVerified && (
                   <div className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-md ring-2 ring-white">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full" style={{
-                      background: isLinkedInVerified ? '#0077B5' : '#10b981'
-                    }}>
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full" style={{ background: accentColor }}>
                       <ShieldCheck className="h-3.5 w-3.5 text-white" />
                     </div>
                   </div>
@@ -227,32 +224,31 @@ export default async function PublicProfilePage({ params }: { params: { username
               </Link>
             )}
 
-            {/* Verified identity banner — BIG and prominent */}
+            {/* Verified identity banner */}
             {isFullyVerified && (
               <div className="mt-4 overflow-hidden rounded-2xl" style={{
                 background: isLinkedInVerified
-                  ? 'linear-gradient(135deg, #0077B5 0%, #005f8f 50%, #004d73 100%)'
-                  : 'linear-gradient(135deg, #059669 0%, #047857 50%, #065f46 100%)',
+                  ? `linear-gradient(135deg, #0077B5 0%, #005f8f 100%)`
+                  : `linear-gradient(135deg, ${accentColor} 0%, ${accentColor}cc 100%)`,
               }}>
-                <div className="relative px-5 py-4 sm:px-6">
-                  {/* Decorative elements */}
+                <div className="relative px-4 py-3.5 sm:px-5 sm:py-4">
                   <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,rgba(255,255,255,0.1),transparent_50%)]" />
-                  <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 opacity-10">
-                    <ShieldCheck className="h-20 w-20 text-white" />
+                  <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 opacity-[0.07]">
+                    <ShieldCheck className="h-16 w-16 text-white sm:h-20 sm:w-20" />
                   </div>
 
-                  <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center">
-                    <div className="flex items-center gap-3 flex-1">
-                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-white/20 shadow-lg shadow-black/10">
-                        <ShieldCheck className="h-5 w-5 text-white" />
+                  <div className="relative space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-white/20">
+                        <ShieldCheck className="h-4.5 w-4.5 text-white" />
                       </div>
                       <div>
                         <p className="text-sm font-bold text-white">
                           {isLinkedInVerified ? 'LinkedIn Verified Identity' : 'Verified Association Member'}
                         </p>
-                        <p className="text-xs text-white/60">
-                          {isLinkedInVerified && 'Authenticated through LinkedIn — identity confirmed. '}
-                          {activeVerifications.length > 0 && `Verified member of ${activeVerifications.map((v: any) => v.association_name).join(', ')}.`}
+                        <p className="text-[11px] text-white/60">
+                          {isLinkedInVerified && 'Authenticated through LinkedIn. '}
+                          {activeVerifications.length > 0 && `Member of ${activeVerifications.map((v: any) => v.association_name).join(', ')}.`}
                         </p>
                       </div>
                     </div>
@@ -262,7 +258,7 @@ export default async function PublicProfilePage({ params }: { params: { username
                         href={linkedinUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-[#0077B5] shadow-lg transition hover:shadow-xl hover:scale-[1.02]"
+                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-[#0077B5] shadow-lg transition hover:shadow-xl sm:w-auto sm:inline-flex sm:rounded-full"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 48 48"><path fill="#0077B5" d="M42 37a5 5 0 01-5 5H11a5 5 0 01-5-5V11a5 5 0 015-5h26a5 5 0 015 5v26z" /><path fill="#FFF" d="M12 19h5v17h-5V19zm2.485-2h-.028C12.965 17 12 15.888 12 14.499 12 13.08 12.995 12 14.514 12c1.521 0 2.458 1.08 2.486 2.499C17 15.887 16.035 17 14.485 17zM36 36h-5v-9.099c0-2.198-1.225-3.698-3.192-3.698-1.501 0-2.313 1.012-2.707 1.99-.144.35-.101.858-.101 1.365V36h-5s.07-16 0-17h5v2.616C25.721 21.865 27.085 20 30.1 20c3.386 0 5.9 2.215 5.9 6.978V36z" /></svg>
                         View LinkedIn Profile

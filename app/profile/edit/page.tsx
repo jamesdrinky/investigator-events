@@ -254,6 +254,9 @@ export default function EditProfilePage() {
     // Validate website URL — only allow http/https
     const sanitizedWebsite = website && /^https?:\/\//i.test(website.trim()) ? website.trim() : null;
 
+    // Only save LinkedIn URL if LinkedIn verified and valid
+    const sanitizedLinkedin = authProvider === 'linkedin_oidc' && linkedinUrl && /^https?:\/\/(www\.)?linkedin\.com\//i.test(linkedinUrl.trim()) ? linkedinUrl.trim() : null;
+
     await supabase.from('profiles').upsert({
       id: userId,
       full_name: (fullName || '').slice(0, 100) || null,
@@ -263,6 +266,7 @@ export default function EditProfilePage() {
       headline: (headline || '').slice(0, 200) || null,
       bio: (bio || '').slice(0, 2000) || null,
       website: sanitizedWebsite,
+      linkedin_url: sanitizedLinkedin,
       profile_color: profileColor,
       avatar_url: avatarUrl,
       banner_url: bannerUrl,
@@ -603,13 +607,18 @@ export default function EditProfilePage() {
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 48 48"><path fill="currentColor" d="M42 37a5 5 0 01-5 5H11a5 5 0 01-5-5V11a5 5 0 015-5h26a5 5 0 015 5v26z" /><path fill="white" d="M12 19h5v17h-5V19zm2.485-2h-.028C12.965 17 12 15.888 12 14.499 12 13.08 12.995 12 14.514 12c1.521 0 2.458 1.08 2.486 2.499C17 15.887 16.035 17 14.485 17zM36 36h-5v-9.099c0-2.198-1.225-3.698-3.192-3.698-1.501 0-2.313 1.012-2.707 1.99-.144.35-.101.858-.101 1.365V36h-5s.07-16 0-17h5v2.616C25.721 21.865 27.085 20 30.1 20c3.386 0 5.9 2.215 5.9 6.978V36z" /></svg>
                     Connected via LinkedIn
                   </span>
-                  <span className="text-sm text-emerald-700">Your identity is verified through LinkedIn</span>
+                  <span className="text-sm text-emerald-700">Your identity is verified</span>
                 </div>
-                {linkedinUrl && (
-                  <p className="mt-2 text-xs text-slate-400">
-                    Linked profile: <a href={linkedinUrl} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">{linkedinUrl}</a>
-                  </p>
-                )}
+                <div className="mt-3">
+                  <label className="text-sm font-medium text-slate-700">Your LinkedIn profile URL</label>
+                  <p className="text-xs text-slate-400">This will be shown as a clickable link on your profile so others can verify who you are.</p>
+                  <input
+                    className="field-input mt-1.5 w-full"
+                    value={linkedinUrl}
+                    onChange={(e) => setLinkedinUrl(e.target.value)}
+                    placeholder="https://linkedin.com/in/your-name"
+                  />
+                </div>
               </div>
             ) : (
               <div className="mt-3">

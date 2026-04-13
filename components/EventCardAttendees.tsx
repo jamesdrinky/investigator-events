@@ -5,7 +5,7 @@ import { Check, Plus } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { UserAvatar } from '@/components/UserAvatar';
 
-type MiniAttendee = { avatar_url: string | null; full_name: string | null };
+type MiniAttendee = { user_id: string | null; avatar_url: string | null; full_name: string | null };
 
 export function EventCardAttendees({ eventId }: { eventId: string }) {
   const [attendees, setAttendees] = useState<MiniAttendee[]>([]);
@@ -36,6 +36,7 @@ export function EventCardAttendees({ eventId }: { eventId: string }) {
       .limit(4)
       .then(({ data, count }) => {
         const rows = (data ?? []).map((r: any) => ({
+          user_id: r.user_id ?? null,
           avatar_url: r.profiles?.avatar_url ?? null,
           full_name: r.profiles?.full_name ?? null,
         }));
@@ -62,12 +63,12 @@ export function EventCardAttendees({ eventId }: { eventId: string }) {
       await supabase.from('event_attendees').delete().eq('event_id', eventId).eq('user_id', userId);
       setIsGoing(false);
       setTotal((t) => Math.max(0, t - 1));
-      setAttendees((prev) => prev.filter((a) => a.full_name !== userName));
+      setAttendees((prev) => prev.filter((a) => a.user_id !== userId));
     } else {
       await supabase.from('event_attendees').insert({ user_id: userId, event_id: eventId, is_going: true });
       setIsGoing(true);
       setTotal((t) => t + 1);
-      setAttendees((prev) => [{ avatar_url: userAvatar, full_name: userName }, ...prev].slice(0, 4));
+      setAttendees((prev) => [{ user_id: userId, avatar_url: userAvatar, full_name: userName }, ...prev].slice(0, 4));
     }
     setToggling(false);
   };

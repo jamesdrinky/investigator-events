@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     // Look up the verification code
     const { data: codeRow } = await admin
       .from('association_verification_codes' as any)
-      .select('id, association_page_id, expires_at, is_active')
+      .select('id, association_page_id, expires_at, is_active, usage_count')
       .eq('code', code)
       .eq('is_active', true)
       .single();
@@ -101,7 +101,7 @@ export async function POST(request: Request) {
     // Increment usage count on the code
     await admin
       .from('association_verification_codes' as any)
-      .update({ usage_count: (row as any).usage_count + 1 } as any)
+      .update({ usage_count: ((row as any).usage_count ?? 0) + 1 } as any)
       .eq('id', row.id);
 
     return NextResponse.json({

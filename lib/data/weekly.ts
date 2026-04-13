@@ -11,11 +11,11 @@ function createdAtTime(event: EventItem): number {
 
 export function getWeeklyCollections(events: EventItem[], now = new Date()) {
   const start = startOfDay(now);
-  const next7 = start.getTime() - 7 * 24 * 60 * 60 * 1000;
+  const past7 = start.getTime() - 7 * 24 * 60 * 60 * 1000;
   const next30 = start.getTime() + 30 * 24 * 60 * 60 * 1000;
 
   const newlyAdded = [...events]
-    .filter((event) => createdAtTime(event) >= next7)
+    .filter((event) => createdAtTime(event) >= past7)
     .sort((a, b) => createdAtTime(b) - createdAtTime(a))
     .slice(0, 6);
 

@@ -40,7 +40,11 @@ export default function PeoplePage() {
         const { data: myProfile } = await supabase.from('profiles').select('country, specialisation').eq('id', uid).single();
         if (myProfile) {
           let q = supabase.from('profiles').select('id, full_name, avatar_url, country, specialisation, profile_color').eq('is_public', true).neq('id', uid).limit(8);
-          if (myProfile.country) q = q.or(`country.eq.${myProfile.country},specialisation.eq.${myProfile.specialisation ?? ''}`);
+          if (myProfile.country) {
+            const filters = [`country.eq.${myProfile.country}`];
+            if (myProfile.specialisation) filters.push(`specialisation.eq.${myProfile.specialisation}`);
+            q = q.or(filters.join(','));
+          }
           const { data: sugg } = await q;
           setSuggested(sugg ?? []);
         }

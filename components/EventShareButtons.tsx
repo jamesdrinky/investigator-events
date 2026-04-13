@@ -26,9 +26,13 @@ export function EventShareButtons({ eventTitle, eventSlug }: { eventTitle: strin
   }, []);
 
   const copyLink = async () => {
-    await navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback for non-HTTPS or restricted contexts
+    }
   };
 
   const shareWhatsApp = () => {

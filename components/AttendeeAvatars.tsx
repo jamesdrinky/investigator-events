@@ -23,7 +23,7 @@ export function AttendeeAvatars({ eventId }: { eventId: string }) {
 
     supabase
       .from('event_attendees')
-      .select('id, user_id, profiles:user_id(full_name, avatar_url, username, specialisation)')
+      .select('id, user_id, profiles:user_id(full_name, avatar_url, username, specialisation)', { count: 'exact' })
       .eq('event_id', eventId)
       .eq('is_going', true)
       .order('created_at', { ascending: false })
@@ -153,13 +153,13 @@ export function AttendeeAvatars({ eventId }: { eventId: string }) {
                 key={a.id}
                 className="flex items-center gap-3 rounded-lg p-2 transition hover:bg-white hover:shadow-sm"
               >
-                <a href={a.username ? `/profile/${a.username}` : '#'} className="flex-shrink-0">
+                <Link href={a.username ? `/profile/${a.username}` : '#'} className="flex-shrink-0">
                   <UserAvatar src={a.avatar_url} name={a.full_name} size={36} />
-                </a>
-                <a href={a.username ? `/profile/${a.username}` : '#'} className="min-w-0 flex-1">
+                </Link>
+                <Link href={a.username ? `/profile/${a.username}` : '#'} className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-slate-900">{a.full_name ?? 'Investigator'}</p>
                   {a.specialisation && <p className="truncate text-[11px] text-slate-400">{a.specialisation}</p>}
-                </a>
+                </Link>
                 {userId && !isMe && (
                   <Link
                     href={`/messages?to=${a.user_id}`}

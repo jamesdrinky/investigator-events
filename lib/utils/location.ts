@@ -28,7 +28,14 @@ const countryCodes: Record<string, string> = {
   Switzerland: 'CH',
   'United Arab Emirates': 'AE',
   'United Kingdom': 'GB',
-  'United States': 'US'
+  'United States': 'US',
+  Finland: 'FI',
+  Hungary: 'HU',
+  Latvia: 'LV',
+  Serbia: 'RS',
+  Slovenia: 'SI',
+  Poland: 'PL',
+  Romania: 'RO'
 };
 
 function codeToFlag(code: string): string {

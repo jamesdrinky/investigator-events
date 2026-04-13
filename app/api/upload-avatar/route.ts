@@ -2,8 +2,12 @@ import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { enforceRateLimit, assertSameOriginRequest } from '@/lib/security/server';
 
 export async function POST(request: Request) {
+  enforceRateLimit('upload-avatar', { maxRequests: 10, windowMs: 60_000 });
+  assertSameOriginRequest();
+
   // Verify the user is authenticated
   const cookieStore = await cookies();
   const supabase = createServerClient(
@@ -48,7 +52,13 @@ export async function POST(request: Request) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  const filePath = `${user.id}/avatar.jpg`;
+  // Support avatar or banner upload
+  const uploadType = formData.get('type') as string | null;
+  const isBanner = uploadType === 'banner';
+
+  const filePath = isBanner
+    ? `banners/${user.id}/banner.jpg`
+    : `${user.id}/avatar.jpg`;
   const buffer = Buffer.from(await file.arrayBuffer());
 
   const { error: uploadError } = await admin.storage
@@ -63,7 +73,11 @@ export async function POST(request: Request) {
   const publicUrl = `${urlData.publicUrl}?v=${Date.now()}`;
 
   // Also update the profile
-  await admin.from('profiles').upsert({ id: user.id, avatar_url: publicUrl });
+  if (isBanner) {
+    await admin.from('profiles').update({ banner_url: publicUrl } as any).eq('id', user.id);
+  } else {
+    await admin.from('profiles').upsert({ id: user.id, avatar_url: publicUrl });
+  }
 
   return NextResponse.json({ url: publicUrl });
 }

@@ -214,14 +214,13 @@ function AssociationCard({ association: a }: { association: Association }) {
         </div>
       </div>
       <div className="flex items-center gap-2 border-t border-slate-100 px-4 py-2.5">
-        {a.hasPage && (
-          <>
-            <Link href={`/associations/${a.slug}`} className="flex items-center gap-1 text-xs font-semibold text-blue-600 transition hover:gap-2">
-              View on IE <ArrowRight className="h-3 w-3" />
-            </Link>
-            <span className="mx-0.5 text-slate-200">|</span>
-          </>
-        )}
+        <Link
+          href={a.hasPage ? `/associations/${a.slug}` : `/calendar?association=${encodeURIComponent(a.shortName)}`}
+          className="flex items-center gap-1 text-xs font-semibold text-blue-600 transition hover:gap-2"
+        >
+          {a.hasPage ? 'See our page' : 'View events'} <ArrowRight className="h-3 w-3" />
+        </Link>
+        <span className="mx-0.5 text-slate-200">|</span>
         <a href={a.website} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs font-semibold text-emerald-600 hover:underline">
           <ShieldCheck className="h-3 w-3" /> Join now <ExternalLink className="h-2.5 w-2.5 ml-0.5 opacity-50" />
         </a>

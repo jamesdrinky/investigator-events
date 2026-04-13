@@ -81,19 +81,13 @@ export function mapEventRowToItem(row: CompatEventRow): EventItem | null {
 
 async function fetchRawEvents(): Promise<CompatEventRow[]> {
   const supabase = createSupabasePublicServerClient();
-  const primary = await supabase.from('events').select('*, image_path').order('date', { ascending: true });
+  const { data, error } = await supabase.from('events').select('*').order('start_date', { ascending: true });
 
-  if (!primary.error) {
-    return (primary.data ?? []) as CompatEventRow[];
-  }
-
-  const fallback = await supabase.from('events').select('*, image_path').order('start_date', { ascending: true });
-
-  if (fallback.error) {
+  if (error) {
     return [];
   }
 
-  return (fallback.data ?? []) as CompatEventRow[];
+  return (data ?? []) as CompatEventRow[];
 }
 
 async function fetchVisibleEvents(): Promise<EventItem[]> {

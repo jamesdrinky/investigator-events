@@ -77,7 +77,7 @@ export function GlobalSearch({ isDark }: { isDark?: boolean }) {
       e.preventDefault();
       const item = allItems[focusIndex];
       if (item.type === 'event') navigate(`/events/${(item.data as EventResult).slug}`);
-      if (item.type === 'person') navigate(`/profile/${(item.data as PersonResult).username}`);
+      if (item.type === 'person' && (item.data as PersonResult).username) navigate(`/profile/${(item.data as PersonResult).username}`);
     }
     if (e.key === 'Escape') { setOpen(false); setMobileOpen(false); }
   };

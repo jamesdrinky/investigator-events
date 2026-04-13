@@ -22,6 +22,7 @@ type Post = {
   avatar_url: string | null;
   specialisation: string | null;
   country: string | null;
+  username: string | null;
 };
 
 type Comment = {
@@ -38,6 +39,7 @@ export function CommunityFeed() {
   const [userId, setUserId] = useState<string | null>(null);
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
+  const [userUsername, setUserUsername] = useState<string | null>(null);
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
 
@@ -62,9 +64,10 @@ export function CommunityFeed() {
       const uid = data.user?.id ?? null;
       setUserId(uid);
       if (uid) {
-        const { data: profile } = await supabase.from('profiles').select('full_name, avatar_url').eq('id', uid).single();
+        const { data: profile } = await supabase.from('profiles').select('full_name, avatar_url, username').eq('id', uid).single();
         setUserAvatar(profile?.avatar_url ?? data.user?.user_metadata?.avatar_url ?? null);
         setUserName(profile?.full_name ?? data.user?.user_metadata?.full_name ?? null);
+        setUserUsername(profile?.username ?? null);
 
         // Get liked posts
         const { data: likes } = await supabase.from('post_likes').select('post_id').eq('user_id', uid);
@@ -75,7 +78,7 @@ export function CommunityFeed() {
     // Fetch posts with profile join — pinned first, then by date
     supabase
       .from('posts')
-      .select('id, user_id, title, content, image_url, link_url, likes_count, comments_count, is_pinned, created_at, profiles:user_id(full_name, avatar_url, specialisation, country)')
+      .select('id, user_id, title, content, image_url, link_url, likes_count, comments_count, is_pinned, created_at, profiles:user_id(full_name, avatar_url, specialisation, country, username)')
       .order('is_pinned', { ascending: false })
       .order('created_at', { ascending: false })
       .limit(50)
@@ -85,7 +88,7 @@ export function CommunityFeed() {
           link_url: r.link_url, likes_count: r.likes_count ?? 0, comments_count: r.comments_count ?? 0,
           is_pinned: r.is_pinned ?? false, created_at: r.created_at,
           full_name: r.profiles?.full_name ?? null, avatar_url: r.profiles?.avatar_url ?? null,
-          specialisation: r.profiles?.specialisation ?? null, country: r.profiles?.country ?? null,
+          specialisation: r.profiles?.specialisation ?? null, country: r.profiles?.country ?? null, username: r.profiles?.username ?? null,
         }));
         setPosts(rows);
         setLoading(false);
@@ -123,7 +126,7 @@ export function CommunityFeed() {
         image_url: d.image_url, link_url: d.link_url,
         likes_count: d.likes_count ?? 0, comments_count: d.comments_count ?? 0,
         is_pinned: false, created_at: d.created_at,
-        full_name: userName, avatar_url: userAvatar, specialisation: null, country: null,
+        full_name: userName, avatar_url: userAvatar, specialisation: null, country: null, username: userUsername,
       }, ...prev]);
       setPostTitle('');
       setPostText('');
@@ -325,7 +328,7 @@ export function CommunityFeed() {
 
                 {/* Post header */}
                 <div className="flex items-start justify-between px-5 pt-4">
-                  <a href={post.full_name ? `/profile/${post.full_name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}` : '#'} className="flex gap-3 group">
+                  <a href={post.username ? `/profile/${post.username}` : '#'} className="flex gap-3 group">
                     <UserAvatar src={post.avatar_url} name={post.full_name} size={44} />
                     <div>
                       <p className="text-sm font-semibold text-slate-900 group-hover:text-blue-600 group-hover:underline">{post.full_name ?? 'Investigator'}</p>

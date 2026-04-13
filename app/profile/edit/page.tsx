@@ -245,6 +245,7 @@ export default function EditProfilePage() {
 
   const handleSave = async () => {
     if (!userId) return;
+    if (!fullName.trim()) { setMessage('Name is required'); return; }
     setSaving(true);
     setMessage('');
     const supabase = createSupabaseBrowserClient();
@@ -358,13 +359,15 @@ export default function EditProfilePage() {
                         const file = e.target.files?.[0];
                         if (!file || !userId) return;
                         setUploadingBanner(true);
-                        const supabase = createSupabaseBrowserClient();
-                        const ext = file.name.split('.').pop();
-                        const path = `banners/${userId}/${Date.now()}.${ext}`;
-                        const { error } = await supabase.storage.from('avatars').upload(path, file);
-                        if (!error) {
-                          const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path);
-                          if (urlData?.publicUrl) setBannerUrl(urlData.publicUrl);
+                        try {
+                          const formData = new FormData();
+                          formData.append('file', file);
+                          formData.append('type', 'banner');
+                          const res = await fetch('/api/upload-avatar', { method: 'POST', body: formData });
+                          const data = await res.json();
+                          if (data.url) setBannerUrl(data.url);
+                        } catch {
+                          // Upload failed silently
                         }
                         setUploadingBanner(false);
                       }}

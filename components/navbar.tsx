@@ -300,7 +300,7 @@ export function Navbar() {
           </button>
         </div>
 
-        <nav className="flex h-[calc(100%-4rem)] flex-col justify-center px-8 pb-[max(5rem,calc(5rem+env(safe-area-inset-bottom)))]">
+        <nav className="flex h-[calc(100%-4rem)] flex-col justify-between overflow-y-auto px-8 pb-[max(6rem,calc(6rem+env(safe-area-inset-bottom)))] pt-6">
           <ul className="space-y-1">
             {mobileMenuItems.map((item, i) => {
               const active = isActiveRoute(pathname, item.href);
@@ -309,7 +309,7 @@ export function Navbar() {
                   <Link
                     href={item.href}
                     onClick={() => handleNavigation(item.href)}
-                    className={`block py-3 text-[2rem] font-semibold tracking-[-0.02em] transition-colors duration-200 ${
+                    className={`block py-2.5 text-[1.7rem] font-semibold tracking-[-0.02em] transition-colors duration-200 sm:py-3 sm:text-[2rem] ${
                       active ? 'text-slate-950' : 'text-slate-400 hover:text-slate-950'
                     }`}
                     style={{

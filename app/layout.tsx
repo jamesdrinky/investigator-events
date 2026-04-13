@@ -13,7 +13,7 @@ const sans = Plus_Jakarta_Sans({
 
 const serif = Cormorant_Garamond({
   subsets: ['latin'],
-  variable: '--font-[var(--font-serif)]',
+  variable: '--font-serif',
   weight: ['500', '600', '700']
 });
 
@@ -43,8 +43,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${sans.variable} ${serif.variable}`}>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+      </head>
       <body className="font-[var(--font-sans)]">
-        <div className="relative flex min-h-screen flex-col">
+        <div className="relative flex min-h-screen flex-col overflow-x-hidden">
           <Navbar />
           <main className="flex-1">{children}</main>
           <Footer />

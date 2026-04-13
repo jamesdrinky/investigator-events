@@ -117,13 +117,15 @@ export default async function AboutPage() {
                 </h2>
                 <div className="mt-4">
                   <h3 className="text-lg font-bold text-slate-950 sm:text-xl">Mike LaCorte</h3>
-                  <p className="mt-1 text-sm font-medium text-slate-600">CEO, Conflict International · ABI President · IKD Secretary General</p>
+                  <p className="mt-1 text-sm font-medium text-slate-600">Founder, Investigator Events</p>
                 </div>
                 <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-600">I help law firms, corporates, and HNWIs solve complex cross-border investigations.</p>
 
-                <div className="mt-5 flex flex-wrap gap-2">
+                <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3">
                   {credibilityPoints.map((point) => (
-                    <span key={point} className="rounded-full border border-slate-200/80 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-700 shadow-sm">{point}</span>
+                    <div key={point} className="rounded-xl border border-slate-200/80 bg-white px-3.5 py-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                      <p className="text-[11px] font-medium leading-snug text-slate-700">{point}</p>
+                    </div>
                   ))}
                 </div>
 

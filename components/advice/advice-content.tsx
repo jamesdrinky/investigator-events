@@ -132,14 +132,10 @@ function useActiveSection() {
 
 /* ── Dark Card (for dark sections) ── */
 
-function DarkCard({ title, detail, type, index }: { title: string; detail: string; type: 'do' | 'dont'; index: number }) {
+function DarkCard({ title, detail, type }: { title: string; detail: string; type: 'do' | 'dont'; index: number }) {
   const isDo = type === 'do';
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 18 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-40px' }}
-      transition={{ duration: 0.4, delay: index * 0.05, ease: [0.16, 1, 0.3, 1] }}
+    <div
       className={`group relative overflow-hidden rounded-2xl border p-5 transition-all duration-500 sm:p-6 ${
         isDo
           ? 'border-emerald-500/15 bg-emerald-500/[0.03] hover:border-emerald-500/40 hover:bg-emerald-500/[0.07]'
@@ -162,20 +158,16 @@ function DarkCard({ title, detail, type, index }: { title: string; detail: strin
           <p className="mt-1.5 text-sm leading-relaxed text-white/35 transition-colors duration-300 group-hover:text-white/50">{detail}</p>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
 /* ── Light Card (for light sections) ── */
 
-function LightCard({ title, detail, type, index }: { title: string; detail: string; type: 'do' | 'dont'; index: number }) {
+function LightCard({ title, detail, type }: { title: string; detail: string; type: 'do' | 'dont'; index: number }) {
   const isDo = type === 'do';
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 18 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-40px' }}
-      transition={{ duration: 0.4, delay: index * 0.05, ease: [0.16, 1, 0.3, 1] }}
+    <div
       className={`group relative overflow-hidden rounded-2xl border p-5 transition-all duration-500 sm:p-6 ${
         isDo
           ? 'border-emerald-200/60 bg-emerald-50/50 hover:border-emerald-300 hover:bg-emerald-50 hover:shadow-[0_8px_30px_-12px_rgba(16,185,129,0.15)]'
@@ -198,7 +190,7 @@ function LightCard({ title, detail, type, index }: { title: string; detail: stri
           <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{detail}</p>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -352,7 +344,7 @@ export function AdviceContent() {
       {/* ══════════════════════════════════════════
           HERO — Dark with MeshGradient shader
          ══════════════════════════════════════════ */}
-      <div ref={heroRef} className="relative overflow-hidden bg-[#04070f] pb-20 pt-28 sm:pb-28 sm:pt-36">
+      <div ref={heroRef} className="relative overflow-hidden bg-[#04070f] pb-14 pt-20 sm:pb-28 sm:pt-36">
         {/* Shader background */}
         <div className="absolute inset-0">
           <MeshGradient
@@ -376,7 +368,7 @@ export function AdviceContent() {
                 <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-400">Conference Guide</span>
               </div>
 
-              <h1 className="text-[2.4rem] font-bold leading-[0.94] tracking-[-0.04em] text-white sm:text-[3.8rem] lg:text-[5rem]">
+              <h1 className="text-[2rem] font-bold leading-[0.94] tracking-[-0.04em] text-white sm:text-[3.8rem] lg:text-[5rem]">
                 Your first PI{' '}
                 <br className="sm:hidden" />
                 conference.
@@ -406,15 +398,11 @@ export function AdviceContent() {
                 ))}
               </div>
 
-              <motion.div
-                className="mt-12 flex justify-center"
-                animate={{ y: [0, 6, 0] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              >
+              <div className="mt-8 hidden justify-center sm:mt-12 sm:flex">
                 <div className="flex h-8 w-5 items-start justify-center rounded-full border border-white/10 p-1">
-                  <div className="h-1.5 w-1.5 rounded-full bg-white/30" />
+                  <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-white/30" />
                 </div>
-              </motion.div>
+              </div>
             </div>
           </Reveal>
         </motion.div>

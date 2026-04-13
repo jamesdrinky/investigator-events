@@ -199,7 +199,6 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
   const sendEvent = async (event: { title: string; slug: string }) => {
     if (!userId || !activeChat) return;
     const url = `${window.location.origin}/events/${event.slug}`;
-    await sendMessage();
     setSending(true);
     const { data } = await supabase.from('messages' as any).insert({ sender_id: userId, receiver_id: activeChat, content: `Check out ${event.title}\n${url}` } as any).select('*').single();
     if (data) {

@@ -126,6 +126,7 @@ export function AssociationFinder({ associations }: { associations: Association[
       <div className="mt-6">
         <AssociationMap
           associations={mapData}
+          selectedRegion={selectedRegion}
           onCountryClick={(country) => {
             setSearch(country);
             setSelectedRegion(null);

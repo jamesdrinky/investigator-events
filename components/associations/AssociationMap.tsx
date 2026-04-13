@@ -13,6 +13,7 @@ interface Props {
   associations: MapAssociation[];
   onCountryClick?: (country: string) => void;
   selectedCountry?: string;
+  selectedRegion?: string | null;
 }
 
 // Map country names to ISO 3166-1 numeric IDs (matches world-atlas topojson)
@@ -25,7 +26,16 @@ const COUNTRY_ISO: Record<string, string> = {
   'United Kingdom': '826', 'United States': '840',
 };
 
-export function AssociationMap({ associations, onCountryClick, selectedCountry }: Props) {
+const REGION_BOUNDS: Record<string, { center: [number, number]; scale: number }> = {
+  'Europe': { center: [15, 50], scale: 1.8 },
+  'North America': { center: [-95, 40], scale: 1.6 },
+  'Asia-Pacific': { center: [115, 10], scale: 1.3 },
+  'Middle East': { center: [45, 28], scale: 2.2 },
+  'Latin America': { center: [-60, -15], scale: 1.4 },
+  'Africa': { center: [20, 5], scale: 1.4 },
+};
+
+export function AssociationMap({ associations, onCountryClick, selectedCountry, selectedRegion }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [worldData, setWorldData] = useState<any>(null);
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
@@ -73,8 +83,16 @@ export function AssociationMap({ associations, onCountryClick, selectedCountry }
     );
   }
 
+  const regionBounds = selectedRegion ? REGION_BOUNDS[selectedRegion] : null;
   const projection = geoNaturalEarth1()
     .fitSize([dimensions.width, dimensions.height], worldData);
+
+  if (regionBounds) {
+    const baseScale = projection.scale();
+    projection
+      .scale(baseScale * regionBounds.scale)
+      .center(regionBounds.center);
+  }
   const pathGenerator = geoPath(projection);
   const graticule = geoGraticule().step([20, 20])();
 

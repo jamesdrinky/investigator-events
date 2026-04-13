@@ -114,15 +114,20 @@ export default async function WhyJoinPage() {
 
                 <div className="mt-8 space-y-4">
                   {[
-                    { level: 'Local or state', desc: 'Immediate collaboration, local expertise, and referral relationships built through regular personal contact.', color: '#10b981', emoji: '📍' },
-                    { level: 'National', desc: 'Credibility, advanced training, certification, and advocacy on legislation that affects every investigator.', color: '#3b82f6', emoji: '🏛️' },
-                    { level: 'International', desc: 'Cross-border networks that make international investigations possible.', color: '#8b5cf6', emoji: '🌍' },
+                    { level: 'Local or state', desc: 'Immediate collaboration, local expertise, and referral relationships built through regular personal contact.', gradient: 'from-emerald-500/15 to-emerald-600/5', border: 'border-emerald-200/60', accent: 'bg-emerald-500', iconBg: 'bg-emerald-100', iconText: 'text-emerald-600', num: '01' },
+                    { level: 'National', desc: 'Credibility, advanced training, certification, and advocacy on legislation that affects every investigator.', gradient: 'from-blue-500/15 to-blue-600/5', border: 'border-blue-200/60', accent: 'bg-blue-500', iconBg: 'bg-blue-100', iconText: 'text-blue-600', num: '02' },
+                    { level: 'International', desc: 'Cross-border networks that make international investigations possible.', gradient: 'from-violet-500/15 to-violet-600/5', border: 'border-violet-200/60', accent: 'bg-violet-500', iconBg: 'bg-violet-100', iconText: 'text-violet-600', num: '03' },
                   ].map((tier) => (
-                    <div key={tier.level} className="flex items-start gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
-                      <span className="mt-0.5 text-2xl">{tier.emoji}</span>
-                      <div>
-                        <h3 className="text-sm font-bold text-slate-900 sm:text-base">{tier.level}</h3>
-                        <p className="mt-1 text-sm leading-relaxed text-slate-600">{tier.desc}</p>
+                    <div key={tier.level} className={`group relative overflow-hidden rounded-2xl border bg-gradient-to-br ${tier.gradient} ${tier.border} p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg sm:p-6`}>
+                      <div className={`absolute inset-x-0 top-0 h-[2px] ${tier.accent} opacity-60`} />
+                      <div className="flex items-start gap-4">
+                        <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${tier.iconBg} text-sm font-bold tabular-nums ${tier.iconText} shadow-sm`}>
+                          {tier.num}
+                        </div>
+                        <div>
+                          <h3 className="text-base font-bold text-slate-900">{tier.level}</h3>
+                          <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{tier.desc}</p>
+                        </div>
                       </div>
                     </div>
                   ))}

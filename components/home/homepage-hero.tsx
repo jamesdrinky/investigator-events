@@ -307,7 +307,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
       {/* Noise texture removed — SVG feTurbulence filter in data URI is GPU-expensive */}
 
       {/* ── Main content wrapper ── */}
-      <div className="relative" style={{ perspective: '1200px' }}>
+      <div className="relative">
         {/* ── Wireframe Globe ── */}
         <motion.div
           className="pointer-events-none absolute left-1/2 z-[1] -translate-x-1/2"
@@ -514,12 +514,12 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
         </motion.div>
 
         {/* ── Mobile: skewed perspective dashboard ── */}
-        <div className="pointer-events-none relative z-20 -mt-4 block overflow-hidden sm:hidden">
+        <div className="pointer-events-none relative z-20 -mt-4 block h-[200px] overflow-hidden sm:hidden">
           <div
             className="mx-auto max-w-7xl pl-4"
             style={{
-              maskImage: 'linear-gradient(to bottom, black 40%, transparent 90%)',
-              WebkitMaskImage: 'linear-gradient(to bottom, black 40%, transparent 90%)',
+              maskImage: 'linear-gradient(to bottom, black 30%, transparent 80%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, black 30%, transparent 80%)',
             }}
           >
             <div style={{ perspective: '1200px' }}>
@@ -547,15 +547,12 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
           </div>
         </div>
 
-        {/* ── Desktop: iPad scroll-animated card ── */}
-        <motion.div
-          style={{
-            rotateX: ipadRotate,
-            scale: ipadScale,
-            boxShadow:
-              '0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #00000026, 0 149px 60px #0000000a, 0 233px 65px #00000003',
-          }}
+        {/* ── Desktop: iPad card ── */}
+        <div
           className="relative z-20 mx-auto hidden w-[calc(100%-3rem)] max-w-5xl sm:block"
+          style={{
+            boxShadow: '0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #00000026, 0 149px 60px #0000000a, 0 233px 65px #00000003',
+          }}
         >
           <div className="overflow-hidden rounded-[1.8rem] border-4 border-[#2a2a3e] bg-[#12122a] p-3 shadow-[0_0_80px_rgba(99,102,241,0.12)] lg:rounded-[2.2rem] lg:p-4">
             {/* Shimmer top edge */}
@@ -572,7 +569,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               />
             </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* ── Bottom fade to page background ── */}
         <div className="pointer-events-none relative z-30 h-16 bg-gradient-to-b from-transparent via-[#0a1228]/60 to-[#f4f8fc] sm:-mt-12 sm:h-36" />

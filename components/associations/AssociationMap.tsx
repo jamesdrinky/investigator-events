@@ -79,7 +79,7 @@ export function AssociationMap({ associations, onCountryClick, selectedCountry }
   const graticule = geoGraticule().step([20, 20])();
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-[linear-gradient(165deg,#06091a_0%,#0a1228_50%,#0d1840_100%)]" style={{ touchAction: 'pan-x pan-y' }}>
+    <div className="relative overflow-hidden rounded-2xl bg-[linear-gradient(165deg,#06091a_0%,#0a1228_50%,#0d1840_100%)]" style={{ touchAction: 'pan-y' }}>
       {/* Ambient glow */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute left-[20%] top-[20%] h-[16rem] w-[16rem] rounded-full bg-[radial-gradient(ellipse,rgba(22,104,255,0.12),transparent_60%)]" />

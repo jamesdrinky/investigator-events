@@ -514,12 +514,12 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
         </motion.div>
 
         {/* ── Mobile: skewed perspective dashboard ── */}
-        <div className="relative z-20 -mt-4 block overflow-hidden sm:hidden">
+        <div className="pointer-events-none relative z-20 -mt-4 block overflow-hidden sm:hidden">
           <div
             className="mx-auto max-w-7xl pl-4"
             style={{
-              maskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)',
-              WebkitMaskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)',
+              maskImage: 'linear-gradient(to bottom, black 40%, transparent 90%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, black 40%, transparent 90%)',
             }}
           >
             <div style={{ perspective: '1200px' }}>

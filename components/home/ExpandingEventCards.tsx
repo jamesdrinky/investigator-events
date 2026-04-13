@@ -40,7 +40,7 @@ export function ExpandingEventCards({ items }: { items: ExpandingEventItem[] }) 
     }
     return {
       gridTemplateColumns: '1fr',
-      gridTemplateRows: items.map((_, i) => (i === activeIndex ? '4fr' : 'minmax(70px, 1fr)')).join(' '),
+      gridTemplateRows: items.map((_, i) => (i === activeIndex ? '4fr' : 'minmax(90px, 1.2fr)')).join(' '),
     };
   }, [activeIndex, items.length, isDesktop]);
 
@@ -95,6 +95,17 @@ export function ExpandingEventCards({ items }: { items: ExpandingEventItem[] }) 
                 <Image src={logoSrc} alt={item.association} width={40} height={40} className="h-auto max-h-7 w-auto max-w-7 object-contain sm:max-h-8 sm:max-w-8" />
               </div>
             )}
+
+            {/* Collapsed: title on mobile — horizontal at bottom */}
+            <div
+              className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end p-3 md:hidden"
+              style={{
+                opacity: active ? 0 : 1,
+                transition: 'opacity 0.3s ease',
+              }}
+            >
+              <p className="truncate text-sm font-bold text-white drop-shadow-md">{item.title}</p>
+            </div>
 
             {/* Collapsed: rotated title (desktop only) — use simple opacity, no layout shift */}
             <div

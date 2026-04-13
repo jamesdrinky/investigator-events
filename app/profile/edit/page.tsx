@@ -254,9 +254,6 @@ export default function EditProfilePage() {
     // Validate website URL — only allow http/https
     const sanitizedWebsite = website && /^https?:\/\//i.test(website.trim()) ? website.trim() : null;
 
-    // Only save LinkedIn URL if LinkedIn verified and valid
-    const sanitizedLinkedin = authProvider === 'linkedin_oidc' && linkedinUrl && /^https?:\/\/(www\.)?linkedin\.com\//i.test(linkedinUrl.trim()) ? linkedinUrl.trim() : null;
-
     await supabase.from('profiles').upsert({
       id: userId,
       full_name: (fullName || '').slice(0, 100) || null,
@@ -266,7 +263,6 @@ export default function EditProfilePage() {
       headline: (headline || '').slice(0, 200) || null,
       bio: (bio || '').slice(0, 2000) || null,
       website: sanitizedWebsite,
-      linkedin_url: sanitizedLinkedin,
       profile_color: profileColor,
       avatar_url: avatarUrl,
       banner_url: bannerUrl,
@@ -609,16 +605,9 @@ export default function EditProfilePage() {
                   </span>
                   <span className="text-sm text-emerald-700">Your identity is verified</span>
                 </div>
-                <div className="mt-3">
-                  <label className="text-sm font-medium text-slate-700">Your LinkedIn profile URL</label>
-                  <p className="text-xs text-slate-400">This will be shown as a clickable link on your profile so others can verify who you are.</p>
-                  <input
-                    className="field-input mt-1.5 w-full"
-                    value={linkedinUrl}
-                    onChange={(e) => setLinkedinUrl(e.target.value)}
-                    placeholder="https://linkedin.com/in/your-name"
-                  />
-                </div>
+                <p className="mt-2 text-xs text-slate-400">
+                  Your LinkedIn name and photo are pulled directly from LinkedIn and displayed on your profile as proof of identity. This data cannot be edited manually.
+                </p>
               </div>
             ) : (
               <div className="mt-3">

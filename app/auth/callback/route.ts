@@ -49,11 +49,10 @@ export async function GET(request: Request) {
           // Check if profile exists
           const { data: existing } = await admin.from('profiles').select('id, full_name, avatar_url').eq('id', user.id).single();
 
-          // Extract LinkedIn profile URL from the LinkedIn identity specifically
+          // Store LinkedIn name and photo from OAuth (can't be faked — comes from LinkedIn directly)
           const linkedinIdentity = user.identities?.find((i) => i.provider === 'linkedin_oidc');
-          const linkedinUrl = linkedinIdentity
-            ? ((linkedinIdentity.identity_data as any)?.profile_url || (linkedinIdentity.identity_data as any)?.linkedin_url || meta.linkedin_url || meta.profile_url || null)
-            : null;
+          const linkedinName = linkedinIdentity ? ((linkedinIdentity.identity_data as any)?.name || (linkedinIdentity.identity_data as any)?.full_name || null) : (meta.name || meta.full_name || null);
+          const linkedinPicture = linkedinIdentity ? ((linkedinIdentity.identity_data as any)?.picture || null) : (meta.picture || null);
 
           if (!existing) {
             // New user — create profile with OAuth data
@@ -64,7 +63,8 @@ export async function GET(request: Request) {
               username: fullName ? fullName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') : null,
               is_public: true,
               auth_provider: provider,
-              linkedin_url: linkedinUrl,
+              linkedin_name: linkedinName,
+              linkedin_picture: linkedinPicture,
               tos_accepted_at: new Date().toISOString(),
             } as any);
 
@@ -77,7 +77,8 @@ export async function GET(request: Request) {
             };
             if (!existing.avatar_url && avatarUrl) updates.avatar_url = avatarUrl;
             if (!existing.full_name && fullName) updates.full_name = fullName;
-            if (linkedinUrl) updates.linkedin_url = linkedinUrl;
+            if (linkedinName) updates.linkedin_name = linkedinName;
+            if (linkedinPicture) updates.linkedin_picture = linkedinPicture;
 
             await (admin.from('profiles') as any).update(updates).eq('id', user.id);
           }

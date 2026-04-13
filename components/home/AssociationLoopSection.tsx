@@ -1,7 +1,6 @@
 import { Reveal } from '@/components/motion/reveal';
 
 const ROW_1 = [
-  { src: '/associations/abi.png', name: 'ABI' },
   { src: '/associations/cii.png', name: 'CII' },
   { src: '/associations/wad.png', name: 'WAD' },
   { src: '/associations/budeg.png', name: 'BuDEG' },
@@ -9,6 +8,9 @@ const ROW_1 = [
   { src: '/associations/fali.png', name: 'FALI' },
   { src: '/associations/federpol.png', name: 'Federpol' },
   { src: '/associations/intellenet.png', name: 'Intellenet' },
+  { src: '/associations/ikd.png', name: 'IKD' },
+  { src: '/associations/nciss.png', name: 'NCISS' },
+  { src: '/associations/tali.png', name: 'TALI' },
 ];
 
 const ROW_2 = [
@@ -19,6 +21,9 @@ const ROW_2 = [
   { src: '/associations/psld.png', name: 'PSLD' },
   { src: '/associations/lideppe.png', name: 'LIDEPPE' },
   { src: '/associations/andr.png', name: 'ANDR' },
+  { src: '/associations/ncapi.png', name: 'NCAPI' },
+  { src: '/associations/fewa.png', name: 'FEWA' },
+  { src: '/associations/oedv.png', name: 'ODV' },
 ];
 
 function LogoChip({ src, name }: { src: string; name: string }) {
@@ -31,10 +36,12 @@ function LogoChip({ src, name }: { src: string; name: string }) {
 
 function LoopRow({ logos, direction }: { logos: typeof ROW_1; direction: 'left' | 'right' }) {
   const cls = direction === 'left' ? 'animate-loop-left' : 'animate-loop-right';
+  // Triple the logos so the loop is seamless across any screen width
+  const tripled = [...logos, ...logos, ...logos];
   return (
     <div className="relative overflow-hidden">
       <div className={`flex w-max gap-6 ${cls}`}>
-        {[...logos, ...logos].map((logo, i) => (
+        {tripled.map((logo, i) => (
           <LogoChip key={`${logo.name}-${i}`} src={logo.src} name={logo.name} />
         ))}
       </div>
@@ -54,10 +61,10 @@ export function AssociationLoopSection() {
       </div>
 
       <div
-        className="relative mt-8 sm:mt-10"
+        className="relative mt-8 w-screen left-1/2 -translate-x-1/2 sm:mt-10"
         style={{
-          maskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
-          WebkitMaskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
+          maskImage: 'linear-gradient(to right, transparent, black 2%, black 98%, transparent)',
+          WebkitMaskImage: 'linear-gradient(to right, transparent, black 2%, black 98%, transparent)',
         }}
       >
         <div className="flex flex-col gap-5">

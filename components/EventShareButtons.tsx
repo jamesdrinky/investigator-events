@@ -20,8 +20,8 @@ export function EventShareButtons({ eventTitle, eventSlug }: { eventTitle: strin
     ? `${window.location.origin}/events/${eventSlug}`
     : `https://investigatorevents.com/events/${eventSlug}`;
 
-  const casualMsg = `${eventTitle} — found this on Investigator Events, thought you'd want to know about it\n${url}`;
-  const inviteMsg = `Hey, ${eventTitle} is coming up. Found it on Investigator Events — it's a free global calendar for PI conferences and events.\n\nCheck it out: ${url}`;
+  const casualMsg = `${eventTitle} — thought this would be on your radar. Details and attendees here:\n\n${url}`;
+  const inviteMsg = `${eventTitle} is coming up and I thought you'd want to know about it. You can see the full details, who's going, and join the discussion on Investigator Events.\n\n${url}`;
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -49,15 +49,7 @@ export function EventShareButtons({ eventTitle, eventSlug }: { eventTitle: strin
     setTimeout(() => setCopiedMsg(false), 2000);
   };
 
-  const shareNative = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: eventTitle, text: casualMsg, url });
-        return;
-      } catch { /* user cancelled */ }
-    }
-    setOpen(!open);
-  };
+  const togglePanel = () => setOpen((prev) => !prev);
 
   const searchUsers = async (q: string) => {
     setSearch(q);
@@ -107,7 +99,7 @@ export function EventShareButtons({ eventTitle, eventSlug }: { eventTitle: strin
       name: 'Telegram',
       color: '#26A5E4',
       icon: <Send className="h-5 w-5" />,
-      href: `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(eventTitle)}`,
+      href: `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(`${eventTitle} — details and attendees on Investigator Events`)}`,
     },
     {
       name: 'X',
@@ -115,7 +107,7 @@ export function EventShareButtons({ eventTitle, eventSlug }: { eventTitle: strin
       icon: (
         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
       ),
-      href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`${eventTitle} — found on @InvestigatorEv`)}&url=${encodeURIComponent(url)}`,
+      href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`${eventTitle} — details and attendees on Investigator Events`)}&url=${encodeURIComponent(url)}`,
     },
     {
       name: 'Email',
@@ -132,7 +124,7 @@ export function EventShareButtons({ eventTitle, eventSlug }: { eventTitle: strin
       <div className="relative" ref={panelRef}>
         <button
           type="button"
-          onClick={shareNative}
+          onClick={togglePanel}
           className="btn-secondary flex items-center gap-2 px-5 py-2.5"
         >
           <Share2 className="h-4 w-4" />

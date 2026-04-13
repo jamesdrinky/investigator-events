@@ -2,9 +2,10 @@ import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { enforceRateLimit, assertSameOriginRequest } from '@/lib/security/server';
+import { enforceRateLimit, assertSameOriginRequest, RateLimitError } from '@/lib/security/server';
 
 export async function POST(request: Request) {
+  try {
   assertSameOriginRequest();
 
   // Verify the user is authenticated before consuming rate limit
@@ -81,4 +82,10 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json({ url: publicUrl });
+  } catch (error) {
+    if (error instanceof RateLimitError) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+    return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
+  }
 }

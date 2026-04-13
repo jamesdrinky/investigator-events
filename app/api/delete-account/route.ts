@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { createSupabaseSSRServerClient } from '@/lib/supabase/ssr-server';
-import { enforceRateLimit, assertSameOriginRequest } from '@/lib/security/server';
+import { enforceRateLimit, assertSameOriginRequest, RateLimitError } from '@/lib/security/server';
 
 export async function POST() {
   try {
@@ -46,6 +46,9 @@ export async function POST() {
 
     return NextResponse.json({ message: 'Account deleted' });
   } catch (error) {
+    if (error instanceof RateLimitError) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
     console.error('delete-account error:', error);
     return NextResponse.json({ error: 'Failed to delete account' }, { status: 500 });
   }

@@ -37,7 +37,7 @@ export function createAdminSessionToken(): string {
 }
 
 export function verifyAdminSessionToken(token: string | undefined): boolean {
-  const secret = process.env.ADMIN_SESSION_SECRET;
+  const secret = process.env.ADMIN_SESSION_SECRET ?? '';
 
   if (!token || !secret) {
     return false;
@@ -64,28 +64,39 @@ export function verifyAdminSessionToken(token: string | undefined): boolean {
 }
 
 export function setAdminSessionCookie(token: string) {
-  cookies().set(ADMIN_SESSION_COOKIE, token, {
-    httpOnly: true,
-    sameSite: 'strict',
-    secure: process.env.NODE_ENV === 'production',
-    path: '/',
-    maxAge: ADMIN_SESSION_DURATION_SECONDS,
-    priority: 'high'
-  });
+  const cookieStore = cookies() as any;
+  const store = typeof cookieStore.then === 'function' ? null : cookieStore;
+  if (store) {
+    store.set(ADMIN_SESSION_COOKIE, token, {
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      maxAge: ADMIN_SESSION_DURATION_SECONDS,
+      priority: 'high'
+    });
+  }
 }
 
 export function clearAdminSessionCookie() {
-  cookies().set(ADMIN_SESSION_COOKIE, '', {
-    httpOnly: true,
-    sameSite: 'strict',
-    secure: process.env.NODE_ENV === 'production',
-    path: '/',
-    priority: 'high',
-    expires: new Date(0)
-  });
+  const cookieStore = cookies() as any;
+  const store = typeof cookieStore.then === 'function' ? null : cookieStore;
+  if (store) {
+    store.set(ADMIN_SESSION_COOKIE, '', {
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      priority: 'high',
+      expires: new Date(0)
+    });
+  }
 }
 
 export function hasValidAdminSessionCookie(): boolean {
-  const token = cookies().get(ADMIN_SESSION_COOKIE)?.value;
+  const cookieStore = cookies() as any;
+  const store = typeof cookieStore.then === 'function' ? null : cookieStore;
+  if (!store) return false;
+  const token = store.get(ADMIN_SESSION_COOKIE)?.value;
   return verifyAdminSessionToken(token);
 }

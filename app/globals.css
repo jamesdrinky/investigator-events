@@ -2,9 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Hide scrollbar globally */
-html { scrollbar-width: none; }
-html::-webkit-scrollbar { display: none; }
+/* Thin scrollbar — visible but unobtrusive */
+html { scrollbar-width: thin; scrollbar-color: rgba(148,163,184,0.3) transparent; }
+html::-webkit-scrollbar { width: 6px; }
+html::-webkit-scrollbar-track { background: transparent; }
+html::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.3); border-radius: 3px; }
+html::-webkit-scrollbar-thumb:hover { background: rgba(148,163,184,0.5); }
 
 /* Hide scrollbar for jump-bar etc */
 .no-scrollbar::-webkit-scrollbar { display: none; }

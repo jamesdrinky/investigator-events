@@ -7,8 +7,9 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
   const rawNext = searchParams.get('next') ?? '/profile';
-  // Prevent open redirect — only allow relative paths starting with /
-  const next = /^\/[^\/\\]/.test(rawNext) ? rawNext : '/profile';
+  // Prevent open redirect — only allow known path prefixes
+  const ALLOWED_PREFIXES = ['/profile', '/calendar', '/events', '/admin', '/messages', '/people', '/associations', '/directory', '/weekly', '/'];
+  const next = ALLOWED_PREFIXES.some((p) => rawNext === p || rawNext.startsWith(p + '/') || rawNext.startsWith(p + '?')) ? rawNext : '/profile';
 
   if (code) {
     const cookieStore = await cookies();

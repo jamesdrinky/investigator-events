@@ -32,6 +32,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   return {
     title: `${title} | Investigator Events`,
     description,
+    alternates: {
+      canonical: `https://www.investigatorevents.com/events/${params.slug}`,
+    },
     openGraph: {
       title,
       description,

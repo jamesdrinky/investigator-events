@@ -44,7 +44,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${sans.variable} ${serif.variable}`}>
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body className="font-[var(--font-sans)]">
         <div className="relative flex min-h-screen flex-col">

@@ -123,14 +123,27 @@ export function Navbar() {
 
   const avatarUrl = profileAvatar || user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
 
-  // Lock body scroll when menu is open
+  // Lock body scroll when menu is open — position:fixed needed for iOS Safari
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.top = `-${window.scrollY}px`;
     } else {
+      const scrollY = document.body.style.top;
       document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+      if (scrollY) window.scrollTo(0, parseInt(scrollY || '0', 10) * -1);
     }
-    return () => { document.body.style.overflow = ''; };
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+    };
   }, [isOpen]);
 
   const handleNavigation = (href: Route) => {
@@ -194,7 +207,7 @@ export function Navbar() {
                 </Link>
                 <Link
                   href="/messages"
-                  className={`relative flex h-8 w-8 items-center justify-center rounded-full border transition ${
+                  className={`relative flex h-10 w-10 sm:h-8 sm:w-8 items-center justify-center rounded-full border transition ${
                     isDark
                       ? 'border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
                       : 'border-slate-200/80 bg-white text-slate-500 hover:bg-slate-50 hover:text-blue-600'
@@ -211,7 +224,7 @@ export function Navbar() {
                 <button
                   type="button"
                   onClick={() => setShowDropdown((c) => !c)}
-                  className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full ring-2 ring-blue-500/20 transition hover:ring-blue-500/40"
+                  className="flex h-10 w-10 sm:h-8 sm:w-8 items-center justify-center overflow-hidden rounded-full ring-2 ring-blue-500/20 transition hover:ring-blue-500/40"
                 >
                   <UserAvatar src={avatarUrl} name={user.user_metadata?.full_name} size={32} />
                 </button>

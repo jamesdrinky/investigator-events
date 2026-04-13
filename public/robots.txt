@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /profile/edit
+Disallow: /profile/setup
+
+Sitemap: https://www.investigatorevents.com/sitemap.xml

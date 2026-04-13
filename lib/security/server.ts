@@ -45,6 +45,13 @@ export function getClientIdentifier() {
   return candidate.slice(0, 120);
 }
 
+export class RateLimitError extends Error {
+  constructor() {
+    super('Rate limited');
+    this.name = 'RateLimitError';
+  }
+}
+
 export function enforceRateLimit(scope: string, options: RateLimitOptions) {
   const key = `${scope}:${getClientIdentifier()}`;
   const now = Date.now();
@@ -52,7 +59,7 @@ export function enforceRateLimit(scope: string, options: RateLimitOptions) {
   const recent = (store.get(key) ?? []).filter((timestamp) => now - timestamp < options.windowMs);
 
   if (recent.length >= options.maxRequests) {
-    throw new Error('Rate limited');
+    throw new RateLimitError();
   }
 
   recent.push(now);

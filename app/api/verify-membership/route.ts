@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { createSupabaseSSRServerClient } from '@/lib/supabase/ssr-server';
+import { enforceRateLimit, RateLimitError } from '@/lib/security/server';
 
 export async function POST(request: Request) {
   try {
+    enforceRateLimit('verify-membership', { maxRequests: 10, windowMs: 60_000 });
     const supabase = await createSupabaseSSRServerClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -72,8 +74,7 @@ export async function POST(request: Request) {
     expiresAt.setFullYear(expiresAt.getFullYear() + 1); // 12 months from now
 
     if (existing) {
-      // Update existing verification
-      await admin
+      const { error: updateErr } = await admin
         .from('member_verifications')
         .update({
           status: 'verified',
@@ -83,9 +84,12 @@ export async function POST(request: Request) {
           association_page_id: row.association_page_id,
         } as any)
         .eq('id', (existing as any).id);
+      if (updateErr) {
+        console.error('Failed to update verification:', updateErr.message);
+        return NextResponse.json({ error: 'Failed to verify membership' }, { status: 500 });
+      }
     } else {
-      // Create new verification
-      await admin
+      const { error: insertErr } = await admin
         .from('member_verifications')
         .insert({
           user_id: user.id,
@@ -96,16 +100,20 @@ export async function POST(request: Request) {
           expires_at: expiresAt.toISOString(),
           association_page_id: row.association_page_id,
         } as any);
+      if (insertErr) {
+        console.error('Failed to insert verification:', insertErr.message);
+        return NextResponse.json({ error: 'Failed to verify membership' }, { status: 500 });
+      }
     }
 
     // Atomically increment usage count on the code
     const { error: rpcErr } = await (admin.rpc as any)('increment_verification_usage', { code_id: row.id });
-    // Fallback if RPC doesn't exist yet
     if (rpcErr?.code === '42883') {
-      await admin
+      const { error: fallbackErr } = await admin
         .from('association_verification_codes' as any)
         .update({ usage_count: ((row as any).usage_count ?? 0) + 1 } as any)
         .eq('id', row.id);
+      if (fallbackErr) console.error('Failed to increment usage count:', fallbackErr.message);
     }
 
     return NextResponse.json({
@@ -114,6 +122,9 @@ export async function POST(request: Request) {
       expires_at: expiresAt.toISOString(),
     });
   } catch (err) {
+    if (err instanceof RateLimitError) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
     console.error('verify-membership error:', err);
     return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
   }

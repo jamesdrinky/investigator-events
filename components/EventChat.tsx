@@ -155,7 +155,7 @@ export function EventChat({ eventId }: { eventId: string }) {
                     )}
                   </div>
                 )}
-                <div className={`max-w-[75%] ${isOwn ? '' : ''}`}>
+                <div className={`max-w-[88%] sm:max-w-[75%] ${isOwn ? '' : ''}`}>
                   {showName && (
                     <p className="mb-0.5 pl-1 text-[10px] font-medium text-slate-500">
                       {m.username ? (

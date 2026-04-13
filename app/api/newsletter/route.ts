@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
-import { enforceRateLimit, assertSameOriginRequest } from '@/lib/security/server';
+import { enforceRateLimit, assertSameOriginRequest, RateLimitError } from '@/lib/security/server';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -49,6 +49,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ message: 'Subscribed successfully' });
   } catch (error) {
+    if (error instanceof RateLimitError) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
     console.error('newsletter_request_failed', {
       name: error instanceof Error ? error.name : 'unknown'
     });

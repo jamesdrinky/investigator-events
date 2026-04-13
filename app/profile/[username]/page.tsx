@@ -44,6 +44,9 @@ export async function generateMetadata({ params }: { params: { username: string 
   return {
     title: `${name} | Investigator Events`,
     description,
+    alternates: {
+      canonical: `https://www.investigatorevents.com/profile/${params.username}`,
+    },
     openGraph: {
       title: name,
       description,

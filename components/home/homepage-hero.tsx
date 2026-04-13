@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { ShinyButton } from '@/components/ui/shiny-button';
-import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { useMemo, useRef, useState, useEffect, useCallback } from 'react';
 import { geoOrthographic, geoPath, geoGraticule } from 'd3-geo';
 import { feature } from 'topojson-client';
@@ -149,14 +149,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
   }, []);
 
 
-  /* ── Scroll-driven iPad animation ── */
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start start', 'end start'],
-  });
-  const ipadRotate = useTransform(scrollYProgress, [0, 1], [35, 0]);
-  const ipadScale = useTransform(scrollYProgress, [0, 1], [0.85, 1]);
-  const headerY = useTransform(scrollYProgress, [0, 0.5], [0, -80]);
+  /* ── Scroll hooks removed — were causing scroll jank ── */
 
   /* ── Mobile detection ── */
   useEffect(() => {
@@ -386,7 +379,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
 
         {/* ── Header content (centered, above globe) ── */}
         <motion.div
-          style={isMobile ? undefined : { translateY: headerY }}
+          style={undefined}
           className="relative z-10 px-6 pb-10 pt-16 text-center sm:pb-8 sm:pt-12 lg:pt-16"
         >
           {/* Badge pill */}

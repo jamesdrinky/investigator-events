@@ -40,7 +40,7 @@ export function FounderQuoteSection() {
                       alt="Mike LaCorte"
                       width={64}
                       height={64}
-                      className="h-full w-full scale-[1.1] object-cover object-[center_12%]"
+                      className="h-full w-full object-cover object-top"
                       sizes="64px"
                     />
                   </div>
@@ -85,7 +85,7 @@ export function FounderQuoteSection() {
                         alt="Mike LaCorte"
                         width={176}
                         height={176}
-                        className="h-full w-full scale-[1.1] object-cover object-[center_12%]"
+                        className="h-full w-full object-cover object-top"
                         sizes="(max-width: 1024px) 144px, 176px"
                       />
                     </div>

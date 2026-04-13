@@ -147,7 +147,7 @@ export function Navbar() {
           {/* Logo */}
           <Link href="/" onClick={() => handleNavigation('/')} className="group flex shrink-0 items-center gap-2.5 sm:gap-3">
             <Image
-              src="/logo/ie-none.png"
+              src="/logo/ie-new.png"
               alt="Investigator Events"
               width={1536}
               height={1024}
@@ -278,7 +278,7 @@ export function Navbar() {
         {/* Top bar with logo + close */}
         <div className="flex items-center justify-between px-6 py-4">
           <Link href="/" onClick={() => handleNavigation('/')} className="flex items-center gap-2.5">
-            <Image src="/logo/ie-none.png" alt="Investigator Events" width={40} height={40} className="h-9 w-auto object-contain" />
+            <Image src="/logo/ie-new.png" alt="Investigator Events" width={40} height={40} className="h-9 w-auto object-contain" />
           </Link>
           <button
             type="button"

@@ -9,7 +9,7 @@ export function Footer() {
       <div className="pointer-events-none absolute right-[12%] top-10 h-36 w-36 rounded-full bg-[radial-gradient(circle,rgba(111,86,255,0.12),transparent_72%)] blur-3xl" />
       <div className="container-shell relative grid gap-8 py-12 sm:gap-10 sm:grid-cols-2 sm:py-16 lg:grid-cols-[1.2fr_0.6fr_0.6fr_0.6fr_0.9fr] lg:py-20">
         <div>
-          <Image src="/logo/ie-none.png" alt="Investigator Events" width={64} height={64} className="h-14 w-14 rounded-2xl object-contain sm:h-16 sm:w-16" />
+          <Image src="/logo/ie-new.png" alt="Investigator Events" width={64} height={64} className="h-14 w-14 rounded-2xl object-contain sm:h-16 sm:w-16" />
           <p className="mt-5 text-[11px] font-semibold tracking-[0.28em] text-slate-900">INVESTIGATOR EVENTS</p>
           <p className="mt-4 max-w-md font-[var(--font-serif)] text-2xl leading-[1.05] tracking-[-0.04em] text-slate-950 sm:text-[2.2rem] sm:leading-[1.02]">
             Every investigator event. One global calendar.
@@ -47,7 +47,7 @@ export function Footer() {
 
         <div>
           <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-900">Contact</h2>
-          <p className="mt-5 text-sm text-slate-600">info@investigatorevents.com</p>
+          <a href="mailto:info@investigatorevents.com" className="mt-5 block text-sm text-blue-600 hover:underline">info@investigatorevents.com</a>
           <p className="mt-2 text-sm text-slate-500">Global coverage. Free listings. Reviewed submissions.</p>
         </div>
 

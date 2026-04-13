@@ -20,16 +20,19 @@ export default async function WhyJoinPage() {
   const { data: pages } = await supabase.from('association_pages' as any).select('slug');
   const pageSlugs = new Set((pages ?? []).map((p: any) => p.slug));
 
-  const finderAssociations = associationRecords.map((a) => ({
-    slug: a.slug,
-    shortName: a.shortName,
-    name: a.name,
-    country: a.country,
-    region: a.region,
-    website: a.website,
-    logoSrc: a.logoFileName ? `/associations/${a.logoFileName}` : undefined,
-    hasPage: pageSlugs.has(a.slug),
-  }));
+  // Exclude IKD from joinable list — it's a federation of associations, not directly joinable
+  const finderAssociations = associationRecords
+    .filter((a) => a.slug !== 'ikd')
+    .map((a) => ({
+      slug: a.slug,
+      shortName: a.shortName,
+      name: a.name,
+      country: a.country,
+      region: a.region,
+      website: a.website,
+      logoSrc: a.logoFileName ? `/associations/${a.logoFileName}` : undefined,
+      hasPage: pageSlugs.has(a.slug),
+    }));
 
   return (
     <section className="relative overflow-hidden">

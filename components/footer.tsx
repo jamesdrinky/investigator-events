@@ -9,7 +9,7 @@ export function Footer() {
       <div className="pointer-events-none absolute right-[12%] top-10 h-36 w-36 rounded-full bg-[radial-gradient(circle,rgba(111,86,255,0.12),transparent_72%)] blur-3xl" />
       <div className="container-shell relative grid gap-8 py-12 sm:gap-10 sm:grid-cols-2 sm:py-16 lg:grid-cols-[1.2fr_0.6fr_0.6fr_0.6fr_0.9fr] lg:py-20">
         <div>
-          <Image src="/logo/ielogo1.PNG" alt="Investigator Events" width={64} height={64} className="h-14 w-14 rounded-full object-cover sm:h-16 sm:w-16" />
+          <Image src="/logo/ielogo1.PNG" alt="Investigator Events" width={96} height={96} className="h-20 w-20 rounded-full object-cover sm:h-24 sm:w-24" />
           <p className="mt-5 text-[11px] font-semibold tracking-[0.28em] text-slate-900">INVESTIGATOR EVENTS</p>
           <p className="mt-4 max-w-md font-[var(--font-serif)] text-2xl leading-[1.05] tracking-[-0.04em] text-slate-950 sm:text-[2.2rem] sm:leading-[1.02]">
             Every investigator event. One global calendar.

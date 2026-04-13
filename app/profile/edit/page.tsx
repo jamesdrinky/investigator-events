@@ -58,6 +58,7 @@ export default function EditProfilePage() {
   const [message, setMessage] = useState('');
 
   // Profile fields
+  const [existingUsername, setExistingUsername] = useState<string | null>(null);
   const [fullName, setFullName] = useState('');
   const [country, setCountry] = useState('');
   const [specialisation, setSpecialisation] = useState('');
@@ -103,6 +104,7 @@ export default function EditProfilePage() {
 
       const { data: profile } = await supabase.from('profiles').select('*').eq('id', data.user.id).single();
       if (profile) {
+        setExistingUsername(profile.username ?? null);
         setFullName(profile.full_name ?? '');
         setCountry(profile.country ?? '');
         setHeadline(profile.headline ?? '');
@@ -258,7 +260,7 @@ export default function EditProfilePage() {
     await supabase.from('profiles').upsert({
       id: userId,
       full_name: (fullName || '').slice(0, 100) || null,
-      username: fullName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').slice(0, 50) || null,
+      username: existingUsername || fullName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').slice(0, 50) || null,
       country: country || null,
       specialisation: (finalSpec || '').slice(0, 100) || null,
       headline: (headline || '').slice(0, 200) || null,
@@ -322,8 +324,8 @@ export default function EditProfilePage() {
               <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">Edit profile</h1>
               <p className="mt-1 text-sm text-slate-500">Build your professional presence. The more you add, the more you stand out.</p>
             </div>
-            {fullName && (
-              <a href={`/profile/${fullName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`} className="hidden rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 sm:inline-flex">
+            {(existingUsername || fullName) && (
+              <a href={`/profile/${existingUsername || fullName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`} className="hidden rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 sm:inline-flex">
                 View profile
               </a>
             )}
@@ -742,8 +744,8 @@ export default function EditProfilePage() {
             {message && (
               <span className="flex items-center gap-2 text-sm font-medium text-emerald-600">
                 {message}
-                {fullName && (
-                  <a href={`/profile/${fullName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`} className="font-medium text-blue-600 underline">
+                {(existingUsername || fullName) && (
+                  <a href={`/profile/${existingUsername || fullName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`} className="font-medium text-blue-600 underline">
                     View your profile
                   </a>
                 )}

@@ -47,7 +47,7 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
       </head>
       <body className="font-[var(--font-sans)]">
-        <div className="relative flex min-h-screen flex-col overflow-x-hidden">
+        <div className="relative flex min-h-screen flex-col">
           <Navbar />
           <main className="flex-1">{children}</main>
           <Footer />

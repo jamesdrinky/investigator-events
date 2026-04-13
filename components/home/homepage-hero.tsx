@@ -186,7 +186,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
   const vb = globeScale + 60;
 
   return (
-    <div className="relative overflow-hidden">
+    <div className="relative overflow-clip">
       {/* ── Dark background ── */}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(165deg,#06091a_0%,#0a1228_35%,#0d1840_60%,#0a1228_100%)]" />
 

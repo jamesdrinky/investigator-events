@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { ShinyButton } from '@/components/ui/shiny-button';
-import { ContainerScroll } from '@/components/ui/container-scroll-animation';
 import { useMemo, useState, useEffect, useCallback } from 'react';
 import { geoOrthographic, geoPath, geoGraticule } from 'd3-geo';
 import { feature } from 'topojson-client';
@@ -202,24 +201,17 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
 
       {/* ── Main content wrapper ── */}
       <div className="relative">
-        {/* ── Wireframe Globe — CSS spin, positioned right on desktop ── */}
+        {/* ── Wireframe Globe — static, no animation ── */}
         <div
-          className="pointer-events-none absolute z-[1]"
+          className="pointer-events-none absolute left-1/2 z-[1] -translate-x-1/2"
           style={{
             width: isMobile ? '22rem' : '56rem',
             height: isMobile ? '22rem' : '56rem',
-            top: isMobile ? '22%' : '4%',
-            left: isMobile ? '50%' : 'auto',
-            right: isMobile ? 'auto' : '-12%',
-            transform: isMobile ? 'translateX(-50%)' : 'none',
+            top: isMobile ? '22%' : '10%',
           }}
         >
           <div className="absolute inset-[-18%] rounded-full bg-[radial-gradient(ellipse,rgba(22,104,255,0.1),rgba(236,72,153,0.05)_40%,transparent_65%)]" />
-          <svg
-            viewBox={`${-vb} ${-vb} ${vb * 2} ${vb * 2}`}
-            className="h-full w-full"
-            style={{ animation: 'globe-slow-rotate 400s linear infinite' }}
-          >
+          <svg viewBox={`${-vb} ${-vb} ${vb * 2} ${vb * 2}`} className="h-full w-full">
             <defs>
               <linearGradient id="hero-land-wire" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#1668ff" />
@@ -302,27 +294,11 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
           </div>
         </div>
 
-        {/* ── Desktop: scroll-animated iPad (ContainerScroll) ── */}
-        <div className="relative z-20 hidden sm:block">
-          <ContainerScroll titleComponent={<></>}>
-            <Image
-              src="/hero/ipad.png"
-              alt="Investigator Events Platform"
-              width={1536}
-              height={1024}
-              className="mx-auto h-full w-full object-cover object-left-top"
-              priority
-              unoptimized
-              draggable={false}
-            />
-          </ContainerScroll>
-        </div>
-
-        {/* ── Mobile: static iPad ── */}
-        <div className="relative z-20 mx-auto mt-4 w-[calc(100%-2rem)] sm:hidden">
-          <div className="overflow-hidden rounded-[1.4rem] border-4 border-[#2a2a3e] bg-[#12122a] p-2 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.6),0_0_80px_rgba(99,102,241,0.12)]">
+        {/* ── iPad device mockup — static, no scroll hooks ── */}
+        <div className="relative z-20 mx-auto mt-4 w-[calc(100%-2rem)] max-w-5xl sm:mt-0">
+          <div className="overflow-hidden rounded-[1.4rem] border-4 border-[#2a2a3e] bg-[#12122a] p-2 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.6),0_0_80px_rgba(99,102,241,0.12)] sm:rounded-[1.8rem] sm:p-3 lg:rounded-[2.2rem] lg:p-4">
             <div className="absolute inset-x-0 top-0 z-10 h-px bg-[linear-gradient(90deg,transparent,rgba(99,102,241,0.5),rgba(236,72,153,0.4),transparent)]" />
-            <div className="overflow-hidden rounded-xl">
+            <div className="overflow-hidden rounded-xl lg:rounded-2xl">
               <Image
                 src="/hero/ipad.png"
                 alt="Investigator Events Platform"

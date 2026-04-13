@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { ShinyButton } from '@/components/ui/shiny-button';
+import { ContainerScroll } from '@/components/ui/container-scroll-animation';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useMemo, useRef, useState, useEffect, useCallback } from 'react';
 import { geoOrthographic, geoPath, geoGraticule } from 'd3-geo';
@@ -503,28 +504,20 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
           </motion.div>
         </div>
 
-        {/* ── Desktop: iPad card ── */}
-        <div
-          className="relative z-20 mx-auto hidden w-[calc(100%-3rem)] max-w-5xl sm:block"
-          style={{
-            boxShadow: '0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #00000026, 0 149px 60px #0000000a, 0 233px 65px #00000003',
-          }}
-        >
-          <div className="overflow-hidden rounded-[1.8rem] border-4 border-[#2a2a3e] bg-[#12122a] p-3 shadow-[0_0_80px_rgba(99,102,241,0.12)] lg:rounded-[2.2rem] lg:p-4">
-            {/* Shimmer top edge */}
-            <div className="absolute inset-x-0 top-0 z-10 h-px bg-[linear-gradient(90deg,transparent,rgba(99,102,241,0.5),rgba(236,72,153,0.4),transparent)]" />
-            <div className="overflow-hidden rounded-xl lg:rounded-2xl">
-              <Image
-                src="/hero/ipad.png"
-                alt="Investigator Events Platform"
-                width={1536}
-                height={1024}
-                className="h-auto w-full"
-                priority
-                unoptimized
-              />
-            </div>
-          </div>
+        {/* ── Desktop: scroll-animated iPad card ── */}
+        <div className="relative z-20 hidden sm:block">
+          <ContainerScroll titleComponent={<></>}>
+            <Image
+              src="/hero/ipad.png"
+              alt="Investigator Events Platform"
+              width={1536}
+              height={1024}
+              className="mx-auto h-full w-full object-cover object-left-top"
+              priority
+              unoptimized
+              draggable={false}
+            />
+          </ContainerScroll>
         </div>
 
         {/* ── Bottom fade to page background ── */}

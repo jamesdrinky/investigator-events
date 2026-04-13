@@ -40,7 +40,7 @@ export function ExpandingEventCards({ items }: { items: ExpandingEventItem[] }) 
     }
     return {
       gridTemplateColumns: '1fr',
-      gridTemplateRows: items.map((_, i) => (i === activeIndex ? '4fr' : 'minmax(90px, 1.2fr)')).join(' '),
+      gridTemplateRows: items.map((_, i) => (i === activeIndex ? '3.5fr' : 'minmax(110px, 1.5fr)')).join(' '),
     };
   }, [activeIndex, items.length, isDesktop]);
 

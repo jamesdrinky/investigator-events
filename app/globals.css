@@ -58,10 +58,6 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 
-/* Prevent pinch-zoom on iOS Safari */
-@supports (-webkit-touch-callout: none) {
-  html { touch-action: pan-y; }
-}
 
 html {
   scroll-behavior: smooth;

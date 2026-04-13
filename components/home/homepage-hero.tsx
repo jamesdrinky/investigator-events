@@ -378,10 +378,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
         </motion.div>
 
         {/* ── Header content (centered, above globe) ── */}
-        <motion.div
-          style={undefined}
-          className="relative z-10 px-6 pb-10 pt-16 text-center sm:pb-8 sm:pt-12 lg:pt-16"
-        >
+        <div className="relative z-10 px-6 pb-10 pt-16 text-center sm:pb-8 sm:pt-12 lg:pt-16">
           {/* Badge pill */}
           <motion.div
             initial={reducedMotion ? false : { opacity: 0, y: 20, scale: 0.95 }}
@@ -504,40 +501,6 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
               );
             })}
           </motion.div>
-        </motion.div>
-
-        {/* ── Mobile: skewed perspective dashboard ── */}
-        <div className="pointer-events-none relative z-20 -mt-4 block h-[200px] overflow-hidden sm:hidden">
-          <div
-            className="mx-auto max-w-7xl pl-4"
-            style={{
-              maskImage: 'linear-gradient(to bottom, black 30%, transparent 80%)',
-              WebkitMaskImage: 'linear-gradient(to bottom, black 30%, transparent 80%)',
-            }}
-          >
-            <div style={{ perspective: '1200px' }}>
-              <div
-                style={{
-                  maskImage: 'linear-gradient(to right, black 50%, transparent 100%)',
-                  WebkitMaskImage: 'linear-gradient(to right, black 50%, transparent 100%)',
-                }}
-              >
-                <div style={{ transform: 'rotateX(20deg)' }}>
-                  <div className="relative" style={{ transform: 'skewX(0.36rad)' }}>
-                    <Image
-                      src="/hero/ipad.png"
-                      alt="Investigator Events Platform"
-                      width={1536}
-                      height={1024}
-                      className="rounded-xl border border-white/10"
-                      priority
-                      unoptimized
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* ── Desktop: iPad card ── */}

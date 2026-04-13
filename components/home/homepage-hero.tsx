@@ -232,20 +232,18 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
     });
   }, [globeNodes, initGen]);
 
-  // Animation loop — updates SVG attributes directly, no React re-renders
+  // Globe rotation — throttled to ~10fps to avoid scroll jank
   useEffect(() => {
     if (!shouldAnimate) return;
-    let frame: number;
-    const tick = () => {
-      rotationRef.current += 0.015; // ~0.9° per second → full rotation in ~6.5 min
+    let timer: ReturnType<typeof setInterval>;
+    timer = setInterval(() => {
+      rotationRef.current += 0.15;
       const { proj, gen } = buildProjection(rotationRef.current);
 
-      // Update land paths
       if (landRef.current) landRef.current.setAttribute('d', gen(landFeature) ?? '');
       if (landWireRef.current) landWireRef.current.setAttribute('d', gen(landFeature) ?? '');
       if (graticuleRef.current) graticuleRef.current.setAttribute('d', gen(graticuleData) ?? '');
 
-      // Update dots
       if (dotsGroupRef.current) {
         globeNodes.forEach((node, i) => {
           const coords = proj([node.lon, node.lat]);
@@ -261,25 +259,19 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
         });
       }
 
-      // Update arcs
-      if (arcsGroupRef.current) {
+      if (arcsGroupRef.current && globeNodes.length >= 2) {
         const paths = arcsGroupRef.current.querySelectorAll('path');
-        if (globeNodes.length >= 2) {
-          globeNodes.slice(0, -1).forEach((node, i) => {
-            const next = globeNodes[i + 1];
-            const arc = {
-              type: 'Feature' as const, properties: {},
-              geometry: { type: 'LineString' as const, coordinates: [[node.lon, node.lat], [next.lon, next.lat]] },
-            };
-            if (paths[i]) paths[i].setAttribute('d', gen(arc as any) ?? '');
-          });
-        }
+        globeNodes.slice(0, -1).forEach((node, i) => {
+          const next = globeNodes[i + 1];
+          const arc = {
+            type: 'Feature' as const, properties: {},
+            geometry: { type: 'LineString' as const, coordinates: [[node.lon, node.lat], [next.lon, next.lat]] },
+          };
+          if (paths[i]) paths[i].setAttribute('d', gen(arc as any) ?? '');
+        });
       }
-
-      frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
+    }, 100); // 10fps instead of 60fps
+    return () => clearInterval(timer);
   }, [shouldAnimate, buildProjection, landFeature, graticuleData, globeNodes]);
 
   const vb = globeScale + 60;

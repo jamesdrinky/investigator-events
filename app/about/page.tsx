@@ -72,32 +72,7 @@ export default async function AboutPage() {
 
       {/* ── Content ── */}
       <div className="container-shell relative py-10 sm:py-16">
-        {/* Introduction video */}
-        <Reveal>
-          <div className="mb-10 sm:mb-14">
-            <div className="mx-auto max-w-4xl text-center">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-indigo-500 sm:text-xs">Watch</p>
-              <h2 className="mt-2 text-xl font-bold tracking-[-0.03em] text-slate-950 sm:text-2xl">A quick introduction from the founder</h2>
-            </div>
-            <div className="mx-auto mt-6 max-w-4xl overflow-hidden rounded-2xl border border-slate-200/60 bg-black shadow-[0_16px_50px_-16px_rgba(15,23,42,0.18)] sm:rounded-[1.6rem]">
-              <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-                <video
-                  className="absolute inset-0 h-full w-full object-cover"
-                  controls
-                  preload="metadata"
-                  poster="/faces/mike2.png"
-                  playsInline
-                >
-                  <source src="/video/about-intro.mp4" type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
-              </div>
-            </div>
-            <p className="mx-auto mt-3 max-w-lg text-center text-xs text-slate-400">
-              Mike LaCorte introduces Investigator Events and explains why the platform exists.
-            </p>
-          </div>
-        </Reveal>
+        {/* Introduction video — hidden until /public/video/about-intro.mp4 is added */}
 
         {/* Mike LaCorte — glassmorphism profile card */}
         <Reveal>

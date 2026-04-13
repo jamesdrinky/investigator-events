@@ -22,7 +22,7 @@ export async function POST(request: Request) {
 
     const supabase = createSupabaseAdminServerClient();
     const { data: existingSubscriber, error: selectError } = await supabase
-      .from('newsletter_subscribers' as never)
+      .from('newsletter_subscriptions' as never)
       .select('email')
       .eq('email', email)
       .maybeSingle();
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Already subscribed' });
     }
 
-    const { error: insertError } = await supabase.from('newsletter_subscribers' as never).insert({ email } as never);
+    const { error: insertError } = await supabase.from('newsletter_subscriptions' as never).insert({ email } as never);
 
     if (insertError) {
       if (insertError.code === '23505') {

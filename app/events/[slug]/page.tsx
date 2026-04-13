@@ -77,7 +77,7 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
     .sort((a, b) => Math.abs(parseDate(a.date).getTime() - parseDate(event.date ?? a.date).getTime()) - Math.abs(parseDate(b.date).getTime() - parseDate(event.date ?? b.date).getTime()))
     .slice(0, 3);
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://investigatorevents.com';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://www.investigatorevents.com');
   const absoluteImageUrl = imageSrc.startsWith('http') ? imageSrc : `${baseUrl}${imageSrc}`;
 
   const jsonLd = {

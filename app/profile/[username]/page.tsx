@@ -125,7 +125,7 @@ export default async function PublicProfilePage({ params }: { params: { username
   const userEmail = user?.email;
   let isNewsletterSubscribed = false;
   if (isOwner && userEmail) {
-    const { data: sub } = await supabase.from('newsletter_subscribers' as any).select('id').eq('email', userEmail).maybeSingle();
+    const { data: sub } = await supabase.from('newsletter_subscriptions' as any).select('id').eq('email', userEmail).maybeSingle();
     isNewsletterSubscribed = !!sub;
   }
 

@@ -52,7 +52,7 @@ export function FounderQuoteSection() {
                     <p className="mt-3 text-sm font-semibold text-slate-950">Mike LaCorte</p>
                     <p className="mt-0.5 text-xs text-slate-400">Founder, Investigator Events</p>
                     <Link
-                      href="/profile/mikelacorte"
+                      href="/profile/mike-lacorte"
                       className="mt-3 inline-flex items-center text-sm font-semibold text-blue-600"
                     >
                       View profile →
@@ -103,7 +103,7 @@ export function FounderQuoteSection() {
                         Founder, Investigator Events
                       </p>
                     </div>
-                    <Link href="/profile/mikelacorte" className="mt-8 inline-flex">
+                    <Link href="/profile/mike-lacorte" className="mt-8 inline-flex">
                       <ShinyButton className="px-6 py-3 text-sm">View profile</ShinyButton>
                     </Link>
                   </div>

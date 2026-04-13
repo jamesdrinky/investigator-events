@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Search, MapPin, Globe, ArrowRight, ShieldCheck, ExternalLink } from 'lucide-react';
@@ -30,6 +30,8 @@ const COUNTRY_ALIASES: Record<string, string[]> = {
 export function AssociationFinder({ associations }: { associations: Association[] }) {
   const [search, setSearch] = useState('');
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [mapFlash, setMapFlash] = useState(false);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const countries = useMemo(() => {
     const set = new Set(associations.map((a) => a.country));
@@ -127,10 +129,16 @@ export function AssociationFinder({ associations }: { associations: Association[
           onCountryClick={(country) => {
             setSearch(country);
             setSelectedRegion(null);
+            setMapFlash(true);
+            setTimeout(() => setMapFlash(false), 1500);
+            // Scroll to results
+            setTimeout(() => {
+              resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
           }}
           selectedCountry={search && countries.includes(search) ? search : undefined}
         />
-        <p className="mt-2 text-center text-[11px] text-slate-400">Click a highlighted country to filter associations</p>
+        <p className="mt-2 text-center text-[11px] text-slate-400">Click a highlighted country to see associations below</p>
       </div>
 
       {/* International associations — always show */}
@@ -149,7 +157,7 @@ export function AssociationFinder({ associations }: { associations: Association[
       </div>
 
       {/* Regional results */}
-      <div className="mt-10">
+      <div ref={resultsRef} className={`mt-10 scroll-mt-24 rounded-2xl transition-all duration-700 ${mapFlash ? 'ring-2 ring-blue-400 ring-offset-4 bg-blue-50/20' : ''}`}>
         <div className="flex items-center gap-2">
           <MapPin className="h-5 w-5 text-blue-500" />
           <h3 className="text-base font-bold text-slate-950">

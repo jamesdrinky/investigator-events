@@ -33,7 +33,7 @@ export function AssociationMap({ associations, onCountryClick, selectedCountry }
 
   // Load world data
   useEffect(() => {
-    fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
+    fetch('/data/countries-110m.json')
       .then((r) => r.json())
       .then((topo) => {
         const geo = feature(topo, topo.objects.countries) as any;

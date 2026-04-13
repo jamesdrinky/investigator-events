@@ -55,7 +55,7 @@ function getEventImage(event: EventItem) {
 }
 
 /* ── Clash overlay: shows both events side by side, floating above the grid ── */
-function ClashOverlay({ events, anchorRef }: { events: EventItem[]; anchorRef: React.RefObject<HTMLDivElement | null> }) {
+function ClashOverlay({ events, anchorRef, onDismiss }: { events: EventItem[]; anchorRef: React.RefObject<HTMLDivElement | null>; onDismiss: () => void }) {
   const [pos, setPos] = useState<{ top: number; left: number; width: number } | null>(null);
 
   useEffect(() => {
@@ -76,8 +76,10 @@ function ClashOverlay({ events, anchorRef }: { events: EventItem[]; anchorRef: R
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+      data-clash-overlay
       className="fixed z-[100] pointer-events-auto"
       style={{ top: pos.top, left: pos.left, width: pos.width }}
+      onMouseLeave={onDismiss}
     >
       {/* Red ambient glow */}
       <div className="pointer-events-none absolute -inset-4 rounded-3xl bg-red-500/15 blur-2xl" />
@@ -315,7 +317,19 @@ export function CalendarGrid({ events, monthKey, selectedDate, onSelectDate }: C
                 }
 
                 return (
-                  <div key={`${wi}-${di}`} className="relative" onMouseLeave={() => setHoveredCell(null)}>
+                  <div
+                    key={`${wi}-${di}`}
+                    className="relative"
+                    onMouseLeave={(e) => {
+                      // Don't close if mouse moved to the clash overlay
+                      const related = e.relatedTarget as HTMLElement | null;
+                      if (related?.closest?.('[data-clash-overlay]')) return;
+                      // Delay to allow mouse to reach overlay
+                      setTimeout(() => {
+                        setHoveredCell((current) => current === cell.iso ? null : current);
+                      }, 150);
+                    }}
+                  >
                     {inner}
                   </div>
                 );
@@ -342,6 +356,7 @@ export function CalendarGrid({ events, monthKey, selectedDate, onSelectDate }: C
               key={hoveredCell}
               events={cellData.dayEvents}
               anchorRef={{ current: cellRefs.current[hoveredCell] ?? null }}
+              onDismiss={() => setHoveredCell(null)}
             />
           );
         })()}

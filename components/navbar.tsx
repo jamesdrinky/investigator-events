@@ -16,7 +16,6 @@ const desktopNavItems: Array<{ href: Route; label: string }> = [
   { href: '/calendar?view=calendar' as Route, label: 'Calendar' },
   { href: '/associations', label: 'Associations' },
   { href: '/people', label: 'Forum' },
-  { href: '/why-join-an-association' as Route, label: 'Why Join?' },
   { href: '/advice', label: 'Advice' },
   { href: '/about', label: 'About' }
 ];
@@ -147,7 +146,7 @@ export function Navbar() {
           {/* Logo */}
           <Link href="/" onClick={() => handleNavigation('/')} className="group flex shrink-0 items-center gap-2.5 sm:gap-3">
             <Image
-              src="/logo/ie-new.png"
+              src="/logo/ielogo1.PNG"
               alt="Investigator Events"
               width={48}
               height={48}
@@ -239,6 +238,13 @@ export function Navbar() {
             ) : (
               <>
                 <Link
+                  href="/why-join-an-association"
+                  onClick={() => handleNavigation('/why-join-an-association' as Route)}
+                  className={`hidden whitespace-nowrap rounded-full px-4 py-1.5 text-xs font-semibold transition sm:inline-flex ${isDark ? 'text-cyan-300 border border-cyan-400/30 hover:bg-cyan-400/10' : 'text-blue-600 border border-blue-200 hover:bg-blue-50'}`}
+                >
+                  Why Join?
+                </Link>
+                <Link
                   href="/signin"
                   onClick={() => handleNavigation('/signin' as Route)}
                   className={`hidden whitespace-nowrap rounded-full px-4 py-1.5 text-xs font-semibold transition sm:inline-flex ${isDark ? 'bg-white/15 text-white hover:bg-white/25' : 'bg-slate-900 text-white hover:bg-slate-800 shadow-sm'}`}
@@ -277,7 +283,7 @@ export function Navbar() {
         {/* Top bar with logo + close */}
         <div className="flex items-center justify-between px-6 py-4">
           <Link href="/" onClick={() => handleNavigation('/')} className="flex items-center gap-2.5">
-            <Image src="/logo/ie-new.png" alt="Investigator Events" width={40} height={40} className="h-9 w-9 rounded-full object-cover" />
+            <Image src="/logo/ielogo1.PNG" alt="Investigator Events" width={40} height={40} className="h-9 w-9 rounded-full object-cover" />
           </Link>
           <button
             type="button"

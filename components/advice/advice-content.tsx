@@ -332,12 +332,15 @@ export function AdviceContent() {
   const jumpBarRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
 
-  // Auto-scroll the jump bar to keep active link visible on mobile
+  // Auto-scroll the jump bar horizontally to keep active link visible on mobile
   useEffect(() => {
     if (!jumpBarRef.current) return;
     const activeEl = jumpBarRef.current.querySelector(`[data-section="${active}"]`) as HTMLElement | null;
-    if (activeEl) {
-      activeEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    if (activeEl && jumpBarRef.current) {
+      // Only scroll horizontally within the jump bar container — never trigger vertical page scroll
+      const container = jumpBarRef.current;
+      const scrollLeft = activeEl.offsetLeft - container.offsetWidth / 2 + activeEl.offsetWidth / 2;
+      container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
     }
   }, [active]);
   const heroY = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);

@@ -117,8 +117,7 @@ export default async function PublicProfilePage({ params }: { params: { username
     { id: 'linkedin', label: 'Verify with LinkedIn', done: isLinkedInVerified, icon: <ShieldCheck className="h-3 w-3" />, href: '/profile/edit', priority: 'high' as const },
     { id: 'associations', label: 'Add association memberships', done: hasAssociations, icon: <Users className="h-3 w-3" />, href: '/profile/edit', priority: 'medium' as const },
     { id: 'experience', label: 'Add work experience', done: hasExperience, icon: <Briefcase className="h-3 w-3" />, href: '/profile/edit', priority: 'medium' as const },
-    { id: 'newsletter', label: 'Subscribe to newsletter', done: isNewsletterSubscribed, icon: <Calendar className="h-3 w-3" />, href: '/weekly', priority: 'low' as const },
-    { id: 'website', label: 'Add your website', done: hasWebsite, icon: <Globe className="h-3 w-3" />, href: '/profile/edit', priority: 'low' as const },
+    { id: 'newsletter', label: 'Subscribe to newsletter', done: isNewsletterSubscribed, icon: <Calendar className="h-3 w-3" />, href: '/weekly', priority: 'medium' as const },
   ] : [];
 
   const missing: string[] = [];
@@ -280,6 +279,14 @@ export default async function PublicProfilePage({ params }: { params: { username
               <div className="flex flex-wrap items-center gap-2.5">
                 <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">{profile.full_name}</h1>
                 {flag && <span className="text-xl">{flag}</span>}
+                {/* LinkedIn clickable badge — right next to name */}
+                {isLinkedInVerified && linkedinUrl && (
+                  <a href={linkedinUrl} target="_blank" rel="noreferrer" className="group flex items-center gap-1.5 rounded-full bg-[#0077B5] px-3 py-1 text-[11px] font-bold text-white shadow-sm transition hover:bg-[#006097] hover:shadow-md" title="View LinkedIn profile — verified identity">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 48 48"><path fill="#ffffff" d="M42 37a5 5 0 01-5 5H11a5 5 0 01-5-5V11a5 5 0 015-5h26a5 5 0 015 5v26z" /><path fill="#0077B5" d="M12 19h5v17h-5V19zm2.485-2h-.028C12.965 17 12 15.888 12 14.499 12 13.08 12.995 12 14.514 12c1.521 0 2.458 1.08 2.486 2.499C17 15.887 16.035 17 14.485 17zM36 36h-5v-9.099c0-2.198-1.225-3.698-3.192-3.698-1.501 0-2.313 1.012-2.707 1.99-.144.35-.101.858-.101 1.365V36h-5s.07-16 0-17h5v2.616C25.721 21.865 27.085 20 30.1 20c3.386 0 5.9 2.215 5.9 6.978V36z" /></svg>
+                    LinkedIn
+                    <ExternalLink className="h-2.5 w-2.5 opacity-60" />
+                  </a>
+                )}
                 {badges.map((b) => {
                   const meta = BADGE_META[b];
                   if (!meta) return null;
@@ -335,7 +342,7 @@ export default async function PublicProfilePage({ params }: { params: { username
         {/* ═══ PROFILE COMPLETION ═══ */}
         {isOwner && profileSteps.length > 0 && (
           <div className="mt-4">
-            <ProfileCompletion steps={profileSteps} />
+            <ProfileCompletion steps={profileSteps} userEmail={userEmail} />
           </div>
         )}
 

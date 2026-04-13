@@ -1,21 +1,28 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { Check, ArrowRight, ShieldCheck, FileText, Users, Briefcase, Mail } from 'lucide-react';
+import { Check, ArrowRight } from 'lucide-react';
 
-interface ProfileCompletionProps {
-  steps: {
-    id: string;
-    label: string;
-    done: boolean;
-    icon: React.ReactNode;
-    href: string;
-    priority: 'high' | 'medium' | 'low';
-  }[];
+interface Step {
+  id: string;
+  label: string;
+  done: boolean;
+  icon: React.ReactNode;
+  href: string;
+  priority: 'high' | 'medium' | 'low';
 }
 
-export function ProfileCompletion({ steps }: ProfileCompletionProps) {
+interface ProfileCompletionProps {
+  steps: Step[];
+  userEmail?: string;
+}
+
+export function ProfileCompletion({ steps: initialSteps, userEmail }: ProfileCompletionProps) {
+  const [steps, setSteps] = useState(initialSteps);
+  const [subscribing, setSubscribing] = useState(false);
+
   const completed = steps.filter((s) => s.done).length;
   const total = steps.length;
   const percentage = Math.round((completed / total) * 100);
@@ -25,6 +32,22 @@ export function ProfileCompletion({ steps }: ProfileCompletionProps) {
   const nextStep = steps.find((s) => !s.done && s.priority === 'high')
     || steps.find((s) => !s.done && s.priority === 'medium')
     || steps.find((s) => !s.done);
+
+  const handleNewsletterSubscribe = async () => {
+    if (!userEmail || subscribing) return;
+    setSubscribing(true);
+    try {
+      const res = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: userEmail }),
+      });
+      if (res.ok) {
+        setSteps((prev) => prev.map((s) => s.id === 'newsletter' ? { ...s, done: true } : s));
+      }
+    } catch {}
+    setSubscribing(false);
+  };
 
   return (
     <div className="rounded-2xl border border-slate-200/60 bg-white shadow-sm">
@@ -80,16 +103,26 @@ export function ProfileCompletion({ steps }: ProfileCompletionProps) {
                 {step.label}
               </span>
               {!step.done && (
-                <Link href={step.href as Route} className="text-[10px] font-semibold text-blue-600 hover:underline">
-                  {step.id === 'newsletter' ? 'Subscribe' : 'Add'}
-                </Link>
+                step.id === 'newsletter' ? (
+                  <button
+                    onClick={handleNewsletterSubscribe}
+                    disabled={subscribing}
+                    className="text-[10px] font-semibold text-blue-600 hover:underline disabled:opacity-50"
+                  >
+                    {subscribing ? 'Subscribing...' : 'Subscribe'}
+                  </button>
+                ) : (
+                  <Link href={step.href as Route} className="text-[10px] font-semibold text-blue-600 hover:underline">
+                    Add
+                  </Link>
+                )
               )}
             </div>
           ))}
         </div>
 
         {/* Next step CTA */}
-        {nextStep && (
+        {nextStep && nextStep.id !== 'newsletter' && (
           <Link href={nextStep.href as Route} className="mt-4 flex items-center justify-between rounded-xl bg-gradient-to-r from-blue-50 to-violet-50 px-4 py-3 transition hover:shadow-sm">
             <div>
               <p className="text-xs font-bold text-slate-900">Next: {nextStep.label}</p>
@@ -97,6 +130,19 @@ export function ProfileCompletion({ steps }: ProfileCompletionProps) {
             </div>
             <ArrowRight className="h-4 w-4 text-blue-600" />
           </Link>
+        )}
+        {nextStep && nextStep.id === 'newsletter' && (
+          <button
+            onClick={handleNewsletterSubscribe}
+            disabled={subscribing}
+            className="mt-4 flex w-full items-center justify-between rounded-xl bg-gradient-to-r from-blue-50 to-violet-50 px-4 py-3 transition hover:shadow-sm disabled:opacity-50"
+          >
+            <div className="text-left">
+              <p className="text-xs font-bold text-slate-900">Next: Subscribe to newsletter</p>
+              <p className="text-[10px] text-slate-500">One click — we'll use your account email</p>
+            </div>
+            <ArrowRight className="h-4 w-4 text-blue-600" />
+          </button>
         )}
       </div>
     </div>

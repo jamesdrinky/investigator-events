@@ -9,6 +9,7 @@ import { ExpandableText } from '@/components/ExpandableText';
 import { ConnectionButton } from './follow-button';
 import { EventsAttendanceStack } from '@/components/EventsAttendanceStack';
 import { ReportButton } from '@/components/ReportButton';
+import { ShareProfileButton } from '@/components/ShareProfileButton';
 import { VerifiedBadges } from '@/components/VerifiedBadges';
 import { ProfileCompletion } from '@/components/ProfileCompletion';
 
@@ -197,15 +198,19 @@ export default async function PublicProfilePage({ params }: { params: { username
               </div>
               <div className="flex items-center gap-2 pb-1">
                 {isOwner ? (
-                  <Link href="/profile/edit" className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 hover:shadow-md">
-                    <Pencil className="h-3.5 w-3.5" /> Edit profile
-                  </Link>
+                  <>
+                    <Link href="/profile/edit" className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 hover:shadow-md">
+                      <Pencil className="h-3.5 w-3.5" /> Edit profile
+                    </Link>
+                    <ShareProfileButton username={profile.username ?? ''} fullName={profile.full_name} avatarUrl={profile.avatar_url} specialisation={profile.specialisation} accentColor={accentColor} />
+                  </>
                 ) : (
                   <>
                     <Link href={`/messages?to=${profile.id}`} className="flex items-center gap-1.5 rounded-full border bg-white px-4 py-2 text-sm font-medium shadow-sm transition hover:shadow-md" style={{ borderColor: `${accentColor}30`, color: accentColor }}>
                       <MessageCircle className="h-3.5 w-3.5" /> Message
                     </Link>
                     <ConnectionButton targetUserId={profile.id} />
+                    <ShareProfileButton username={profile.username ?? ''} fullName={profile.full_name} avatarUrl={profile.avatar_url} specialisation={profile.specialisation} accentColor={accentColor} />
                     <ReportButton reportedUserId={profile.id} contentType="profile" />
                   </>
                 )}

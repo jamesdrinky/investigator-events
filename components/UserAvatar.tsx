@@ -34,7 +34,7 @@ export function UserAvatar({ src, name, size = 32, className = '', color }: Prop
       width={size}
       height={size}
       className={`rounded-full object-cover ${className}`}
-      style={{ width: size, height: size }}
+      style={{ width: size, height: size, maxWidth: '100%', maxHeight: '100%' }}
       onError={() => setFailed(true)}
     />
   );

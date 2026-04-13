@@ -365,7 +365,7 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
                                 ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white'
                                 : 'bg-white/[0.06] text-slate-200'
                             }`}>
-                              <p className="whitespace-pre-wrap">{m.content}</p>
+                              <p className="whitespace-pre-wrap break-words">{m.content}</p>
                             </div>
                           );
                         })()}

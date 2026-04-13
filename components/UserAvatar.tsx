@@ -20,7 +20,7 @@ export function UserAvatar({ src, name, size = 32, className = '', color }: Prop
     return (
       <div
         className={`flex items-center justify-center rounded-full ${className}`}
-        style={{ width: size, height: size, backgroundColor: bg, color: fg, fontSize: size * 0.4, fontWeight: 700 }}
+        style={{ width: size, height: size, backgroundColor: bg, color: fg, fontSize: Math.max(11, size * 0.4), fontWeight: 700 }}
       >
         {initial}
       </div>

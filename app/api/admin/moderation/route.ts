@@ -13,78 +13,75 @@ export async function GET() {
   const admin = createSupabaseAdminServerClient();
   const items: Array<{ id: string; type: string; content: string; author: string; context: string; created_at: string }> = [];
 
-  // Reports (always show first)
-  const { data: reports } = await admin
-    .from('reports' as any)
-    .select('id, reason, description, status, created_at, reporter_id, reported_user_id, reported_content_type')
-    .order('created_at', { ascending: false })
-    .limit(50);
+  // Fetch all content in parallel
+  const [
+    { data: reports },
+    { data: reviews },
+    { data: comments },
+    { data: posts },
+  ] = await Promise.all([
+    admin.from('reports' as any).select('id, reason, description, status, created_at, reporter_id, reported_user_id, reported_content_type').order('created_at', { ascending: false }).limit(50),
+    admin.from('event_reviews').select('id, rating, review_text, created_at, user_id, event_id').order('created_at', { ascending: false }).limit(50),
+    admin.from('post_comments').select('id, content, created_at, user_id, post_id').order('created_at', { ascending: false }).limit(50),
+    admin.from('posts').select('id, title, content, created_at, user_id').order('created_at', { ascending: false }).limit(50),
+  ]);
+
+  // Collect all user IDs and event IDs for batch lookup
+  const userIds = new Set<string>();
+  const eventIds = new Set<string>();
+  for (const r of (reports ?? []) as any[]) { userIds.add(r.reporter_id); }
+  for (const r of (reviews ?? []) as any[]) { userIds.add(r.user_id); eventIds.add(r.event_id); }
+  for (const c of (comments ?? []) as any[]) { userIds.add(c.user_id); }
+  for (const p of (posts ?? []) as any[]) { userIds.add(p.user_id); }
+
+  // Batch fetch profiles and events
+  const [{ data: profileRows }, { data: eventRows }] = await Promise.all([
+    userIds.size > 0 ? admin.from('profiles').select('id, full_name').in('id', Array.from(userIds)) : { data: [] },
+    eventIds.size > 0 ? admin.from('events').select('id, title').in('id', Array.from(eventIds)) : { data: [] },
+  ]);
+
+  const profileMap = new Map((profileRows ?? []).map((p) => [p.id, p.full_name ?? 'Unknown']));
+  const eventMap = new Map((eventRows ?? []).map((e) => [e.id, e.title ?? 'Unknown']));
 
   for (const r of (reports ?? []) as any[]) {
-    const { data: reporter } = await admin.from('profiles').select('full_name').eq('id', r.reporter_id).single();
     items.push({
       id: r.id,
       type: 'report',
       content: `[${r.reason}] ${r.description || 'No details provided'}`,
-      author: (reporter as any)?.full_name ?? 'Unknown',
+      author: profileMap.get(r.reporter_id) ?? 'Unknown',
       context: `Status: ${r.status} · Type: ${r.reported_content_type || 'profile'}`,
       created_at: r.created_at,
     });
   }
 
-  // Reviews
-  const { data: reviews } = await admin
-    .from('event_reviews')
-    .select('id, rating, review_text, created_at, user_id, event_id')
-    .order('created_at', { ascending: false })
-    .limit(50);
-
   for (const r of (reviews ?? []) as any[]) {
-    const { data: profile } = await admin.from('profiles').select('full_name').eq('id', r.user_id).single();
-    const { data: event } = await admin.from('events').select('title').eq('id', r.event_id).single();
     items.push({
       id: r.id,
       type: 'review',
       content: `${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)} ${r.review_text || '(no text)'}`,
-      author: (profile as any)?.full_name ?? 'Unknown',
-      context: `Event: ${(event as any)?.title ?? 'Unknown'}`,
+      author: profileMap.get(r.user_id) ?? 'Unknown',
+      context: `Event: ${eventMap.get(r.event_id) ?? 'Unknown'}`,
       created_at: r.created_at,
     });
   }
 
-  // Post comments
-  const { data: comments } = await admin
-    .from('post_comments')
-    .select('id, content, created_at, user_id, post_id')
-    .order('created_at', { ascending: false })
-    .limit(50);
-
   for (const c of (comments ?? []) as any[]) {
-    const { data: profile } = await admin.from('profiles').select('full_name').eq('id', c.user_id).single();
     items.push({
       id: c.id,
       type: 'comment',
       content: c.content,
-      author: (profile as any)?.full_name ?? 'Unknown',
+      author: profileMap.get(c.user_id) ?? 'Unknown',
       context: `On post ${c.post_id?.slice(0, 8)}...`,
       created_at: c.created_at,
     });
   }
 
-  // Posts
-  const { data: posts } = await admin
-    .from('posts')
-    .select('id, title, content, created_at, user_id')
-    .order('created_at', { ascending: false })
-    .limit(50);
-
   for (const p of (posts ?? []) as any[]) {
-    const { data: profile } = await admin.from('profiles').select('full_name').eq('id', p.user_id).single();
     items.push({
       id: p.id,
       type: 'post',
       content: p.title ? `${p.title}: ${p.content}` : p.content,
-      author: (profile as any)?.full_name ?? 'Unknown',
+      author: profileMap.get(p.user_id) ?? 'Unknown',
       context: '',
       created_at: p.created_at,
     });

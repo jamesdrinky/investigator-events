@@ -72,6 +72,7 @@ export function EventCard({ event, priority = 'default', isSignalActive = false,
         {/* Title over image — bottom */}
         <div className="absolute inset-x-0 bottom-0 px-4 pb-4">
           <h3
+            title={event.title}
             className={`font-bold leading-tight text-white ${hero ? 'text-xl sm:text-2xl' : 'text-base sm:text-lg'}`}
             style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
           >

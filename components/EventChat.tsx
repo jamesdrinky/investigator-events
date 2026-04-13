@@ -170,7 +170,7 @@ export function EventChat({ eventId }: { eventId: string }) {
                       ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white'
                       : 'bg-white/[0.06] text-slate-200'
                   }`}>
-                    <p className="whitespace-pre-wrap">{m.message}</p>
+                    <p className="whitespace-pre-wrap break-words">{m.message}</p>
                   </div>
                   <p className={`mt-0.5 text-[10px] text-slate-600 ${isOwn ? 'text-right pr-1' : 'pl-1'}`}>{formatTime(m.created_at)}</p>
                 </div>

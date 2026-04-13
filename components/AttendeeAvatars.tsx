@@ -153,13 +153,26 @@ export function AttendeeAvatars({ eventId }: { eventId: string }) {
                 key={a.id}
                 className="flex items-center gap-3 rounded-lg p-2 transition hover:bg-white hover:shadow-sm"
               >
-                <Link href={a.username ? `/profile/${a.username}` : '#'} className="flex-shrink-0">
-                  <UserAvatar src={a.avatar_url} name={a.full_name} size={36} />
-                </Link>
-                <Link href={a.username ? `/profile/${a.username}` : '#'} className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-slate-900">{a.full_name ?? 'Investigator'}</p>
-                  {a.specialisation && <p className="truncate text-[11px] text-slate-400">{a.specialisation}</p>}
-                </Link>
+                {a.username ? (
+                  <Link href={`/profile/${a.username}`} className="flex-shrink-0">
+                    <UserAvatar src={a.avatar_url} name={a.full_name} size={36} />
+                  </Link>
+                ) : (
+                  <div className="flex-shrink-0">
+                    <UserAvatar src={a.avatar_url} name={a.full_name} size={36} />
+                  </div>
+                )}
+                {a.username ? (
+                  <Link href={`/profile/${a.username}`} className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-slate-900">{a.full_name ?? 'Investigator'}</p>
+                    {a.specialisation && <p className="truncate text-[11px] text-slate-400">{a.specialisation}</p>}
+                  </Link>
+                ) : (
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-slate-900">{a.full_name ?? 'Investigator'}</p>
+                    {a.specialisation && <p className="truncate text-[11px] text-slate-400">{a.specialisation}</p>}
+                  </div>
+                )}
                 {userId && !isMe && (
                   <Link
                     href={`/messages?to=${a.user_id}`}

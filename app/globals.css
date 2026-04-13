@@ -755,3 +755,16 @@ a {
   from { opacity: 0; filter: blur(4px); transform: translateX(24px); }
   to { opacity: 1; filter: blur(0); transform: translateX(0); }
 }
+
+/* ── Reduced motion — disable animations for accessibility ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  body {
+    background: linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%);
+  }
+}

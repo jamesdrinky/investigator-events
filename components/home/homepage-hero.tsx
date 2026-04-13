@@ -201,13 +201,16 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
 
       {/* ── Main content wrapper ── */}
       <div className="relative">
-        {/* ── Wireframe Globe — static, no animation ── */}
+        {/* ── Wireframe Globe — static, positioned right on desktop ── */}
         <div
-          className="pointer-events-none absolute left-1/2 z-[1] -translate-x-1/2"
+          className="pointer-events-none absolute z-[1]"
           style={{
             width: isMobile ? '22rem' : '56rem',
             height: isMobile ? '22rem' : '56rem',
-            top: isMobile ? '22%' : '10%',
+            top: isMobile ? '22%' : '4%',
+            left: isMobile ? '50%' : 'auto',
+            right: isMobile ? 'auto' : '-12%',
+            transform: isMobile ? 'translateX(-50%)' : 'none',
           }}
         >
           <div className="absolute inset-[-18%] rounded-full bg-[radial-gradient(ellipse,rgba(22,104,255,0.1),rgba(236,72,153,0.05)_40%,transparent_65%)]" />

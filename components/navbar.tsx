@@ -150,7 +150,7 @@ export function Navbar() {
               width={48}
               height={48}
               priority
-              className="h-9 w-9 shrink-0 rounded-full object-cover sm:h-10 sm:w-10 md:h-11 md:w-11"
+              className="h-9 w-9 shrink-0 rounded-full object-cover shadow-sm sm:h-10 sm:w-10 md:h-11 md:w-11 scale-[1.15]"
             />
             <div className="hidden sm:block">
               <p className={`whitespace-nowrap text-[11px] font-semibold tracking-[0.14em] sm:text-[13px] sm:tracking-[0.16em] ${isDark ? 'text-white' : 'text-slate-950'}`}>INVESTIGATOR EVENTS</p>
@@ -288,7 +288,7 @@ export function Navbar() {
         {/* Top bar with logo + close */}
         <div className="flex items-center justify-between px-6 py-4">
           <Link href="/" onClick={() => handleNavigation('/')} className="flex items-center gap-2.5">
-            <Image src="/logo/ielogo1.PNG" alt="Investigator Events" width={40} height={40} className="h-9 w-9 rounded-full object-cover" />
+            <Image src="/logo/ielogo1.PNG" alt="Investigator Events" width={40} height={40} className="h-9 w-9 rounded-full object-cover scale-[1.15]" />
           </Link>
           <button
             type="button"

@@ -3,6 +3,7 @@ type AssociationBrandingRecord = {
   shortName: string;
   aliases: string[];
   logoFileName?: string;
+  invertOnLight?: boolean;
 };
 
 const associationBrandingRecords: AssociationBrandingRecord[] = [
@@ -10,7 +11,8 @@ const associationBrandingRecords: AssociationBrandingRecord[] = [
     name: 'Association of British Investigators',
     shortName: 'ABI',
     aliases: ['Association of British Investigators', 'Association of British Investigators (ABI)', 'ABI'],
-    logoFileName: 'abi.png'
+    logoFileName: 'abi.png',
+    invertOnLight: true
   },
   { name: 'WAD', shortName: 'WAD', aliases: ['WAD', 'World Association of Detectives'], logoFileName: 'wad.png' },
   {
@@ -68,6 +70,11 @@ export function findAssociationBranding(label: string) {
 export function getAssociationBrandLogoSrc(label: string) {
   const association = findAssociationBranding(label);
   return association?.logoFileName ? `/associations/${association.logoFileName}` : undefined;
+}
+
+export function shouldInvertLogoOnLight(label: string) {
+  const association = findAssociationBranding(label);
+  return association?.invertOnLight ?? false;
 }
 
 export function getAssociationBadgeLabel(label: string) {

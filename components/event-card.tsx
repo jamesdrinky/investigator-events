@@ -5,7 +5,7 @@ import Image from 'next/image';
 import type { EventItem } from '@/lib/data/events';
 import { formatEventDate } from '@/lib/utils/date';
 import { getEventSlug } from '@/lib/utils/event-slugs';
-import { getAssociationBrandLogoSrc } from '@/lib/utils/association-branding';
+import { getAssociationBrandLogoSrc, shouldInvertLogoOnLight } from '@/lib/utils/association-branding';
 import { EventCardAttendees } from '@/components/EventCardAttendees';
 
 interface EventCardProps {
@@ -18,6 +18,7 @@ interface EventCardProps {
 export function EventCard({ event, priority = 'default', isSignalActive = false, onHoverChange }: EventCardProps) {
   const hostLabel = event.association ?? event.organiser;
   const logoSrc = getAssociationBrandLogoSrc(hostLabel);
+  const invertLogo = shouldInvertLogoOnLight(hostLabel);
   const hero = priority === 'hero';
   const featured = priority === 'featured' || hero;
   const description = event.description?.trim();
@@ -55,7 +56,7 @@ export function EventCard({ event, priority = 'default', isSignalActive = false,
               alt={hostLabel}
               width={48}
               height={48}
-              className="h-auto max-h-8 w-auto max-w-8 object-contain sm:max-h-10 sm:max-w-10"
+              className={`h-auto max-h-8 w-auto max-w-8 object-contain sm:max-h-10 sm:max-w-10 ${invertLogo ? 'brightness-0' : ''}`}
             />
           </div>
         ) : (

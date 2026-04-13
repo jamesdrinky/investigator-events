@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect, useMemo } from 'react';
 import { Calendar, MapPin } from 'lucide-react';
-import { getAssociationBrandLogoSrc } from '@/lib/utils/association-branding';
+import { getAssociationBrandLogoSrc, shouldInvertLogoOnLight } from '@/lib/utils/association-branding';
 
 export interface ExpandingEventItem {
   id: string;
@@ -40,7 +40,7 @@ export function ExpandingEventCards({ items }: { items: ExpandingEventItem[] }) 
     }
     return {
       gridTemplateColumns: '1fr',
-      gridTemplateRows: items.map((_, i) => (i === activeIndex ? '3.5fr' : 'minmax(110px, 1.5fr)')).join(' '),
+      gridTemplateRows: items.map((_, i) => (i === activeIndex ? '5fr' : 'minmax(56px, 0.6fr)')).join(' '),
     };
   }, [activeIndex, items.length, isDesktop]);
 
@@ -52,7 +52,7 @@ export function ExpandingEventCards({ items }: { items: ExpandingEventItem[] }) 
       className="grid w-full gap-2"
       style={{
         ...gridStyle,
-        height: isDesktop ? '480px' : 'min(520px, 70vh)',
+        height: isDesktop ? '480px' : 'min(620px, 82vh)',
         transition: 'grid-template-columns 0.45s cubic-bezier(0.4,0,0.2,1), grid-template-rows 0.45s cubic-bezier(0.4,0,0.2,1)',
         willChange: 'grid-template-columns, grid-template-rows',
         contain: 'layout style',
@@ -61,6 +61,7 @@ export function ExpandingEventCards({ items }: { items: ExpandingEventItem[] }) 
       {items.map((item, index) => {
         const active = activeIndex === index;
         const logoSrc = getAssociationBrandLogoSrc(item.association);
+        const invertLogo = shouldInvertLogoOnLight(item.association);
 
         return (
           <li
@@ -92,7 +93,7 @@ export function ExpandingEventCards({ items }: { items: ExpandingEventItem[] }) 
             {/* Association logo — top-left, always visible */}
             {logoSrc && (
               <div className="absolute left-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-xl border border-white/30 bg-white/90 p-1.5 shadow-lg sm:h-12 sm:w-12 sm:p-2">
-                <Image src={logoSrc} alt={item.association} width={40} height={40} className="h-auto max-h-7 w-auto max-w-7 object-contain sm:max-h-8 sm:max-w-8" />
+                <Image src={logoSrc} alt={item.association} width={40} height={40} className={`h-auto max-h-7 w-auto max-w-7 object-contain sm:max-h-8 sm:max-w-8 ${invertLogo ? 'brightness-0' : ''}`} />
               </div>
             )}
 

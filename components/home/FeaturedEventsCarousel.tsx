@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import useEmblaCarousel from 'embla-carousel-react';
 import { useCallback, useEffect, useState } from 'react';
-import { getAssociationBrandLogoSrc } from '@/lib/utils/association-branding';
+import { getAssociationBrandLogoSrc, shouldInvertLogoOnLight } from '@/lib/utils/association-branding';
 
 export interface FeaturedEventCard {
   id: string;
@@ -63,6 +63,7 @@ export function FeaturedEventsCarousel({ items }: { items: FeaturedEventCard[] }
         <div className="flex">
           {items.map((item) => {
             const logoSrc = getAssociationBrandLogoSrc(item.association);
+            const invertLogo = shouldInvertLogoOnLight(item.association);
 
             return (
               <div key={item.id} className="min-w-0 shrink-0 grow-0 basis-[85%] pl-4 sm:basis-[45%] lg:basis-[32%]">
@@ -84,7 +85,7 @@ export function FeaturedEventsCarousel({ items }: { items: FeaturedEventCard[] }
                     {/* Association logo — top-left */}
                     {logoSrc && (
                       <div className="absolute left-3 top-3 flex h-10 w-10 items-center justify-center rounded-xl border border-white/30 bg-white/90 p-1.5 shadow-lg">
-                        <Image src={logoSrc} alt={item.association} width={32} height={32} className="h-auto max-h-6 w-auto max-w-6 object-contain" />
+                        <Image src={logoSrc} alt={item.association} width={32} height={32} className={`h-auto max-h-6 w-auto max-w-6 object-contain ${invertLogo ? 'brightness-0' : ''}`} />
                       </div>
                     )}
                   </div>

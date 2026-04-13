@@ -8,7 +8,7 @@ import { SaveDateLinks } from '@/components/save-date-links';
 import { fetchAllEvents, fetchEventBySlug } from '@/lib/data/events';
 import { formatEventDate, parseDate } from '@/lib/utils/date';
 import { getCountryFlag } from '@/lib/utils/location';
-import { getAssociationBrandLogoSrc } from '@/lib/utils/association-branding';
+import { getAssociationBrandLogoSrc, shouldInvertLogoOnLight } from '@/lib/utils/association-branding';
 import { EventCommunityTabs } from '@/components/EventCommunityTabs';
 import { AttendeeAvatars } from '@/components/AttendeeAvatars';
 import { StickyGoingBar } from '@/components/StickyGoingBar';
@@ -65,6 +65,7 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
   const title = event.title ?? 'Event';
   const eventDate = event.date ? formatEventDate(event) : 'TBC';
   const logoSrc = getAssociationBrandLogoSrc(organiser);
+  const invertLogo = shouldInvertLogoOnLight(organiser);
   const imageSrc = (event.image_path && /^(\/(cities|events|images)\/|https?:\/\/)/.test(event.image_path) ? event.image_path : event.coverImage) ?? '/cities/fallback.jpg';
   // Video support — if the event has a video URL field
   const videoUrl = (event as any).videoUrl as string | undefined;
@@ -119,7 +120,7 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
         {/* Association logo — top-left */}
         {logoSrc && (
           <div className="absolute left-4 top-20 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/30 bg-white/90 p-2 shadow-xl sm:left-8 sm:top-24 sm:h-16 sm:w-16">
-            <Image src={logoSrc} alt={organiser} width={48} height={48} className="h-auto max-h-10 w-auto max-w-10 object-contain sm:max-h-12 sm:max-w-12" />
+            <Image src={logoSrc} alt={organiser} width={48} height={48} className={`h-auto max-h-10 w-auto max-w-10 object-contain sm:max-h-12 sm:max-w-12 ${invertLogo ? 'brightness-0' : ''}`} />
           </div>
         )}
 

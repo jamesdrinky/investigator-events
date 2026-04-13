@@ -26,10 +26,12 @@ const ROW_2 = [
   { src: '/associations/oedv.png', name: 'ODV' },
 ];
 
+const INVERT_LOGOS = new Set(['ABI']);
+
 function LogoChip({ src, name }: { src: string; name: string }) {
   return (
     <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-white p-2.5 shadow-[0_4px_20px_-6px_rgba(15,23,42,0.12),0_0_0_1px_rgba(226,232,240,0.7)]">
-      <img src={src} alt={name} className="h-full w-full object-contain" loading="lazy" />
+      <img src={src} alt={name} className={`h-full w-full object-contain ${INVERT_LOGOS.has(name) ? 'brightness-0' : ''}`} loading="lazy" />
     </div>
   );
 }

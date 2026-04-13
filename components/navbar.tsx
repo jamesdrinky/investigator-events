@@ -13,10 +13,8 @@ import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 const desktopNavItems: Array<{ href: Route; label: string }> = [
   { href: '/calendar', label: 'Events' },
-  { href: '/calendar?view=calendar' as Route, label: 'Calendar' },
   { href: '/associations', label: 'Associations' },
   { href: '/people', label: 'Forum' },
-  { href: '/advice', label: 'Advice' },
   { href: '/about', label: 'About' }
 ];
 
@@ -185,6 +183,12 @@ export function Navbar() {
             <GlobalSearch isDark={isDark} />
             {user ? (
               <div ref={dropdownRef} className="relative flex items-center gap-2">
+                <Link
+                  href="/why-join-an-association"
+                  className={`hidden whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition sm:inline-flex ${isDark ? 'text-cyan-300 border border-cyan-400/30 hover:bg-cyan-400/10' : 'text-blue-600 border border-blue-200 hover:bg-blue-50'}`}
+                >
+                  Why Join?
+                </Link>
                 <Link
                   href="/messages"
                   className={`relative flex h-8 w-8 items-center justify-center rounded-full border transition ${

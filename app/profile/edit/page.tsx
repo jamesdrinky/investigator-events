@@ -254,9 +254,6 @@ export default function EditProfilePage() {
     // Validate website URL — only allow http/https
     const sanitizedWebsite = website && /^https?:\/\//i.test(website.trim()) ? website.trim() : null;
 
-    // Only save LinkedIn URL if verified via OAuth and valid
-    const sanitizedLinkedin = authProvider === 'linkedin_oidc' && linkedinUrl && /^https?:\/\/(www\.)?linkedin\.com\//i.test(linkedinUrl.trim()) ? linkedinUrl.trim() : null;
-
     await supabase.from('profiles').upsert({
       id: userId,
       full_name: (fullName || '').slice(0, 100) || null,
@@ -266,7 +263,6 @@ export default function EditProfilePage() {
       headline: (headline || '').slice(0, 200) || null,
       bio: (bio || '').slice(0, 2000) || null,
       website: sanitizedWebsite,
-      linkedin_url: sanitizedLinkedin,
       profile_color: profileColor,
       avatar_url: avatarUrl,
       banner_url: bannerUrl,
@@ -609,19 +605,9 @@ export default function EditProfilePage() {
                   </span>
                   <span className="text-sm text-emerald-700">Your identity is verified</span>
                 </div>
-                <div className="mt-3 rounded-xl border border-slate-200/60 bg-slate-50/50 p-3">
-                  <label className="text-xs font-semibold text-slate-700">Your LinkedIn profile URL</label>
-                  <p className="text-[10px] text-slate-400">This link is shown alongside your OAuth-verified identity so others can view your profile.</p>
-                  <input
-                    className="field-input mt-1.5 w-full text-sm"
-                    value={linkedinUrl}
-                    onChange={(e) => setLinkedinUrl(e.target.value)}
-                    placeholder="https://linkedin.com/in/your-name"
-                  />
-                  <p className="mt-1 text-[10px] text-slate-400">
-                    Your name and photo are verified through LinkedIn OAuth and cannot be faked. This URL lets people click through to your actual profile.
-                  </p>
-                </div>
+                <p className="mt-2 text-xs text-slate-400">
+                  Your LinkedIn name and photo are shown on your profile as proof of identity. Others can click "Find on LinkedIn" to search for your verified name on LinkedIn.
+                </p>
               </div>
             ) : (
               <div className="mt-3">

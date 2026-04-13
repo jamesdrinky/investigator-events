@@ -266,15 +266,15 @@ export default async function PublicProfilePage({ params }: { params: { username
                       </div>
                     </div>
 
-                    {isLinkedInVerified && linkedinUrl && (
+                    {isLinkedInVerified && linkedinName && (
                       <a
-                        href={linkedinUrl}
+                        href={linkedinUrl || `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(linkedinName)}`}
                         target="_blank"
                         rel="noreferrer"
                         className="flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-[#0077B5] shadow-lg transition hover:shadow-xl sm:w-auto sm:inline-flex sm:rounded-full"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 48 48"><path fill="#0077B5" d="M42 37a5 5 0 01-5 5H11a5 5 0 01-5-5V11a5 5 0 015-5h26a5 5 0 015 5v26z" /><path fill="#FFF" d="M12 19h5v17h-5V19zm2.485-2h-.028C12.965 17 12 15.888 12 14.499 12 13.08 12.995 12 14.514 12c1.521 0 2.458 1.08 2.486 2.499C17 15.887 16.035 17 14.485 17zM36 36h-5v-9.099c0-2.198-1.225-3.698-3.192-3.698-1.501 0-2.313 1.012-2.707 1.99-.144.35-.101.858-.101 1.365V36h-5s.07-16 0-17h5v2.616C25.721 21.865 27.085 20 30.1 20c3.386 0 5.9 2.215 5.9 6.978V36z" /></svg>
-                        View LinkedIn Profile
+                        Find on LinkedIn
                         <ExternalLink className="h-3 w-3 opacity-50" />
                       </a>
                     )}

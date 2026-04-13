@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import createGlobe from 'cobe';
 import { NewsletterSignupForm } from '@/components/newsletter-signup-form';
 
 import type { COBEOptions } from 'cobe';
@@ -45,29 +44,36 @@ function CobeGlobe({ className = '' }: { className?: string }) {
   useEffect(() => {
     if (!canvasRef.current) return;
     const w = canvasRef.current.offsetWidth;
+    let globe: ReturnType<typeof import('cobe')['default']> extends Promise<infer T> ? T : any;
+    let frame: number;
+    let cancelled = false;
 
-    const globe = createGlobe(canvasRef.current, {
-      ...GLOBE_CONFIG,
-      width: w * 2,
-      height: w * 2,
+    import('cobe').then(({ default: createGlobe }) => {
+      if (cancelled || !canvasRef.current) return;
+      globe = createGlobe(canvasRef.current, {
+        ...GLOBE_CONFIG,
+        width: w * 2,
+        height: w * 2,
+      });
+
+      const tick = () => {
+        if (!pointerInteracting.current) phiRef.current += 0.004;
+        globe.update({ phi: phiRef.current + rRef.current });
+        frame = requestAnimationFrame(tick);
+      };
+      frame = requestAnimationFrame(tick);
+
+      const t = setTimeout(() => {
+        if (canvasRef.current) canvasRef.current.style.opacity = '1';
+      }, 100);
+
+      return () => clearTimeout(t);
     });
 
-    let frame: number;
-    const tick = () => {
-      if (!pointerInteracting.current) phiRef.current += 0.004;
-      globe.update({ phi: phiRef.current + rRef.current });
-      frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-
-    const t = setTimeout(() => {
-      if (canvasRef.current) canvasRef.current.style.opacity = '1';
-    }, 100);
-
     return () => {
-      cancelAnimationFrame(frame);
-      globe.destroy();
-      clearTimeout(t);
+      cancelled = true;
+      if (frame) cancelAnimationFrame(frame);
+      if (globe) globe.destroy();
     };
   }, []);
 

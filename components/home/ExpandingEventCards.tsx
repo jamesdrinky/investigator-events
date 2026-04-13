@@ -80,10 +80,12 @@ export function ExpandingEventCards({ items }: { items: ExpandingEventItem[] }) 
             }}
           >
             {/* Background image — always colourful, no grayscale */}
-            <img
+            <Image
               src={safeSrc(item.coverImage)}
               alt={item.title}
-              className="absolute inset-0 h-full w-full object-cover transition-all duration-500 ease-out group-data-[active=true]:scale-100 scale-110"
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover transition-all duration-500 ease-out group-data-[active=true]:scale-100 scale-110"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
 

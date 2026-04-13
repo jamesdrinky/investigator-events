@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -33,11 +34,28 @@ const SECTION_PROMPTS: Record<string, { title: string; desc: string }> = {
   sections: { title: 'Add a section', desc: 'Services, experience, case studies...' },
 };
 
-export async function generateMetadata({ params }: { params: { username: string } }) {
+export async function generateMetadata({ params }: { params: { username: string } }): Promise<Metadata> {
   const supabase = await createSupabaseSSRServerClient();
-  const { data: profile } = await supabase.from('profiles').select('full_name, username').eq('username', params.username).single();
+  const { data: profile } = await supabase.from('profiles').select('full_name, username, specialisation, headline, country').eq('username', params.username).single();
   if (!profile) return { title: 'Profile Not Found' };
-  return { title: `${profile.full_name ?? profile.username} | Investigator Events` };
+  const name = profile.full_name ?? profile.username ?? 'Investigator';
+  const tagline = profile.headline || profile.specialisation || '';
+  const description = [tagline, profile.country ? `Based in ${profile.country}` : '', 'View their profile on Investigator Events.'].filter(Boolean).join('. ');
+  return {
+    title: `${name} | Investigator Events`,
+    description,
+    openGraph: {
+      title: name,
+      description,
+      type: 'profile',
+      siteName: 'Investigator Events',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: name,
+      description,
+    },
+  };
 }
 
 export default async function PublicProfilePage({ params }: { params: { username: string } }) {

@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
+import nextDynamic from 'next/dynamic';
 import { AssociationLoopSection } from '@/components/home/AssociationLoopSection';
-import { FeaturedEventsSection } from '@/components/home/FeaturedEventsSection';
 import { FounderQuoteSection } from '@/components/home/FounderQuoteSection';
-import { GlobeNewsletterSection } from '@/components/home/GlobeNewsletterSection';
 import { UpcomingEventsGallery } from '@/components/home/UpcomingEventsGallery';
 import { WhyUseSection } from '@/components/home/WhyUseSection';
 import { HomepageHero } from '@/components/home/homepage-hero';
@@ -10,6 +9,15 @@ import { Reveal } from '@/components/motion/reveal';
 import { fetchAllEvents, fetchFeaturedEvents } from '@/lib/data/events';
 import { getCoverageMetrics } from '@/lib/utils/coverage';
 import { parseDate, sortEventsByDate } from '@/lib/utils/date';
+
+const FeaturedEventsSection = nextDynamic(
+  () => import('@/components/home/FeaturedEventsSection').then((m) => m.FeaturedEventsSection),
+);
+
+const GlobeNewsletterSection = nextDynamic(
+  () => import('@/components/home/GlobeNewsletterSection').then((m) => m.GlobeNewsletterSection),
+  { ssr: false }
+);
 
 export const dynamic = 'force-dynamic';
 

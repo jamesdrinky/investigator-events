@@ -98,11 +98,15 @@ export async function POST(request: Request) {
         } as any);
     }
 
-    // Increment usage count on the code
-    await admin
-      .from('association_verification_codes' as any)
-      .update({ usage_count: ((row as any).usage_count ?? 0) + 1 } as any)
-      .eq('id', row.id);
+    // Atomically increment usage count on the code
+    const { error: rpcErr } = await (admin.rpc as any)('increment_verification_usage', { code_id: row.id });
+    // Fallback if RPC doesn't exist yet
+    if (rpcErr?.code === '42883') {
+      await admin
+        .from('association_verification_codes' as any)
+        .update({ usage_count: ((row as any).usage_count ?? 0) + 1 } as any)
+        .eq('id', row.id);
+    }
 
     return NextResponse.json({
       message: 'Membership verified',

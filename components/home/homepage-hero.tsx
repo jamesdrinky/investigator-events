@@ -309,7 +309,6 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
                 height={1024}
                 className="h-auto w-full"
                 priority
-                unoptimized
               />
             </div>
           </div>

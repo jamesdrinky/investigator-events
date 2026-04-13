@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { hasValidAdminSessionCookie } from '@/lib/admin/session';
+import { assertSameOriginRequest } from '@/lib/security/server';
 
 function generateCode(prefix: string): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // No 0/O/1/I to avoid confusion
@@ -13,6 +14,7 @@ function generateCode(prefix: string): string {
 
 // GET — list all codes
 export async function GET() {
+  assertSameOriginRequest();
   if (!hasValidAdminSessionCookie()) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -42,6 +44,7 @@ export async function GET() {
 
 // POST — generate a new code
 export async function POST(request: Request) {
+  assertSameOriginRequest();
   if (!hasValidAdminSessionCookie()) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -105,6 +108,7 @@ export async function POST(request: Request) {
 
 // DELETE — deactivate a code
 export async function DELETE(request: Request) {
+  assertSameOriginRequest();
   if (!hasValidAdminSessionCookie()) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

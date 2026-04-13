@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { hasValidAdminSessionCookie } from '@/lib/admin/session';
+import { assertSameOriginRequest } from '@/lib/security/server';
 
 // GET — fetch all moderatable content
 export async function GET() {
+  assertSameOriginRequest();
   if (!hasValidAdminSessionCookie()) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -100,6 +102,7 @@ export async function GET() {
 
 // DELETE — remove content
 export async function DELETE(request: Request) {
+  assertSameOriginRequest();
   if (!hasValidAdminSessionCookie()) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

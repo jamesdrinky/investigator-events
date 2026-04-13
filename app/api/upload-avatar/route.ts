@@ -5,10 +5,9 @@ import { NextResponse } from 'next/server';
 import { enforceRateLimit, assertSameOriginRequest } from '@/lib/security/server';
 
 export async function POST(request: Request) {
-  enforceRateLimit('upload-avatar', { maxRequests: 10, windowMs: 60_000 });
   assertSameOriginRequest();
 
-  // Verify the user is authenticated
+  // Verify the user is authenticated before consuming rate limit
   const cookieStore = await cookies();
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -27,6 +26,8 @@ export async function POST(request: Request) {
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
+  enforceRateLimit('upload-avatar', { maxRequests: 10, windowMs: 60_000 });
 
   // Get the file from the request
   const formData = await request.formData();

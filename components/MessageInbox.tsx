@@ -192,7 +192,9 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
   const searchEvents = async (q: string) => {
     setEventSearch(q);
     if (q.length < 2) { setEventResults([]); return; }
-    const { data } = await supabase.from('events').select('id, title, slug, city, country, image_path').eq('approved', true).ilike('title', `%${q}%`).order('start_date', { ascending: false }).limit(6);
+    const safeQ = q.replace(/[,%().*\\]/g, '');
+    if (!safeQ) { setEventResults([]); return; }
+    const { data } = await supabase.from('events').select('id, title, slug, city, country, image_path').eq('approved', true).ilike('title', `%${safeQ}%`).order('start_date', { ascending: false }).limit(6);
     setEventResults((data ?? []) as any[]);
   };
 

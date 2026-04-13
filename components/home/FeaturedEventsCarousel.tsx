@@ -73,7 +73,7 @@ export function FeaturedEventsCarousel({ items }: { items: FeaturedEventCard[] }
                   {/* Image with logo */}
                   <div className="relative h-48 w-full overflow-hidden sm:h-56">
                     {item.coverImage ? (
-                      <img src={item.coverImage} alt={item.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+                      <Image src={item.coverImage} alt={item.title} fill sizes="(max-width: 640px) 85vw, (max-width: 1024px) 45vw, 32vw" className="object-cover transition-transform duration-500 group-hover:scale-105" />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-900/40 to-indigo-900/40">
                         <p className="text-base font-semibold text-white/60">{item.city}</p>

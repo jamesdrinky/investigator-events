@@ -17,16 +17,25 @@ export async function POST() {
 
     const adminClient = createSupabaseAdminServerClient();
 
-    // Delete user data (cascading FKs handle most related data)
-    await adminClient.from('posts').delete().eq('user_id', user.id);
-    await adminClient.from('connections').delete().or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`);
-    await adminClient.from('event_attendees').delete().eq('user_id', user.id);
-    await adminClient.from('work_experience').delete().eq('user_id', user.id);
-    await adminClient.from('user_associations').delete().eq('user_id', user.id);
-    await adminClient.from('profile_sections').delete().eq('user_id', user.id);
-    await adminClient.from('saved_events').delete().eq('user_id', user.id);
-    await adminClient.from('member_verifications').delete().eq('user_id', user.id);
-    await adminClient.from('profiles').delete().eq('id', user.id);
+    // Delete user data in a single transaction via RPC to avoid partial deletes
+    const { error: txError } = await (adminClient.rpc as any)('delete_user_data', { target_user_id: user.id });
+    if (txError) {
+      // Fallback: delete sequentially if RPC doesn't exist yet
+      if (txError.code === '42883') {
+        await adminClient.from('posts').delete().eq('user_id', user.id);
+        await adminClient.from('connections').delete().or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`);
+        await adminClient.from('event_attendees').delete().eq('user_id', user.id);
+        await adminClient.from('work_experience').delete().eq('user_id', user.id);
+        await adminClient.from('user_associations').delete().eq('user_id', user.id);
+        await adminClient.from('profile_sections').delete().eq('user_id', user.id);
+        await adminClient.from('saved_events').delete().eq('user_id', user.id);
+        await adminClient.from('member_verifications').delete().eq('user_id', user.id);
+        await adminClient.from('profiles').delete().eq('id', user.id);
+      } else {
+        console.error('Failed to delete user data:', txError.message);
+        return NextResponse.json({ error: 'Failed to delete account' }, { status: 500 });
+      }
+    }
 
     // Delete the actual auth user
     const { error } = await adminClient.auth.admin.deleteUser(user.id);

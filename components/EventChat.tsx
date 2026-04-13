@@ -82,11 +82,19 @@ export function EventChat({ eventId }: { eventId: string }) {
     }
   }, [messages]);
 
+  const [sendError, setSendError] = useState(false);
+
   const handleSend = async () => {
     if (!userId || !text.trim()) return;
     setSending(true);
+    setSendError(false);
     const supabase = createSupabaseBrowserClient();
-    await supabase.from('event_messages').insert({ event_id: eventId, user_id: userId, message: text.trim() });
+    const { error } = await supabase.from('event_messages').insert({ event_id: eventId, user_id: userId, message: text.trim() });
+    if (error) {
+      setSendError(true);
+      setSending(false);
+      return;
+    }
     setText('');
     setSending(false);
   };
@@ -177,10 +185,11 @@ export function EventChat({ eventId }: { eventId: string }) {
       {userId ? (
         <div className="border-t border-white/5 bg-slate-950/80 p-3 backdrop-blur-sm">
           <div className="flex items-center gap-2">
+            {sendError && <p className="absolute -top-6 left-3 text-[10px] text-red-400">Failed to send. Try again.</p>}
             <input
               type="text"
               value={text}
-              onChange={(e) => setText(e.target.value)}
+              onChange={(e) => { setText(e.target.value); setSendError(false); }}
               onKeyDown={handleKeyDown}
               placeholder="Type a message..."
               className="flex-1 rounded-xl border border-white/5 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition focus:border-indigo-500/40 focus:bg-white/8"

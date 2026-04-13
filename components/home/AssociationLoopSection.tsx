@@ -56,8 +56,8 @@ export function AssociationLoopSection() {
       <div
         className="relative mt-8 sm:mt-10"
         style={{
-          maskImage: 'linear-gradient(to right, transparent, black 12%, black 88%, transparent)',
-          WebkitMaskImage: 'linear-gradient(to right, transparent, black 12%, black 88%, transparent)',
+          maskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
+          WebkitMaskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
         }}
       >
         <div className="flex flex-col gap-5">

@@ -3,8 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { ShinyButton } from '@/components/ui/shiny-button';
-import { motion, useReducedMotion } from 'framer-motion';
-import { useMemo, useRef, useState, useEffect, useCallback } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { geoOrthographic, geoPath, geoGraticule } from 'd3-geo';
 import { feature } from 'topojson-client';
 import landData from 'world-atlas/land-110m.json';
@@ -126,29 +125,7 @@ function getEventCoordinate(event: EventItem): GlobePoint {
 /* ────────────────────────────────────────────── */
 
 export function HomepageHero({ events, stats }: HomepageHeroProps) {
-  const reducedMotion = useReducedMotion();
   const [isMobile, setIsMobile] = useState(false);
-  const [introComplete, setIntroComplete] = useState(false);
-
-  /* Poll for intro completion — checks if the overlay is gone */
-  useEffect(() => {
-    // If no intro overlay exists at all, animate immediately
-    if (!document.querySelector('[data-site-intro]')) {
-      setIntroComplete(true);
-      return;
-    }
-    // Otherwise poll until it's removed
-    const interval = setInterval(() => {
-      if (!document.querySelector('[data-site-intro]')) {
-        setIntroComplete(true);
-        clearInterval(interval);
-      }
-    }, 200);
-    return () => clearInterval(interval);
-  }, []);
-
-
-  /* ── Scroll hooks removed — were causing scroll jank ── */
 
   /* ── Mobile detection ── */
   useEffect(() => {
@@ -176,17 +153,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
   );
   const graticuleData = useMemo(() => geoGraticule()(), []);
 
-  /* ── Animated globe rotation (desktop only) ── */
-  const rotationRef = useRef(25);
-  const landRef = useRef<SVGPathElement>(null);
-  const landWireRef = useRef<SVGPathElement>(null);
-  const graticuleRef = useRef<SVGPathElement>(null);
-  const dotsGroupRef = useRef<SVGGElement>(null);
-  const arcsGroupRef = useRef<SVGGElement>(null);
-
-  const shouldAnimate = !reducedMotion && !isMobile;
-
-  // Build projection + pathGen for a given rotation
+  // Static globe projection — computed once, no animation
   const buildProjection = useCallback(
     (rot: number) => {
       const proj = geoOrthographic()
@@ -199,7 +166,6 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
     [globeScale],
   );
 
-  // Initial static render
   const { proj: initProj, gen: initGen } = useMemo(
     () => buildProjection(25),
     [buildProjection],
@@ -216,63 +182,6 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
         .filter((d): d is NonNullable<typeof d> => d !== null),
     [globeNodes, initProj],
   );
-  const arcPaths = useMemo(() => {
-    if (globeNodes.length < 2) return [];
-    return globeNodes.slice(0, -1).map((node, i) => {
-      const next = globeNodes[i + 1];
-      const arc = {
-        type: 'Feature' as const,
-        properties: {},
-        geometry: {
-          type: 'LineString' as const,
-          coordinates: [[node.lon, node.lat], [next.lon, next.lat]],
-        },
-      };
-      return { id: `${node.id}-${next.id}`, d: initGen(arc as any) ?? '' };
-    });
-  }, [globeNodes, initGen]);
-
-  // Globe rotation — throttled to ~10fps to avoid scroll jank
-  useEffect(() => {
-    if (!shouldAnimate) return;
-    let timer: ReturnType<typeof setInterval>;
-    timer = setInterval(() => {
-      rotationRef.current += 0.15;
-      const { proj, gen } = buildProjection(rotationRef.current);
-
-      if (landRef.current) landRef.current.setAttribute('d', gen(landFeature) ?? '');
-      if (landWireRef.current) landWireRef.current.setAttribute('d', gen(landFeature) ?? '');
-      if (graticuleRef.current) graticuleRef.current.setAttribute('d', gen(graticuleData) ?? '');
-
-      if (dotsGroupRef.current) {
-        globeNodes.forEach((node, i) => {
-          const coords = proj([node.lon, node.lat]);
-          const group = dotsGroupRef.current?.children[i] as SVGGElement | undefined;
-          if (!group) return;
-          if (coords) {
-            group.style.display = '';
-            const cs = group.querySelectorAll('circle');
-            cs.forEach((c) => { c.setAttribute('cx', String(coords[0])); c.setAttribute('cy', String(coords[1])); });
-          } else {
-            group.style.display = 'none';
-          }
-        });
-      }
-
-      if (arcsGroupRef.current && globeNodes.length >= 2) {
-        const paths = arcsGroupRef.current.querySelectorAll('path');
-        globeNodes.slice(0, -1).forEach((node, i) => {
-          const next = globeNodes[i + 1];
-          const arc = {
-            type: 'Feature' as const, properties: {},
-            geometry: { type: 'LineString' as const, coordinates: [[node.lon, node.lat], [next.lon, next.lat]] },
-          };
-          if (paths[i]) paths[i].setAttribute('d', gen(arc as any) ?? '');
-        });
-      }
-    }, 100); // 10fps instead of 60fps
-    return () => clearInterval(timer);
-  }, [shouldAnimate, buildProjection, landFeature, graticuleData, globeNodes]);
 
   const vb = globeScale + 60;
 
@@ -292,25 +201,17 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
 
       {/* ── Main content wrapper ── */}
       <div className="relative">
-        {/* ── Wireframe Globe ── */}
-        <motion.div
+        {/* ── Wireframe Globe — static, no animation ── */}
+        <div
           className="pointer-events-none absolute left-1/2 z-[1] -translate-x-1/2"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={introComplete ? { opacity: 1, scale: 1 } : undefined}
-          transition={{ duration: 2, delay: 0, ease: [0.16, 1, 0.3, 1] }}
           style={{
             width: isMobile ? '22rem' : '56rem',
             height: isMobile ? '22rem' : '56rem',
             top: isMobile ? '22%' : '10%',
           }}
         >
-          {/* Globe glow — no blur filter, just a large soft gradient */}
           <div className="absolute inset-[-18%] rounded-full bg-[radial-gradient(ellipse,rgba(22,104,255,0.1),rgba(236,72,153,0.05)_40%,transparent_65%)]" />
-
-          <svg
-            viewBox={`${-vb} ${-vb} ${vb * 2} ${vb * 2}`}
-            className="h-full w-full overflow-visible"
-          >
+          <svg viewBox={`${-vb} ${-vb} ${vb * 2} ${vb * 2}`} className="h-full w-full">
             <defs>
               <linearGradient id="hero-land-wire" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#1668ff" />
@@ -318,131 +219,53 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
                 <stop offset="70%" stopColor="#a855f7" />
                 <stop offset="100%" stopColor="#ec4899" />
               </linearGradient>
-              <linearGradient id="hero-arc-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#60a5fa" />
-                <stop offset="100%" stopColor="#f472b6" />
-              </linearGradient>
               <radialGradient id="hero-globe-fill" cx="38%" cy="35%" r="65%">
                 <stop offset="0%" stopColor="rgba(30,64,140,0.08)" />
                 <stop offset="60%" stopColor="rgba(15,25,60,0.03)" />
                 <stop offset="100%" stopColor="transparent" />
               </radialGradient>
             </defs>
-
-            {/* Globe sphere */}
             <circle r={globeScale} fill="url(#hero-globe-fill)" stroke="rgba(59,130,246,0.15)" strokeWidth="1.2" />
-
-            {/* Graticule grid */}
-            <path ref={graticuleRef} d={graticulePath} fill="none" stroke="rgba(59,130,246,0.07)" strokeWidth="0.5" />
-
-            {/* Land — wireframe dotted style */}
-            <path ref={landRef} d={landPath} fill="rgba(59,130,246,0.03)" stroke="url(#hero-land-wire)" strokeWidth="0.7" strokeDasharray="3 5" opacity="0.5" />
-            <path ref={landWireRef} d={landPath} fill="none" stroke="url(#hero-land-wire)" strokeWidth="1.2" opacity="0.25" />
-
-            {/* Route arcs between events */}
-            <g ref={arcsGroupRef}>
-              {arcPaths.map((arc) => (
-                <path
-                  key={arc.id}
-                  d={arc.d}
-                  fill="none"
-                  stroke="url(#hero-arc-grad)"
-                  strokeWidth="1.4"
-                  strokeDasharray="6 8"
-                  opacity="0.35"
-                  style={{ animation: reducedMotion ? 'none' : 'hero-dash-flow 5s linear infinite' }}
-                />
-              ))}
-            </g>
-
-            {/* Event location dots */}
-            <g ref={dotsGroupRef}>
-              {projectedDots.map((dot, i) => (
-                <g key={dot.id}>
-                  <circle cx={dot.x} cy={dot.y} r="14" fill="rgba(236,72,153,0.22)" opacity="0.35" style={{ animation: `hero-pulse ${3 + i * 0.5}s ease-in-out infinite` }} />
-                  <circle cx={dot.x} cy={dot.y} r="4" fill="#ec4899" />
-                  <circle cx={dot.x} cy={dot.y} r="7" fill="none" stroke="rgba(236,72,153,0.5)" strokeWidth="1" />
-                </g>
-              ))}
-            </g>
+            <path d={graticulePath} fill="none" stroke="rgba(59,130,246,0.07)" strokeWidth="0.5" />
+            <path d={landPath} fill="rgba(59,130,246,0.03)" stroke="url(#hero-land-wire)" strokeWidth="0.7" strokeDasharray="3 5" opacity="0.5" />
+            <path d={landPath} fill="none" stroke="url(#hero-land-wire)" strokeWidth="1.2" opacity="0.25" />
+            {projectedDots.map((dot) => (
+              <g key={dot.id}>
+                <circle cx={dot.x} cy={dot.y} r="4" fill="#ec4899" />
+                <circle cx={dot.x} cy={dot.y} r="7" fill="none" stroke="rgba(236,72,153,0.5)" strokeWidth="1" />
+              </g>
+            ))}
           </svg>
-        </motion.div>
+        </div>
 
-        {/* ── Header content (centered, above globe) ── */}
+        {/* ── Header content ── */}
         <div className="relative z-10 px-6 pb-10 pt-16 text-center sm:pb-8 sm:pt-12 lg:pt-16">
-          {/* Badge pill */}
-          <motion.div
-            initial={reducedMotion ? false : { opacity: 0, y: 20, scale: 0.95 }}
-            animate={introComplete ? { opacity: 1, y: 0, scale: 1 } : undefined}
-            transition={{ duration: 1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          <div
+            className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 shadow-[0_20px_50px_-30px_rgba(0,0,60,0.5)]"
+            style={{ borderColor: 'rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.07)' }}
           >
-            <div
-              className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 shadow-[0_20px_50px_-30px_rgba(0,0,60,0.5)]"
-              style={{
-                borderColor: 'rgba(255,255,255,0.15)',
-                background: 'rgba(255,255,255,0.07)',
-              }}
-            >
-              <span
-                className="h-2.5 w-2.5 shrink-0 rounded-full bg-cyan-400 shadow-[0_0_0_6px_rgba(34,211,238,0.18)]"
-                style={{ animation: 'hero-pulse 3s ease-in-out infinite' }}
-              />
-              <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/70 sm:text-[11px] sm:tracking-[0.26em]">
-                Private Investigator Events Calendar
-              </span>
-            </div>
-          </motion.div>
+            <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-cyan-400 shadow-[0_0_0_6px_rgba(34,211,238,0.18)]" />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/70 sm:text-[11px] sm:tracking-[0.26em]">
+              Private Investigator Events Calendar
+            </span>
+          </div>
 
-          {/* Heading */}
-          <motion.h1
-            className="mx-auto mt-8 max-w-[10ch] text-5xl font-bold leading-[0.9] tracking-[-0.06em] text-white sm:mt-7 sm:text-[4.5rem] sm:leading-[0.86] lg:mt-8 lg:text-[7.5rem]"
-            initial={reducedMotion ? false : { opacity: 0, y: 30 }}
-            animate={introComplete ? { opacity: 1, y: 0 } : undefined}
-            transition={{
-              duration: 1.2,
-              delay: 0.3,
-              ease: [0.16, 1, 0.3, 1],
-            }}
-          >
+          <h1 className="mx-auto mt-8 max-w-[10ch] text-5xl font-bold leading-[0.9] tracking-[-0.06em] text-white sm:mt-7 sm:text-[4.5rem] sm:leading-[0.86] lg:mt-8 lg:text-[7.5rem]">
             <span
               className="inline-block bg-[linear-gradient(92deg,#3b82f6_0%,#22d3ee_30%,#a855f7_65%,#ec4899_100%)] bg-[length:200%_100%] bg-clip-text text-transparent"
-              style={{
-                animation: reducedMotion
-                  ? 'none'
-                  : 'gradient-text-cycle 5s ease-in-out infinite',
-              }}
+              style={{ animation: 'gradient-text-cycle 5s ease-in-out infinite' }}
             >
               Never
             </span>{' '}
             Miss Another Investigator Event
-          </motion.h1>
+          </h1>
 
-          {/* Description */}
-          <motion.p
-            className="mx-auto mt-7 max-w-md text-base leading-[1.65] text-blue-100/55 sm:mt-6 sm:max-w-xl sm:text-lg"
-            initial={reducedMotion ? false : { opacity: 0, y: 20 }}
-            animate={introComplete ? { opacity: 1, y: 0 } : undefined}
-            transition={{
-              duration: 1,
-              delay: 0.6,
-              ease: [0.16, 1, 0.3, 1],
-            }}
-          >
+          <p className="mx-auto mt-7 max-w-md text-base leading-[1.65] text-blue-100/55 sm:mt-6 sm:max-w-xl sm:text-lg">
             Every confirmed conference, AGM, and training event for private
             investigators — free to browse, free to list.
-          </motion.p>
+          </p>
 
-          {/* CTA buttons */}
-          <motion.div
-            className="mt-10 flex flex-col items-center gap-3.5 sm:mt-8 sm:flex-row sm:justify-center sm:gap-3"
-            initial={reducedMotion ? false : { opacity: 0, y: 20 }}
-            animate={introComplete ? { opacity: 1, y: 0 } : undefined}
-            transition={{
-              duration: 1,
-              delay: 0.85,
-              ease: [0.16, 1, 0.3, 1],
-            }}
-          >
+          <div className="mt-10 flex flex-col items-center gap-3.5 sm:mt-8 sm:flex-row sm:justify-center sm:gap-3">
             <Link href="/calendar">
               <ShinyButton className="min-h-[3.5rem] w-full px-8 py-3.5 text-[15px] sm:w-auto sm:px-10 sm:py-4 sm:text-base">Browse PI Events</ShinyButton>
             </Link>
@@ -452,46 +275,23 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
             >
               Submit Your Event
             </Link>
-          </motion.div>
+          </div>
 
-          {/* Stats row */}
-          <motion.div
-            className="mx-auto mt-10 grid max-w-md grid-cols-3 gap-3 sm:mt-10 sm:max-w-md sm:gap-3"
-            initial={reducedMotion ? false : { opacity: 0, y: 20 }}
-            animate={introComplete ? { opacity: 1, y: 0 } : undefined}
-            transition={{
-              duration: 1,
-              delay: 1.1,
-              ease: [0.16, 1, 0.3, 1],
-            }}
-          >
+          <div className="mx-auto mt-10 grid max-w-md grid-cols-3 gap-3">
             {stats.map((item, index) => {
-              const colors = [
-                'from-cyan-400 to-blue-400',
-                'from-violet-400 to-purple-400',
-                'from-pink-400 to-rose-400',
-              ];
+              const colors = ['from-cyan-400 to-blue-400', 'from-violet-400 to-purple-400', 'from-pink-400 to-rose-400'];
               return (
                 <div
                   key={item.label}
-                  className="rounded-[1.2rem] border px-3 py-4 text-center sm:rounded-[1.4rem] sm:px-4 sm:py-4"
-                  style={{
-                    borderColor: 'rgba(255,255,255,0.1)',
-                    background: 'rgba(255,255,255,0.05)',
-                  }}
+                  className="rounded-[1.2rem] border px-3 py-4 text-center sm:rounded-[1.4rem] sm:px-4"
+                  style={{ borderColor: 'rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)' }}
                 >
-                  <p className="truncate text-[9px] font-semibold uppercase tracking-[0.16em] text-blue-100/60 sm:text-[10px] sm:tracking-[0.2em]">
-                    {item.label}
-                  </p>
-                  <p
-                    className={`mt-1.5 bg-gradient-to-r ${colors[index % 3]} bg-clip-text text-2xl font-bold tracking-tight text-transparent sm:mt-1.5 sm:text-[1.8rem]`}
-                  >
-                    {item.value}
-                  </p>
+                  <p className="truncate text-[9px] font-semibold uppercase tracking-[0.16em] text-blue-100/60 sm:text-[10px] sm:tracking-[0.2em]">{item.label}</p>
+                  <p className={`mt-1.5 bg-gradient-to-r ${colors[index % 3]} bg-clip-text text-2xl font-bold tracking-tight text-transparent sm:text-[1.8rem]`}>{item.value}</p>
                 </div>
               );
             })}
-          </motion.div>
+          </div>
         </div>
 
         {/* ── iPad device mockup — static, no scroll hooks ── */}

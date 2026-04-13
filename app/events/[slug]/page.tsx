@@ -13,6 +13,8 @@ import { EventCommunityTabs } from '@/components/EventCommunityTabs';
 import { AttendeeAvatars } from '@/components/AttendeeAvatars';
 import { StickyGoingBar } from '@/components/StickyGoingBar';
 import { EventShareButtons } from '@/components/EventShareButtons';
+import { InlineAdminEdit } from '@/components/admin/InlineAdminEdit';
+import { hasValidAdminSessionCookie } from '@/lib/admin/session';
 
 export const dynamic = 'force-dynamic';
 
@@ -57,6 +59,7 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
   if (!slug) notFound();
   const { event, events } = await resolveEvent(slug);
   if (!event) notFound();
+  const isAdmin = hasValidAdminSessionCookie();
 
   const category = event.category ?? 'Event';
   const region = event.region ?? 'Global';
@@ -274,6 +277,27 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
 
       {/* Sticky mobile "I'm going" bar */}
       <StickyGoingBar eventId={event.id} eventTitle={title} />
+
+      {/* Admin inline edit — only visible when admin session is active */}
+      {isAdmin && (
+        <InlineAdminEdit
+          eventId={event.id}
+          initialData={{
+            title,
+            date: event.date,
+            endDate: event.endDate,
+            city,
+            country,
+            region,
+            organiser: event.organiser,
+            association: event.association,
+            category,
+            description: event.description,
+            website: event.website,
+            featured: event.featured,
+          }}
+        />
+      )}
     </section>
   );
 }

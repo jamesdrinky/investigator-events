@@ -144,14 +144,16 @@ export function Navbar() {
         <div className="mx-auto flex min-h-[3.25rem] max-w-7xl items-center gap-2 px-4 py-1.5 sm:min-h-[4rem] sm:gap-2 sm:px-5 md:min-h-[4.75rem] md:gap-3 md:py-0 lg:px-6">
           {/* Logo */}
           <Link href="/" onClick={() => handleNavigation('/')} className="group flex shrink-0 items-center gap-2.5 sm:gap-3">
-            <Image
-              src="/logo/ielogo1.PNG"
-              alt="Investigator Events"
-              width={48}
-              height={48}
-              priority
-              className="h-9 w-9 shrink-0 rounded-full object-cover shadow-sm sm:h-10 sm:w-10 md:h-11 md:w-11 scale-[1.15]"
-            />
+            <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full shadow-sm sm:h-10 sm:w-10 md:h-11 md:w-11">
+              <Image
+                src="/logo/ielogo1.PNG"
+                alt="Investigator Events"
+                width={48}
+                height={48}
+                priority
+                className="h-full w-full scale-[1.35] object-cover"
+              />
+            </div>
             <div className="hidden sm:block">
               <p className={`whitespace-nowrap text-[11px] font-semibold tracking-[0.14em] sm:text-[13px] sm:tracking-[0.16em] ${isDark ? 'text-white' : 'text-slate-950'}`}>INVESTIGATOR EVENTS</p>
               <p className={`hidden whitespace-nowrap text-[10px] uppercase tracking-[0.14em] md:block ${isDark ? 'text-white/40' : 'text-slate-500'}`}>Global event discovery</p>
@@ -288,7 +290,9 @@ export function Navbar() {
         {/* Top bar with logo + close */}
         <div className="flex items-center justify-between px-6 py-4">
           <Link href="/" onClick={() => handleNavigation('/')} className="flex items-center gap-2.5">
-            <Image src="/logo/ielogo1.PNG" alt="Investigator Events" width={40} height={40} className="h-9 w-9 rounded-full object-cover scale-[1.15]" />
+            <div className="h-9 w-9 overflow-hidden rounded-full">
+              <Image src="/logo/ielogo1.PNG" alt="Investigator Events" width={40} height={40} className="h-full w-full scale-[1.35] object-cover" />
+            </div>
           </Link>
           <button
             type="button"

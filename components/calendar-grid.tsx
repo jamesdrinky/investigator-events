@@ -129,6 +129,8 @@ export function CalendarGrid({ events, monthKey, selectedDate, onSelectDate }: C
   const [year, month] = monthKey.split('-').map(Number);
   const weeks = buildWeekCells(year, month);
   const [hoveredCell, setHoveredCell] = useState<string | null>(null);
+  const [pinnedCell, setPinnedCell] = useState<string | null>(null);
+  const activeCell = pinnedCell || hoveredCell;
   const cellRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const desktopCells = weeks.map((week) =>
@@ -143,11 +145,18 @@ export function CalendarGrid({ events, monthKey, selectedDate, onSelectDate }: C
     .map((cell) => ({ ...cell, dayEvents: getEventsForDate(events, cell.iso) }))
     .filter((cell) => cell.dayEvents.length > 0);
 
-  // Close overlay on scroll
+  // Close overlay on scroll or click outside
   useEffect(() => {
-    const handler = () => setHoveredCell(null);
-    window.addEventListener('scroll', handler, { passive: true });
-    return () => window.removeEventListener('scroll', handler);
+    const scrollHandler = () => { setHoveredCell(null); setPinnedCell(null); };
+    const clickHandler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('[data-clash-overlay]') && !target.closest('[data-clash-cell]')) {
+        setPinnedCell(null);
+      }
+    };
+    window.addEventListener('scroll', scrollHandler, { passive: true });
+    document.addEventListener('mousedown', clickHandler);
+    return () => { window.removeEventListener('scroll', scrollHandler); document.removeEventListener('mousedown', clickHandler); };
   }, []);
 
   return (
@@ -224,7 +233,7 @@ export function CalendarGrid({ events, monthKey, selectedDate, onSelectDate }: C
                 const hasEvents = cell.dayEvents.length > 0;
                 const today = cell.inMonth && isToday(cell.iso);
                 const isClash = cell.dayEvents.length >= 2;
-                const isHovered = hoveredCell === cell.iso;
+                const isHovered = activeCell === cell.iso;
                 const leadEvent = cell.dayEvents[0] ?? null;
                 const leadImage = leadEvent ? getEventImage(leadEvent) : null;
                 const singleEvent = cell.dayEvents.length === 1;
@@ -320,10 +329,18 @@ export function CalendarGrid({ events, monthKey, selectedDate, onSelectDate }: C
                   <div
                     key={`${wi}-${di}`}
                     className="relative"
+                    data-clash-cell
+                    onClick={() => {
+                      if (isClash) {
+                        setPinnedCell((prev) => prev === cell.iso ? null : cell.iso);
+                      }
+                    }}
                     onMouseLeave={(e) => {
                       // Don't close if mouse moved to the clash overlay
                       const related = e.relatedTarget as HTMLElement | null;
                       if (related?.closest?.('[data-clash-overlay]')) return;
+                      // Don't close hover if pinned
+                      if (pinnedCell === cell.iso) return;
                       // Delay to allow mouse to reach overlay
                       setTimeout(() => {
                         setHoveredCell((current) => current === cell.iso ? null : current);
@@ -348,15 +365,15 @@ export function CalendarGrid({ events, monthKey, selectedDate, onSelectDate }: C
 
       {/* ── Clash overlay (fixed, no page movement) ── */}
       <AnimatePresence>
-        {hoveredCell && (() => {
-          const cellData = desktopCells.flat().find((c) => c.iso === hoveredCell);
+        {activeCell && (() => {
+          const cellData = desktopCells.flat().find((c) => c.iso === activeCell);
           if (!cellData || cellData.dayEvents.length < 2) return null;
           return (
             <ClashOverlay
-              key={hoveredCell}
+              key={activeCell}
               events={cellData.dayEvents}
-              anchorRef={{ current: cellRefs.current[hoveredCell] ?? null }}
-              onDismiss={() => setHoveredCell(null)}
+              anchorRef={{ current: cellRefs.current[activeCell] ?? null }}
+              onDismiss={() => { setHoveredCell(null); setPinnedCell(null); }}
             />
           );
         })()}

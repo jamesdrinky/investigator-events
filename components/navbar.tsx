@@ -183,10 +183,10 @@ export function Navbar() {
                   key={item.href}
                   href={item.href}
                   onClick={() => handleNavigation(item.href)}
-                  className={`rounded-full px-3 py-1.5 text-[13px] font-semibold transition-all duration-300 ${
+                  className={`relative rounded-full px-3 py-1.5 text-[13px] font-semibold transition-all duration-300 hover:-translate-y-[1px] ${
                     isDark
-                      ? (active ? 'bg-white/15 text-white shadow-[0_0_12px_rgba(255,255,255,0.15)]' : 'text-white/50 hover:bg-white/8 hover:text-white hover:shadow-[0_0_16px_rgba(255,255,255,0.12)]')
-                      : (active ? 'bg-slate-900 text-white shadow-[0_0_16px_rgba(15,23,42,0.25)]' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]')
+                      ? (active ? 'bg-white/15 text-white shadow-[0_0_18px_rgba(34,211,238,0.25),0_0_6px_rgba(255,255,255,0.1)]' : 'text-white/50 hover:bg-white/8 hover:text-white hover:shadow-[0_0_22px_rgba(34,211,238,0.2),0_0_8px_rgba(255,255,255,0.08)]')
+                      : (active ? 'bg-slate-900 text-white shadow-[0_4px_20px_-4px_rgba(59,130,246,0.4),0_0_10px_rgba(99,102,241,0.15)]' : 'text-slate-600 hover:bg-white hover:text-slate-900 hover:shadow-[0_4px_24px_-4px_rgba(59,130,246,0.3),0_0_12px_rgba(99,102,241,0.1)]')
                   }`}
                 >
                   {item.label}

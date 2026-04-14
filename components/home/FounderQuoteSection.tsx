@@ -95,7 +95,7 @@ export function FounderQuoteSection() {
                   <div className="text-center lg:text-left">
                     <p className="eyebrow">Founder&apos;s Note</p>
                     <blockquote className="mt-6 text-[1.8rem] font-semibold leading-[1.32] tracking-[-0.025em] text-slate-950 lg:text-[2.2rem] lg:leading-[1.28]">
-                      &ldquo;I have spent my career in this industry and I still get a buzz walking into a room full of investigators. It has given me everything. The problem was never a lack of good events. It was that nobody could see them all in one place.&rdquo;
+                      &ldquo;I have spent my career in this industry and I still get a buzz walking into a room full of investigators. The problem was never a lack of good events. It was that nobody could see them all in one place.&rdquo;
                     </blockquote>
                     <div className="mt-8">
                       <p className="text-lg font-semibold text-slate-950">Mike LaCorte</p>

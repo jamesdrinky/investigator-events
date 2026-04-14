@@ -189,6 +189,20 @@ export function AuthPage({
                     </button>
                   </div>
                 </GlassInput>
+                {!isSignUp && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!email) { alert('Enter your email first'); return; }
+                      const supabase = (await import('@/lib/supabase/browser')).createSupabaseBrowserClient();
+                      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/profile/edit' });
+                      if (error) { alert(error.message); } else { alert('Password reset link sent to your email'); }
+                    }}
+                    className="mt-1 self-end text-xs font-medium text-blue-600 hover:underline"
+                  >
+                    Forgot password?
+                  </button>
+                )}
               </div>
 
               {isSignUp && (

@@ -15,6 +15,7 @@ const desktopNavItems: Array<{ href: Route; label: string }> = [
   { href: '/calendar', label: 'Events' },
   { href: '/associations', label: 'Associations' },
   { href: '/people', label: 'Forum' },
+  { href: '/submit-event', label: 'Submit Event' },
   { href: '/advice', label: 'Advice' },
   { href: '/about', label: 'About' }
 ];

@@ -274,16 +274,6 @@ export const associationRecords: AssociationRecord[] = [
     logoFileName: 'apdu.png'
   },
   {
-    slug: 'codpc',
-    shortName: 'CODPC',
-    name: 'CODPC',
-    country: 'France',
-    region: 'Europe',
-    website: 'https://www.codpc.fr',
-    aliases: ['CODPC'],
-    logoFileName: 'codpc.png'
-  },
-  {
     slug: 'fapi',
     shortName: 'FAPI',
     name: 'FAPI',

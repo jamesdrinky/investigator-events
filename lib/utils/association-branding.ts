@@ -45,7 +45,6 @@ const associationBrandingRecords: AssociationBrandingRecord[] = [
   { name: 'Intellenet', shortName: 'Intellenet', aliases: ['Intellenet', 'INTELLENET'], logoFileName: 'intellenet.png' },
   { name: 'APDPE', shortName: 'APDPE', aliases: ['APDPE'], logoFileName: 'apdpe.png' },
   { name: 'APDU', shortName: 'APDU', aliases: ['APDU'], logoFileName: 'apdu.png' },
-  { name: 'CODPC', shortName: 'CODPC', aliases: ['CODPC'], logoFileName: 'codpc.png' },
   { name: 'FAPI', shortName: 'FAPI', aliases: ['FAPI'], logoFileName: 'fapi.png' },
   { name: 'FSPD', shortName: 'FSPD', aliases: ['FSPD'], logoFileName: 'fspd.png' },
   { name: 'IAIACE', shortName: 'IAIACE', aliases: ['IAIACE'], logoFileName: 'iaiace.png' },

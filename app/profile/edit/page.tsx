@@ -37,7 +37,7 @@ const PROFILE_BADGES = [
 const ALL_ASSOCIATIONS = [
   'ABI','WAD','IKD','CII','Intellenet','FEDERPOL','BuDEG','SNARP','EURODET','ODV','CKDS','FDDE',
   'SYL','IBPI','NFES','PSLD','LIDEPPE','ANDR','PDPR','ARD','SAD','DZRS','HDA',
-  'APDPE','APDU','CODPC','FAPI','FSPD','IAIACE','SFPP','CALI','FALI','FEWA','NCAPI','NCISS','TALI',
+  'APDPE','APDU','FAPI','FSPD','IAIACE','SFPP','CALI','FALI','FEWA','NCAPI','NCISS','TALI',
 ];
 
 type UserAssociation = { id?: string; association_name: string; association_slug: string; role: string; member_since: string };

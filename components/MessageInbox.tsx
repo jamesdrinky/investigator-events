@@ -164,9 +164,10 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
       setMessages((prev) => [...prev, data as unknown as Message]);
       setNewMsg('');
       loadConversations();
-      // Scroll to bottom after sending
+      // Scroll message container to bottom after sending
       setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        const container = messagesContainerRef.current;
+        if (container) container.scrollTop = container.scrollHeight;
       }, 50);
     }
     setSending(false);

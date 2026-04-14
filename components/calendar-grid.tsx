@@ -301,10 +301,15 @@ export function CalendarGrid({ events, monthKey, selectedDate, onSelectDate }: C
                         {hasEvents && (
                           <div className="mt-1.5 flex-1 space-y-1">
                             {cell.dayEvents.slice(0, 2).map((e) => (
-                              <div key={e.id} className={`rounded-md px-1.5 py-1 transition-all duration-300 ${isHovered ? 'bg-white/15' : 'bg-slate-50/80'}`}>
+                              <Link
+                                key={e.id}
+                                href={`/events/${getEventSlug(e)}`}
+                                onClick={(ev) => ev.stopPropagation()}
+                                className={`block rounded-md px-1.5 py-1 transition-all duration-300 ${isHovered ? 'bg-white/15 hover:bg-white/25' : 'bg-slate-50/80 hover:bg-slate-100'}`}
+                              >
                                 <p className={`truncate text-[10px] font-semibold leading-tight transition-colors duration-300 ${isHovered ? 'text-white' : 'text-slate-800'}`}>{e.title}</p>
                                 <p className={`truncate text-[9px] transition-colors duration-300 ${isHovered ? 'text-white/60' : 'text-slate-400'}`}>{e.city}</p>
-                              </div>
+                              </Link>
                             ))}
                             {cell.dayEvents.length > 2 && (
                               <p className={`px-1.5 text-[9px] font-medium ${isHovered ? 'text-white/50' : 'text-blue-500'}`}>+{cell.dayEvents.length - 2} more</p>

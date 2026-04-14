@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Reveal } from '@/components/motion/reveal';
 import { CalendarView } from '@/components/calendar-view';
+import { MyEventsPanel } from '@/components/MyEventsPanel';
 import { SpinningLogoRings } from '@/components/calendar/spinning-logo-rings';
 import { ExpandingEventCards, type ExpandingEventItem } from '@/components/home/ExpandingEventCards';
 import { fetchAllEvents } from '@/lib/data/events';
@@ -97,8 +98,13 @@ export default async function CalendarPage({
         </div>
       </div>
 
+      {/* ── My Events (logged in only) ── */}
+      <div className="container-shell relative pt-8 sm:pt-12">
+        <MyEventsPanel />
+      </div>
+
       {/* ── Calendar content ── */}
-      <div className="container-shell relative py-8 sm:py-12">
+      <div className="container-shell relative pb-8 sm:pb-12">
         <CalendarView
           events={events}
           initialAssociation={initialAssociation}

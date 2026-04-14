@@ -12,7 +12,7 @@ import { FilterBar } from '@/components/filter-bar';
 import type { EventItem } from '@/lib/data/events';
 import { formatEventDate, formatMonthLabel, getMonthKey, parseDate, sortEventsByDate } from '@/lib/utils/date';
 import { getEventSlug } from '@/lib/utils/event-slugs';
-import { getAssociationBrandLogoSrc } from '@/lib/utils/association-branding';
+import { getAssociationBrandLogoSrc, shouldInvertLogoOnLight } from '@/lib/utils/association-branding';
 import { EventCardAttendees } from '@/components/EventCardAttendees';
 
 interface CalendarViewProps {
@@ -96,6 +96,7 @@ function MonthEventStrip({ events, label, countryCount }: { events: EventItem[];
       <div ref={scrollRef} className="flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
         {events.map((event) => {
           const logoSrc = getAssociationBrandLogoSrc(event.association ?? event.organiser);
+          const invertLogo = shouldInvertLogoOnLight(event.association ?? event.organiser);
           const imageSrc = (event.image_path && /^(\/(cities|events|images)\/|https?:\/\/)/.test(event.image_path) ? event.image_path : event.coverImage) ?? '/cities/fallback.jpg';
 
           return (
@@ -112,7 +113,7 @@ function MonthEventStrip({ events, label, countryCount }: { events: EventItem[];
                 {/* Association logo — top-left */}
                 {logoSrc ? (
                   <div className="absolute left-2.5 top-2.5 flex h-10 w-10 items-center justify-center rounded-lg border border-white/30 bg-white/90 p-1.5 shadow-md sm:h-12 sm:w-12 sm:p-2">
-                    <Image src={logoSrc} alt="" width={40} height={40} className="h-auto max-h-7 w-auto max-w-7 object-contain sm:max-h-8 sm:max-w-8" />
+                    <Image src={logoSrc} alt="" width={40} height={40} className={`h-auto max-h-7 w-auto max-w-7 object-contain sm:max-h-8 sm:max-w-8 ${invertLogo ? 'brightness-0' : ''}`} />
                   </div>
                 ) : null}
 

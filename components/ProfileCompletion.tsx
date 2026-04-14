@@ -22,7 +22,18 @@ interface ProfileCompletionProps {
 export function ProfileCompletion({ steps: initialSteps, userEmail }: ProfileCompletionProps) {
   const [steps, setSteps] = useState(initialSteps);
   const [subscribing, setSubscribing] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('ie_profile_completion_collapsed') === '1';
+  });
+
+  const toggleCollapsed = () => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem('ie_profile_completion_collapsed', next ? '1' : '0');
+      return next;
+    });
+  };
 
   const completed = steps.filter((s) => s.done).length;
   const total = steps.length;
@@ -54,7 +65,7 @@ export function ProfileCompletion({ steps: initialSteps, userEmail }: ProfileCom
     <div className="rounded-2xl border border-slate-200/60 bg-white shadow-sm">
       <div className="p-5 sm:p-6">
         {/* Progress header — clickable to collapse */}
-        <button type="button" onClick={() => setCollapsed((c) => !c)} className="flex w-full items-center justify-between text-left">
+        <button type="button" onClick={toggleCollapsed} className="flex w-full items-center justify-between text-left">
           <div>
             <h3 className="text-sm font-bold text-slate-900">Profile strength</h3>
             <p className="mt-0.5 text-xs text-slate-400">{completed} of {total} steps completed</p>

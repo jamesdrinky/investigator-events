@@ -41,7 +41,7 @@ export function EventReview({ eventId, isPast }: { eventId: string; isPast: bool
   useEffect(() => {
     if (userId) {
       const supabase = createSupabaseBrowserClient();
-      supabase.from('event_reviews').select('id').eq('event_id', eventId).eq('user_id', userId).single()
+      supabase.from('event_reviews').select('id').eq('event_id', eventId).eq('user_id', userId).maybeSingle()
         .then(({ data }) => setHasReviewed(!!data));
     }
   }, [userId, eventId]);

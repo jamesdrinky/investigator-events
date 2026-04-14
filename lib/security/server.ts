@@ -83,9 +83,10 @@ export function assertSameOriginRequest() {
     throw new Error('Missing host');
   }
 
-  const originHost = new URL(origin).host;
+  const originHost = new URL(origin).host.replace(/^www\./, '');
+  const normalizedHost = host.replace(/^www\./, '');
 
-  if (originHost !== host) {
+  if (originHost !== normalizedHost) {
     throw new Error('Invalid origin');
   }
 }

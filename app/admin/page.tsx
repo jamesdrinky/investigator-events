@@ -231,23 +231,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                 <h2 className="text-lg font-bold text-slate-900">Quick Add</h2>
                 <p className="mt-1 text-sm text-slate-500">Paste text from any association website to extract event details, or browse association events pages directly.</p>
                 <div className="mt-4">
-                  <QuickAddEvent onAdd={(data) => {
-                    // Pre-fill the create form below by setting input values
-                    const setVal = (name: string, val: string) => {
-                      const el = document.querySelector(`#create-${name}`) as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null;
-                      if (el) { el.value = val; el.dispatchEvent(new Event('input', { bubbles: true })); }
-                    };
-                    if (data.title) setVal('title', data.title);
-                    if (data.startDate) setVal('date', data.startDate);
-                    if (data.endDate) setVal('end-date', data.endDate);
-                    if (data.city) setVal('city', data.city);
-                    if (data.association) setVal('association', data.association);
-                    if (data.organiser) setVal('organiser', data.organiser);
-                    if (data.website) setVal('website', data.website);
-                    if (data.description) setVal('description', data.description);
-                    // Scroll to the form
-                    document.querySelector('#create-title')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  }} />
+                  <QuickAddEvent />
                 </div>
               </div>
 

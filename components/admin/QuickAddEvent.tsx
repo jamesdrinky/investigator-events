@@ -114,11 +114,7 @@ function parseText(raw: string): Partial<ParsedEvent> {
   };
 }
 
-interface QuickAddEventProps {
-  onAdd: (data: Partial<ParsedEvent>) => void;
-}
-
-export function QuickAddEvent({ onAdd }: QuickAddEventProps) {
+export function QuickAddEvent() {
   const [raw, setRaw] = useState('');
   const [parsed, setParsed] = useState<Partial<ParsedEvent> | null>(null);
   const [showAssocLinks, setShowAssocLinks] = useState(false);
@@ -130,11 +126,22 @@ export function QuickAddEvent({ onAdd }: QuickAddEventProps) {
   };
 
   const handleUse = () => {
-    if (parsed) {
-      onAdd(parsed);
-      setRaw('');
-      setParsed(null);
-    }
+    if (!parsed) return;
+    const setVal = (name: string, val: string) => {
+      const el = document.querySelector(`#create-${name}`) as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null;
+      if (el) { el.value = val; el.dispatchEvent(new Event('input', { bubbles: true })); }
+    };
+    if (parsed.title) setVal('title', parsed.title);
+    if (parsed.startDate) setVal('date', parsed.startDate);
+    if (parsed.endDate) setVal('end-date', parsed.endDate);
+    if (parsed.city) setVal('city', parsed.city);
+    if (parsed.association) setVal('association', parsed.association);
+    if (parsed.organiser) setVal('organiser', parsed.organiser);
+    if (parsed.website) setVal('website', parsed.website);
+    if (parsed.description) setVal('description', parsed.description);
+    document.querySelector('#create-title')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setRaw('');
+    setParsed(null);
   };
 
   return (

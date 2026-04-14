@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { Check, ArrowRight } from 'lucide-react';
+import { Check, ArrowRight, ChevronDown } from 'lucide-react';
 
 interface Step {
   id: string;
@@ -22,6 +22,7 @@ interface ProfileCompletionProps {
 export function ProfileCompletion({ steps: initialSteps, userEmail }: ProfileCompletionProps) {
   const [steps, setSteps] = useState(initialSteps);
   const [subscribing, setSubscribing] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   const completed = steps.filter((s) => s.done).length;
   const total = steps.length;
@@ -52,28 +53,31 @@ export function ProfileCompletion({ steps: initialSteps, userEmail }: ProfileCom
   return (
     <div className="rounded-2xl border border-slate-200/60 bg-white shadow-sm">
       <div className="p-5 sm:p-6">
-        {/* Progress header */}
-        <div className="flex items-center justify-between">
+        {/* Progress header — clickable to collapse */}
+        <button type="button" onClick={() => setCollapsed((c) => !c)} className="flex w-full items-center justify-between text-left">
           <div>
             <h3 className="text-sm font-bold text-slate-900">Profile strength</h3>
             <p className="mt-0.5 text-xs text-slate-400">{completed} of {total} steps completed</p>
           </div>
-          <div className="relative flex h-14 w-14 items-center justify-center">
-            <svg className="h-14 w-14 -rotate-90" viewBox="0 0 56 56">
-              <circle cx="28" cy="28" r="24" fill="none" stroke="#e2e8f0" strokeWidth="4" />
-              <circle
-                cx="28" cy="28" r="24" fill="none"
-                stroke={percentage >= 80 ? '#10b981' : percentage >= 50 ? '#3b82f6' : '#f59e0b'}
-                strokeWidth="4"
-                strokeLinecap="round"
-                strokeDasharray={`${2 * Math.PI * 24}`}
-                strokeDashoffset={`${2 * Math.PI * 24 * (1 - percentage / 100)}`}
-                className="transition-all duration-1000 ease-out"
-              />
-            </svg>
-            <span className="absolute text-sm font-bold text-slate-900">{percentage}%</span>
+          <div className="flex items-center gap-2">
+            <div className="relative flex h-14 w-14 items-center justify-center">
+              <svg className="h-14 w-14 -rotate-90" viewBox="0 0 56 56">
+                <circle cx="28" cy="28" r="24" fill="none" stroke="#e2e8f0" strokeWidth="4" />
+                <circle
+                  cx="28" cy="28" r="24" fill="none"
+                  stroke={percentage >= 80 ? '#10b981' : percentage >= 50 ? '#3b82f6' : '#f59e0b'}
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  strokeDasharray={`${2 * Math.PI * 24}`}
+                  strokeDashoffset={`${2 * Math.PI * 24 * (1 - percentage / 100)}`}
+                  className="transition-all duration-1000 ease-out"
+                />
+              </svg>
+              <span className="absolute text-sm font-bold text-slate-900">{percentage}%</span>
+            </div>
+            <ChevronDown className={`h-5 w-5 text-slate-300 transition-transform duration-300 ${collapsed ? '-rotate-90' : ''}`} />
           </div>
-        </div>
+        </button>
 
         {/* Progress bar */}
         <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
@@ -90,8 +94,8 @@ export function ProfileCompletion({ steps: initialSteps, userEmail }: ProfileCom
           />
         </div>
 
-        {/* Steps */}
-        <div className="mt-4 space-y-1.5">
+        {/* Steps — collapsible */}
+        <div className={`mt-4 space-y-1.5 overflow-hidden transition-all duration-300 ${collapsed ? 'max-h-0 mt-0 opacity-0' : 'max-h-[600px] opacity-100'}`}>
           {steps.map((step) => (
             <div key={step.id} className={`flex items-center gap-3 rounded-xl px-3 py-2 transition ${step.done ? 'opacity-50' : 'hover:bg-slate-50'}`}>
               <div className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full ${
@@ -121,8 +125,8 @@ export function ProfileCompletion({ steps: initialSteps, userEmail }: ProfileCom
           ))}
         </div>
 
-        {/* Next step CTA */}
-        {nextStep && nextStep.id !== 'newsletter' && (
+        {/* Next step CTA — hidden when collapsed */}
+        {!collapsed && nextStep && nextStep.id !== 'newsletter' && (
           <Link href={nextStep.href as Route} className="mt-4 flex items-center justify-between rounded-xl bg-gradient-to-r from-blue-50 to-violet-50 px-4 py-3 transition hover:shadow-sm">
             <div>
               <p className="text-xs font-bold text-slate-900">Next: {nextStep.label}</p>
@@ -131,7 +135,7 @@ export function ProfileCompletion({ steps: initialSteps, userEmail }: ProfileCom
             <ArrowRight className="h-4 w-4 text-blue-600" />
           </Link>
         )}
-        {nextStep && nextStep.id === 'newsletter' && (
+        {!collapsed && nextStep && nextStep.id === 'newsletter' && (
           <button
             onClick={handleNewsletterSubscribe}
             disabled={subscribing}

@@ -30,6 +30,9 @@ const cityImageMap: Record<string, string> = {
   'Texas': 'sanantonio.jpg',
   'Prague': 'budapest.jpg',
   'San Jose': 'beach.jpg',
+  'Casablanca': 'casablanca.avif',
+  'Nashville': 'nashville.avif',
+  'Nashville, TN': 'nashville.avif',
 };
 
 /** Map specific event slugs to event-branded images */

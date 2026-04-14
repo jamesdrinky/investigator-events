@@ -108,7 +108,12 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
       .or(`and(sender_id.eq.${userId},receiver_id.eq.${activeChat}),and(sender_id.eq.${activeChat},receiver_id.eq.${userId})`)
       .order('created_at', { ascending: true })
       .limit(100);
-    setMessages((data ?? []) as unknown as Message[]);
+    const newMessages = (data ?? []) as unknown as Message[];
+    setMessages((prev) => {
+      // Only update if messages actually changed to avoid unnecessary scroll triggers
+      if (prev.length === newMessages.length && prev.every((m, i) => m.id === newMessages[i]?.id)) return prev;
+      return newMessages;
+    });
 
     await supabase.from('messages' as any).update({ is_read: true } as any).eq('sender_id', activeChat).eq('receiver_id', userId).eq('is_read', false);
   }, [userId, activeChat]);

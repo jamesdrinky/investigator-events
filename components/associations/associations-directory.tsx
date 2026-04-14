@@ -144,7 +144,7 @@ export function AssociationsDirectory({ associations }: AssociationsDirectoryPro
                         alt={`${association.name} logo`}
                         width={96}
                         height={96}
-                        className="h-auto max-h-16 w-auto max-w-16 object-contain"
+                        className={`h-auto max-h-16 w-auto max-w-16 object-contain ${association.shortName === 'ABI' ? 'brightness-0' : ''}`}
                       />
                     ) : (
                       <span className="text-base font-bold uppercase tracking-[0.14em] text-slate-400">

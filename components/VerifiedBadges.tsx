@@ -57,11 +57,11 @@ export function VerifiedBadges({ verifications, authProvider, linkedinUrl, size 
       {activeVerifications.map((v) => (
         <span
           key={v.association_name}
-          className={`inline-flex items-center gap-1 rounded-full bg-emerald-50 font-bold text-emerald-700 ${isSm ? 'px-1.5 py-0.5 text-[9px]' : 'px-2.5 py-0.5 text-[10px]'}`}
-          style={{ border: '1px solid rgba(16,185,129,0.2)' }}
+          className={`inline-flex items-center gap-1.5 rounded-full bg-emerald-50 font-bold text-emerald-700 shadow-sm ${isSm ? 'px-2 py-0.5 text-[9px]' : 'px-3 py-1 text-[11px]'}`}
+          style={{ border: '1px solid rgba(16,185,129,0.25)' }}
         >
-          <ShieldCheck className={isSm ? 'h-2.5 w-2.5' : 'h-3 w-3'} />
-          {v.association_name}
+          <ShieldCheck className={isSm ? 'h-2.5 w-2.5' : 'h-3.5 w-3.5'} />
+          {v.association_name} Member
         </span>
       ))}
     </div>

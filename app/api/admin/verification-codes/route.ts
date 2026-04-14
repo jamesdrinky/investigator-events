@@ -14,7 +14,6 @@ function generateCode(prefix: string): string {
 
 // GET — list all codes
 export async function GET() {
-  assertSameOriginRequest();
   if (!hasValidAdminSessionCookie()) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

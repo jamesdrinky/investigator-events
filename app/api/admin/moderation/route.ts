@@ -5,7 +5,6 @@ import { assertSameOriginRequest } from '@/lib/security/server';
 
 // GET — fetch all moderatable content
 export async function GET() {
-  assertSameOriginRequest();
   if (!hasValidAdminSessionCookie()) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

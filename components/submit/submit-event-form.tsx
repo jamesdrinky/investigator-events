@@ -265,6 +265,18 @@ export function SubmitEventForm({
             </div>
           </div>
 
+          {/* Association (optional) */}
+          <div className="flex items-center gap-3 rounded-[1.2rem] border border-slate-200/60 bg-white px-4 py-3 transition-colors hover:border-slate-300">
+            <Building2 className="h-4 w-4 flex-shrink-0 text-slate-400" />
+            <select name="association" defaultValue="" className="flex-1 border-0 bg-transparent text-sm text-slate-900 focus:outline-none">
+              <option value="">Association (optional)</option>
+              {['ABI','WAD','IKD','CII','Intellenet','FEDERPOL','BuDEG','SNARP','EURODET','NCAPI','NCISS','FALI','CALI','TALI','FEWA','NFES','PSLD','LIDEPPE','ANDR','HDA','IBPI','DAF','SYL','FDDE','CKDS','FAPI','FSPD','SFPP','APDPE','APDU','IAIACE','DZRS','SAD','ARD','PDPR'].sort().map((a) => (
+                <option key={a} value={a}>{a}</option>
+              ))}
+              <option value="other">Other (specify in notes)</option>
+            </select>
+          </div>
+
           {/* Organiser + Contact */}
           <div className="flex items-start gap-3 rounded-[1.2rem] border border-slate-200/60 bg-white px-4 py-3 transition-colors hover:border-slate-300">
             <User className="mt-0.5 h-4 w-4 flex-shrink-0 text-slate-400" />

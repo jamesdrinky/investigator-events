@@ -88,7 +88,11 @@ function parseSubmissionData(formData: FormData): Omit<EventSubmissionInsert, 'i
   const contactEmail = parseEmail(formData, 'contactEmail');
   const eventScopeRaw = parseRequired(formData, 'eventScope', 20);
   const endDate = parseDateValue(formData, 'endDate', false);
-  const notes = parseOptional(formData, 'notes', 2000);
+  const association = parseOptional(formData, 'association', 140);
+  const rawNotes = parseOptional(formData, 'notes', 2000);
+  const notes = association && association !== 'other'
+    ? `[Association: ${association}]\n${rawNotes}`.trim()
+    : rawNotes;
   const eventScope = eventScopeRaw === 'secondary' ? 'secondary' : 'main';
 
   if (!regions.has(region as (typeof eventRegions)[number])) {

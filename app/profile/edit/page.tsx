@@ -563,10 +563,10 @@ export default function EditProfilePage() {
                   onChange={(e) => setVerifyAssoc(e.target.value)}
                 >
                   <option value="">Select association</option>
-                  {associations
-                    .filter((a) => verifications[a.association_name]?.status !== 'verified')
-                    .map((a) => (
-                      <option key={a.association_name} value={a.association_name}>{a.association_name}</option>
+                  {ALL_ASSOCIATIONS
+                    .filter((name) => verifications[name]?.status !== 'verified')
+                    .map((name) => (
+                      <option key={name} value={name}>{name}</option>
                     ))}
                 </select>
                 <input

@@ -183,10 +183,10 @@ export function Navbar() {
                   key={item.href}
                   href={item.href}
                   onClick={() => handleNavigation(item.href)}
-                  className={`rounded-full px-3 py-1.5 text-[13px] font-semibold transition-all duration-200 ${
+                  className={`rounded-full px-3 py-1.5 text-[13px] font-semibold transition-all duration-300 ${
                     isDark
-                      ? (active ? 'bg-white/15 text-white' : 'text-white/50 hover:bg-white/8 hover:text-white')
-                      : (active ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900')
+                      ? (active ? 'bg-white/15 text-white shadow-[0_0_12px_rgba(255,255,255,0.15)]' : 'text-white/50 hover:bg-white/8 hover:text-white hover:shadow-[0_0_16px_rgba(255,255,255,0.12)]')
+                      : (active ? 'bg-slate-900 text-white shadow-[0_0_16px_rgba(15,23,42,0.25)]' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]')
                   }`}
                 >
                   {item.label}

@@ -15,6 +15,7 @@ import {
 import { Calendar, Users, FileText, Megaphone, Globe, MapPin, Tag, ExternalLink, CheckCircle2, XCircle, Plus, Trash2, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { VerificationCodeManager } from '@/components/admin/VerificationCodeManager';
 import { ModerationPanel } from '@/components/admin/ModerationPanel';
+import { QuickAddEvent } from '@/components/admin/QuickAddEvent';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 
 export const dynamic = 'force-dynamic';
@@ -224,15 +225,43 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
         <div className="mt-6">
           {/* Create Event */}
           {activeTab === 'overview' && (
-            <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
-              <h2 className="text-lg font-bold text-slate-900">Create New Event</h2>
-              <p className="mt-1 text-sm text-slate-500">Add an event directly to the live calendar.</p>
-              <form action={createEventAction} className="mt-6 space-y-4">
-                <EventFields idPrefix="create" />
-                <button type="submit" className="btn-primary flex items-center gap-2 px-6 py-3 text-sm">
-                  <Plus className="h-4 w-4" /> Create Event
-                </button>
-              </form>
+            <div className="space-y-6">
+              {/* Quick Add — paste and extract */}
+              <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
+                <h2 className="text-lg font-bold text-slate-900">Quick Add</h2>
+                <p className="mt-1 text-sm text-slate-500">Paste text from any association website to extract event details, or browse association events pages directly.</p>
+                <div className="mt-4">
+                  <QuickAddEvent onAdd={(data) => {
+                    // Pre-fill the create form below by setting input values
+                    const setVal = (name: string, val: string) => {
+                      const el = document.querySelector(`#create-${name}`) as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null;
+                      if (el) { el.value = val; el.dispatchEvent(new Event('input', { bubbles: true })); }
+                    };
+                    if (data.title) setVal('title', data.title);
+                    if (data.startDate) setVal('date', data.startDate);
+                    if (data.endDate) setVal('end-date', data.endDate);
+                    if (data.city) setVal('city', data.city);
+                    if (data.association) setVal('association', data.association);
+                    if (data.organiser) setVal('organiser', data.organiser);
+                    if (data.website) setVal('website', data.website);
+                    if (data.description) setVal('description', data.description);
+                    // Scroll to the form
+                    document.querySelector('#create-title')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }} />
+                </div>
+              </div>
+
+              {/* Create Event form */}
+              <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
+                <h2 className="text-lg font-bold text-slate-900">Create New Event</h2>
+                <p className="mt-1 text-sm text-slate-500">Add an event directly to the live calendar.</p>
+                <form action={createEventAction} className="mt-6 space-y-4">
+                  <EventFields idPrefix="create" />
+                  <button type="submit" className="btn-primary flex items-center gap-2 px-6 py-3 text-sm">
+                    <Plus className="h-4 w-4" /> Create Event
+                  </button>
+                </form>
+              </div>
             </div>
           )}
 

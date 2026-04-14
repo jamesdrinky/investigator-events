@@ -44,8 +44,6 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval>>();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const prevMessageCountRef = useRef(0);
-  const isInitialLoadRef = useRef(true);
 
   const supabase = createSupabaseBrowserClient();
 
@@ -119,7 +117,6 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
   }, [userId, activeChat]);
 
   useEffect(() => {
-    isInitialLoadRef.current = true;
     loadMessages();
     if (pollRef.current) clearInterval(pollRef.current);
     if (activeChat) {
@@ -128,28 +125,22 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [loadMessages, activeChat]);
 
-  // Smart scroll: instant on first load, smooth on new messages only
+  // Scroll: only on initial load. After that, user controls scroll.
+  const hasScrolledRef = useRef(false);
   useEffect(() => {
     const container = messagesContainerRef.current;
     if (!container || messages.length === 0) return;
 
-    if (isInitialLoadRef.current) {
-      // First load — jump to bottom instantly
+    if (!hasScrolledRef.current) {
       container.scrollTop = container.scrollHeight;
-      isInitialLoadRef.current = false;
-      prevMessageCountRef.current = messages.length;
-      return;
+      hasScrolledRef.current = true;
     }
-
-    // Only auto-scroll if new messages arrived and user is near the bottom
-    if (messages.length > prevMessageCountRef.current) {
-      const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
-      if (distanceFromBottom < 150) {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-    prevMessageCountRef.current = messages.length;
   }, [messages]);
+
+  // Reset scroll flag when switching chats
+  useEffect(() => {
+    hasScrolledRef.current = false;
+  }, [activeChat]);
 
   useEffect(() => {
     if (!activeChat) { setActivePerson(null); return; }
@@ -173,6 +164,10 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
       setMessages((prev) => [...prev, data as unknown as Message]);
       setNewMsg('');
       loadConversations();
+      // Scroll to bottom after sending
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 50);
     }
     setSending(false);
   };

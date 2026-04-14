@@ -153,11 +153,24 @@ export default function EditProfilePage() {
       if (verifs) {
         const map: Record<string, { status: string; expires_at?: string }> = {};
         verifs.forEach((v: any) => {
-          // Only count as verified if not expired
           const isExpired = v.expires_at && new Date(v.expires_at) < new Date();
           map[v.association_name] = { status: isExpired ? 'expired' : v.status, expires_at: v.expires_at };
         });
         setVerifications(map);
+
+        // Auto-add verified associations to the list if not already present
+        const existingNames = new Set((assocs ?? []).map((a) => a.association_name));
+        const missingVerified = verifs
+          .filter((v: any) => v.status === 'verified' && !existingNames.has(v.association_name))
+          .map((v: any) => ({
+            association_name: v.association_name,
+            association_slug: v.association_name.toLowerCase().replace(/\s+/g, '-'),
+            role: '',
+            member_since: '',
+          }));
+        if (missingVerified.length > 0) {
+          setAssociations((prev) => [...prev, ...missingVerified]);
+        }
       }
 
       // Load work experience

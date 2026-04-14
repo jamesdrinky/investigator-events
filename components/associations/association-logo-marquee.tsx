@@ -27,7 +27,7 @@ function LogoCard({ item }: { item: LogoItem }) {
             alt={item.shortName}
             width={48}
             height={48}
-            className="h-auto max-h-10 w-auto max-w-10 object-contain"
+            className={`h-auto max-h-10 w-auto max-w-10 object-contain ${item.shortName === 'ABI' ? 'brightness-0' : ''}`}
           />
         ) : (
           <span className="text-xs font-bold uppercase tracking-wider text-slate-400">

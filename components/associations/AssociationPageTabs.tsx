@@ -15,6 +15,7 @@ interface AssocJob { id: string; title: string; description: string; location: s
 interface Props {
   page: { name: string; slug: string; description: string | null; country: string | null; website: string | null; founded_year: number | null; member_count: number | null; contact_email: string | null; social_links: any; is_verified: boolean; logo_url: string | null; cover_image_url: string | null; };
   logoSrc: string | null;
+  invertLogo?: boolean;
   upcoming: AssocEvent[];
   past: AssocEvent[];
   members: AssocMember[];
@@ -35,7 +36,7 @@ function timeAgo(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
 }
 
-export function AssociationPageTabs({ page, logoSrc, upcoming, past, members, posts, jobs, platformMembers, verifiedCount }: Props) {
+export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past, members, posts, jobs, platformMembers, verifiedCount }: Props) {
   return (
     <>
       {/* ═══ HERO — full-width dark section ═══ */}
@@ -53,7 +54,7 @@ export function AssociationPageTabs({ page, logoSrc, upcoming, past, members, po
             {/* Logo */}
             <div className="flex h-24 w-24 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-white p-3 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.5)] sm:h-32 sm:w-32">
               {logoSrc ? (
-                <Image src={logoSrc} alt={page.name} width={120} height={120} className="h-auto max-h-16 w-auto object-contain sm:max-h-24" />
+                <Image src={logoSrc} alt={page.name} width={120} height={120} className={`h-auto max-h-16 w-auto object-contain sm:max-h-24 ${invertLogo ? 'brightness-0' : ''}`} />
               ) : (
                 <span className="text-4xl font-bold text-slate-400">{page.name.charAt(0)}</span>
               )}
@@ -209,7 +210,7 @@ export function AssociationPageTabs({ page, logoSrc, upcoming, past, members, po
                 <div key={post.id} className="overflow-hidden rounded-[1.5rem] border border-white/80 bg-white shadow-[0_24px_54px_-36px_rgba(15,23,42,0.12)]">
                   <div className="flex items-center gap-3 px-5 pt-5 sm:px-6">
                     {logoSrc ? (
-                      <Image src={logoSrc} alt={page.name} width={40} height={40} className="h-10 w-10 rounded-xl border border-slate-100 object-contain p-1" />
+                      <Image src={logoSrc} alt={page.name} width={40} height={40} className={`h-10 w-10 rounded-xl border border-slate-100 object-contain p-1 ${invertLogo ? 'brightness-0' : ''}`} />
                     ) : (
                       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-violet-50 text-sm font-bold text-blue-400">{page.name.charAt(0)}</div>
                     )}

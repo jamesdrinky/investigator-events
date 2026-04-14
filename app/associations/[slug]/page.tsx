@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { createSupabaseSSRServerClient } from '@/lib/supabase/ssr-server';
 import { fetchAllEvents } from '@/lib/data/events';
-import { getAssociationBrandLogoSrc } from '@/lib/utils/association-branding';
+import { getAssociationBrandLogoSrc, shouldInvertLogoOnLight } from '@/lib/utils/association-branding';
 import { formatEventDate } from '@/lib/utils/date';
 import { AssociationPageTabs } from '@/components/associations/AssociationPageTabs';
 
@@ -24,6 +24,7 @@ export default async function AssociationPage({ params }: { params: { slug: stri
   const page = pageData as any;
 
   const logoSrc = getAssociationBrandLogoSrc(page.name) || getAssociationBrandLogoSrc(page.slug.toUpperCase());
+  const invertLogo = shouldInvertLogoOnLight(page.name) || shouldInvertLogoOnLight(page.slug.toUpperCase());
 
   // Get ALL events for this association
   const allEvents = await fetchAllEvents();
@@ -142,6 +143,7 @@ export default async function AssociationPage({ params }: { params: { slug: stri
           cover_image_url: page.cover_image_url,
         }}
         logoSrc={logoSrc ?? null}
+        invertLogo={invertLogo}
         upcoming={upcoming}
         past={past}
         members={members}

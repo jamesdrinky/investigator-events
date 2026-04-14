@@ -200,7 +200,7 @@ function AssociationCard({ association: a }: { association: Association }) {
       <div className="flex items-center gap-3.5 p-4">
         {a.logoSrc ? (
           <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl border border-slate-100 bg-white p-1.5">
-            <Image src={a.logoSrc} alt={a.shortName} width={40} height={40} className="h-auto max-h-8 w-auto object-contain" />
+            <Image src={a.logoSrc} alt={a.shortName} width={40} height={40} className={`h-auto max-h-8 w-auto object-contain ${a.shortName === 'ABI' ? 'brightness-0' : ''}`} />
           </div>
         ) : (
           <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-violet-50 text-sm font-bold text-blue-400">

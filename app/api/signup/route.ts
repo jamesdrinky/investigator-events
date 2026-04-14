@@ -42,13 +42,16 @@ export async function POST(request: Request) {
 
     // Create profile row
     if (data.user) {
-      await admin.from('profiles').upsert({
+      const { error: profileError } = await admin.from('profiles').upsert({
         id: data.user.id,
         full_name: fullName || null,
         username: fullName ? fullName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') : null,
         is_public: true,
         tos_accepted_at: new Date().toISOString(),
       } as any);
+      if (profileError) {
+        console.error('Failed to create profile:', profileError.message);
+      }
     }
 
     return NextResponse.json({ message: 'Account created', userId: data.user?.id });

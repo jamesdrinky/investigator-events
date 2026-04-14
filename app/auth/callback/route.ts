@@ -48,7 +48,7 @@ export async function GET(request: Request) {
           const admin = createSupabaseAdminServerClient();
 
           // Check if profile exists
-          const { data: existing } = await admin.from('profiles').select('id, full_name, avatar_url').eq('id', user.id).single();
+          const { data: existing } = await admin.from('profiles').select('id, full_name, avatar_url').eq('id', user.id).maybeSingle();
 
           // Store LinkedIn name and photo from OAuth (can't be faked — comes from LinkedIn directly)
           const linkedinIdentity = user.identities?.find((i) => i.provider === 'linkedin_oidc');

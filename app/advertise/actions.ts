@@ -3,11 +3,22 @@
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import type { AdvertiserFormState } from '@/app/advertise/form-state';
 import { normalizeOptionalUrl } from '@/lib/utils/url';
+import { enforceRateLimit, assertSameOriginRequest, RateLimitError } from '@/lib/security/server';
 
 export async function submitAdvertiserLead(
   _prevState: AdvertiserFormState,
   formData: FormData
 ): Promise<AdvertiserFormState> {
+  try {
+    assertSameOriginRequest();
+    enforceRateLimit('advertiser-lead', { maxRequests: 5, windowMs: 60_000 });
+  } catch (err) {
+    if (err instanceof RateLimitError) {
+      return { status: 'error', message: 'Too many submissions. Please try again later.' };
+    }
+    return { status: 'error', message: 'Unable to submit right now.' };
+  }
+
   const companyName = String(formData.get('companyName') ?? '').trim();
   const contactName = String(formData.get('contactName') ?? '').trim();
   const email = String(formData.get('email') ?? '').trim();

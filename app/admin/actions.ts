@@ -7,7 +7,7 @@ import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import type { EventInsert, EventUpdate } from '@/lib/data/events';
 import type { EventSubmissionInsert } from '@/lib/data/event-submissions';
 import type { Database } from '@/lib/types/database';
-import { assertSameOriginRequest, enforceRateLimit } from '@/lib/security/server';
+import { assertSameOriginRequest, enforceRateLimit, RateLimitError } from '@/lib/security/server';
 import { slugifyEventTitle } from '@/lib/utils/event-slugs';
 import { normalizeRequiredUrl } from '@/lib/utils/url';
 import {
@@ -150,11 +150,18 @@ function buildDefaultSubmissionDescription(submission: Pick<SubmissionRow, 'even
 }
 
 export async function adminLoginAction(formData: FormData) {
-  assertSameOriginRequest();
-  enforceRateLimit('admin-login', {
-    maxRequests: 10,
-    windowMs: 15 * 60 * 1000
-  });
+  try {
+    assertSameOriginRequest();
+    enforceRateLimit('admin-login', {
+      maxRequests: 10,
+      windowMs: 15 * 60 * 1000
+    });
+  } catch (err) {
+    if (err instanceof RateLimitError) {
+      redirect('/admin?error=rate-limited');
+    }
+    throw err;
+  }
 
   const submittedPassword = String(formData.get('password') ?? '');
   const expectedPassword = process.env.ADMIN_PASSWORD;

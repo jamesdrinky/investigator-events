@@ -45,7 +45,7 @@ export default function ProfileSetupPage() {
       if (!data.user) { router.push('/signin'); return; }
 
       // Check if profile already exists with a username — if so, skip setup
-      const { data: profile } = await supabase.from('profiles').select('username, full_name, avatar_url, country').eq('id', data.user.id).single();
+      const { data: profile } = await supabase.from('profiles').select('username, full_name, avatar_url, country').eq('id', data.user.id).maybeSingle();
       if (profile?.username) { router.push(`/profile/${profile.username}`); return; }
 
       // If profile exists with a name but no username (partial setup), auto-fix it

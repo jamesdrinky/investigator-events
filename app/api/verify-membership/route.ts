@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { createSupabaseSSRServerClient } from '@/lib/supabase/ssr-server';
-import { enforceRateLimit, RateLimitError } from '@/lib/security/server';
+import { enforceRateLimit, assertSameOriginRequest, RateLimitError } from '@/lib/security/server';
 
 export async function POST(request: Request) {
   try {
+    assertSameOriginRequest();
     enforceRateLimit('verify-membership', { maxRequests: 10, windowMs: 60_000 });
     const supabase = await createSupabaseSSRServerClient();
     const { data: { user } } = await supabase.auth.getUser();

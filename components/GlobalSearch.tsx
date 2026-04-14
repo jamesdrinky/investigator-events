@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { Search, Calendar, MapPin, X } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { getCountryFlag } from '@/lib/utils/location';
@@ -10,6 +11,7 @@ type EventResult = { id: string; title: string; slug: string; start_date: string
 type PersonResult = { id: string; full_name: string | null; username: string | null; avatar_url: string | null; country: string | null; specialisation: string | null };
 
 export function GlobalSearch({ isDark }: { isDark?: boolean }) {
+  const router = useRouter();
   const [query, setQuery] = useState('');
   const [events, setEvents] = useState<EventResult[]>([]);
   const [people, setPeople] = useState<PersonResult[]>([]);
@@ -62,7 +64,7 @@ export function GlobalSearch({ isDark }: { isDark?: boolean }) {
     setOpen(false);
     setMobileOpen(false);
     setQuery('');
-    window.location.href = path;
+    router.push(path as any);
   };
 
   const allItems: Array<{ type: 'event' | 'person'; data: EventResult | PersonResult }> = [

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthPage } from '@/components/ui/sign-in';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 
@@ -11,6 +11,8 @@ const testimonials = [
 
 export default function SignInPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const prefillEmail = searchParams.get('email') ?? '';
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -54,6 +56,7 @@ export default function SignInPage() {
       onSwitchMode={() => router.push('/signup')}
       loading={loading}
       error={error}
+      initialEmail={prefillEmail}
     />
   );
 }

@@ -59,7 +59,6 @@ export function NewsletterSignupForm() {
         status: 'success',
         message: payload?.message ?? 'Subscribed successfully'
       });
-      setEmail('');
     } catch {
       setState({
         status: 'error',
@@ -104,7 +103,15 @@ export function NewsletterSignupForm() {
       </p>
 
       {state.status === 'success' ? (
-        <p className="rounded-2xl border border-emerald-400/30 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{state.message}</p>
+        <div className="rounded-2xl border border-emerald-400/30 bg-emerald-50 px-4 py-3">
+          <p className="text-sm font-semibold text-emerald-700">{state.message}</p>
+          <p className="mt-2 text-sm text-emerald-600">
+            Want to build a profile and connect with investigators?{' '}
+            <a href={`/signup?email=${encodeURIComponent(email)}`} className="font-bold text-blue-600 underline hover:text-blue-700">
+              Create your free account
+            </a>
+          </p>
+        </div>
       ) : null}
       {state.status === 'error' ? (
         <p className="rounded-2xl border border-rose-400/30 bg-rose-50 px-4 py-3 text-sm text-rose-700">{state.message}</p>

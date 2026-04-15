@@ -38,6 +38,7 @@ interface AuthPageProps {
   loading?: boolean;
   error?: string;
   success?: string;
+  initialEmail?: string;
 }
 
 const GlassInput = ({ children }: { children: React.ReactNode }) => (
@@ -68,10 +69,11 @@ export function AuthPage({
   loading,
   error,
   success,
+  initialEmail,
 }: AuthPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(initialEmail ?? '');
   const [password, setPassword] = useState('');
   const [tosAccepted, setTosAccepted] = useState(false);
 

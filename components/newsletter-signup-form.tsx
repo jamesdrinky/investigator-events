@@ -73,29 +73,33 @@ export function NewsletterSignupForm() {
       className="relative grid gap-4 rounded-[1.5rem] border border-white/85 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-4 shadow-[0_34px_96px_-54px_rgba(15,23,42,0.16)] sm:gap-5 sm:rounded-[2.3rem] sm:p-6 lg:p-7"
     >
       <div className="pointer-events-none absolute inset-0 rounded-[1.5rem] bg-[linear-gradient(135deg,rgba(255,255,255,0.28),rgba(255,255,255,0)_26%,rgba(255,255,255,0.1)_54%,rgba(255,255,255,0)_100%)] sm:rounded-[2.3rem]" />
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
-        <label className="grid gap-2 text-sm text-slate-600">
-          <span>Email</span>
-          <input
-            type="email"
-            name="email"
-            required
-            autoComplete="email"
-            placeholder="Email address"
-            className={inputClasses()}
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            disabled={state.status === 'loading'}
-          />
-        </label>
-        <div className="flex items-end">
-          <SubmitButton pending={state.status === 'loading'} />
-        </div>
-      </div>
+      {state.status !== 'success' && (
+        <>
+          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
+            <label className="grid gap-2 text-sm text-slate-600">
+              <span>Email</span>
+              <input
+                type="email"
+                name="email"
+                required
+                autoComplete="email"
+                placeholder="Email address"
+                className={inputClasses()}
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                disabled={state.status === 'loading'}
+              />
+            </label>
+            <div className="flex items-end">
+              <SubmitButton pending={state.status === 'loading'} />
+            </div>
+          </div>
 
-      <p className="text-sm leading-relaxed text-slate-500">
-        Weekly updates focused on new events, approaching dates, and one standout event.
-      </p>
+          <p className="text-sm leading-relaxed text-slate-500">
+            Weekly updates focused on new events, approaching dates, and one standout event.
+          </p>
+        </>
+      )}
 
       <p className="text-xs leading-relaxed text-slate-400">
         Your details are stored securely and used only to process your submission. See our{' '}

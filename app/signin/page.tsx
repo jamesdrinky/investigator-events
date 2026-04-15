@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthPage } from '@/components/ui/sign-in';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
@@ -9,7 +9,7 @@ const testimonials = [
   { avatarSrc: '/faces/mike2.png', name: 'Mike LaCorte', role: 'Founder, Investigator Events', text: 'Built for the profession, by someone in it. Free, open, and working with associations — not against them.' },
 ];
 
-export default function SignInPage() {
+function SignInPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const prefillEmail = searchParams.get('email') ?? '';
@@ -58,5 +58,13 @@ export default function SignInPage() {
       error={error}
       initialEmail={prefillEmail}
     />
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense>
+      <SignInPageInner />
+    </Suspense>
   );
 }

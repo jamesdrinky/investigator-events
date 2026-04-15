@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthPage } from '@/components/ui/sign-in';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
@@ -11,7 +11,7 @@ const testimonials = [
   { avatarSrc: 'https://randomuser.me/api/portraits/men/75.jpg', name: 'Tom Bradley', role: 'Private Investigator', text: 'Finally one place for every event in the industry. The verified badges are a great touch.' },
 ];
 
-export default function SignUpPage() {
+function SignUpPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const prefillEmail = searchParams.get('email') ?? '';
@@ -97,5 +97,13 @@ export default function SignUpPage() {
       success={success}
       initialEmail={prefillEmail}
     />
+  );
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense>
+      <SignUpPageInner />
+    </Suspense>
   );
 }

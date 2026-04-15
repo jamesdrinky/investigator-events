@@ -674,7 +674,7 @@ export default function EditProfilePage() {
                 <h3 className="text-sm font-bold text-slate-900">Verify your membership</h3>
               </div>
               <p className="mt-1 text-xs text-slate-500">
-                Your association has a unique verification code that proves you&apos;re an active member. Contact your association directly and ask for their Investigator Events verification code. This is <strong>not</strong> your membership number — it&apos;s a special code your association shares with members. Verification lasts 12 months.
+                We&apos;re rolling out verification codes with associations — your association will share a code with members when it&apos;s ready. If you already have a code, enter it below. Verification lasts 12 months.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <select

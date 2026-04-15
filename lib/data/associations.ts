@@ -267,7 +267,7 @@ export const associationRecords: AssociationRecord[] = [
     slug: 'apdu',
     shortName: 'APDU',
     name: 'APDU',
-    country: 'Portugal',
+    country: 'Ukraine',
     region: 'Europe',
     website: 'https://www.apdu.pt',
     aliases: ['APDU'],

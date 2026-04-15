@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Save, Plus, ShieldCheck, Trash2, Flame, Award, Zap, Crown, Star, Shield, Globe2, Sparkles, ImagePlus, X } from 'lucide-react';
 import Image from 'next/image';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
+import { getCountryFlag } from '@/lib/utils/location';
 import { AvatarCropUpload } from '@/components/AvatarCropUpload';
 
 const COUNTRIES = [
@@ -54,14 +55,7 @@ const ALL_ASSOCIATIONS = [
 
 type UserAssociation = { id?: string; association_name: string; association_slug: string; role: string; member_since: string };
 
-const FLAGS: Record<string, string> = {
-  'United Kingdom': '🇬🇧', 'United States': '🇺🇸', 'Australia': '🇦🇺', 'Austria': '🇦🇹', 'Belgium': '🇧🇪',
-  'Canada': '🇨🇦', 'Czech Republic': '🇨🇿', 'Denmark': '🇩🇰', 'Finland': '🇫🇮', 'France': '🇫🇷',
-  'Germany': '🇩🇪', 'Hungary': '🇭🇺', 'India': '🇮🇳', 'Ireland': '🇮🇪', 'Israel': '🇮🇱', 'Italy': '🇮🇹',
-  'Latvia': '🇱🇻', 'Netherlands': '🇳🇱', 'New Zealand': '🇳🇿', 'Norway': '🇳🇴', 'Poland': '🇵🇱',
-  'Portugal': '🇵🇹', 'Romania': '🇷🇴', 'Russia': '🇷🇺', 'Serbia': '🇷🇸', 'Singapore': '🇸🇬',
-  'Slovenia': '🇸🇮', 'South Africa': '🇿🇦', 'Spain': '🇪🇸', 'Sweden': '🇸🇪', 'Switzerland': '🇨🇭',
-};
+// Flags generated dynamically from getCountryFlag() in location.ts
 
 export default function EditProfilePage() {
   const router = useRouter();
@@ -437,7 +431,7 @@ export default function EditProfilePage() {
                 <label className="text-sm font-medium text-slate-700">Country</label>
                 <select className="field-input mt-1.5 w-full" value={country} onChange={(e) => setCountry(e.target.value)}>
                   <option value="">Select country</option>
-                  {COUNTRIES.map((c) => <option key={c} value={c}>{FLAGS[c] ?? ''} {c}</option>)}
+                  {COUNTRIES.map((c) => <option key={c} value={c}>{getCountryFlag(c)} {c}</option>)}
                 </select>
               </div>
               <div>

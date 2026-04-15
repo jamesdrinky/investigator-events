@@ -57,6 +57,104 @@ type UserAssociation = { id?: string; association_name: string; association_slug
 
 // Flags generated dynamically from getCountryFlag() in location.ts
 
+function SuggestAssociation() {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState('');
+  const [country, setCountry] = useState('');
+  const [website, setWebsite] = useState('');
+  const [status, setStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
+
+  const handleSubmit = async () => {
+    if (!name.trim()) return;
+    setStatus('sending');
+    const supabase = createSupabaseBrowserClient();
+    await supabase.from('association_suggestions' as any).insert({
+      name: name.trim(),
+      country: country.trim() || null,
+      website: website.trim() || null,
+    } as any).then(async ({ error }) => {
+      // Fallback: if table doesn't exist, store as a report
+      if (error?.code === '42P01') {
+        await supabase.from('reports' as any).insert({
+          reason: 'association_suggestion',
+          description: `Association suggestion: ${name.trim()}${country ? ` (${country})` : ''}${website ? ` — ${website}` : ''}`,
+          reported_content_type: 'suggestion',
+          reporter_id: (await supabase.auth.getUser()).data.user?.id,
+          reported_user_id: (await supabase.auth.getUser()).data.user?.id,
+        } as any);
+      }
+    });
+    setStatus('sent');
+    setName('');
+    setCountry('');
+    setWebsite('');
+  };
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="mt-3 text-xs font-medium text-blue-600 hover:underline"
+      >
+        Don&apos;t see your association? Suggest one
+      </button>
+    );
+  }
+
+  if (status === 'sent') {
+    return (
+      <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50/50 px-4 py-3 text-sm text-emerald-700">
+        Thanks! Your suggestion has been submitted for review. We&apos;ll add it if it meets our criteria.
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-3 rounded-xl border border-blue-200/60 bg-blue-50/30 p-4">
+      <p className="text-sm font-bold text-slate-900">Suggest an association</p>
+      <p className="mt-1 text-xs text-slate-500">We&apos;ll review it and add it to the platform if it qualifies.</p>
+      <div className="mt-3 grid gap-2 sm:grid-cols-3">
+        <input
+          className="field-input"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Association name *"
+        />
+        <input
+          className="field-input"
+          value={country}
+          onChange={(e) => setCountry(e.target.value)}
+          placeholder="Country"
+        />
+        <input
+          className="field-input"
+          value={website}
+          onChange={(e) => setWebsite(e.target.value)}
+          placeholder="Website (optional)"
+        />
+      </div>
+      <div className="mt-3 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={!name.trim() || status === 'sending'}
+          className="flex items-center gap-1.5 rounded-full bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-blue-700 disabled:opacity-40"
+        >
+          {status === 'sending' ? 'Submitting...' : 'Submit for review'}
+        </button>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="text-xs text-slate-400 hover:text-slate-600"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function EditProfilePage() {
   const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
@@ -565,6 +663,9 @@ export default function EditProfilePage() {
                 <Plus className="h-4 w-4" /> Add
               </button>
             </div>
+
+            {/* Submit unlisted association */}
+            <SuggestAssociation />
 
             {/* Verify with code */}
             <div className="mt-6 rounded-xl border border-blue-200/60 bg-blue-50/30 p-4">

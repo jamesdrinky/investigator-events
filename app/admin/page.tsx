@@ -159,13 +159,15 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
   }
 
   const admin = createSupabaseAdminServerClient();
-  const [events, pendingSubmissions, advertiserLeads, assocPagesResult] = await Promise.all([
+  const [events, pendingSubmissions, advertiserLeads, assocPagesResult, assocSuggestionsResult] = await Promise.all([
     fetchAllEvents(),
     fetchPendingEventSubmissions(),
     fetchAdvertiserLeads(20),
     admin.from('association_pages').select('id, name, slug').order('name'),
+    admin.from('association_suggestions' as any).select('*').eq('status', 'pending').order('created_at', { ascending: false }),
   ]);
   const associationPages = (assocPagesResult.data ?? []) as { id: string; name: string; slug: string }[];
+  const assocSuggestions = (assocSuggestionsResult.data ?? []) as unknown as { id: string; name: string; country: string | null; website: string | null; created_at: string }[];
 
   const activeTab = searchParams?.tab ?? 'overview';
   const countries = new Set(events.map((e) => e.country));
@@ -396,8 +398,34 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
 
           {/* Advertising Inquiries */}
           {activeTab === 'verification' && (
-            <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
-              <VerificationCodeManager associations={associationPages} />
+            <div className="space-y-6">
+              {/* Association suggestions from users */}
+              {assocSuggestions.length > 0 && (
+                <div className="rounded-2xl border border-amber-200/60 bg-amber-50/30 p-6 shadow-sm sm:p-8">
+                  <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900">
+                    <Plus className="h-5 w-5 text-amber-500" /> Association Suggestions ({assocSuggestions.length})
+                  </h2>
+                  <p className="mt-1 text-sm text-slate-500">Users have suggested these associations. Review and add to the platform if they qualify.</p>
+                  <div className="mt-4 space-y-2">
+                    {assocSuggestions.map((s) => (
+                      <div key={s.id} className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white px-4 py-3">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-bold text-slate-900">{s.name}</p>
+                          <p className="text-xs text-slate-400">
+                            {s.country && `${s.country} · `}
+                            {s.website ? <a href={s.website} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">{s.website}</a> : 'No website provided'}
+                            {' · '}{new Date(s.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
+                <VerificationCodeManager associations={associationPages} />
+              </div>
             </div>
           )}
 

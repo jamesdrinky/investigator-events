@@ -273,7 +273,7 @@ export function Navbar() {
                   Sign in
                 </Link>
                 <Link href="/weekly" className="hidden sm:inline-flex">
-                  <ShinyButton className="whitespace-nowrap px-3 py-1.5 text-xs">Subscribe Free</ShinyButton>
+                  <ShinyButton className="whitespace-nowrap px-3 py-1.5 text-xs">Weekly Newsletter</ShinyButton>
                 </Link>
               </>
             )}
@@ -362,7 +362,7 @@ export function Navbar() {
               </Link>
             )}
             <Link href="/weekly" onClick={() => { handleNavigation('/weekly' as Route); }}>
-              <ShinyButton className="w-full px-6 py-4 text-base">Subscribe Free</ShinyButton>
+              <ShinyButton className="w-full px-6 py-4 text-base">Weekly Newsletter</ShinyButton>
             </Link>
             <Link
               href="/calendar"

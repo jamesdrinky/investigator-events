@@ -674,7 +674,7 @@ export default function EditProfilePage() {
                 <h3 className="text-sm font-bold text-slate-900">Verify your membership</h3>
               </div>
               <p className="mt-1 text-xs text-slate-500">
-                Enter the verification code provided by your association. Codes are shared exclusively with active members. Verification lasts 12 months.
+                Your association has a unique verification code that proves you&apos;re an active member. Contact your association directly and ask for their Investigator Events verification code. This is <strong>not</strong> your membership number — it&apos;s a special code your association shares with members. Verification lasts 12 months.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <select
@@ -742,6 +742,27 @@ export default function EditProfilePage() {
                 <button
                   type="button"
                   onClick={async () => {
+                    // Auto-save profile before redirecting so edits aren't lost
+                    if (userId && fullName.trim()) {
+                      const sb = createSupabaseBrowserClient();
+                      const finalSpec = useCustomTitle ? customTitle.trim() : specialisation;
+                      const sanitizedWebsite = website && /^https?:\/\//i.test(website.trim()) ? website.trim() : null;
+                      await sb.from('profiles').upsert({
+                        id: userId,
+                        full_name: (fullName || '').slice(0, 100) || null,
+                        username: existingUsername || fullName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').slice(0, 50) || null,
+                        country: country || null,
+                        specialisation: (finalSpec || '').slice(0, 100) || null,
+                        headline: (headline || '').slice(0, 200) || null,
+                        bio: (bio || '').slice(0, 2000) || null,
+                        website: sanitizedWebsite,
+                        profile_color: profileColor,
+                        avatar_url: avatarUrl,
+                        banner_url: bannerUrl,
+                        badges: selectedBadges.length > 0 ? selectedBadges : null,
+                        is_public: true,
+                      } as any);
+                    }
                     const supabase = createSupabaseBrowserClient();
                     const { error } = await supabase.auth.signInWithOAuth({
                       provider: 'linkedin_oidc',

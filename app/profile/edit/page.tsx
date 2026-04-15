@@ -8,9 +8,21 @@ import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { AvatarCropUpload } from '@/components/AvatarCropUpload';
 
 const COUNTRIES = [
-  'United Kingdom','United States','Australia','Austria','Belgium','Canada','Czech Republic','Denmark','Finland',
-  'France','Germany','Hungary','India','Ireland','Israel','Italy','Latvia','Netherlands','New Zealand','Norway',
-  'Poland','Portugal','Romania','Russia','Serbia','Singapore','Slovenia','South Africa','Spain','Sweden','Switzerland',
+  'Afghanistan','Albania','Algeria','Andorra','Angola','Argentina','Armenia','Australia','Austria','Azerbaijan',
+  'Bahamas','Bahrain','Bangladesh','Barbados','Belarus','Belgium','Belize','Bermuda','Bolivia','Bosnia and Herzegovina',
+  'Botswana','Brazil','Brunei','Bulgaria','Cambodia','Cameroon','Canada','Chile','China','Colombia','Costa Rica',
+  'Croatia','Cuba','Cyprus','Czech Republic','Denmark','Dominican Republic','Ecuador','Egypt','El Salvador',
+  'Estonia','Ethiopia','Fiji','Finland','France','Georgia','Germany','Ghana','Greece','Guatemala','Guernsey',
+  'Honduras','Hong Kong','Hungary','Iceland','India','Indonesia','Iran','Iraq','Ireland','Isle of Man','Israel',
+  'Italy','Jamaica','Japan','Jersey','Jordan','Kazakhstan','Kenya','Kuwait','Latvia','Lebanon','Libya',
+  'Liechtenstein','Lithuania','Luxembourg','Macau','Malaysia','Maldives','Malta','Mauritius','Mexico','Moldova',
+  'Monaco','Mongolia','Montenegro','Morocco','Mozambique','Myanmar','Namibia','Nepal','Netherlands','New Zealand',
+  'Nicaragua','Nigeria','North Macedonia','Norway','Oman','Pakistan','Palestine','Panama','Paraguay','Peru',
+  'Philippines','Poland','Portugal','Qatar','Romania','Russia','Rwanda','Saudi Arabia','Senegal','Serbia',
+  'Singapore','Slovakia','Slovenia','South Africa','South Korea','Spain','Sri Lanka','Sweden','Switzerland',
+  'Taiwan','Tanzania','Thailand','Trinidad and Tobago','Tunisia','Turkey','Uganda','Ukraine',
+  'United Arab Emirates','United Kingdom','United States','Uruguay','Uzbekistan','Venezuela','Vietnam',
+  'Zambia','Zimbabwe',
 ];
 
 const SPECIALISATIONS = [

@@ -24,6 +24,7 @@ const ROW_2 = [
   { src: '/associations/ncapi.png', name: 'NCAPI' },
   { src: '/associations/fewa.png', name: 'FEWA' },
   { src: '/associations/oedv.png', name: 'ODV' },
+  { src: '/associations/nali.webp', name: 'NALI' },
 ];
 
 const INVERT_LOGOS = new Set(['ABI']);

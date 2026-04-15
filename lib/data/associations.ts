@@ -393,6 +393,16 @@ export const associationRecords: AssociationRecord[] = [
     website: 'https://www.fewa.org',
     aliases: ['FEWA'],
     logoFileName: 'fewa.png'
+  },
+  {
+    slug: 'nali',
+    shortName: 'NALI',
+    name: 'National Association of Legal Investigators',
+    country: 'United States',
+    region: 'North America',
+    website: 'https://nalionline.org/',
+    aliases: ['NALI', 'National Association of Legal Investigators'],
+    logoFileName: 'nali.webp'
   }
 ];
 

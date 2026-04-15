@@ -7,7 +7,7 @@ const KNOWN_ASSOCIATIONS = [
   'ABI','WAD','IKD','CII','Intellenet','FEDERPOL','BuDEG','SNARP','EURODET',
   'NCAPI','NCISS','FALI','CALI','TALI','FEWA','NFES','PSLD','LIDEPPE',
   'ANDR','HDA','IBPI','DAF','SYL','FDDE','CKDS','FAPI','FSPD','SFPP',
-  'APDPE','APDU','IAIACE','DZRS','SAD','ARD','PDPR','ODV',
+  'APDPE','APDU','IAIACE','DZRS','SAD','ARD','PDPR','ODV','NALI',
 ];
 
 const ASSOC_URLS: Record<string, string> = {

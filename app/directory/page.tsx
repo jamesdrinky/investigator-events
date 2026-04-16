@@ -16,6 +16,7 @@ import {
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { UserAvatar } from '@/components/UserAvatar';
 import { getCountryFlag } from '@/lib/utils/location';
+import { getProfileCompletion } from '@/lib/utils/profile-completion';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -107,7 +108,7 @@ export default function DirectoryPage() {
       // Fetch public profiles
       const { data: profiles } = await (supabase
         .from('profiles')
-        .select('id, full_name, avatar_url, username, country, specialisation, headline, profile_color, bio, badges, available_for_referrals, last_seen, auth_provider, linkedin_url') as any)
+        .select('id, full_name, avatar_url, username, country, specialisation, headline, profile_color, bio, badges, available_for_referrals, last_seen, auth_provider, linkedin_url, website, banner_url') as any)
         .eq('is_public', true)
         .order('last_seen', { ascending: false, nullsFirst: false })
         .limit(500);
@@ -162,31 +163,48 @@ export default function DirectoryPage() {
         followerCounts[f.following_id] = (followerCounts[f.following_id] ?? 0) + 1;
       });
 
-      // Build investigators list
+      // Build investigators list — only include profiles that are ≥65% complete
       const countrySet = new Set<string>();
-      const list: Investigator[] = profiles.map((p: any) => {
-        if (p.country) countrySet.add(p.country);
-        return {
-          id: p.id,
-          full_name: p.full_name,
-          avatar_url: p.avatar_url,
-          username: p.username,
-          country: p.country,
-          specialisation: p.specialisation,
-          headline: p.headline,
-          profile_color: p.profile_color,
-          bio: p.bio,
-          badges: p.badges as string[] | null,
-          available_for_referrals: !!(p as any).available_for_referrals,
-          last_seen: p.last_seen as string | null,
-          is_verified: verifiedSet.has(p.id),
-          auth_provider: p.auth_provider ?? null,
-          linkedin_url: p.linkedin_url ?? null,
-          verified_associations: userVerifications[p.id] ?? [],
-          associations: assocMap[p.id] ?? [],
-          follower_count: followerCounts[p.id] ?? 0,
-        };
-      });
+      const list: Investigator[] = profiles
+        .filter((p: any) => {
+          const { isVisible } = getProfileCompletion({
+            full_name: p.full_name,
+            avatar_url: p.avatar_url,
+            headline: p.headline,
+            country: p.country,
+            specialisation: p.specialisation,
+            bio: p.bio,
+            website: p.website ?? null,
+            banner_url: p.banner_url ?? null,
+            auth_provider: p.auth_provider ?? null,
+            hasAssociations: !!(assocMap[p.id]?.length),
+            hasExperience: false, // not fetched for directory
+          });
+          return isVisible;
+        })
+        .map((p: any) => {
+          if (p.country) countrySet.add(p.country);
+          return {
+            id: p.id,
+            full_name: p.full_name,
+            avatar_url: p.avatar_url,
+            username: p.username,
+            country: p.country,
+            specialisation: p.specialisation,
+            headline: p.headline,
+            profile_color: p.profile_color,
+            bio: p.bio,
+            badges: p.badges as string[] | null,
+            available_for_referrals: !!(p as any).available_for_referrals,
+            last_seen: p.last_seen as string | null,
+            is_verified: verifiedSet.has(p.id),
+            auth_provider: p.auth_provider ?? null,
+            linkedin_url: p.linkedin_url ?? null,
+            verified_associations: userVerifications[p.id] ?? [],
+            associations: assocMap[p.id] ?? [],
+            follower_count: followerCounts[p.id] ?? 0,
+          };
+        });
 
       // Sort: verified first, then by last_seen desc
       list.sort((a, b) => {

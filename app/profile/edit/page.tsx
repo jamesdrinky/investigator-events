@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Save, Plus, ShieldCheck, Trash2, Flame, Award, Zap, Crown, Star, Shield, Globe2, Sparkles, ImagePlus, X } from 'lucide-react';
+import { Save, Plus, ShieldCheck, Trash2, Flame, Award, Zap, Crown, Star, Shield, Globe2, Sparkles, ImagePlus, X, AlertTriangle, CheckCircle2, Circle } from 'lucide-react';
 import Image from 'next/image';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { getCountryFlag } from '@/lib/utils/location';
 import { AvatarCropUpload } from '@/components/AvatarCropUpload';
+import { getProfileCompletion, PROFILE_VISIBILITY_THRESHOLD } from '@/lib/utils/profile-completion';
 
 const COUNTRIES = [
   'Afghanistan','Albania','Algeria','Andorra','Angola','Argentina','Armenia','Australia','Austria','Azerbaijan',
@@ -362,6 +363,20 @@ export default function EditProfilePage() {
     );
   };
 
+  const completion = useMemo(() => getProfileCompletion({
+    full_name: fullName,
+    avatar_url: avatarUrl,
+    headline,
+    country,
+    specialisation: useCustomTitle ? customTitle : specialisation,
+    bio,
+    website,
+    banner_url: bannerUrl,
+    auth_provider: authProvider,
+    hasAssociations: associations.length > 0,
+    hasExperience: experience.some((e) => e.company_name && e.job_title),
+  }), [fullName, avatarUrl, headline, country, specialisation, customTitle, useCustomTitle, bio, website, bannerUrl, authProvider, associations, experience]);
+
   const handleSave = async () => {
     if (!userId) return;
     if (!fullName.trim()) { setMessage('Name is required'); return; }
@@ -446,6 +461,77 @@ export default function EditProfilePage() {
                 View profile
               </a>
             )}
+          </div>
+
+          {/* ── Profile Completion Banner ── */}
+          <div className={`mt-8 rounded-2xl border-2 p-5 sm:p-6 ${completion.isVisible ? 'border-emerald-200 bg-gradient-to-br from-emerald-50/80 to-white' : 'border-amber-300 bg-gradient-to-br from-amber-50 via-orange-50/50 to-white'}`}>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+              {/* Score ring */}
+              <div className="relative mx-auto flex-shrink-0 sm:mx-0">
+                <svg className="h-24 w-24 -rotate-90" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="42" fill="none" stroke="#e2e8f0" strokeWidth="8" />
+                  <circle
+                    cx="50" cy="50" r="42" fill="none"
+                    stroke={completion.isVisible ? '#10b981' : '#f59e0b'}
+                    strokeWidth="8" strokeLinecap="round"
+                    strokeDasharray={`${(completion.score / 100) * 263.89} 263.89`}
+                    className="transition-all duration-700 ease-out"
+                  />
+                </svg>
+                <span className={`absolute inset-0 flex items-center justify-center text-xl font-bold ${completion.isVisible ? 'text-emerald-600' : 'text-amber-600'}`}>
+                  {completion.score}%
+                </span>
+              </div>
+
+              {/* Message */}
+              <div className="flex-1 text-center sm:text-left">
+                {completion.isVisible ? (
+                  <>
+                    <div className="flex items-center justify-center gap-2 sm:justify-start">
+                      <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                      <h2 className="text-lg font-bold text-emerald-800">Your profile is live in the directory</h2>
+                    </div>
+                    <p className="mt-1 text-sm text-emerald-700/70">
+                      Looking good! Keep adding details to stand out even more.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-center gap-2 sm:justify-start">
+                      <AlertTriangle className="h-5 w-5 text-amber-500" />
+                      <h2 className="text-lg font-bold text-amber-900">Your profile isn&apos;t visible yet</h2>
+                    </div>
+                    <p className="mt-1 text-sm text-amber-800/70">
+                      Complete at least <strong>{PROFILE_VISIBILITY_THRESHOLD}%</strong> of your profile to appear in the investigator directory. You&apos;re {PROFILE_VISIBILITY_THRESHOLD - completion.score}% away.
+                    </p>
+                  </>
+                )}
+
+                {/* Progress bar */}
+                <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-slate-200/80">
+                  <div
+                    className={`h-full rounded-full transition-all duration-700 ease-out ${completion.isVisible ? 'bg-emerald-500' : 'bg-gradient-to-r from-amber-400 to-orange-400'}`}
+                    style={{ width: `${completion.score}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Checklist */}
+            <div className="mt-5 grid grid-cols-2 gap-x-4 gap-y-1.5 sm:grid-cols-3">
+              {completion.checks.map((item) => (
+                <div key={item.key} className="flex items-center gap-1.5">
+                  {item.completed ? (
+                    <CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0 text-emerald-500" />
+                  ) : (
+                    <Circle className="h-3.5 w-3.5 flex-shrink-0 text-slate-300" />
+                  )}
+                  <span className={`text-xs ${item.completed ? 'text-slate-400 line-through' : 'font-medium text-slate-700'}`}>
+                    {item.label}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Banner + Avatar */}

@@ -213,12 +213,12 @@ export const associationRecords: AssociationRecord[] = [
   },
   {
     slug: 'dzrs',
-    shortName: 'DZRS',
-    name: 'DZRS',
+    shortName: 'DeZRS',
+    name: 'DeZRS',
     country: 'Slovenia',
     region: 'Europe',
     website: 'https://www.detektivska-zbornica-rs.si/',
-    aliases: ['DZRS'],
+    aliases: ['DeZRS', 'DZRS'],
     logoFileName: 'dzrs.png'
   },
   // ── Major International ──

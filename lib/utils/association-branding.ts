@@ -40,7 +40,7 @@ const associationBrandingRecords: AssociationBrandingRecord[] = [
   { name: 'PDPR', shortName: 'PDPR', aliases: ['PDPR'], logoFileName: 'pdpr.png' },
   { name: 'ARD', shortName: 'ARD', aliases: ['ARD'], logoFileName: 'ard.png' },
   { name: 'SAD', shortName: 'SAD', aliases: ['SAD'], logoFileName: 'sad.png' },
-  { name: 'DZRS', shortName: 'DZRS', aliases: ['DZRS'], logoFileName: 'dzrs.png' },
+  { name: 'DeZRS', shortName: 'DeZRS', aliases: ['DeZRS', 'DZRS'], logoFileName: 'dzrs.png' },
   { name: 'CII', shortName: 'CII', aliases: ['CII', 'Council of International Investigators'], logoFileName: 'cii.png' },
   { name: 'Intellenet', shortName: 'Intellenet', aliases: ['Intellenet', 'INTELLENET'], logoFileName: 'intellenet.png' },
   { name: 'APDPE', shortName: 'APDPE', aliases: ['APDPE'], logoFileName: 'apdpe.png' },

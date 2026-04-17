@@ -17,6 +17,7 @@ import { VerificationCodeManager } from '@/components/admin/VerificationCodeMana
 import { ModerationPanel } from '@/components/admin/ModerationPanel';
 import { QuickAddEvent } from '@/components/admin/QuickAddEvent';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
+import { associationRecords } from '@/lib/data/associations';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,6 +38,7 @@ function EventFields({
     eventScope?: 'main' | 'secondary';
     description?: string;
     website?: string;
+    imagePath?: string;
     featured?: boolean;
   };
   idPrefix: string;
@@ -79,7 +81,11 @@ function EventFields({
       </div>
       <div>
         <label htmlFor={`${idPrefix}-association`} className="text-xs font-medium uppercase tracking-wider text-slate-500">Association</label>
-        <input id={`${idPrefix}-association`} name="association" defaultValue={defaults?.association ?? ''} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20" />
+        <select id={`${idPrefix}-association`} name="association" defaultValue={defaults?.association ?? ''} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20">
+          <option value="">None</option>
+          {associationRecords.map((a) => <option key={a.slug} value={a.shortName}>{a.shortName} — {a.name}</option>)}
+          <option value="other">Other</option>
+        </select>
       </div>
       <div>
         <label htmlFor={`${idPrefix}-category`} className="text-xs font-medium uppercase tracking-wider text-slate-500">Category</label>
@@ -99,6 +105,18 @@ function EventFields({
       <div className="sm:col-span-2">
         <label htmlFor={`${idPrefix}-website`} className="text-xs font-medium uppercase tracking-wider text-slate-500">Website</label>
         <input id={`${idPrefix}-website`} type="text" name="website" required inputMode="url" defaultValue={defaults?.website ?? ''} placeholder="example.com" className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20" />
+      </div>
+      <div className="sm:col-span-2">
+        <label htmlFor={`${idPrefix}-image-path`} className="text-xs font-medium uppercase tracking-wider text-slate-500">Cover image URL</label>
+        <div className="mt-1 flex gap-2">
+          <input id={`${idPrefix}-image-path`} type="text" name="imagePath" defaultValue={defaults?.imagePath ?? ''} placeholder="/associations/aldonys.png or https://..." className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20" />
+          {defaults?.imagePath && (
+            <a href={defaults.imagePath} target="_blank" rel="noreferrer" className="flex items-center gap-1 whitespace-nowrap rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-blue-600 hover:bg-slate-100">
+              <ExternalLink className="h-3 w-3" /> View
+            </a>
+          )}
+        </div>
+        <p className="mt-1 text-[11px] text-slate-400">Local path (e.g. /associations/logo.png) or external URL. Leave blank for auto city image.</p>
       </div>
       <label className="inline-flex items-center gap-2.5 text-sm text-slate-700 sm:col-span-2">
         <input id={`${idPrefix}-featured`} type="checkbox" name="featured" defaultChecked={Boolean(defaults?.featured)} className="h-4 w-4 rounded border-slate-300 text-blue-600 accent-blue-600" />
@@ -233,7 +251,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                 <h2 className="text-lg font-bold text-slate-900">Quick Add</h2>
                 <p className="mt-1 text-sm text-slate-500">Paste text from any association website to extract event details, or browse association events pages directly.</p>
                 <div className="mt-4">
-                  <QuickAddEvent />
+                  <QuickAddEvent associationUrls={Object.fromEntries(associationRecords.map((a) => [a.shortName, a.website]))} />
                 </div>
               </div>
 
@@ -372,6 +390,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                           eventScope: event.eventScope,
                           description: event.description,
                           website: event.website,
+                          imagePath: event.image_path,
                           featured: event.featured
                         }}
                       />

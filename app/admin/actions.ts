@@ -93,6 +93,7 @@ async function parseEventData(formData: FormData, currentEventId?: string): Prom
   const endDate = String(formData.get('endDate') ?? '').trim();
   const eventScopeRaw = String(formData.get('eventScope') ?? 'main').trim();
   const eventScope = eventScopeRaw === 'secondary' ? 'secondary' : 'main';
+  const imagePath = String(formData.get('imagePath') ?? '').trim();
   const slug = await generateUniqueEventSlug(title, currentEventId);
 
   return {
@@ -109,6 +110,7 @@ async function parseEventData(formData: FormData, currentEventId?: string): Prom
     category,
     event_scope: eventScope,
     website,
+    image_path: imagePath || null,
     featured: formData.get('featured') === 'on',
     approved: true
   };

@@ -7,10 +7,11 @@ const KNOWN_ASSOCIATIONS = [
   'ABI','WAD','IKD','CII','Intellenet','FEDERPOL','BuDEG','SNARP','EURODET',
   'NCAPI','NCISS','FALI','CALI','TALI','FEWA','NFES','PSLD','LIDEPPE',
   'ANDR','HDA','IBPI','DAF','SYL','FDDE','CKDS','FAPI','FSPD','SFPP',
-  'APDPE','APDU','IAIACE','DeZRS','SAD','ARD','PDPR','ODV','NALI',
+  'APDPE','APDU','IAIACE','DeZRS','SAD','ARD','PDPR','ODV','NALI','ALDONYS',
 ];
 
-const ASSOC_URLS: Record<string, string> = {
+// Event-specific URLs override the default association website when available
+const ASSOC_EVENT_URLS: Record<string, string> = {
   'ABI': 'https://www.theabi.org.uk/events',
   'WAD': 'https://www.wad.net/conferences-events',
   'CII': 'https://www.cii2.org/index.php?option=com_content&view=article&catid=19:site-content&id=38:events',
@@ -19,11 +20,8 @@ const ASSOC_URLS: Record<string, string> = {
   'FALI': 'https://www.fali.org/page/FALICONFERENCE',
   'TALI': 'https://members.tali.org/event-calendar',
   'NCISS': 'https://www.nciss.org/events',
-  'NCAPI': 'https://www.ncapi.com',
   'FEWA': 'https://forensic.org/events/event_list.asp',
-  'FEDERPOL': 'https://www.federpol.it',
-  'BuDEG': 'https://www.budeg.de',
-  'IKD': 'https://www.i-k-d.com',
+  'ALDONYS': 'https://aldonys.org/meetinginfo.php',
 };
 
 // Simple date extraction — looks for patterns like "22-26 April 2026", "Apr 17, 2026", "2026-04-22", etc.
@@ -114,10 +112,13 @@ function parseText(raw: string): Partial<ParsedEvent> {
   };
 }
 
-export function QuickAddEvent() {
+export function QuickAddEvent({ associationUrls }: { associationUrls?: Record<string, string> }) {
   const [raw, setRaw] = useState('');
   const [parsed, setParsed] = useState<Partial<ParsedEvent> | null>(null);
   const [showAssocLinks, setShowAssocLinks] = useState(false);
+
+  // Merge: event-specific URLs override base association websites
+  const allAssocUrls = { ...(associationUrls ?? {}), ...ASSOC_EVENT_URLS };
 
   const handleParse = () => {
     if (!raw.trim()) return;
@@ -159,7 +160,7 @@ export function QuickAddEvent() {
 
         {showAssocLinks && (
           <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {Object.entries(ASSOC_URLS).sort(([a], [b]) => a.localeCompare(b)).map(([name, url]) => (
+            {Object.entries(allAssocUrls).sort(([a], [b]) => a.localeCompare(b)).map(([name, url]) => (
               <a
                 key={name}
                 href={url}

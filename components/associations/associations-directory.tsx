@@ -37,6 +37,7 @@ const GLOW_COLORS: Record<string, string> = {
   'ard':                           '59,130,246',   // blue
   'sad':                           '37,99,235',    // blue
   'dzrs':                          '34,197,94',    // green
+  'nali':                          '0,82,165',     // navy blue
 };
 
 const DEFAULT_GLOW = '99,102,241'; // indigo fallback

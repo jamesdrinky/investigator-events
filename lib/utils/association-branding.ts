@@ -55,7 +55,8 @@ const associationBrandingRecords: AssociationBrandingRecord[] = [
   { name: 'NCAPI', shortName: 'NCAPI', aliases: ['NCAPI', 'North Carolina Association of Private Investigators'], logoFileName: 'ncapi.png' },
   { name: 'NCISS', shortName: 'NCISS', aliases: ['NCISS', 'National Council of Investigation & Security Services'], logoFileName: 'nciss.png' },
   { name: 'TALI', shortName: 'TALI', aliases: ['TALI', 'Texas Association of Licensed Investigators'], logoFileName: 'tali.png' },
-  { name: 'National Association of Legal Investigators', shortName: 'NALI', aliases: ['NALI', 'National Association of Legal Investigators'], logoFileName: 'nali.webp' }
+  { name: 'National Association of Legal Investigators', shortName: 'NALI', aliases: ['NALI', 'National Association of Legal Investigators'], logoFileName: 'nali.webp' },
+  { name: 'Associated Licensed Detectives of New York State', shortName: 'ALDONYS', aliases: ['ALDONYS', 'Associated Licensed Detectives of New York State'], logoFileName: 'aldonys.png' }
 ];
 
 export function findAssociationBranding(label: string) {

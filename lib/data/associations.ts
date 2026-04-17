@@ -395,6 +395,16 @@ export const associationRecords: AssociationRecord[] = [
     logoFileName: 'fewa.png'
   },
   {
+    slug: 'aldonys',
+    shortName: 'ALDONYS',
+    name: 'Associated Licensed Detectives of New York State',
+    country: 'United States',
+    region: 'North America',
+    website: 'https://aldonys.org/',
+    aliases: ['ALDONYS', 'Associated Licensed Detectives of New York State'],
+    logoFileName: 'aldonys.png'
+  },
+  {
     slug: 'nali',
     shortName: 'NALI',
     name: 'National Association of Legal Investigators',

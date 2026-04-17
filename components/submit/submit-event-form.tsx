@@ -270,7 +270,7 @@ export function SubmitEventForm({
             <Building2 className="h-4 w-4 flex-shrink-0 text-slate-400" />
             <select name="association" defaultValue="" className="flex-1 border-0 bg-transparent text-sm text-slate-900 focus:outline-none">
               <option value="">Association (optional)</option>
-              {['ABI','WAD','IKD','CII','Intellenet','FEDERPOL','BuDEG','SNARP','EURODET','NCAPI','NCISS','FALI','CALI','TALI','FEWA','NFES','PSLD','LIDEPPE','ANDR','HDA','IBPI','DAF','SYL','FDDE','CKDS','FAPI','FSPD','SFPP','APDPE','APDU','IAIACE','DeZRS','SAD','ARD','PDPR','ALDONYS','NALI','ODV'].sort().map((a) => (
+              {['ABI','WAD','IKD','CII','Intellenet','FEDERPOL','BuDEG','SNARP','EURODET','NCAPI','NCISS','FALI','CALI','TALI','FEWA','NFES','PSLD','LIDEPPE','ANDR','HDA','IBPI','DAF','SYL','FDDE','CKDS','FAPI','FSPD','SFPP','APDPE','APDU','IAIACE','DeZRS','SAD','ARD','PDPR','ALDONYS','NALI','ODV','WAPI'].sort().map((a) => (
                 <option key={a} value={a}>{a}</option>
               ))}
               <option value="other">Other (specify in notes)</option>

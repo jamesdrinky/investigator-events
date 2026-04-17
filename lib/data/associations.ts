@@ -413,6 +413,16 @@ export const associationRecords: AssociationRecord[] = [
     website: 'https://nalionline.org/',
     aliases: ['NALI', 'National Association of Legal Investigators'],
     logoFileName: 'nali.webp'
+  },
+  {
+    slug: 'wapi',
+    shortName: 'WAPI',
+    name: 'World Association of Professional Investigators',
+    country: 'United Kingdom',
+    region: 'Europe',
+    website: 'https://wapi.org/',
+    aliases: ['WAPI', 'World Association of Professional Investigators'],
+    logoFileName: 'wapi.webp'
   }
 ];
 

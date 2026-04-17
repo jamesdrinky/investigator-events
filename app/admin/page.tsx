@@ -18,6 +18,7 @@ import { ModerationPanel } from '@/components/admin/ModerationPanel';
 import { QuickAddEvent } from '@/components/admin/QuickAddEvent';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { associationRecords } from '@/lib/data/associations';
+import { ImageDropZone } from '@/components/admin/ImageDropZone';
 
 export const dynamic = 'force-dynamic';
 
@@ -107,16 +108,10 @@ function EventFields({
         <input id={`${idPrefix}-website`} type="text" name="website" required inputMode="url" defaultValue={defaults?.website ?? ''} placeholder="example.com" className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20" />
       </div>
       <div className="sm:col-span-2">
-        <label htmlFor={`${idPrefix}-image-path`} className="text-xs font-medium uppercase tracking-wider text-slate-500">Cover image URL</label>
-        <div className="mt-1 flex gap-2">
-          <input id={`${idPrefix}-image-path`} type="text" name="imagePath" defaultValue={defaults?.imagePath ?? ''} placeholder="/associations/aldonys.png or https://..." className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20" />
-          {defaults?.imagePath && (
-            <a href={defaults.imagePath} target="_blank" rel="noreferrer" className="flex items-center gap-1 whitespace-nowrap rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-blue-600 hover:bg-slate-100">
-              <ExternalLink className="h-3 w-3" /> View
-            </a>
-          )}
+        <label className="text-xs font-medium uppercase tracking-wider text-slate-500">Cover image</label>
+        <div className="mt-1">
+          <ImageDropZone name="imagePath" defaultValue={defaults?.imagePath} />
         </div>
-        <p className="mt-1 text-[11px] text-slate-400">Local path (e.g. /associations/logo.png) or external URL. Leave blank for auto city image.</p>
       </div>
       <label className="inline-flex items-center gap-2.5 text-sm text-slate-700 sm:col-span-2">
         <input id={`${idPrefix}-featured`} type="checkbox" name="featured" defaultChecked={Boolean(defaults?.featured)} className="h-4 w-4 rounded border-slate-300 text-blue-600 accent-blue-600" />

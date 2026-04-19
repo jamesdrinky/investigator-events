@@ -37,8 +37,7 @@ export async function GET(request: Request) {
   // Fetch all active subscribers
   const { data: subscribers, error: fetchError } = await supabase
     .from('newsletter_subscribers' as never)
-    .select('email')
-    .eq('status', 'active');
+    .select('email');
 
   if (fetchError || !subscribers) {
     return NextResponse.json({ error: 'Failed to fetch subscribers', details: fetchError?.message }, { status: 500 });

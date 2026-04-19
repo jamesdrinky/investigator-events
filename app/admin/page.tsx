@@ -178,7 +178,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
     fetchAdvertiserLeads(20),
     admin.from('association_pages').select('id, name, slug').order('name'),
     admin.from('association_suggestions' as any).select('*').eq('status', 'pending').order('created_at', { ascending: false }),
-    admin.from('newsletter_subscribers' as never).select('id', { count: 'exact', head: true }).eq('status', 'active'),
+    admin.from('newsletter_subscribers' as never).select('id', { count: 'exact', head: true }),
   ]);
   const associationPages = (assocPagesResult.data ?? []) as { id: string; name: string; slug: string }[];
   const assocSuggestions = (assocSuggestionsResult.data ?? []) as unknown as { id: string; name: string; country: string | null; website: string | null; created_at: string }[];

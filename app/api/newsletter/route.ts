@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
+import { Resend } from 'resend';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { enforceRateLimit, assertSameOriginRequest, RateLimitError } from '@/lib/security/server';
+import { buildConfirmationEmail } from '@/lib/email/confirmation-email';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -21,33 +23,54 @@ export async function POST(request: Request) {
     }
 
     const supabase = createSupabaseAdminServerClient();
-    const { data: existingSubscriber, error: selectError } = await supabase
+
+    // Check if already exists
+    const { data: existing } = await supabase
       .from('newsletter_subscribers' as never)
-      .select('email')
+      .select('email, status, unsubscribe_token')
       .eq('email', email)
-      .maybeSingle();
+      .maybeSingle() as any;
 
-    if (selectError) {
-      console.error('newsletter_select_failed', { code: selectError.code });
-      return NextResponse.json({ error: 'Unable to subscribe right now' }, { status: 500 });
+    if (existing) {
+      if (existing.status === 'active') {
+        return NextResponse.json({ message: 'Already subscribed' });
+      }
+      if (existing.status === 'unsubscribed') {
+        // Re-subscribe
+        await supabase
+          .from('newsletter_subscribers' as never)
+          .update({ status: 'pending', unsubscribed_at: null, confirmed_at: null } as never)
+          .eq('email', email);
+      }
+      // Resend confirmation for pending
+      const token = existing.unsubscribe_token;
+      if (token) {
+        await sendConfirmationEmail(email, token);
+      }
+      return NextResponse.json({ message: 'Check your email to confirm your subscription' });
     }
 
-    if (existingSubscriber) {
-      return NextResponse.json({ message: 'Already subscribed' });
-    }
-
-    const { error: insertError } = await supabase.from('newsletter_subscribers' as never).insert({ email } as never);
+    // Insert new subscriber as pending
+    const { data: inserted, error: insertError } = await supabase
+      .from('newsletter_subscribers' as never)
+      .insert({ email, status: 'pending' } as never)
+      .select('unsubscribe_token')
+      .single() as any;
 
     if (insertError) {
       if (insertError.code === '23505') {
         return NextResponse.json({ message: 'Already subscribed' });
       }
-
       console.error('newsletter_insert_failed', { code: insertError.code });
       return NextResponse.json({ error: 'Unable to subscribe right now' }, { status: 500 });
     }
 
-    return NextResponse.json({ message: 'Subscribed successfully' });
+    // Send confirmation email
+    if (inserted?.unsubscribe_token) {
+      await sendConfirmationEmail(email, inserted.unsubscribe_token);
+    }
+
+    return NextResponse.json({ message: 'Check your email to confirm your subscription' });
   } catch (error) {
     if (error instanceof RateLimitError) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
@@ -55,7 +78,21 @@ export async function POST(request: Request) {
     console.error('newsletter_request_failed', {
       name: error instanceof Error ? error.name : 'unknown'
     });
-
     return NextResponse.json({ error: 'Unable to subscribe right now' }, { status: 500 });
   }
+}
+
+async function sendConfirmationEmail(email: string, token: string) {
+  const resendKey = process.env.RESEND_API_KEY;
+  if (!resendKey) return;
+
+  const resend = new Resend(resendKey);
+  const html = buildConfirmationEmail(token);
+
+  await resend.emails.send({
+    from: 'Investigator Events <info@investigatorevents.com>',
+    to: email,
+    subject: 'Confirm your subscription — Investigator Events',
+    html,
+  }).catch((err) => console.error('confirmation_email_failed', err));
 }

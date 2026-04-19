@@ -1,0 +1,50 @@
+import { NextResponse } from 'next/server';
+import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
+
+// Resend sends webhooks for email events: delivered, opened, clicked, bounced, complained
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const type = body?.type as string;
+    const email = body?.data?.to?.[0] ?? body?.data?.email ?? null;
+
+    if (!type || !email) {
+      return NextResponse.json({ received: true });
+    }
+
+    const supabase = createSupabaseAdminServerClient();
+
+    // Auto-unsubscribe on bounce or complaint
+    if (type === 'email.bounced' || type === 'email.complained') {
+      await supabase
+        .from('newsletter_subscribers' as never)
+        .update({ status: type === 'email.bounced' ? 'bounced' : 'complained', unsubscribed_at: new Date().toISOString() } as never)
+        .eq('email', email.toLowerCase());
+    }
+
+    // Track opens and clicks on the most recent send
+    if (type === 'email.opened' || type === 'email.clicked') {
+      const { data: latestSend } = await supabase
+        .from('newsletter_sends' as never)
+        .select('id, open_count, click_count')
+        .order('sent_at', { ascending: false })
+        .limit(1)
+        .single() as any;
+
+      if (latestSend) {
+        const update = type === 'email.opened'
+          ? { open_count: (latestSend.open_count ?? 0) + 1 }
+          : { click_count: (latestSend.click_count ?? 0) + 1 };
+
+        await supabase
+          .from('newsletter_sends' as never)
+          .update(update as never)
+          .eq('id', latestSend.id);
+      }
+    }
+
+    return NextResponse.json({ received: true });
+  } catch {
+    return NextResponse.json({ received: true });
+  }
+}

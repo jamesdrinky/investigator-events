@@ -48,6 +48,9 @@ const cityImageMap: Record<string, string> = {
   'Escondido, CA': 'la.jpg',
   'Vienna': 'vienna.jpg',
   'Bremen': 'conventioncentre.jpg',
+  'New York': 'nyc.jpg',
+  'New York City': 'nyc.jpg',
+  'New York, NY': 'nyc.jpg',
 };
 
 /** Map specific event slugs to event-branded images */

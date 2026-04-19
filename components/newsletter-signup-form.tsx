@@ -108,7 +108,7 @@ export function NewsletterSignupForm() {
 
       {state.status === 'success' ? (
         <div className="rounded-2xl border border-emerald-400/30 bg-emerald-50 px-4 py-3">
-          <p className="text-sm font-semibold text-emerald-700">{state.message}</p>
+          <p className="text-sm font-semibold text-emerald-700">Check your email to confirm your subscription.</p>
           <p className="mt-2 text-sm text-emerald-600">
             Want to build a profile and connect with investigators?{' '}
             <a href={`/signup?email=${encodeURIComponent(email)}`} className="font-bold text-blue-600 underline hover:text-blue-700">

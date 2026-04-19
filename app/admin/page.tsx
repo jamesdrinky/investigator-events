@@ -172,17 +172,21 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
   }
 
   const admin = createSupabaseAdminServerClient();
-  const [events, pendingSubmissions, advertiserLeads, assocPagesResult, assocSuggestionsResult, subscriberCountResult] = await Promise.all([
+  const [events, pendingSubmissions, advertiserLeads, assocPagesResult, assocSuggestionsResult, subscriberCountResult, newsletterSendsResult, recentSubscribersResult] = await Promise.all([
     fetchAllEvents(),
     fetchPendingEventSubmissions(),
     fetchAdvertiserLeads(20),
     admin.from('association_pages').select('id, name, slug').order('name'),
     admin.from('association_suggestions' as any).select('*').eq('status', 'pending').order('created_at', { ascending: false }),
     admin.from('newsletter_subscribers' as never).select('id', { count: 'exact', head: true }),
+    admin.from('newsletter_sends' as never).select('*').order('sent_at', { ascending: false }).limit(5) as any,
+    admin.from('newsletter_subscribers' as never).select('email, status, created_at, confirmed_at').order('created_at', { ascending: false }).limit(20) as any,
   ]);
   const associationPages = (assocPagesResult.data ?? []) as { id: string; name: string; slug: string }[];
   const assocSuggestions = (assocSuggestionsResult.data ?? []) as unknown as { id: string; name: string; country: string | null; website: string | null; created_at: string }[];
 
+  const newsletterSends = (newsletterSendsResult?.data ?? []) as any[];
+  const recentSubscribers = (recentSubscribersResult?.data ?? []) as any[];
   const activeTab = searchParams?.tab ?? 'overview';
   const countries = new Set(events.map((e) => e.country));
   const mainEvents = events.filter((e) => e.eventScope === 'main');
@@ -220,6 +224,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
             { id: 'submissions', label: `Submissions (${pendingSubmissions.length})`, icon: FileText },
             { id: 'events', label: `All Events (${events.length})`, icon: Calendar },
             { id: 'inquiries', label: `Inquiries (${advertiserLeads.length})`, icon: Megaphone },
+            { id: 'newsletter', label: `Newsletter (${subscriberCountResult.count ?? 0})`, icon: Mail },
             { id: 'verification', label: 'Verification Codes', icon: ShieldCheck },
             { id: 'moderation', label: 'Moderation', icon: AlertTriangle },
           ].map((tab) => (
@@ -441,6 +446,71 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
 
               <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
                 <VerificationCodeManager associations={associationPages} />
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'newsletter' && (
+            <div className="space-y-6">
+              {/* Send controls */}
+              <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900">Weekly Newsletter</h2>
+                    <p className="mt-1 text-sm text-slate-500">{subscriberCountResult.count ?? 0} subscribers · Sends every Monday at 9am UK</p>
+                  </div>
+                  <a
+                    href={`/api/cron/weekly-newsletter`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                  >
+                    <Mail className="h-4 w-4" /> Preview in browser
+                  </a>
+                </div>
+              </div>
+
+              {/* Recent sends */}
+              <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
+                <h2 className="text-lg font-bold text-slate-900">Send History</h2>
+                {newsletterSends.length === 0 ? (
+                  <p className="mt-3 text-sm text-slate-500">No newsletters sent yet. First send will be Monday 9am UK.</p>
+                ) : (
+                  <div className="mt-4 space-y-3">
+                    {newsletterSends.map((send: any) => (
+                      <div key={send.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/50 px-4 py-3 text-sm">
+                        <span className="font-medium text-slate-900">{new Date(send.sent_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                        <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">{send.recipient_count} sent</span>
+                        {send.failed_count > 0 && <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-700">{send.failed_count} failed</span>}
+                        <span className="text-xs text-slate-400">{send.upcoming_count} upcoming · {send.new_count} new · {send.featured_count} featured</span>
+                        {(send.open_count > 0 || send.click_count > 0) && (
+                          <span className="text-xs text-blue-600">{send.open_count} opens · {send.click_count} clicks</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Recent subscribers */}
+              <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
+                <h2 className="text-lg font-bold text-slate-900">Recent Subscribers</h2>
+                <div className="mt-4 divide-y divide-slate-100">
+                  {recentSubscribers.map((sub: any) => (
+                    <div key={sub.email} className="flex items-center justify-between gap-3 py-2.5 text-sm">
+                      <span className="min-w-0 truncate font-medium text-slate-900">{sub.email}</span>
+                      <div className="flex items-center gap-2">
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                          sub.status === 'active' ? 'bg-emerald-100 text-emerald-700' :
+                          sub.status === 'pending' ? 'bg-amber-100 text-amber-700' :
+                          sub.status === 'bounced' ? 'bg-red-100 text-red-700' :
+                          'bg-slate-100 text-slate-500'
+                        }`}>{sub.status}</span>
+                        <span className="whitespace-nowrap text-xs text-slate-400">{new Date(sub.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}

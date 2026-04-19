@@ -8,7 +8,6 @@ import { buildWeeklyNewsletterHtml } from '@/lib/email/weekly-newsletter';
 const BATCH_SIZE = 50;
 
 export async function GET(request: Request) {
-  // Verify the request is from Vercel Cron or an admin
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
 
@@ -24,7 +23,6 @@ export async function GET(request: Request) {
   const resend = new Resend(resendKey);
   const supabase = createSupabaseAdminServerClient();
 
-  // Fetch events and build content
   const events = await fetchAllEvents();
   const { upcoming, newlyAdded, featured, hasFreshActivity } = getWeeklyCollections(events);
 
@@ -32,37 +30,35 @@ export async function GET(request: Request) {
     return NextResponse.json({ message: 'No fresh activity, skipping send', sent: 0 });
   }
 
-  const html = buildWeeklyNewsletterHtml({ upcoming, newlyAdded, featured });
-
-  // Fetch all active subscribers
+  // Fetch active confirmed subscribers with their unsubscribe tokens
   const { data: subscribers, error: fetchError } = await supabase
     .from('newsletter_subscribers' as never)
-    .select('email');
+    .select('email, unsubscribe_token')
+    .eq('status', 'active') as any;
 
   if (fetchError || !subscribers) {
     return NextResponse.json({ error: 'Failed to fetch subscribers', details: fetchError?.message }, { status: 500 });
   }
 
-  const emails = (subscribers as unknown as { email: string }[]).map((s) => s.email);
+  const subs = subscribers as { email: string; unsubscribe_token: string }[];
 
-  if (emails.length === 0) {
+  if (subs.length === 0) {
     return NextResponse.json({ message: 'No subscribers', sent: 0 });
   }
 
-  // Send in batches
   let sent = 0;
   let failed = 0;
 
-  for (let i = 0; i < emails.length; i += BATCH_SIZE) {
-    const batch = emails.slice(i, i + BATCH_SIZE);
+  for (let i = 0; i < subs.length; i += BATCH_SIZE) {
+    const batch = subs.slice(i, i + BATCH_SIZE);
 
     try {
       await resend.batch.send(
-        batch.map((email) => ({
+        batch.map((sub) => ({
           from: 'Investigator Events <weekly@investigatorevents.com>',
-          to: email,
+          to: sub.email,
           subject: `Weekly Briefing — ${upcoming.length} upcoming event${upcoming.length !== 1 ? 's' : ''}, ${newlyAdded.length} newly added`,
-          html,
+          html: buildWeeklyNewsletterHtml({ upcoming, newlyAdded, featured, unsubscribeToken: sub.unsubscribe_token }),
         }))
       );
       sent += batch.length;
@@ -72,11 +68,21 @@ export async function GET(request: Request) {
     }
   }
 
+  // Log the send
+  await supabase.from('newsletter_sends' as never).insert({
+    sent_at: new Date().toISOString(),
+    recipient_count: sent,
+    failed_count: failed,
+    upcoming_count: upcoming.length,
+    new_count: newlyAdded.length,
+    featured_count: featured.length,
+  } as never);
+
   return NextResponse.json({
     message: 'Newsletter sent',
     sent,
     failed,
-    total: emails.length,
+    total: subs.length,
     content: { upcoming: upcoming.length, newlyAdded: newlyAdded.length, featured: featured.length },
   });
 }

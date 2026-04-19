@@ -24,8 +24,8 @@ const cityImageMap: Record<string, string> = {
   'National Harbor': 'hilton.jpg',
   'National Harbor, MD': 'hilton.jpg',
   'Sorrento': 'hilton.jpg',
-  'Cathedral City': 'hilton.jpg',
-  'Cathedral City, CA': 'hilton.jpg',
+  'Cathedral City': 'cathederalcity.jpg',
+  'Cathedral City, CA': 'cathederalcity.jpg',
   'New Delhi': 'memorial.jpg',
   'Texas': 'sanantonio.jpg',
   'Prague': 'budapest.jpg',
@@ -33,6 +33,21 @@ const cityImageMap: Record<string, string> = {
   'Casablanca': 'casablanca.avif',
   'Nashville': 'nashville.avif',
   'Nashville, TN': 'nashville.avif',
+
+  // New city images
+  'London': 'london.jpg',
+  'Manchester': 'manchester.jpg',
+  'Los Angeles': 'la.jpg',
+  'Toluca Lake': 'la.jpg',
+  'Toluca Lake, CA': 'la.jpg',
+  'Lakewood': 'la.jpg',
+  'Lakewood, CA': 'la.jpg',
+  'Carmichael': 'la.jpg',
+  'Carmichael, CA': 'la.jpg',
+  'Escondido': 'la.jpg',
+  'Escondido, CA': 'la.jpg',
+  'Vienna': 'vienna.jpg',
+  'Bremen': 'conventioncentre.jpg',
 };
 
 /** Map specific event slugs to event-branded images */

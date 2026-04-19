@@ -23,6 +23,7 @@ export function EventCard({ event, priority = 'default', isSignalActive = false,
   const featured = priority === 'featured' || hero;
   const description = event.description?.trim();
 
+  const isOnline = /^online/i.test(event.city.trim());
   const safeCoverImage = event.coverImage && /^(\/(cities|events|images)\/|https?:\/\/)/.test(event.coverImage) ? event.coverImage : undefined;
   const imageSrc = event.image_path && /^(\/(cities|events|images)\/|https?:\/\/)/.test(event.image_path) ? event.image_path : safeCoverImage ?? '/cities/fallback.jpg';
 
@@ -39,12 +40,25 @@ export function EventCard({ event, priority = 'default', isSignalActive = false,
     >
       {/* ── Cover image with logo + date badge ── */}
       <div className={`relative w-full overflow-hidden ${hero ? 'h-52 sm:h-64' : featured ? 'h-44 sm:h-52' : 'h-40 sm:h-48'}`}>
-        <Image
-          src={imageSrc}
-          alt={event.title}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-        />
+        {isOnline && logoSrc ? (
+          <>
+            <div className="absolute inset-0 bg-[linear-gradient(135deg,#0f172a_0%,#1e293b_40%,#0f172a_100%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,rgba(59,130,246,0.15),transparent_50%),radial-gradient(circle_at_70%_60%,rgba(124,58,237,0.12),transparent_50%)]" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.07] p-4 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.5)] backdrop-blur-sm sm:h-24 sm:w-24 sm:p-5">
+                <Image src={logoSrc} alt={hostLabel} width={80} height={80} className="h-auto max-h-14 w-auto object-contain brightness-0 invert sm:max-h-16" />
+              </div>
+            </div>
+            <div className="pointer-events-none absolute inset-0 opacity-[0.03] [background-image:repeating-linear-gradient(0deg,transparent,transparent_1px,rgba(255,255,255,0.5)_1px,rgba(255,255,255,0.5)_2px)]" />
+          </>
+        ) : (
+          <Image
+            src={imageSrc}
+            alt={event.title}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        )}
         {/* Dark gradient overlay */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 

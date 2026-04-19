@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import { AssociationLogoBadge } from '@/components/association-logo-badge';
+import { getAssociationBrandLogoSrc } from '@/lib/utils/association-branding';
 
 interface EventCoverMediaProps {
   title: string;
@@ -93,6 +94,8 @@ export function EventCoverMedia({
 }: EventCoverMediaProps) {
   const [hasError, setHasError] = useState(false);
   const [badgeTreatment, setBadgeTreatment] = useState<BadgeTreatment>({ tone: 'light', position: 'left' });
+  const isOnline = /^online/i.test(city.trim());
+  const onlineLogoSrc = isOnline && associationName ? getAssociationBrandLogoSrc(associationName) : undefined;
   const safeCoverImage = coverImage && /^(\/(cities|events|images)\/|https?:\/\/)/.test(coverImage) ? coverImage : undefined;
   const resolvedImagePath = imagePath && /^(\/(cities|events|images)\/|https?:\/\/)/.test(imagePath) ? imagePath : undefined;
   const imageSrc = hasError ? '/cities/fallback.jpg' : resolvedImagePath ?? safeCoverImage ?? '/cities/fallback.jpg';
@@ -103,14 +106,27 @@ export function EventCoverMedia({
         compact ? 'h-[13rem] sm:h-[13.5rem]' : 'h-[18rem] sm:h-[20rem]'
       } ${className}`}
     >
-      <Image
-        src={imageSrc}
-        alt={coverImageAlt ?? title}
-        fill
-        className="object-cover transition duration-700 ease-out group-hover/media:scale-[1.05]"
-        onError={() => setHasError(true)}
-        onLoad={(event) => setBadgeTreatment(resolveBadgeTreatment(event.currentTarget))}
-      />
+      {isOnline && onlineLogoSrc ? (
+        <>
+          <div className="absolute inset-0 bg-[linear-gradient(135deg,#0f172a_0%,#1e293b_40%,#0f172a_100%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,rgba(59,130,246,0.15),transparent_50%),radial-gradient(circle_at_70%_60%,rgba(124,58,237,0.12),transparent_50%)]" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="flex h-24 w-24 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.07] p-5 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.5)] backdrop-blur-sm sm:h-28 sm:w-28 sm:p-6">
+              <Image src={onlineLogoSrc} alt={associationName ?? ''} width={96} height={96} className="h-auto max-h-16 w-auto object-contain brightness-0 invert sm:max-h-20" />
+            </div>
+          </div>
+          <div className="pointer-events-none absolute inset-0 opacity-[0.03] [background-image:repeating-linear-gradient(0deg,transparent,transparent_1px,rgba(255,255,255,0.5)_1px,rgba(255,255,255,0.5)_2px)]" />
+        </>
+      ) : (
+        <Image
+          src={imageSrc}
+          alt={coverImageAlt ?? title}
+          fill
+          className="object-cover transition duration-700 ease-out group-hover/media:scale-[1.05]"
+          onError={() => setHasError(true)}
+          onLoad={(event) => setBadgeTreatment(resolveBadgeTreatment(event.currentTarget))}
+        />
+      )}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.14),rgba(2,6,23,0)_28%,rgba(2,6,23,0.24)_54%,rgba(2,6,23,0.82))]" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[56%] bg-[linear-gradient(180deg,rgba(2,6,23,0),rgba(15,23,42,0.16)_18%,rgba(15,23,42,0.88))]" />
       <div className="pointer-events-none absolute inset-0 opacity-0 transition duration-500 group-hover/media:opacity-100 bg-[radial-gradient(circle_at_16%_14%,rgba(37,99,235,0.16),transparent_24%),radial-gradient(circle_at_84%_10%,rgba(124,58,237,0.12),transparent_20%)]" />

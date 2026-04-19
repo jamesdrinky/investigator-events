@@ -12,7 +12,7 @@ import {
   rejectSubmissionAction,
   updateEventAction
 } from '@/app/admin/actions';
-import { Calendar, Users, FileText, Megaphone, Globe, MapPin, Tag, ExternalLink, CheckCircle2, XCircle, Plus, Trash2, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { Calendar, Users, FileText, Megaphone, Globe, MapPin, Tag, ExternalLink, CheckCircle2, XCircle, Plus, Trash2, ShieldCheck, AlertTriangle, Mail } from 'lucide-react';
 import { VerificationCodeManager } from '@/components/admin/VerificationCodeManager';
 import { ModerationPanel } from '@/components/admin/ModerationPanel';
 import { QuickAddEvent } from '@/components/admin/QuickAddEvent';
@@ -172,12 +172,13 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
   }
 
   const admin = createSupabaseAdminServerClient();
-  const [events, pendingSubmissions, advertiserLeads, assocPagesResult, assocSuggestionsResult] = await Promise.all([
+  const [events, pendingSubmissions, advertiserLeads, assocPagesResult, assocSuggestionsResult, subscriberCountResult] = await Promise.all([
     fetchAllEvents(),
     fetchPendingEventSubmissions(),
     fetchAdvertiserLeads(20),
     admin.from('association_pages').select('id, name, slug').order('name'),
     admin.from('association_suggestions' as any).select('*').eq('status', 'pending').order('created_at', { ascending: false }),
+    admin.from('newsletter_subscribers' as never).select('id', { count: 'exact', head: true }).eq('status', 'active'),
   ]);
   const associationPages = (assocPagesResult.data ?? []) as { id: string; name: string; slug: string }[];
   const assocSuggestions = (assocSuggestionsResult.data ?? []) as unknown as { id: string; name: string; country: string | null; website: string | null; created_at: string }[];
@@ -204,11 +205,12 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
         </div>
 
         {/* Stats */}
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <StatCard icon={Calendar} label="Total events" value={events.length} color="#3b82f6" />
           <StatCard icon={FileText} label="Pending submissions" value={pendingSubmissions.length} color="#f59e0b" />
           <StatCard icon={Megaphone} label="Ad inquiries" value={advertiserLeads.length} color="#8b5cf6" />
           <StatCard icon={Globe} label="Countries" value={countries.size} color="#10b981" />
+          <StatCard icon={Mail} label="Newsletter subs" value={subscriberCountResult.count ?? 0} color="#ec4899" />
         </div>
 
         {/* Tab navigation */}

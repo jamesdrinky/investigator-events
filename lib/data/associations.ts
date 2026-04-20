@@ -423,6 +423,16 @@ export const associationRecords: AssociationRecord[] = [
     website: 'https://wapi.org/',
     aliases: ['WAPI', 'World Association of Professional Investigators'],
     logoFileName: 'wapi.webp'
+  },
+  {
+    slug: 'spi',
+    shortName: 'SPI',
+    name: 'Society of Professional Investigators',
+    country: 'United States',
+    region: 'North America',
+    website: 'https://spinyc.org/',
+    aliases: ['SPI', 'Society of Professional Investigators'],
+    logoFileName: 'spi.jpg'
   }
 ];
 

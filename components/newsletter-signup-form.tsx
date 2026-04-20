@@ -25,6 +25,7 @@ function SubmitButton({ pending }: { pending: boolean }) {
 
 export function NewsletterSignupForm() {
   const [email, setEmail] = useState('');
+  const [region, setRegion] = useState('');
   const [state, setState] = useState<NewsletterFormState>({ status: 'idle' });
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -42,7 +43,7 @@ export function NewsletterSignupForm() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ email, region: region || undefined })
       });
 
       const payload = (await response.json().catch(() => null)) as { message?: string; error?: string } | null;
@@ -75,7 +76,7 @@ export function NewsletterSignupForm() {
       <div className="pointer-events-none absolute inset-0 rounded-[1.5rem] bg-[linear-gradient(135deg,rgba(255,255,255,0.28),rgba(255,255,255,0)_26%,rgba(255,255,255,0.1)_54%,rgba(255,255,255,0)_100%)] sm:rounded-[2.3rem]" />
       {state.status !== 'success' && (
         <>
-          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
+          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto_auto]">
             <label className="grid gap-2 text-sm text-slate-600">
               <span>Email</span>
               <input
@@ -89,6 +90,23 @@ export function NewsletterSignupForm() {
                 onChange={(event) => setEmail(event.target.value)}
                 disabled={state.status === 'loading'}
               />
+            </label>
+            <label className="grid gap-2 text-sm text-slate-600">
+              <span>Region <span className="text-slate-400">(optional)</span></span>
+              <select
+                value={region}
+                onChange={(e) => setRegion(e.target.value)}
+                disabled={state.status === 'loading'}
+                className={inputClasses()}
+              >
+                <option value="">All regions</option>
+                <option value="Europe">Europe</option>
+                <option value="North America">North America</option>
+                <option value="Asia-Pacific">Asia-Pacific</option>
+                <option value="Middle East">Middle East</option>
+                <option value="Latin America">Latin America</option>
+                <option value="Africa">Africa</option>
+              </select>
             </label>
             <div className="flex items-end">
               <SubmitButton pending={state.status === 'loading'} />

@@ -180,7 +180,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
     admin.from('association_suggestions' as any).select('*').eq('status', 'pending').order('created_at', { ascending: false }),
     admin.from('newsletter_subscribers' as never).select('id', { count: 'exact', head: true }),
     admin.from('newsletter_sends' as never).select('*').order('sent_at', { ascending: false }).limit(5) as any,
-    admin.from('newsletter_subscribers' as never).select('email, status, created_at, confirmed_at').order('created_at', { ascending: false }).limit(20) as any,
+    admin.from('newsletter_subscribers' as never).select('email, status, region, created_at, confirmed_at').order('created_at', { ascending: false }).limit(20) as any,
   ]);
   const associationPages = (assocPagesResult.data ?? []) as { id: string; name: string; slug: string }[];
   const assocSuggestions = (assocSuggestionsResult.data ?? []) as unknown as { id: string; name: string; country: string | null; website: string | null; created_at: string }[];
@@ -498,7 +498,10 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                 <div className="mt-4 divide-y divide-slate-100">
                   {recentSubscribers.map((sub: any) => (
                     <div key={sub.email} className="flex items-center justify-between gap-3 py-2.5 text-sm">
-                      <span className="min-w-0 truncate font-medium text-slate-900">{sub.email}</span>
+                      <div className="min-w-0">
+                        <span className="truncate font-medium text-slate-900">{sub.email}</span>
+                        {sub.region && <span className="ml-2 text-xs text-slate-400">{sub.region}</span>}
+                      </div>
                       <div className="flex items-center gap-2">
                         <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
                           sub.status === 'active' ? 'bg-emerald-100 text-emerald-700' :

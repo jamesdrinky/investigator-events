@@ -17,6 +17,7 @@ export async function POST(request: Request) {
 
     const body = await request.json().catch(() => null);
     const email = normalizeEmail(body?.email);
+    const region = typeof body?.region === 'string' ? body.region.trim() : '';
 
     if (!email || !EMAIL_REGEX.test(email)) {
       return NextResponse.json({ error: 'Invalid email' }, { status: 400 });
@@ -53,7 +54,7 @@ export async function POST(request: Request) {
     // Insert new subscriber as pending
     const { data: inserted, error: insertError } = await supabase
       .from('newsletter_subscribers' as never)
-      .insert({ email, status: 'pending' } as never)
+      .insert({ email, status: 'pending', region: region || null } as never)
       .select('unsubscribe_token')
       .single() as any;
 

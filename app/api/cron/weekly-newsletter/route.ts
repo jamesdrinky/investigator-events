@@ -30,11 +30,21 @@ export async function GET(request: Request) {
     return NextResponse.json({ message: 'No fresh activity, skipping send', sent: 0 });
   }
 
+  // Optional region filter via query param (e.g. ?region=Europe)
+  const { searchParams } = new URL(request.url);
+  const regionFilter = searchParams.get('region');
+
   // Fetch active confirmed subscribers with their unsubscribe tokens
-  const { data: subscribers, error: fetchError } = await supabase
+  let query = supabase
     .from('newsletter_subscribers' as never)
     .select('email, unsubscribe_token')
-    .eq('status', 'active') as any;
+    .eq('status', 'active');
+
+  if (regionFilter) {
+    query = query.eq('region', regionFilter) as any;
+  }
+
+  const { data: subscribers, error: fetchError } = await query as any;
 
   if (fetchError || !subscribers) {
     return NextResponse.json({ error: 'Failed to fetch subscribers', details: fetchError?.message }, { status: 500 });

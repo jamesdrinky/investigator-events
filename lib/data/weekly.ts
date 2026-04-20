@@ -32,10 +32,21 @@ export function getWeeklyCollections(events: EventItem[], now = new Date()) {
     .sort((a, b) => parseDate(a.date).getTime() - parseDate(b.date).getTime())
     .slice(0, 4);
 
+  // Events that ended in the last 14 days — prompt reviews
+  const past14 = start.getTime() - 14 * 24 * 60 * 60 * 1000;
+  const recentlyPast = [...events]
+    .filter((event) => {
+      const endTime = parseDate(event.endDate ?? event.date).getTime();
+      return endTime < start.getTime() && endTime >= past14;
+    })
+    .sort((a, b) => parseDate(b.endDate ?? b.date).getTime() - parseDate(a.endDate ?? a.date).getTime())
+    .slice(0, 3);
+
   return {
     newlyAdded,
     upcoming,
     featured,
+    recentlyPast,
     hasFreshActivity: newlyAdded.length > 0 || upcoming.length > 0
   };
 }

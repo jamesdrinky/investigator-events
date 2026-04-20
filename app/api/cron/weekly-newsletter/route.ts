@@ -24,7 +24,7 @@ export async function GET(request: Request) {
   const supabase = createSupabaseAdminServerClient();
 
   const events = await fetchAllEvents();
-  const { upcoming, newlyAdded, featured, hasFreshActivity } = getWeeklyCollections(events);
+  const { upcoming, newlyAdded, featured, recentlyPast, hasFreshActivity } = getWeeklyCollections(events);
 
   if (!hasFreshActivity) {
     return NextResponse.json({ message: 'No fresh activity, skipping send', sent: 0 });
@@ -68,7 +68,7 @@ export async function GET(request: Request) {
           from: 'Investigator Events <weekly@investigatorevents.com>',
           to: sub.email,
           subject: `Weekly Briefing — ${upcoming.length} upcoming event${upcoming.length !== 1 ? 's' : ''}, ${newlyAdded.length} newly added`,
-          html: buildWeeklyNewsletterHtml({ upcoming, newlyAdded, featured, unsubscribeToken: sub.unsubscribe_token }),
+          html: buildWeeklyNewsletterHtml({ upcoming, newlyAdded, featured, recentlyPast, unsubscribeToken: sub.unsubscribe_token }),
         }))
       );
       sent += batch.length;

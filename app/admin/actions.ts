@@ -310,3 +310,22 @@ export async function rejectSubmissionAction(formData: FormData) {
   revalidatePath('/admin');
   revalidatePath('/admin/events');
 }
+
+export async function toggleUserVerifiedAction(formData: FormData) {
+  ensureAdminSession();
+
+  const userId = parseRequired(formData, 'userId');
+  const currentlyVerified = formData.get('currentlyVerified') === 'true';
+  const supabase = createSupabaseAdminServerClient();
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ is_verified: !currentlyVerified } as any)
+    .eq('id', userId);
+
+  if (error) {
+    throw new Error(`Failed to update verification: ${error.message}`);
+  }
+
+  revalidatePath('/admin');
+}

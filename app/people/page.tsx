@@ -12,6 +12,7 @@ import { CaseReferralBoard } from '@/components/CaseReferralBoard';
 type Person = {
   id: string; full_name: string | null; avatar_url: string | null;
   country: string | null; specialisation: string | null; profile_color: string | null;
+  username: string | null;
 };
 
 export default function PeoplePage() {
@@ -39,7 +40,7 @@ export default function PeoplePage() {
         // Get suggested (same country or specialisation)
         const { data: myProfile } = await supabase.from('profiles').select('country, specialisation').eq('id', uid).single();
         if (myProfile) {
-          let q = supabase.from('profiles').select('id, full_name, avatar_url, country, specialisation, profile_color').eq('is_public', true).neq('id', uid).limit(8);
+          let q = supabase.from('profiles').select('id, full_name, avatar_url, country, specialisation, profile_color, username').eq('is_public', true).neq('id', uid).limit(8);
           if (myProfile.country) {
             const filters = [`country.eq.${myProfile.country}`];
             if (myProfile.specialisation) filters.push(`specialisation.eq.${myProfile.specialisation}`);
@@ -63,7 +64,7 @@ export default function PeoplePage() {
   useEffect(() => {
     if (tab !== 'discover' || allPeople.length > 0) return;
     const supabase = createSupabaseBrowserClient();
-    supabase.from('profiles').select('id, full_name, avatar_url, country, specialisation, profile_color').eq('is_public', true).order('created_at', { ascending: false }).limit(200).then(({ data }) => setAllPeople(data ?? []));
+    supabase.from('profiles').select('id, full_name, avatar_url, country, specialisation, profile_color, username').eq('is_public', true).order('created_at', { ascending: false }).limit(200).then(({ data }) => setAllPeople(data ?? []));
   }, [tab, allPeople.length]);
 
   const toggleFollow = async (targetId: string) => {
@@ -94,7 +95,7 @@ export default function PeoplePage() {
   const MiniCard = ({ person }: { person: Person }) => {
     const color = person.profile_color ?? '#3b82f6';
     const isFollowing = following.has(person.id);
-    return (
+    const inner = (
       <div className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white p-3 transition hover:shadow-sm">
         <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-full border-2" style={{ borderColor: color }}>
           {person.avatar_url ? (
@@ -115,7 +116,7 @@ export default function PeoplePage() {
         {userId && userId !== person.id && (
           <button
             type="button"
-            onClick={() => toggleFollow(person.id)}
+            onClick={(e) => { e.preventDefault(); toggleFollow(person.id); }}
             disabled={togglingFollow === person.id}
             className={`flex-shrink-0 rounded-full px-3 py-1 text-[11px] font-semibold transition ${
               isFollowing ? 'bg-blue-50 text-blue-600' : 'bg-blue-600 text-white hover:bg-blue-700'
@@ -126,6 +127,7 @@ export default function PeoplePage() {
         )}
       </div>
     );
+    return person.username ? <Link href={`/profile/${person.username}`}>{inner}</Link> : inner;
   };
 
   return (
@@ -208,8 +210,8 @@ export default function PeoplePage() {
               {filtered.map((p) => {
                 const color = p.profile_color ?? '#3b82f6';
                 const isFollowing = following.has(p.id);
-                return (
-                  <div key={p.id} className="rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm transition hover:shadow-md">
+                const card = (
+                  <div className="rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm transition hover:shadow-md">
                     <div className="flex items-center gap-4">
                       <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-full border-2" style={{ borderColor: color }}>
                         {p.avatar_url ? (
@@ -233,7 +235,7 @@ export default function PeoplePage() {
                       {userId && userId !== p.id && (
                         <button
                           type="button"
-                          onClick={() => toggleFollow(p.id)}
+                          onClick={(e) => { e.preventDefault(); toggleFollow(p.id); }}
                           disabled={togglingFollow === p.id}
                           className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
                             isFollowing ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' : 'bg-blue-600 text-white hover:bg-blue-700'
@@ -245,6 +247,7 @@ export default function PeoplePage() {
                     </div>
                   </div>
                 );
+                return p.username ? <Link key={p.id} href={`/profile/${p.username}`}>{card}</Link> : <div key={p.id}>{card}</div>;
               })}
               {filtered.length === 0 && <p className="col-span-full py-12 text-center text-sm text-slate-400">No investigators found.</p>}
             </div>

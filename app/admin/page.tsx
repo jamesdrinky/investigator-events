@@ -10,7 +10,8 @@ import {
   createEventAction,
   deleteEventAction,
   rejectSubmissionAction,
-  updateEventAction
+  updateEventAction,
+  toggleUserVerifiedAction
 } from '@/app/admin/actions';
 import { Calendar, Users, FileText, Megaphone, Globe, MapPin, Tag, ExternalLink, CheckCircle2, XCircle, Plus, Trash2, ShieldCheck, AlertTriangle, Mail } from 'lucide-react';
 import { VerificationCodeManager } from '@/components/admin/VerificationCodeManager';
@@ -172,7 +173,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
   }
 
   const admin = createSupabaseAdminServerClient();
-  const [events, pendingSubmissions, advertiserLeads, assocPagesResult, assocSuggestionsResult, subscriberCountResult, newsletterSendsResult, recentSubscribersResult] = await Promise.all([
+  const [events, pendingSubmissions, advertiserLeads, assocPagesResult, assocSuggestionsResult, subscriberCountResult, newsletterSendsResult, recentSubscribersResult, allUsersResult] = await Promise.all([
     fetchAllEvents(),
     fetchPendingEventSubmissions(),
     fetchAdvertiserLeads(20),
@@ -181,12 +182,14 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
     admin.from('newsletter_subscribers' as never).select('id', { count: 'exact', head: true }),
     admin.from('newsletter_sends' as never).select('*').order('sent_at', { ascending: false }).limit(5) as any,
     admin.from('newsletter_subscribers' as never).select('email, status, region, created_at, confirmed_at').order('created_at', { ascending: false }).limit(20) as any,
+    admin.from('profiles').select('id, full_name, username, email, avatar_url, country, specialisation, is_verified, is_public, created_at').order('created_at', { ascending: false }).limit(200) as any,
   ]);
   const associationPages = (assocPagesResult.data ?? []) as { id: string; name: string; slug: string }[];
   const assocSuggestions = (assocSuggestionsResult.data ?? []) as unknown as { id: string; name: string; country: string | null; website: string | null; created_at: string }[];
 
   const newsletterSends = (newsletterSendsResult?.data ?? []) as any[];
   const recentSubscribers = (recentSubscribersResult?.data ?? []) as any[];
+  const allUsers = (allUsersResult?.data ?? []) as { id: string; full_name: string | null; username: string | null; email: string | null; avatar_url: string | null; country: string | null; specialisation: string | null; is_verified: boolean; is_public: boolean; created_at: string }[];
   const activeTab = searchParams?.tab ?? 'overview';
   const countries = new Set(events.map((e) => e.country));
   const mainEvents = events.filter((e) => e.eventScope === 'main');
@@ -225,6 +228,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
             { id: 'events', label: `All Events (${events.length})`, icon: Calendar },
             { id: 'inquiries', label: `Inquiries (${advertiserLeads.length})`, icon: Megaphone },
             { id: 'newsletter', label: `Newsletter (${subscriberCountResult.count ?? 0})`, icon: Mail },
+            { id: 'users', label: `Users (${allUsers.length})`, icon: Users },
             { id: 'verification', label: 'Verification Codes', icon: ShieldCheck },
             { id: 'moderation', label: 'Moderation', icon: AlertTriangle },
           ].map((tab) => (
@@ -510,6 +514,59 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                           'bg-slate-100 text-slate-500'
                         }`}>{sub.status}</span>
                         <span className="whitespace-nowrap text-xs text-slate-400">{new Date(sub.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'users' && (
+            <div className="space-y-4">
+              <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
+                <h2 className="text-lg font-bold text-slate-900">Registered Users</h2>
+                <p className="mt-1 text-sm text-slate-500">{allUsers.length} users · {allUsers.filter(u => u.is_verified).length} verified</p>
+                <div className="mt-6 divide-y divide-slate-100">
+                  {allUsers.map((user) => (
+                    <div key={user.id} className="flex items-center gap-4 py-3">
+                      <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-full bg-slate-100">
+                        {user.avatar_url ? (
+                          <img src={user.avatar_url} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-sm font-bold text-slate-400">
+                            {(user.full_name ?? '?').charAt(0)}
+                          </div>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="truncate text-sm font-semibold text-slate-900">{user.full_name ?? 'No name'}</p>
+                          {user.is_verified && <ShieldCheck className="h-4 w-4 flex-shrink-0 text-blue-600" />}
+                          {!user.is_public && <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500">Private</span>}
+                        </div>
+                        <p className="truncate text-xs text-slate-400">
+                          {user.username ? `@${user.username}` : user.email ?? 'No email'}
+                          {user.country ? ` · ${user.country}` : ''}
+                          {user.specialisation ? ` · ${user.specialisation}` : ''}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="hidden text-[10px] text-slate-400 sm:block">{new Date(user.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                        <form action={toggleUserVerifiedAction}>
+                          <input type="hidden" name="userId" value={user.id} />
+                          <input type="hidden" name="currentlyVerified" value={String(user.is_verified)} />
+                          <button
+                            type="submit"
+                            className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                              user.is_verified
+                                ? 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                                : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                            }`}
+                          >
+                            {user.is_verified ? 'Verified ✓' : 'Verify'}
+                          </button>
+                        </form>
                       </div>
                     </div>
                   ))}

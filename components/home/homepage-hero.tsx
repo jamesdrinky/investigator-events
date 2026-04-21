@@ -282,6 +282,12 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
 
           <p className="mt-4 text-center text-xs text-blue-100/40">Free forever for individual investigators · No credit card required</p>
 
+          <p className="mt-5 text-center">
+            <Link href="/submit-event" className="text-sm font-medium text-blue-300/70 transition hover:text-blue-200">
+              Run events? List yours for free →
+            </Link>
+          </p>
+
           <div className="mx-auto mt-10 grid max-w-md grid-cols-3 gap-3">
             {stats.map((item, index) => {
               const colors = ['from-cyan-400 to-blue-400', 'from-violet-400 to-purple-400', 'from-pink-400 to-rose-400'];

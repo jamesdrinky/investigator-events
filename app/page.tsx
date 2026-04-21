@@ -72,16 +72,34 @@ export default async function HomePage() {
         <WhyUseSection />
       </div>
 
+      {/* Submit event prompt */}
       <div className="order-5 sm:order-none">
-        <FounderQuoteSection />
+        <div className="container-shell py-6 sm:py-10">
+          <div className="flex flex-col items-center gap-4 rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50/80 via-white to-purple-50/80 px-6 py-8 text-center sm:flex-row sm:justify-between sm:px-10 sm:text-left">
+            <div>
+              <p className="text-base font-bold text-slate-900 sm:text-lg">Run conferences or training events?</p>
+              <p className="mt-1 text-sm text-slate-500">List your event for free — it takes 2 minutes and reaches investigators worldwide.</p>
+            </div>
+            <Link
+              href="/submit-event"
+              className="inline-flex flex-shrink-0 items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+            >
+              Submit your event →
+            </Link>
+          </div>
+        </div>
       </div>
 
       <div className="order-6 sm:order-none">
+        <FounderQuoteSection />
+      </div>
+
+      <div className="order-7 sm:order-none">
         <FeaturedEventsSection events={featuredCarouselEvents} />
       </div>
 
       {/* Signup CTA banner */}
-      <div className="order-7 sm:order-none">
+      <div className="order-8 sm:order-none">
         <div className="container-shell py-14 sm:py-20">
           <Reveal>
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 px-6 py-14 text-center sm:px-12 sm:py-20">
@@ -115,7 +133,7 @@ export default async function HomePage() {
         </div>
       </div>
 
-      <div className="order-8 sm:order-none">
+      <div className="order-9 sm:order-none">
         <div className="container-shell py-14 sm:py-20">
           <div className="app-mobile-shell">
             <Reveal>

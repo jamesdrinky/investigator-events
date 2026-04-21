@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Search, ShieldCheck, UserPlus, UserCheck, Users, TrendingUp, Globe, BookUser } from 'lucide-react';
+import { Search, ShieldCheck, UserPlus, UserCheck, Users, TrendingUp, Globe, BookUser, XCircle } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { getCountryFlag } from '@/lib/utils/location';
 import { CommunityFeed } from '@/components/CommunityFeed';
@@ -204,6 +204,11 @@ export default function PeoplePage() {
             <div className="mx-auto mb-6 flex max-w-xl items-center gap-2 rounded-2xl border border-slate-200/80 bg-white px-4 py-2.5">
               <Search className="h-4 w-4 text-slate-400" />
               <input className="flex-1 border-0 bg-transparent text-sm outline-none" placeholder="Search investigators..." value={search} onChange={(e) => setSearch(e.target.value)} />
+              {search && (
+                <button type="button" onClick={() => setSearch('')} className="flex-shrink-0 rounded-full p-1 text-slate-300 transition hover:bg-slate-100 hover:text-slate-500">
+                  <XCircle className="h-4 w-4" />
+                </button>
+              )}
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

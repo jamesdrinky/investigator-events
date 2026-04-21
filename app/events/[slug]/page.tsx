@@ -172,7 +172,9 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
             <div className="flex flex-wrap gap-2 sm:gap-3">
               {website ? (
                 <a href={website} target="_blank" rel="noreferrer" className="btn-primary w-full px-6 py-3 sm:w-auto">Official website</a>
-              ) : null}
+              ) : (
+                <span className="inline-flex w-full items-center justify-center rounded-full border border-slate-200 bg-slate-50 px-6 py-3 text-sm font-medium text-slate-400 sm:w-auto">Website coming soon</span>
+              )}
               <EventShareButtons eventTitle={title} eventSlug={slug} />
               <Link href="/calendar" className="btn-secondary px-5 py-2.5">Back to calendar</Link>
               <SaveDateLinks event={event} />
@@ -205,7 +207,7 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
               <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm">
                 <h2 className="text-lg font-bold text-slate-950">About this event</h2>
                 <p className="mt-3 text-sm leading-relaxed text-slate-600">
-                  {event.description || 'Full event details, organiser information, and dates in one clean record.'}
+                  {event.description || `No additional details have been provided yet. ${website ? 'Visit the official website for full event information.' : `Contact ${organiser} directly for more details.`}`}
                 </p>
               </div>
             </Reveal>

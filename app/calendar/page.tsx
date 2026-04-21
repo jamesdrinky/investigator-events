@@ -83,14 +83,27 @@ export default async function CalendarPage({
             </div>
           </Reveal>
 
-          {/* Expanding cards — hidden on mobile (too tall) */}
+          {/* Expanding cards — full version on desktop, compact list on mobile */}
           {expandingItems.length > 0 && (
             <Reveal delay={0.1}>
-              <div className="mt-8 hidden sm:block sm:mt-12">
+              <div className="mt-8 sm:mt-12">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400 sm:text-xs">Coming soon</p>
                 <h2 className="mt-1 text-lg font-bold tracking-[-0.03em] text-slate-950 sm:text-xl">Next on the calendar</h2>
-                <div className="mt-4">
+                {/* Desktop: expanding cards */}
+                <div className="mt-4 hidden sm:block">
                   <ExpandingEventCards items={expandingItems} />
+                </div>
+                {/* Mobile: simple list */}
+                <div className="mt-3 space-y-2 sm:hidden">
+                  {expandingItems.slice(0, 5).map((item) => (
+                    <a key={item.slug} href={`/events/${item.slug}`} className="flex items-center gap-3 rounded-xl border border-slate-200/60 bg-white px-4 py-3 transition hover:shadow-sm">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-slate-900">{item.title}</p>
+                        <p className="truncate text-xs text-slate-400">{item.date} · {item.city}, {item.country}</p>
+                      </div>
+                      <span className="flex-shrink-0 text-xs font-medium text-blue-600">View →</span>
+                    </a>
+                  ))}
                 </div>
               </div>
             </Reveal>

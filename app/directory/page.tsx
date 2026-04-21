@@ -387,10 +387,13 @@ export default function DirectoryPage() {
       {/* ---- Grid ---- */}
       <div className="container-shell py-8 sm:py-12">
         {loading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-56 animate-pulse rounded-2xl bg-slate-100" />
-            ))}
+          <div>
+            <p className="mb-4 text-center text-sm text-slate-400">Loading investigators...</p>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="h-56 animate-pulse rounded-2xl bg-slate-100" />
+              ))}
+            </div>
           </div>
         ) : filtered.length === 0 ? (
           /* Empty state */

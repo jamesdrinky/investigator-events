@@ -162,6 +162,8 @@ export function SubmitEventForm({
           <input type="hidden" name="issuedAt" value={issuedAt} />
           <input type="hidden" name="formToken" value={formToken} />
 
+          <p className="text-[11px] text-slate-400">All fields required unless marked optional.</p>
+
           {/* Event name — big, lu.ma style */}
           <div>
             <textarea

@@ -432,7 +432,7 @@ export const associationRecords: AssociationRecord[] = [
     region: 'North America',
     website: 'https://spinyc.org/',
     aliases: ['SPI', 'Society of Professional Investigators'],
-    logoFileName: 'spi.jpg'
+    logoFileName: 'spi.png'
   }
 ];
 

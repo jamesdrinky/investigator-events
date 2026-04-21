@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import nextDynamic from 'next/dynamic';
+import Link from 'next/link';
 import { AssociationLoopSection } from '@/components/home/AssociationLoopSection';
 import { FounderQuoteSection } from '@/components/home/FounderQuoteSection';
 import { UpcomingEventsGallery } from '@/components/home/UpcomingEventsGallery';
@@ -79,7 +80,42 @@ export default async function HomePage() {
         <FeaturedEventsSection events={featuredCarouselEvents} />
       </div>
 
+      {/* Signup CTA banner */}
       <div className="order-7 sm:order-none">
+        <div className="container-shell py-14 sm:py-20">
+          <Reveal>
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 px-6 py-14 text-center sm:px-12 sm:py-20">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.15),transparent_50%),radial-gradient(circle_at_70%_80%,rgba(168,85,247,0.1),transparent_50%)]" />
+              <div className="relative">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-blue-400">Join the community</p>
+                <h2 className="mx-auto mt-4 max-w-lg text-2xl font-bold tracking-tight text-white sm:text-3xl">
+                  Get discovered. Get connected. Get ahead.
+                </h2>
+                <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-blue-200/60 sm:text-base">
+                  Create your free profile, connect with investigators worldwide, and never miss an event in your region.
+                </p>
+                <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+                  <Link
+                    href="/signup"
+                    className="inline-flex min-h-[3rem] items-center justify-center rounded-full bg-white px-8 py-3 text-sm font-bold text-slate-900 shadow-lg transition hover:bg-blue-50 sm:text-base"
+                  >
+                    Create your free profile
+                  </Link>
+                  <Link
+                    href="/directory"
+                    className="inline-flex min-h-[3rem] items-center justify-center rounded-full border border-white/20 px-8 py-3 text-sm font-medium text-white/80 transition hover:bg-white/10 sm:text-base"
+                  >
+                    Browse the directory
+                  </Link>
+                </div>
+                <p className="mt-4 text-xs text-blue-200/30">Takes 2 minutes · Free forever · No spam</p>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </div>
+
+      <div className="order-8 sm:order-none">
         <div className="container-shell py-14 sm:py-20">
           <div className="app-mobile-shell">
             <Reveal>

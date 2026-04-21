@@ -269,16 +269,18 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
           </p>
 
           <div className="mt-10 flex flex-col items-center gap-3.5 sm:mt-8 sm:flex-row sm:justify-center sm:gap-3">
-            <Link href="/calendar">
-              <ShinyButton className="min-h-[3.5rem] w-full px-8 py-3.5 text-[15px] sm:w-auto sm:px-10 sm:py-4 sm:text-base">Browse PI Events</ShinyButton>
+            <Link href="/signup">
+              <ShinyButton className="min-h-[3.5rem] w-full px-8 py-3.5 text-[15px] sm:w-auto sm:px-10 sm:py-4 sm:text-base">Join Free — Create Your Profile</ShinyButton>
             </Link>
             <Link
-              href="/submit-event"
+              href="/calendar"
               className="inline-flex min-h-[3.5rem] w-full items-center justify-center rounded-full border border-slate-300 bg-white px-8 py-3.5 text-[15px] font-semibold text-slate-700 transition hover:bg-slate-50 sm:w-auto sm:px-10 sm:py-4 sm:text-base"
             >
-              Submit Your Event
+              Browse PI Events
             </Link>
           </div>
+
+          <p className="mt-4 text-center text-xs text-blue-100/40">Free forever for individual investigators · No credit card required</p>
 
           <div className="mx-auto mt-10 grid max-w-md grid-cols-3 gap-3">
             {stats.map((item, index) => {

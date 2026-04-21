@@ -329,3 +329,56 @@ export async function toggleUserVerifiedAction(formData: FormData) {
 
   revalidatePath('/admin');
 }
+
+export async function adminAddAssociationAction(formData: FormData) {
+  ensureAdminSession();
+
+  const userId = parseRequired(formData, 'userId');
+  const associationName = parseRequired(formData, 'associationName');
+  const supabase = createSupabaseAdminServerClient();
+
+  const slug = associationName.toLowerCase().replace(/\s+/g, '-');
+
+  // Check if already exists
+  const { data: existing } = await supabase
+    .from('user_associations')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('association_name', associationName)
+    .maybeSingle();
+
+  if (existing) {
+    revalidatePath('/admin');
+    return;
+  }
+
+  const { error } = await supabase
+    .from('user_associations')
+    .insert({ user_id: userId, association_name: associationName, association_slug: slug });
+
+  if (error) {
+    throw new Error(`Failed to add association: ${error.message}`);
+  }
+
+  revalidatePath('/admin');
+}
+
+export async function adminRemoveAssociationAction(formData: FormData) {
+  ensureAdminSession();
+
+  const userId = parseRequired(formData, 'userId');
+  const associationName = parseRequired(formData, 'associationName');
+  const supabase = createSupabaseAdminServerClient();
+
+  const { error } = await supabase
+    .from('user_associations')
+    .delete()
+    .eq('user_id', userId)
+    .eq('association_name', associationName);
+
+  if (error) {
+    throw new Error(`Failed to remove association: ${error.message}`);
+  }
+
+  revalidatePath('/admin');
+}

@@ -54,17 +54,17 @@ export default async function AssociationPage({ params }: { params: { slug: stri
       formattedDate: formatEventDate(e),
     }));
 
-  // Get members
+  // Get members — match on slug OR name (covers all ways users add associations)
   const { data: memberRows } = await supabase
     .from('user_associations')
     .select('user_id, role, member_since, profiles:user_id(full_name, avatar_url, username, specialisation, headline, country, profile_color)')
-    .ilike('association_name', `%${page.slug}%`)
+    .or(`association_slug.eq.${page.slug},association_name.ilike.%${page.slug}%,association_name.ilike.%${page.name}%`)
     .limit(50);
 
   const { count: memberCount } = await supabase
     .from('user_associations')
     .select('id', { count: 'exact', head: true })
-    .ilike('association_name', `%${page.slug}%`);
+    .or(`association_slug.eq.${page.slug},association_name.ilike.%${page.slug}%,association_name.ilike.%${page.name}%`);
 
   // Get verified status for members
   const memberIds = (memberRows ?? []).map((m: any) => m.user_id);

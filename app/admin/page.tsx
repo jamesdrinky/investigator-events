@@ -11,7 +11,9 @@ import {
   deleteEventAction,
   rejectSubmissionAction,
   updateEventAction,
-  toggleUserVerifiedAction
+  toggleUserVerifiedAction,
+  adminAddAssociationAction,
+  adminRemoveAssociationAction
 } from '@/app/admin/actions';
 import { Calendar, Users, FileText, Megaphone, Globe, MapPin, Tag, ExternalLink, CheckCircle2, XCircle, Plus, Trash2, ShieldCheck, AlertTriangle, Mail } from 'lucide-react';
 import { VerificationCodeManager } from '@/components/admin/VerificationCodeManager';
@@ -182,14 +184,22 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
     admin.from('newsletter_subscribers' as never).select('id', { count: 'exact', head: true }),
     admin.from('newsletter_sends' as never).select('*').order('sent_at', { ascending: false }).limit(5) as any,
     admin.from('newsletter_subscribers' as never).select('email, status, region, created_at, confirmed_at').order('created_at', { ascending: false }).limit(20) as any,
-    admin.from('profiles').select('id, full_name, username, email, avatar_url, country, specialisation, is_verified, is_public, created_at').order('created_at', { ascending: false }).limit(200) as any,
+    admin.from('profiles').select('id, full_name, username, email, avatar_url, country, specialisation, is_verified, is_public, created_at, linkedin_url, auth_provider').order('created_at', { ascending: false }).limit(200) as any,
   ]);
   const associationPages = (assocPagesResult.data ?? []) as { id: string; name: string; slug: string }[];
   const assocSuggestions = (assocSuggestionsResult.data ?? []) as unknown as { id: string; name: string; country: string | null; website: string | null; created_at: string }[];
 
   const newsletterSends = (newsletterSendsResult?.data ?? []) as any[];
   const recentSubscribers = (recentSubscribersResult?.data ?? []) as any[];
-  const allUsers = (allUsersResult?.data ?? []) as { id: string; full_name: string | null; username: string | null; email: string | null; avatar_url: string | null; country: string | null; specialisation: string | null; is_verified: boolean; is_public: boolean; created_at: string }[];
+  const allUsers = (allUsersResult?.data ?? []) as { id: string; full_name: string | null; username: string | null; email: string | null; avatar_url: string | null; country: string | null; specialisation: string | null; is_verified: boolean; is_public: boolean; created_at: string; linkedin_url: string | null; auth_provider: string | null }[];
+
+  // Fetch all user_associations for the admin panel
+  const { data: allUserAssocs } = await admin.from('user_associations').select('user_id, association_name, association_slug, role') as any;
+  const userAssocMap: Record<string, { association_name: string; association_slug: string; role: string | null }[]> = {};
+  ((allUserAssocs ?? []) as any[]).forEach((ua: any) => {
+    if (!userAssocMap[ua.user_id]) userAssocMap[ua.user_id] = [];
+    userAssocMap[ua.user_id].push({ association_name: ua.association_name, association_slug: ua.association_slug, role: ua.role });
+  });
   const activeTab = searchParams?.tab ?? 'overview';
   const countries = new Set(events.map((e) => e.country));
   const mainEvents = events.filter((e) => e.eventScope === 'main');
@@ -525,51 +535,150 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
           {activeTab === 'users' && (
             <div className="space-y-4">
               <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
-                <h2 className="text-lg font-bold text-slate-900">Registered Users</h2>
-                <p className="mt-1 text-sm text-slate-500">{allUsers.length} users · {allUsers.filter(u => u.is_verified).length} verified</p>
-                <div className="mt-6 divide-y divide-slate-100">
-                  {allUsers.map((user) => (
-                    <div key={user.id} className="flex items-center gap-4 py-3">
-                      <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-full bg-slate-100">
-                        {user.avatar_url ? (
-                          <img src={user.avatar_url} alt="" className="h-full w-full object-cover" />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-sm font-bold text-slate-400">
-                            {(user.full_name ?? '?').charAt(0)}
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900">Registered Users</h2>
+                    <p className="mt-1 text-sm text-slate-500">{allUsers.length} users · {allUsers.filter(u => u.is_verified).length} verified · {allUsers.filter(u => u.linkedin_url || u.auth_provider === 'linkedin_oidc').length} with LinkedIn</p>
+                  </div>
+                </div>
+
+                {/* User cards */}
+                <div className="mt-6 space-y-3">
+                  {allUsers.map((user) => {
+                    const assocs = userAssocMap[user.id] ?? [];
+                    const linkedinUrl = user.linkedin_url || (user.auth_provider === 'linkedin_oidc' && user.full_name ? `https://www.linkedin.com/search/results/all/?keywords=${encodeURIComponent(user.full_name)}` : null);
+                    const expandId = `user-${user.id}`;
+
+                    return (
+                      <details key={user.id} className="group rounded-xl border border-slate-200/60 bg-white transition open:shadow-sm" id={expandId}>
+                        <summary className="flex cursor-pointer items-center gap-4 px-4 py-3 [&::-webkit-details-marker]:hidden">
+                          {/* Avatar */}
+                          <div className="h-11 w-11 flex-shrink-0 overflow-hidden rounded-full bg-slate-100">
+                            {user.avatar_url ? (
+                              <img src={user.avatar_url} alt="" className="h-full w-full object-cover" />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-sm font-bold text-slate-400">
+                                {(user.full_name ?? '?').charAt(0)}
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="truncate text-sm font-semibold text-slate-900">{user.full_name ?? 'No name'}</p>
-                          {user.is_verified && <ShieldCheck className="h-4 w-4 flex-shrink-0 text-blue-600" />}
-                          {!user.is_public && <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500">Private</span>}
+
+                          {/* Name + meta */}
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="truncate text-sm font-semibold text-slate-900">{user.full_name ?? 'No name'}</p>
+                              {user.is_verified && <ShieldCheck className="h-4 w-4 flex-shrink-0 text-blue-600" />}
+                              {user.auth_provider === 'linkedin_oidc' && <span className="rounded bg-blue-50 px-1.5 py-0.5 text-[9px] font-bold text-blue-600">LI</span>}
+                              {!user.is_public && <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-medium text-slate-500">Private</span>}
+                            </div>
+                            <p className="truncate text-xs text-slate-400">
+                              {user.email ?? ''}
+                              {user.country ? ` · ${user.country}` : ''}
+                              {user.specialisation ? ` · ${user.specialisation}` : ''}
+                            </p>
+                            {assocs.length > 0 && (
+                              <div className="mt-1 flex flex-wrap gap-1">
+                                {assocs.map((a) => (
+                                  <span key={a.association_name} className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">{a.association_name}</span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Right side: date + verify */}
+                          <div className="flex items-center gap-2">
+                            <span className="hidden text-[10px] text-slate-400 sm:block">{new Date(user.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                            <form action={toggleUserVerifiedAction}>
+                              <input type="hidden" name="userId" value={user.id} />
+                              <input type="hidden" name="currentlyVerified" value={String(user.is_verified)} />
+                              <button
+                                type="submit"
+                                onClick={(e) => e.stopPropagation()}
+                                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                                  user.is_verified
+                                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                    : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                                }`}
+                              >
+                                {user.is_verified ? 'Verified ✓' : 'Verify'}
+                              </button>
+                            </form>
+                          </div>
+                        </summary>
+
+                        {/* Expanded detail panel */}
+                        <div className="border-t border-slate-100 px-4 pb-4 pt-3">
+                          <div className="grid gap-4 sm:grid-cols-2">
+                            {/* LinkedIn section */}
+                            <div>
+                              <p className="text-xs font-bold uppercase tracking-wider text-slate-400">LinkedIn</p>
+                              {linkedinUrl ? (
+                                <a href={linkedinUrl} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700">
+                                  <ExternalLink className="h-3.5 w-3.5" />
+                                  {user.linkedin_url ? 'View profile' : `Search "${user.full_name}"`}
+                                </a>
+                              ) : (
+                                <p className="mt-1 text-sm text-slate-400">No LinkedIn linked</p>
+                              )}
+                              {user.username && (
+                                <a href={`/profile/${user.username}`} target="_blank" rel="noreferrer" className="mt-1 block text-sm text-slate-500 hover:text-blue-600">
+                                  View site profile →
+                                </a>
+                              )}
+                            </div>
+
+                            {/* User info */}
+                            <div>
+                              <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Details</p>
+                              <p className="mt-1 text-sm text-slate-600">{user.username ? `@${user.username}` : 'No username'}</p>
+                              <p className="text-sm text-slate-600">{user.email ?? 'No email'}</p>
+                              <p className="text-sm text-slate-600">Signed up via {user.auth_provider === 'linkedin_oidc' ? 'LinkedIn' : user.auth_provider === 'google' ? 'Google' : 'email'}</p>
+                            </div>
+                          </div>
+
+                          {/* Association management */}
+                          <div className="mt-4">
+                            <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Associations</p>
+                            {assocs.length > 0 ? (
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                {assocs.map((a) => (
+                                  <div key={a.association_name} className="flex items-center gap-1 rounded-full bg-blue-50 py-1 pl-3 pr-1 text-xs font-medium text-blue-700">
+                                    {a.association_name}{a.role ? ` (${a.role})` : ''}
+                                    <form action={adminRemoveAssociationAction} className="inline">
+                                      <input type="hidden" name="userId" value={user.id} />
+                                      <input type="hidden" name="associationName" value={a.association_name} />
+                                      <button type="submit" className="ml-0.5 rounded-full p-1 text-blue-400 transition hover:bg-blue-100 hover:text-red-500">
+                                        <XCircle className="h-3.5 w-3.5" />
+                                      </button>
+                                    </form>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="mt-1 text-sm text-slate-400">No associations yet</p>
+                            )}
+
+                            {/* Add association form */}
+                            <form action={adminAddAssociationAction} className="mt-3 flex items-center gap-2">
+                              <input type="hidden" name="userId" value={user.id} />
+                              <select name="associationName" className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 outline-none focus:border-blue-400" defaultValue="">
+                                <option value="" disabled>Add association...</option>
+                                {associationRecords
+                                  .filter((ar) => !assocs.some((a) => a.association_name === ar.shortName))
+                                  .sort((a, b) => a.shortName.localeCompare(b.shortName))
+                                  .map((ar) => (
+                                    <option key={ar.slug} value={ar.shortName}>{ar.shortName} — {ar.name}</option>
+                                  ))}
+                              </select>
+                              <button type="submit" className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-700">
+                                <Plus className="h-4 w-4" />
+                              </button>
+                            </form>
+                          </div>
                         </div>
-                        <p className="truncate text-xs text-slate-400">
-                          {user.username ? `@${user.username}` : user.email ?? 'No email'}
-                          {user.country ? ` · ${user.country}` : ''}
-                          {user.specialisation ? ` · ${user.specialisation}` : ''}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="hidden text-[10px] text-slate-400 sm:block">{new Date(user.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                        <form action={toggleUserVerifiedAction}>
-                          <input type="hidden" name="userId" value={user.id} />
-                          <input type="hidden" name="currentlyVerified" value={String(user.is_verified)} />
-                          <button
-                            type="submit"
-                            className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
-                              user.is_verified
-                                ? 'bg-blue-50 text-blue-600 hover:bg-blue-100'
-                                : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
-                            }`}
-                          >
-                            {user.is_verified ? 'Verified ✓' : 'Verify'}
-                          </button>
-                        </form>
-                      </div>
-                    </div>
-                  ))}
+                      </details>
+                    );
+                  })}
                 </div>
               </div>
             </div>

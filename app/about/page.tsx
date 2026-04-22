@@ -28,27 +28,19 @@ const platformExpectations = [
 export default async function AboutPage() {
   return (
     <div className="relative">
-      {/* ── Cinematic video hero ── */}
-      <section className="relative flex min-h-[85vh] items-end overflow-hidden bg-slate-950 sm:min-h-[90vh]">
-        {/* Video background */}
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          poster="/conference/conference4.avif"
-          className="absolute inset-0 h-full w-full object-cover"
-        >
-          <source src="/conference/ie-reel.mp4" type="video/mp4" />
-        </video>
+      {/* ── Hero with conference crowd image ── */}
+      <section className="relative flex min-h-[70vh] items-end overflow-hidden bg-slate-950 sm:min-h-[80vh]">
+        <Image
+          src="/conference/hugeconference.avif"
+          alt="Professional investigators at a global conference"
+          fill
+          className="object-cover"
+          sizes="100vw"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-950/30" />
 
-        {/* Gradient overlays */}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/60 via-transparent to-transparent" />
-
-        {/* Hero content — sits at bottom of video */}
-        <div className="container-shell relative z-10 pb-12 pt-32 sm:pb-16">
+        <div className="container-shell relative z-10 pb-14 pt-32 sm:pb-20">
           <Reveal>
             <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-blue-400 sm:text-xs">About Investigator Events</p>
             <h1 className="mt-4 max-w-2xl text-[2.2rem] font-bold leading-[0.92] tracking-[-0.05em] text-white sm:text-[3.5rem] lg:text-[4.5rem]">
@@ -57,32 +49,6 @@ export default async function AboutPage() {
             <p className="mt-5 max-w-xl text-base leading-relaxed text-slate-300 sm:text-lg">
               A practical calendar for the private investigations sector — bringing conferences, training, and association events into one place.
             </p>
-          </Reveal>
-
-          {/* Scroll hint */}
-          <div className="mt-10 flex items-center gap-2 text-slate-500">
-            <div className="h-8 w-[1px] animate-pulse bg-gradient-to-b from-slate-500 to-transparent" />
-            <span className="text-[10px] font-medium uppercase tracking-[0.2em]">Scroll</span>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Playable video with audio ── */}
-      <section className="bg-slate-950">
-        <div className="container-shell py-10 sm:py-14">
-          <Reveal>
-            <div className="overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10">
-              <video
-                controls
-                playsInline
-                preload="metadata"
-                poster="/conference/conference4.avif"
-                className="w-full"
-              >
-                <source src="/conference/ie-reel.mp4" type="video/mp4" />
-              </video>
-            </div>
-            <p className="mt-4 text-center text-[11px] font-medium uppercase tracking-[0.15em] text-slate-500">Watch the full reel with audio</p>
           </Reveal>
         </div>
       </section>
@@ -110,8 +76,7 @@ export default async function AboutPage() {
 
       {/* ── Mike LaCorte — founder section ── */}
       <section className="relative overflow-hidden bg-slate-950">
-        {/* Subtle conference photo background */}
-        <div className="absolute inset-0 opacity-20">
+        <div className="absolute inset-0 opacity-15">
           <Image src="/conference/conference7.avif" alt="" fill className="object-cover object-[center_45%]" sizes="100vw" />
         </div>
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/95 to-slate-950/80" />
@@ -140,7 +105,6 @@ export default async function AboutPage() {
               </Reveal>
             </div>
 
-            {/* Mike photo */}
             <Reveal delay={0.1}>
               <div className="mx-auto max-w-[16rem] lg:mx-0">
                 <div className="relative overflow-hidden rounded-2xl shadow-[0_20px_60px_-16px_rgba(0,0,0,0.5)]">
@@ -150,6 +114,26 @@ export default async function AboutPage() {
               </div>
             </Reveal>
           </div>
+        </div>
+      </section>
+
+      {/* ── Conference reel — with audio ── */}
+      <section className="bg-slate-950 pb-16 sm:pb-24">
+        <div className="container-shell">
+          <Reveal>
+            <p className="mb-4 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">See it in action</p>
+            <div className="overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10">
+              <video
+                controls
+                playsInline
+                preload="metadata"
+                poster="/conference/hugeconference.avif"
+                className="w-full"
+              >
+                <source src="/conference/ie-reel.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </Reveal>
         </div>
       </section>
 

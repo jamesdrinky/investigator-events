@@ -64,15 +64,28 @@ export default async function AboutPage() {
         </div>
       </div>
 
-      {/* ── Conference atmosphere ── */}
-      <div className="relative h-48 w-full overflow-hidden sm:h-64 lg:h-80" style={{ contain: 'layout paint' }}>
-        <Image src="/conference/conference4.avif" alt="Panel discussion at a professional conference" fill className="object-cover object-[center_60%]" sizes="100vw" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-white/50" />
+      {/* ── Conference reel ── */}
+      <div className="relative w-full overflow-hidden bg-slate-950" style={{ contain: 'layout paint' }}>
+        <div className="container-shell py-10 sm:py-16">
+          <Reveal>
+            <div className="overflow-hidden rounded-2xl shadow-2xl">
+              <video
+                controls
+                playsInline
+                preload="metadata"
+                poster="/conference/conference4.avif"
+                className="w-full"
+              >
+                <source src="/conference/ie-reel.mp4" type="video/mp4" />
+              </video>
+            </div>
+            <p className="mt-4 text-center text-sm text-slate-400">Investigator Events — conferences, training, and networking from around the world.</p>
+          </Reveal>
+        </div>
       </div>
 
       {/* ── Content ── */}
       <div className="container-shell relative py-10 sm:py-16">
-        {/* Introduction video — hidden until /public/video/about-intro.mp4 is added */}
 
         {/* Mike LaCorte — glassmorphism profile card */}
         <Reveal>

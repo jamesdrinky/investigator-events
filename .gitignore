@@ -5,3 +5,6 @@ node_modules
 dist
 build
 .vercel
+
+# Original uncompressed video (166MB — too large for git)
+public/conference/ie reel.mp4

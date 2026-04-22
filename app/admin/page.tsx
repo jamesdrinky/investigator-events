@@ -204,12 +204,14 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
   const allUsers = (allUsersResult?.data ?? []) as { id: string; full_name: string | null; username: string | null; avatar_url: string | null; country: string | null; specialisation: string | null; is_verified: boolean; is_public: boolean; created_at: string; linkedin_url: string | null; auth_provider: string | null }[];
 
   // Fetch all user_associations for the admin panel
-  const { data: allUserAssocs } = await admin.from('user_associations').select('user_id, association_name, association_slug, role') as any;
-  const userAssocMap: Record<string, { association_name: string; association_slug: string; role: string | null }[]> = {};
-  ((allUserAssocs ?? []) as any[]).forEach((ua: any) => {
-    if (!userAssocMap[ua.user_id]) userAssocMap[ua.user_id] = [];
-    userAssocMap[ua.user_id].push({ association_name: ua.association_name, association_slug: ua.association_slug, role: ua.role });
-  });
+  let userAssocMap: Record<string, { association_name: string; association_slug: string; role: string | null }[]> = {};
+  try {
+    const { data: allUserAssocs } = await admin.from('user_associations').select('user_id, association_name, association_slug, role') as any;
+    ((allUserAssocs ?? []) as any[]).forEach((ua: any) => {
+      if (!userAssocMap[ua.user_id]) userAssocMap[ua.user_id] = [];
+      userAssocMap[ua.user_id].push({ association_name: ua.association_name, association_slug: ua.association_slug, role: ua.role });
+    });
+  } catch { /* ignore — associations just won't show */ }
   const activeTab = searchParams?.tab ?? 'overview';
   const countries = new Set(events.map((e) => e.country));
   const mainEvents = events.filter((e) => e.eventScope === 'main');
@@ -548,7 +550,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div>
                     <h2 className="text-lg font-bold text-slate-900">Registered Users</h2>
-                    <p className="mt-1 text-sm text-slate-500">{allUsers.length} users · {allUsers.filter(u => u.is_verified).length} verified · {allUsers.filter(u => u.linkedin_url || u.auth_provider === 'linkedin_oidc').length} with LinkedIn</p>
+                    <p className="mt-1 text-sm text-slate-500">{allUsers.length} users · {allUsers.filter(u => u.is_verified === true).length} verified · {allUsers.filter(u => u.linkedin_url || u.auth_provider === 'linkedin_oidc').length} with LinkedIn</p>
                   </div>
                 </div>
 
@@ -556,11 +558,11 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                 <div className="mt-6 space-y-3">
                   {allUsers.map((user) => {
                     const assocs = userAssocMap[user.id] ?? [];
-                    const linkedinUrl = user.linkedin_url || (user.auth_provider === 'linkedin_oidc' && user.full_name ? `https://www.linkedin.com/search/results/all/?keywords=${encodeURIComponent(user.full_name)}` : null);
-                    const expandId = `user-${user.id}`;
+                    const linkedinUrl = user.linkedin_url || (user.auth_provider === 'linkedin_oidc' && user.full_name ? `https://www.linkedin.com/search/results/all/?keywords=${encodeURIComponent(user.full_name)}` : '');
+                    const isVerified = user.is_verified === true;
 
                     return (
-                      <details key={user.id} className="group rounded-xl border border-slate-200/60 bg-white transition open:shadow-sm" id={expandId}>
+                      <details key={user.id} className="group rounded-xl border border-slate-200/60 bg-white transition open:shadow-sm">
                         <summary className="flex cursor-pointer items-center gap-4 px-4 py-3 [&::-webkit-details-marker]:hidden">
                           {/* Avatar */}
                           <div className="h-11 w-11 flex-shrink-0 overflow-hidden rounded-full bg-slate-100">
@@ -577,9 +579,9 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
                               <p className="truncate text-sm font-semibold text-slate-900">{user.full_name ?? 'No name'}</p>
-                              {user.is_verified && <ShieldCheck className="h-4 w-4 flex-shrink-0 text-blue-600" />}
+                              {isVerified && <ShieldCheck className="h-4 w-4 flex-shrink-0 text-blue-600" />}
                               {user.auth_provider === 'linkedin_oidc' && <span className="rounded bg-blue-50 px-1.5 py-0.5 text-[9px] font-bold text-blue-600">LI</span>}
-                              {!user.is_public && <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-medium text-slate-500">Private</span>}
+                              {user.is_public === false && <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-medium text-slate-500">Private</span>}
                             </div>
                             <p className="truncate text-xs text-slate-400">
                               {user.username ? `@${user.username}` : ''}
@@ -597,20 +599,20 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
 
                           {/* Right side: date + verify */}
                           <div className="flex items-center gap-2">
-                            <span className="hidden text-[10px] text-slate-400 sm:block">{new Date(user.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                            <span className="hidden text-[10px] text-slate-400 sm:block">{user.created_at ? new Date(user.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''}</span>
                             <form action={toggleUserVerifiedAction}>
                               <input type="hidden" name="userId" value={user.id} />
-                              <input type="hidden" name="currentlyVerified" value={String(user.is_verified)} />
+                              <input type="hidden" name="currentlyVerified" value={String(isVerified)} />
                               <button
                                 type="submit"
                                 onClick={(e) => e.stopPropagation()}
                                 className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
-                                  user.is_verified
+                                  isVerified
                                     ? 'bg-blue-600 text-white hover:bg-blue-700'
                                     : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                                 }`}
                               >
-                                {user.is_verified ? 'Verified ✓' : 'Verify'}
+                                {isVerified ? 'Verified ✓' : 'Verify'}
                               </button>
                             </form>
                           </div>

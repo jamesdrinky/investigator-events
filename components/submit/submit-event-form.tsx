@@ -1,10 +1,20 @@
 'use client';
 
 import { useRef, useState, useEffect, useCallback } from 'react';
-import { Camera, MapPin, Calendar, Clock, Globe, FileText, Mail, User, Building2, Tag, Layers, ImageIcon, AlertTriangle } from 'lucide-react';
+import { useFormStatus } from 'react-dom';
+import { Camera, MapPin, Calendar, Clock, Globe, FileText, Mail, User, Building2, Tag, Layers, ImageIcon, AlertTriangle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { getCountriesForRegion } from '@/lib/forms/event-form-options';
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button type="submit" disabled={pending} className="btn-primary w-full px-7 py-3 text-[15px] sm:w-auto disabled:opacity-60">
+      {pending ? <><Loader2 className="mr-2 inline h-4 w-4 animate-spin" />Submitting...</> : 'Create Event'}
+    </button>
+  );
+}
 
 interface SubmitEventFormProps {
   action: (formData: FormData) => void;
@@ -343,9 +353,7 @@ export function SubmitEventForm({
                 <a href="/privacy" className="underline underline-offset-2 hover:text-slate-600">privacy policy</a>.
               </p>
             </div>
-            <button type="submit" className="btn-primary w-full px-7 py-3 text-[15px] sm:w-auto">
-              Create Event
-            </button>
+            <SubmitButton />
           </div>
         </form>
 

@@ -194,14 +194,14 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
     admin.from('newsletter_subscribers' as never).select('id', { count: 'exact', head: true }),
     admin.from('newsletter_sends' as never).select('*').order('sent_at', { ascending: false }).limit(5) as any,
     admin.from('newsletter_subscribers' as never).select('email, status, region, created_at, confirmed_at').order('created_at', { ascending: false }).limit(20) as any,
-    admin.from('profiles').select('id, full_name, username, email, avatar_url, country, specialisation, is_verified, is_public, created_at, linkedin_url, auth_provider').order('created_at', { ascending: false }).limit(200) as any,
+    admin.from('profiles').select('id, full_name, username, avatar_url, country, specialisation, is_verified, is_public, created_at, linkedin_url, auth_provider').order('created_at', { ascending: false }).limit(200) as any,
   ]);
   const associationPages = (assocPagesResult.data ?? []) as { id: string; name: string; slug: string }[];
   const assocSuggestions = (assocSuggestionsResult.data ?? []) as unknown as { id: string; name: string; country: string | null; website: string | null; created_at: string }[];
 
   const newsletterSends = (newsletterSendsResult?.data ?? []) as any[];
   const recentSubscribers = (recentSubscribersResult?.data ?? []) as any[];
-  const allUsers = (allUsersResult?.data ?? []) as { id: string; full_name: string | null; username: string | null; email: string | null; avatar_url: string | null; country: string | null; specialisation: string | null; is_verified: boolean; is_public: boolean; created_at: string; linkedin_url: string | null; auth_provider: string | null }[];
+  const allUsers = (allUsersResult?.data ?? []) as { id: string; full_name: string | null; username: string | null; avatar_url: string | null; country: string | null; specialisation: string | null; is_verified: boolean; is_public: boolean; created_at: string; linkedin_url: string | null; auth_provider: string | null }[];
 
   // Fetch all user_associations for the admin panel
   const { data: allUserAssocs } = await admin.from('user_associations').select('user_id, association_name, association_slug, role') as any;
@@ -582,7 +582,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                               {!user.is_public && <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-medium text-slate-500">Private</span>}
                             </div>
                             <p className="truncate text-xs text-slate-400">
-                              {user.email ?? ''}
+                              {user.username ? `@${user.username}` : ''}
                               {user.country ? ` · ${user.country}` : ''}
                               {user.specialisation ? ` · ${user.specialisation}` : ''}
                             </p>
@@ -641,7 +641,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                             <div>
                               <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Details</p>
                               <p className="mt-1 text-sm text-slate-600">{user.username ? `@${user.username}` : 'No username'}</p>
-                              <p className="text-sm text-slate-600">{user.email ?? 'No email'}</p>
+                              <p className="text-sm text-slate-600">{user.username ? `@${user.username}` : 'No username'}</p>
                               <p className="text-sm text-slate-600">Signed up via {user.auth_provider === 'linkedin_oidc' ? 'LinkedIn' : user.auth_provider === 'google' ? 'Google' : 'email'}</p>
                             </div>
                           </div>

@@ -54,26 +54,52 @@ export default async function AssociationPage({ params }: { params: { slug: stri
       formattedDate: formatEventDate(e),
     }));
 
-  // Get members — match on slug OR name (covers all ways users add associations)
+  // Get members from user_associations
   const { data: memberRows } = await supabase
     .from('user_associations')
     .select('user_id, role, member_since, profiles:user_id(full_name, avatar_url, username, specialisation, headline, country, profile_color)')
-    .or(`association_slug.eq.${page.slug},association_name.ilike.%${page.slug}%,association_name.ilike.%${page.name}%`)
+    .or(`association_slug.eq.${page.slug},association_name.ilike.%${page.slug}%`)
     .limit(50);
+
+  // Also get verified members from member_verifications (they might not have a user_associations row)
+  const { data: verifiedRows } = await supabase
+    .from('member_verifications' as any)
+    .select('user_id, status')
+    .eq('status', 'verified')
+    .ilike('association_name', `%${page.slug}%`);
+
+  const verifiedSet = new Set((verifiedRows ?? []).map((v: any) => v.user_id));
+
+  // Merge: add any verified members who aren't already in memberRows
+  const memberUserIds = new Set((memberRows ?? []).map((m: any) => m.user_id));
+  const missingVerifiedIds = (verifiedRows ?? [])
+    .filter((v: any) => !memberUserIds.has(v.user_id))
+    .map((v: any) => v.user_id);
+
+  let extraMembers: any[] = [];
+  if (missingVerifiedIds.length > 0) {
+    const { data: extraProfiles } = await supabase
+      .from('profiles')
+      .select('id, full_name, avatar_url, username, specialisation, headline, country, profile_color')
+      .in('id', missingVerifiedIds);
+    extraMembers = (extraProfiles ?? []).map((p: any) => ({
+      user_id: p.id,
+      role: null,
+      member_since: null,
+      profiles: p,
+    }));
+  }
+
+  const allMemberRows = [...(memberRows ?? []), ...extraMembers];
 
   const { count: memberCount } = await supabase
     .from('user_associations')
     .select('id', { count: 'exact', head: true })
-    .or(`association_slug.eq.${page.slug},association_name.ilike.%${page.slug}%,association_name.ilike.%${page.name}%`);
+    .or(`association_slug.eq.${page.slug},association_name.ilike.%${page.slug}%`);
 
-  // Get verified status for members
-  const memberIds = (memberRows ?? []).map((m: any) => m.user_id);
-  const { data: verifiedRows } = memberIds.length > 0
-    ? await supabase.from('member_verifications').select('user_id, status').eq('status', 'verified').in('user_id', memberIds)
-    : { data: [] };
-  const verifiedSet = new Set((verifiedRows ?? []).map((v: any) => v.user_id));
+  const totalMemberCount = (memberCount ?? 0) + missingVerifiedIds.length;
 
-  const members = (memberRows ?? []).map((m: any) => ({
+  const members = allMemberRows.map((m: any) => ({
     user_id: m.user_id,
     role: m.role,
     member_since: m.member_since,
@@ -149,7 +175,7 @@ export default async function AssociationPage({ params }: { params: { slug: stri
         members={members}
         posts={posts}
         jobs={jobs}
-        platformMembers={memberCount ?? 0}
+        platformMembers={totalMemberCount}
         verifiedCount={verifiedSet.size}
       />
     </main>

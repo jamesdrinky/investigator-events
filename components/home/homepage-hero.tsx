@@ -187,20 +187,8 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
 
   return (
     <div className="relative overflow-clip">
-      {/* ── Video background ── */}
-      <div className="pointer-events-none absolute inset-0">
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="h-full w-full object-cover"
-          src="/conference/ie-hero.mp4"
-        />
-      </div>
-
-      {/* ── Dark overlay on video ── */}
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(165deg,rgba(6,9,26,0.88)_0%,rgba(10,18,40,0.85)_35%,rgba(13,24,64,0.82)_60%,rgba(10,18,40,0.9)_100%)]" />
+      {/* ── Dark background ── */}
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(165deg,#06091a_0%,#0a1228_35%,#0d1840_60%,#0a1228_100%)]" />
 
       {/* ── Ambient glow orbs ── */}
       <div className="pointer-events-none absolute inset-0">

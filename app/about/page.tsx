@@ -67,6 +67,26 @@ export default async function AboutPage() {
         </div>
       </section>
 
+      {/* ── Playable video with audio ── */}
+      <section className="bg-slate-950">
+        <div className="container-shell py-10 sm:py-14">
+          <Reveal>
+            <div className="overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10">
+              <video
+                controls
+                playsInline
+                preload="metadata"
+                poster="/conference/conference4.avif"
+                className="w-full"
+              >
+                <source src="/conference/ie-reel.mp4" type="video/mp4" />
+              </video>
+            </div>
+            <p className="mt-4 text-center text-[11px] font-medium uppercase tracking-[0.15em] text-slate-500">Watch the full reel with audio</p>
+          </Reveal>
+        </div>
+      </section>
+
       {/* ── Three pillars ── */}
       <section className="border-b border-slate-200/60 bg-white">
         <div className="container-shell py-14 sm:py-20">

@@ -94,6 +94,8 @@ async function parseEventData(formData: FormData, currentEventId?: string): Prom
   const eventScopeRaw = String(formData.get('eventScope') ?? 'main').trim();
   const eventScope = eventScopeRaw === 'secondary' ? 'secondary' : 'main';
   const imagePath = String(formData.get('imagePath') ?? '').trim();
+  const pricing = String(formData.get('pricing') ?? '').trim();
+  const timezone = String(formData.get('timezone') ?? '').trim();
   const slug = await generateUniqueEventSlug(title, currentEventId);
 
   return {
@@ -112,8 +114,10 @@ async function parseEventData(formData: FormData, currentEventId?: string): Prom
     website,
     image_path: imagePath || null,
     featured: formData.get('featured') === 'on',
-    approved: true
-  };
+    approved: true,
+    pricing: pricing || null,
+    timezone: timezone || null,
+  } as any;
 }
 
 function parseSubmissionData(formData: FormData): Omit<EventSubmissionInsert, 'id' | 'status' | 'created_at'> {

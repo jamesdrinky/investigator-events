@@ -44,6 +44,8 @@ function EventFields({
     website?: string;
     imagePath?: string;
     featured?: boolean;
+    pricing?: string;
+    timezone?: string;
   };
   idPrefix: string;
 }) {
@@ -109,6 +111,14 @@ function EventFields({
       <div className="sm:col-span-2">
         <label htmlFor={`${idPrefix}-website`} className="text-xs font-medium uppercase tracking-wider text-slate-500">Website</label>
         <input id={`${idPrefix}-website`} type="text" name="website" required inputMode="url" defaultValue={defaults?.website ?? ''} placeholder="example.com" className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20" />
+      </div>
+      <div>
+        <label htmlFor={`${idPrefix}-pricing`} className="text-xs font-medium uppercase tracking-wider text-slate-500">Pricing (optional)</label>
+        <input id={`${idPrefix}-pricing`} type="text" name="pricing" defaultValue={defaults?.pricing ?? ''} placeholder="e.g. Free, £150, $200-$500" className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20" />
+      </div>
+      <div>
+        <label htmlFor={`${idPrefix}-timezone`} className="text-xs font-medium uppercase tracking-wider text-slate-500">Timezone (optional)</label>
+        <input id={`${idPrefix}-timezone`} type="text" name="timezone" defaultValue={defaults?.timezone ?? ''} placeholder="e.g. GMT, EST, CET" className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20" />
       </div>
       <div className="sm:col-span-2">
         <label className="text-xs font-medium uppercase tracking-wider text-slate-500">Cover image</label>

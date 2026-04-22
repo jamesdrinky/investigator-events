@@ -69,6 +69,8 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
   const imageSrc = (event.image_path && /^(\/(cities|events|images)\/|https?:\/\/)/.test(event.image_path) ? event.image_path : event.coverImage) ?? '/cities/fallback.jpg';
   // Video support — if the event has a video URL field
   const videoUrl = (event as any).videoUrl as string | undefined;
+  const pricing = (event as any).pricing as string | undefined;
+  const timezone = (event as any).timezone as string | undefined;
 
   const isPastEvent = event.date ? parseDate(event.date).getTime() < Date.now() : false;
 
@@ -156,6 +158,7 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
                 <div className="rounded-xl border border-slate-200/60 bg-white px-4 py-3 shadow-sm">
                   <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-400">Date</p>
                   <p className="mt-1 text-sm font-bold text-slate-950">{eventDate}</p>
+                  {timezone && <p className="mt-0.5 text-[10px] text-slate-400">{timezone}</p>}
                 </div>
                 <div className="rounded-xl border border-slate-200/60 bg-white px-4 py-3 shadow-sm">
                   <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-400">Location</p>
@@ -165,6 +168,12 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
                   <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-400">Organiser</p>
                   <p className="mt-1 truncate text-sm font-bold text-slate-950">{organiser}</p>
                 </div>
+                {pricing && (
+                  <div className="col-span-2 rounded-xl border border-slate-200/60 bg-white px-4 py-3 shadow-sm sm:col-span-3">
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-400">Pricing</p>
+                    <p className="mt-1 text-sm font-bold text-slate-950">{pricing}</p>
+                  </div>
+                )}
               </div>
             </Reveal>
 

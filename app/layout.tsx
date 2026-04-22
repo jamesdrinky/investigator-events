@@ -4,6 +4,7 @@ import { CookieBanner } from '@/components/CookieBanner';
 import { Footer } from '@/components/footer';
 import { Navbar } from '@/components/navbar';
 import { NewsletterBanner } from '@/components/NewsletterBanner';
+import { BackToTop } from '@/components/BackToTop';
 import './globals.css';
 
 const sans = Plus_Jakarta_Sans({
@@ -54,6 +55,7 @@ export default function RootLayout({
         </div>
         <NewsletterBanner />
         <CookieBanner />
+        <BackToTop />
       </body>
     </html>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Search,
@@ -89,14 +89,32 @@ function isOnline(dateStr: string | null): boolean {
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 
+function getInitialParam(key: string) {
+  if (typeof window === 'undefined') return '';
+  return new URLSearchParams(window.location.search).get(key) ?? '';
+}
+
 export default function DirectoryPage() {
   const [investigators, setInvestigators] = useState<Investigator[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [countryFilter, setCountryFilter] = useState('');
-  const [specFilter, setSpecFilter] = useState('');
-  const [assocFilter, setAssocFilter] = useState('');
-  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [search, setSearch] = useState(() => getInitialParam('q'));
+  const [countryFilter, setCountryFilter] = useState(() => getInitialParam('country'));
+  const [specFilter, setSpecFilter] = useState(() => getInitialParam('spec'));
+  const [assocFilter, setAssocFilter] = useState(() => getInitialParam('assoc'));
+  const [verifiedOnly, setVerifiedOnly] = useState(() => getInitialParam('verified') === '1');
+  const [profileHidden, setProfileHidden] = useState(false);
+
+  // Sync filters to URL
+  const syncUrl = useCallback((s: string, country: string, spec: string, assoc: string, verified: boolean) => {
+    const params = new URLSearchParams();
+    if (s) params.set('q', s);
+    if (country) params.set('country', country);
+    if (spec) params.set('spec', spec);
+    if (assoc) params.set('assoc', assoc);
+    if (verified) params.set('verified', '1');
+    const qs = params.toString();
+    window.history.replaceState(null, '', `/directory${qs ? `?${qs}` : ''}`);
+  }, []);
   const [associations, setAssociations] = useState<string[]>([]);
   const [countries, setCountries] = useState<string[]>([]);
 
@@ -217,11 +235,23 @@ export default function DirectoryPage() {
       setInvestigators(list);
       setAssociations(Array.from(assocNames).sort());
       setCountries(Array.from(countrySet).sort());
+
+      // Check if current user's profile is hidden from directory
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (authUser && !list.some((inv) => inv.id === authUser.id)) {
+        setProfileHidden(true);
+      }
+
       setLoading(false);
     }
 
     load();
   }, []);
+
+  // Persist filters to URL when they change
+  useEffect(() => {
+    if (!loading) syncUrl(search, countryFilter, specFilter, assocFilter, verifiedOnly);
+  }, [search, countryFilter, specFilter, assocFilter, verifiedOnly, loading, syncUrl]);
 
   /* ---- Filter ---- */
   const filtered = useMemo(() => {
@@ -383,6 +413,16 @@ export default function DirectoryPage() {
           </div>
         </div>
       </div>
+
+      {/* Profile hidden banner */}
+      {profileHidden && (
+        <div className="container-shell pt-4">
+          <div className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+            <Clock className="h-4 w-4 flex-shrink-0 text-amber-600" />
+            <p className="flex-1 text-sm text-amber-800">Your profile isn&apos;t visible in the directory yet. <Link href="/profile/edit" className="font-semibold text-amber-900 underline">Complete your profile</Link> to appear here.</p>
+          </div>
+        </div>
+      )}
 
       {/* ---- Grid ---- */}
       <div className="container-shell py-8 sm:py-12">

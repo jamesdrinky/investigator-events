@@ -194,7 +194,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
     admin.from('newsletter_subscribers' as never).select('id', { count: 'exact', head: true }),
     admin.from('newsletter_sends' as never).select('*').order('sent_at', { ascending: false }).limit(5) as any,
     admin.from('newsletter_subscribers' as never).select('email, status, region, created_at, confirmed_at').order('created_at', { ascending: false }).limit(20) as any,
-    admin.from('profiles').select('id, full_name, username, avatar_url, country, specialisation, is_verified, is_public, created_at, linkedin_url, auth_provider').order('created_at', { ascending: false }).limit(200) as any,
+    admin.from('profiles').select('*').order('created_at', { ascending: false }).limit(200) as any,
   ]);
   const associationPages = (assocPagesResult.data ?? []) as { id: string; name: string; slug: string }[];
   const assocSuggestions = (assocSuggestionsResult.data ?? []) as unknown as { id: string; name: string; country: string | null; website: string | null; created_at: string }[];

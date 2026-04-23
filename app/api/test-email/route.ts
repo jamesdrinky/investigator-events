@@ -5,6 +5,16 @@ import { buildSubmissionConfirmationEmail } from '@/lib/email/submission-confirm
 import { buildWelcomeEmail } from '@/lib/email/welcome-email';
 import { buildApprovalOutreachEmail } from '@/lib/email/association-outreach';
 import { buildDailyDigestEmail } from '@/lib/email/daily-digest';
+import { buildWeeklyNewsletterHtml } from '@/lib/email/weekly-newsletter';
+import type { EventItem } from '@/lib/data/events';
+
+const sampleEvents: EventItem[] = [
+  { id: '1', title: 'WAD Annual Conference 2026', slug: 'wad-annual-conference-2026', eventScope: 'main', date: '2026-05-15', endDate: '2026-05-17', city: 'Amsterdam', region: 'Europe', country: 'Netherlands', organiser: 'World Association of Detectives', association: 'WAD', category: 'Conference', description: '', website: 'https://wad.net', featured: true },
+  { id: '2', title: 'ABI Annual Conference 2026', slug: 'abi-annual-conference-2026', eventScope: 'main', date: '2026-05-22', city: 'London', region: 'Europe', country: 'United Kingdom', organiser: 'Association of British Investigators', association: 'ABI', category: 'Conference', description: '', website: 'https://theabi.org.uk', featured: false },
+  { id: '3', title: 'IKD Jahrestagung 2026', slug: 'ikd-jahrestagung-2026', eventScope: 'main', date: '2026-06-10', endDate: '2026-06-12', city: 'Munich', region: 'Europe', country: 'Germany', organiser: 'Internationales Kartell der Detektive', association: 'IKD', category: 'Conference', description: '', website: 'https://ikd.net', featured: false },
+  { id: '4', title: 'ACFE Global Fraud Conference', slug: 'acfe-global-fraud-conference', eventScope: 'main', date: '2026-06-21', endDate: '2026-06-26', city: 'Nashville', region: 'North America', country: 'United States', organiser: 'ACFE', category: 'Conference', description: '', website: 'https://acfe.com', featured: true },
+  { id: '5', title: 'SPI Symposium 2026', slug: 'spi-symposium-2026', eventScope: 'main', date: '2026-07-08', city: 'New York', region: 'North America', country: 'United States', organiser: 'Society of Professional Investigators', association: 'SPI', category: 'Seminar', description: '', website: 'https://spinyc.org', featured: false },
+];
 
 const ALLOWED_RECIPIENTS = new Set([
   'james@drinky.com',
@@ -38,6 +48,15 @@ const TEMPLATES = {
       { type: 'post_like', actorName: 'Robert Fried', actorAvatar: 'https://dbeyznsxcetpwfcicimz.supabase.co/storage/v1/object/public/avatars/6c1ea32e-8d2f-498a-9177-05dbdfca7556/avatar.jpg', actorUsername: 'robert-fried', createdAt: new Date(Date.now() - 4 * 3600000).toISOString() },
       { type: 'post_comment', actorName: 'Charlotte Notley', actorAvatar: 'https://dbeyznsxcetpwfcicimz.supabase.co/storage/v1/object/public/avatars/ad551a2d-c5cf-4a0c-8c9f-f97e4b77acd3/avatar.jpg', actorUsername: 'charlotte-notley', createdAt: new Date(Date.now() - 5 * 3600000).toISOString() },
     ]),
+  }),
+  weekly: () => ({
+    subject: '[TEST] Weekly Briefing — 5 upcoming events, 3 newly added',
+    html: buildWeeklyNewsletterHtml({
+      upcoming: sampleEvents,
+      newlyAdded: sampleEvents.slice(2),
+      featured: sampleEvents.filter(e => e.featured),
+      recentlyPast: [],
+    }),
   }),
 };
 

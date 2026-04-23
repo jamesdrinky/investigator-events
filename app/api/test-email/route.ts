@@ -1,8 +1,15 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import { enforceRateLimit } from '@/lib/security/server';
 import { buildSubmissionConfirmationEmail } from '@/lib/email/submission-confirmation';
 import { buildWelcomeEmail } from '@/lib/email/welcome-email';
 import { buildApprovalOutreachEmail } from '@/lib/email/association-outreach';
+
+// Only these addresses can receive test emails
+const ALLOWED_RECIPIENTS = new Set([
+  'james@drinky.com',
+  'info@investigatorevents.com',
+]);
 
 const TEMPLATES = {
   submission: () => ({
@@ -25,26 +32,31 @@ const TEMPLATES = {
 };
 
 /**
- * Test email endpoint — only works in development or with admin password.
+ * Test email endpoint — admin-only, rate-limited, locked to allowed recipients.
  *
  * Usage:
- *   GET /api/test-email?template=submission&to=your@email.com
- *   GET /api/test-email?template=welcome&to=your@email.com
- *   GET /api/test-email?template=outreach&to=your@email.com
+ *   GET /api/test-email?template=submission&to=james@drinky.com&password=...
  */
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const template = searchParams.get('template') as keyof typeof TEMPLATES;
-  const to = searchParams.get('to');
-  const password = searchParams.get('password');
-
-  // Auth: require admin password
-  if (password !== process.env.ADMIN_PASSWORD) {
-    return NextResponse.json({ error: 'Unauthorized — add ?password=YOUR_ADMIN_PASSWORD' }, { status: 401 });
+  try {
+    enforceRateLimit('test-email', { maxRequests: 10, windowMs: 60_000 });
+  } catch {
+    return NextResponse.json({ error: 'Too many requests — slow down' }, { status: 429 });
   }
 
-  if (!to) {
-    return NextResponse.json({ error: 'Missing ?to=email@example.com' }, { status: 400 });
+  const { searchParams } = new URL(request.url);
+  const template = searchParams.get('template') as keyof typeof TEMPLATES;
+  const to = searchParams.get('to')?.trim().toLowerCase();
+  const password = searchParams.get('password');
+
+  if (password !== process.env.ADMIN_PASSWORD) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  if (!to || !ALLOWED_RECIPIENTS.has(to)) {
+    return NextResponse.json({
+      error: `Can only send test emails to: ${[...ALLOWED_RECIPIENTS].join(', ')}`,
+    }, { status: 403 });
   }
 
   if (!template || !TEMPLATES[template]) {

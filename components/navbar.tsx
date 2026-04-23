@@ -1,7 +1,7 @@
 'use client';
 
 import type { Route } from 'next';
-import { Menu, X, LogOut, User, Send, Bell, UserPlus, Heart, MessageCircle, CheckCircle } from 'lucide-react';
+import { Menu, X, LogOut, User, Send, Bell, UserPlus, UserCheck, Heart, MessageCircle, CheckCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
@@ -287,7 +287,7 @@ export function Navbar() {
                           </button>
                         )}
                       </div>
-                      <div className="max-h-80 overflow-y-auto">
+                      <div className="max-h-96 overflow-y-auto">
                         {loadingNotifs ? (
                           <div className="flex items-center justify-center py-8">
                             <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
@@ -296,34 +296,63 @@ export function Navbar() {
                           <div className="py-10 text-center">
                             <Bell className="mx-auto h-8 w-8 text-slate-200" />
                             <p className="mt-2 text-sm text-slate-400">No notifications yet</p>
+                            <p className="mt-1 text-xs text-slate-300">When people follow you, like your posts, or send connection requests, they'll show up here.</p>
                           </div>
                         ) : (
                           notifications.map((n: any) => {
-                            const icon = n.type === 'follow' ? <UserPlus className="h-4 w-4 text-blue-500" />
-                              : n.type === 'connection_request' || n.type === 'connection_accepted' ? <UserPlus className="h-4 w-4 text-emerald-500" />
-                              : n.type === 'post_like' ? <Heart className="h-4 w-4 text-pink-500" />
-                              : n.type === 'post_comment' ? <MessageCircle className="h-4 w-4 text-violet-500" />
-                              : <CheckCircle className="h-4 w-4 text-blue-500" />;
-
+                            const actor = n.actor;
+                            const actorName = actor?.full_name ?? 'Someone';
                             const timeAgo = getTimeAgo(n.created_at);
+
+                            const typeIcon = n.type === 'follow' ? <UserPlus className="h-3 w-3 text-blue-500" />
+                              : n.type === 'connection_request' ? <UserPlus className="h-3 w-3 text-emerald-500" />
+                              : n.type === 'connection_accepted' ? <UserCheck className="h-3 w-3 text-emerald-500" />
+                              : n.type === 'post_like' ? <Heart className="h-3 w-3 text-pink-500" />
+                              : n.type === 'post_comment' ? <MessageCircle className="h-3 w-3 text-violet-500" />
+                              : <CheckCircle className="h-3 w-3 text-blue-500" />;
+
+                            const actionText = n.type === 'follow' ? 'started following you'
+                              : n.type === 'connection_request' ? 'wants to connect with you'
+                              : n.type === 'connection_accepted' ? 'accepted your connection request'
+                              : n.type === 'post_like' ? 'liked your post'
+                              : n.type === 'post_comment' ? 'commented on your post'
+                              : n.body || '';
 
                             const inner = (
                               <div
                                 key={n.id}
-                                className={`flex items-start gap-3 px-4 py-3 transition hover:bg-slate-50 ${!n.is_read ? 'bg-blue-50/40' : ''}`}
+                                className={`flex items-start gap-3 px-4 py-3 transition hover:bg-slate-50 ${!n.is_read ? 'bg-blue-50/30' : ''}`}
                               >
-                                <div className="mt-0.5 flex-shrink-0">{icon}</div>
-                                <div className="min-w-0 flex-1">
-                                  <p className="text-sm text-slate-700">{n.title}</p>
-                                  {n.body && <p className="mt-0.5 text-xs text-slate-400">{n.body}</p>}
-                                  <p className="mt-1 text-[11px] text-slate-300">{timeAgo}</p>
+                                {/* Avatar with type badge */}
+                                <div className="relative flex-shrink-0">
+                                  {actor?.avatar_url ? (
+                                    <img src={actor.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover" />
+                                  ) : (
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-500">
+                                      {actorName.charAt(0)}
+                                    </div>
+                                  )}
+                                  <div className="absolute -bottom-0.5 -right-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full border-2 border-white bg-white">
+                                    {typeIcon}
+                                  </div>
                                 </div>
-                                {!n.is_read && <div className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-blue-500" />}
+
+                                {/* Content */}
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-[13px] leading-snug text-slate-700">
+                                    <span className="font-semibold text-slate-900">{actorName}</span>
+                                    {' '}{actionText}
+                                  </p>
+                                  <p className="mt-1 text-[11px] text-slate-400">{timeAgo}</p>
+                                </div>
+
+                                {!n.is_read && <div className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-blue-500" />}
                               </div>
                             );
 
-                            return n.link ? (
-                              <Link key={n.id} href={n.link as any} onClick={() => setShowNotifs(false)}>{inner}</Link>
+                            const href = n.link || (actor?.username ? `/profile/${actor.username}` : null);
+                            return href ? (
+                              <Link key={n.id} href={href as any} onClick={() => setShowNotifs(false)}>{inner}</Link>
                             ) : (
                               <div key={n.id}>{inner}</div>
                             );

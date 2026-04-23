@@ -61,7 +61,31 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ notifications: data ?? [] });
+    const notifications = data ?? [];
+
+    // Enrich with actor profiles (names + avatars)
+    const actorIds = [...new Set(notifications.map((n: any) => n.actor_id).filter(Boolean))];
+    let actorMap: Record<string, { full_name: string | null; avatar_url: string | null; username: string | null }> = {};
+
+    if (actorIds.length > 0) {
+      const { data: actors } = await supabase
+        .from('profiles')
+        .select('id, full_name, avatar_url, username')
+        .in('id', actorIds);
+
+      if (actors) {
+        for (const a of actors) {
+          actorMap[a.id] = { full_name: a.full_name, avatar_url: a.avatar_url, username: a.username };
+        }
+      }
+    }
+
+    const enriched = notifications.map((n: any) => ({
+      ...n,
+      actor: actorMap[n.actor_id] ?? null,
+    }));
+
+    return NextResponse.json({ notifications: enriched });
   } catch {
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }

@@ -146,7 +146,7 @@ export function buildApprovalOutreachEmail(params: ApprovalOutreachParams): stri
           </td></tr></table>
         </td></tr>
 
-        <!-- Thin brand divider instead of flipped wave (transform breaks Outlook) -->
+        <!-- Thin brand divider -->
         <tr><td>
           <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
             <td width="33%" style="height:3px;background-color:${C.blue};font-size:0;line-height:0;">&nbsp;</td>
@@ -174,19 +174,13 @@ export function buildApprovalOutreachEmail(params: ApprovalOutreachParams): stri
 }
 
 /**
- * Send the approval outreach email, but only once per association.
- * Returns true if sent, false if already sent to this association before.
+ * Queue the approval outreach email with a random 2-6 hour delay.
+ * Only queues once per association — skips if already queued or sent.
  */
-export async function sendApprovalOutreachEmail(params: ApprovalOutreachParams): Promise<boolean> {
-  const resendKey = process.env.RESEND_API_KEY;
-  if (!resendKey) {
-    console.warn('RESEND_API_KEY not set — skipping outreach email');
-    return false;
-  }
-
+export async function queueApprovalOutreachEmail(params: ApprovalOutreachParams): Promise<boolean> {
   const supabase = createSupabaseAdminServerClient();
 
-  // Check if we've already sent an outreach to this association
+  // Check if we've already queued or sent an outreach to this association
   const normalizedAssociation = params.association.trim().toLowerCase();
   const { data: existing } = await supabase
     .from('outreach_sends' as any)
@@ -196,43 +190,94 @@ export async function sendApprovalOutreachEmail(params: ApprovalOutreachParams):
     .maybeSingle();
 
   if (existing) {
-    console.log(`Outreach already sent to "${params.association}" — skipping`);
+    console.log(`Outreach already queued/sent to "${params.association}" — skipping`);
     return false;
   }
 
-  const resend = new Resend(resendKey);
-  const html = buildApprovalOutreachEmail(params);
+  // Random delay: 2-6 hours from now
+  const delayMs = (2 + Math.random() * 4) * 60 * 60 * 1000;
+  const sendAfter = new Date(Date.now() + delayMs).toISOString();
   const subject = `${params.eventName} is live on Investigator Events`;
+  const html = buildApprovalOutreachEmail(params);
 
-  const { data, error } = await resend.emails.send({
-    from: 'Mike LaCorte <info@investigatorevents.com>',
-    to: params.contactEmail,
-    subject,
-    html,
-    tags: [
-      { name: 'type', value: 'approval-outreach' },
-      { name: 'association', value: params.association },
-      ...(params.region ? [{ name: 'region', value: params.region }] : []),
-    ],
-  });
-
-  if (error) {
-    console.error(`Outreach email failed for "${params.association}":`, error.message);
-    return false;
-  }
-
-  // Log the send so we don't send again to this association
-  await supabase.from('outreach_sends' as any).insert({
-    resend_id: data?.id,
+  const { error } = await supabase.from('outreach_sends' as any).insert({
     recipient_email: params.contactEmail,
     recipient_name: params.contactName,
     association: params.association,
     region: params.region ?? null,
     sender: 'mike',
     subject,
-  } as any).then(({ error: logError }: { error: any }) => {
-    if (logError) console.warn('Failed to log outreach send:', logError.message);
-  });
+    event_name: params.eventName,
+    html,
+    status: 'pending',
+    send_after: sendAfter,
+  } as any);
 
+  if (error) {
+    console.error('Failed to queue outreach email:', error.message);
+    return false;
+  }
+
+  console.log(`Outreach to "${params.association}" queued — will send after ${sendAfter}`);
   return true;
+}
+
+/**
+ * Process the outreach queue — sends any emails where send_after has passed.
+ * Called by the cron job.
+ */
+export async function processOutreachQueue(): Promise<{ sent: number; failed: number }> {
+  const resendKey = process.env.RESEND_API_KEY;
+  if (!resendKey) {
+    console.warn('RESEND_API_KEY not set — skipping outreach queue');
+    return { sent: 0, failed: 0 };
+  }
+
+  const supabase = createSupabaseAdminServerClient();
+  const resend = new Resend(resendKey);
+
+  // Get all pending sends where send_after has passed
+  const { data: pending, error: fetchError } = await supabase
+    .from('outreach_sends' as any)
+    .select('*')
+    .eq('status', 'pending')
+    .lte('send_after', new Date().toISOString())
+    .order('send_after', { ascending: true })
+    .limit(10);
+
+  if (fetchError || !pending?.length) {
+    return { sent: 0, failed: 0 };
+  }
+
+  let sent = 0;
+  let failed = 0;
+
+  for (const row of pending as any[]) {
+    const { data, error } = await resend.emails.send({
+      from: 'Mike LaCorte <info@investigatorevents.com>',
+      to: row.recipient_email,
+      subject: row.subject,
+      html: row.html,
+      tags: [
+        { name: 'type', value: 'approval-outreach' },
+        { name: 'association', value: row.association },
+        ...(row.region ? [{ name: 'region', value: row.region }] : []),
+      ],
+    });
+
+    if (error) {
+      console.error(`Outreach to "${row.association}" failed:`, error.message);
+      await supabase.from('outreach_sends' as any)
+        .update({ status: 'failed' } as any)
+        .eq('id', row.id);
+      failed++;
+    } else {
+      await supabase.from('outreach_sends' as any)
+        .update({ status: 'sent', resend_id: data?.id, sent_at: new Date().toISOString() } as any)
+        .eq('id', row.id);
+      sent++;
+    }
+  }
+
+  return { sent, failed };
 }

@@ -16,7 +16,7 @@ import {
   hasValidAdminSessionCookie,
   setAdminSessionCookie
 } from '@/lib/admin/session';
-import { sendApprovalOutreachEmail } from '@/lib/email/association-outreach';
+import { queueApprovalOutreachEmail } from '@/lib/email/association-outreach';
 
 function ensureAdminSession() {
   if (!hasValidAdminSessionCookie()) {
@@ -300,7 +300,7 @@ export async function approveSubmissionAction(formData: FormData) {
       ? assocMatch[1]
       : submission.organiser;
 
-    sendApprovalOutreachEmail({
+    queueApprovalOutreachEmail({
       contactEmail: submission.contact_email,
       contactName: submission.organiser,
       eventName: submission.event_name,

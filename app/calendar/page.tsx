@@ -116,6 +116,21 @@ export default async function CalendarPage({
         <MyEventsPanel />
       </div>
 
+      {/* ── Newsletter CTA ── */}
+      <div className="container-shell relative">
+        <div className="mx-auto max-w-3xl rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 to-violet-50 px-6 py-5 sm:px-8">
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-bold text-slate-900">Never miss an event</p>
+              <p className="mt-0.5 text-xs text-slate-500">Get a free weekly briefing with new events, featured conferences, and community updates.</p>
+            </div>
+            <a href="/weekly" className="flex-shrink-0 rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800">
+              Subscribe free
+            </a>
+          </div>
+        </div>
+      </div>
+
       {/* ── Calendar content ── */}
       <div className="container-shell relative pb-8 sm:pb-12">
         <CalendarView

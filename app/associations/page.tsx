@@ -77,6 +77,21 @@ export default async function AssociationsPage() {
         </div>
       </div>
 
+      {/* ── Why join banner ── */}
+      <div className="container-shell relative pt-4">
+        <div className="mx-auto max-w-3xl rounded-2xl border border-emerald-100 bg-gradient-to-r from-emerald-50 to-cyan-50 px-6 py-5 sm:px-8">
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-bold text-slate-900">Not a member of an association?</p>
+              <p className="mt-0.5 text-xs text-slate-500">Discover why joining a professional investigation association can transform your career and credibility.</p>
+            </div>
+            <a href="/why-join-an-association" className="flex-shrink-0 rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800">
+              Learn why
+            </a>
+          </div>
+        </div>
+      </div>
+
       {/* ── Directory ── */}
       <div className="container-shell relative py-10 sm:py-16">
         <AssociationsDirectory associations={associations} stats={stats} />

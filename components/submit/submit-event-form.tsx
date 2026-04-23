@@ -157,8 +157,20 @@ export function SubmitEventForm({
       {/* ── Right: Form fields ── */}
       <div>
         {isSuccess && (
-          <div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-700">
-            Submission received. It has been added to the review queue.
+          <div className="mb-5 space-y-4">
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-700">
+              Submission received. It has been added to the review queue.
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <a href="/weekly" className="rounded-xl border border-blue-100 bg-blue-50 p-4 transition hover:shadow-sm">
+                <p className="text-sm font-semibold text-slate-900">Subscribe to the newsletter</p>
+                <p className="mt-0.5 text-xs text-slate-500">Get notified when your event goes live, plus weekly updates.</p>
+              </a>
+              <a href="/why-join-an-association" className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-4 transition hover:shadow-sm">
+                <p className="text-sm font-semibold text-slate-900">Why join an association?</p>
+                <p className="mt-0.5 text-xs text-slate-500">Discover the benefits of professional membership.</p>
+              </a>
+            </div>
           </div>
         )}
         {isError && (

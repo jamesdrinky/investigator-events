@@ -279,6 +279,22 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
         )}
       </div>
 
+      {/* ── Newsletter + Association CTAs ── */}
+      <div className="container-shell py-8">
+        <div className="mx-auto grid max-w-4xl gap-4 sm:grid-cols-2">
+          <a href="/weekly" className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-violet-50 p-5 transition hover:shadow-md">
+            <p className="text-sm font-bold text-slate-900">Get weekly event updates</p>
+            <p className="mt-1 text-xs text-slate-500">Free weekly briefing with new events, featured conferences, and community news. Join investigators worldwide.</p>
+            <span className="mt-3 inline-block text-xs font-semibold text-blue-600">Subscribe free →</span>
+          </a>
+          <a href="/why-join-an-association" className="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-cyan-50 p-5 transition hover:shadow-md">
+            <p className="text-sm font-bold text-slate-900">Why join an association?</p>
+            <p className="mt-1 text-xs text-slate-500">Professional credibility, networking, training discounts, and a voice in the industry. See what membership offers.</p>
+            <span className="mt-3 inline-block text-xs font-semibold text-emerald-600">Learn more →</span>
+          </a>
+        </div>
+      </div>
+
       {/* Bottom padding so sticky bar doesn't overlap content on mobile */}
       <div className="h-16 lg:hidden" />
 

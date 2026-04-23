@@ -22,20 +22,21 @@ export interface DigestNotification {
 
 function avatarCell(avatar: string | null, name: string): string {
   if (avatar) {
-    return `<img src="${avatar}" alt="" width="44" height="44" style="display:block;width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid ${C.border};" />`;
+    return `<img src="${avatar}" alt="" width="38" height="38" style="display:block;width:38px;height:38px;border-radius:50%;border:0;" />`;
   }
-  return `<div style="width:44px;height:44px;border-radius:50%;background-color:#dbeafe;text-align:center;line-height:44px;font-size:17px;font-weight:700;color:${C.blue};border:2px solid ${C.border};">${name.charAt(0)}</div>`;
+  return `<div style="width:38px;height:38px;border-radius:50%;background-color:#dbeafe;text-align:center;line-height:38px;font-size:15px;font-weight:700;color:${C.blue};">${name.charAt(0)}</div>`;
 }
 
-function actionText(type: string): string {
-  switch (type) {
-    case 'follow': return 'started following you';
-    case 'connection_request': return 'wants to connect with you';
-    case 'connection_accepted': return 'accepted your connection request';
-    case 'post_like': return 'liked your post';
-    case 'post_comment': return 'commented on your post';
-    default: return 'interacted with you';
-  }
+function typeBadge(type: string): string {
+  const badges: Record<string, { label: string; bg: string; color: string }> = {
+    follow: { label: 'Followed you', bg: '#dbeafe', color: '#2563eb' },
+    connection_request: { label: 'Connection request', bg: '#d1fae5', color: '#059669' },
+    connection_accepted: { label: 'Accepted', bg: '#d1fae5', color: '#059669' },
+    post_like: { label: 'Liked your post', bg: '#fce7f3', color: '#db2777' },
+    post_comment: { label: 'Commented', bg: '#ede9fe', color: '#7c3aed' },
+  };
+  const b = badges[type] ?? { label: 'Activity', bg: '#f1f5f9', color: '#64748b' };
+  return `<span style="display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;background-color:${b.bg};color:${b.color};letter-spacing:0.02em;">${b.label}</span>`;
 }
 
 function formatTime(dateStr: string): string {
@@ -62,19 +63,19 @@ export function buildDailyDigestEmail(name: string, notifications: DigestNotific
   const rows = notifications.slice(0, 10).map((n) => {
     const profileLink = n.actorUsername ? `${SITE}/profile/${n.actorUsername}` : `${SITE}/people?tab=discover`;
     return `
-    <tr><td style="padding:12px 0;border-bottom:1px solid ${C.border};">
+    <tr><td style="padding:10px 0;border-bottom:1px solid ${C.border};">
       <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
-        <td width="56" valign="top" style="padding-right:12px;">
+        <td width="50" valign="middle" style="padding-right:10px;">
           <a href="${profileLink}" style="text-decoration:none;">
             ${avatarCell(n.actorAvatar, n.actorName)}
           </a>
         </td>
-        <td valign="top">
-          <p style="margin:0;font-size:14px;color:${C.dark};line-height:1.4;">
+        <td valign="middle">
+          <p style="margin:0;font-size:13px;color:${C.dark};line-height:1.3;">
             <a href="${profileLink}" style="font-weight:700;color:${C.dark};text-decoration:none;">${n.actorName}</a>
-            <span style="color:${C.body};"> ${actionText(n.type)}</span>
+            <span style="color:${C.faint};font-size:11px;"> · ${formatTime(n.createdAt)}</span>
           </p>
-          <p style="margin:3px 0 0;font-size:11px;color:${C.faint};">${formatTime(n.createdAt)}</p>
+          <p style="margin:3px 0 0;">${typeBadge(n.type)}</p>
         </td>
       </tr></table>
     </td></tr>`;
@@ -104,7 +105,7 @@ export function buildDailyDigestEmail(name: string, notifications: DigestNotific
 
         <tr><td>
           <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:${C.white};border-radius:16px;border:1px solid ${C.border};">
-            <tr><td style="padding:28px 24px;">
+            <tr><td style="padding:24px 22px;">
 
               <p style="margin:0;font-size:20px;font-weight:800;color:${C.dark};letter-spacing:-0.02em;">
                 Hi ${name}, here's what you missed

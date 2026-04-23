@@ -31,14 +31,12 @@ const TEMPLATES = {
     }),
   }),
   digest: () => ({
-    subject: '[TEST] 6 new notifications on Investigator Events',
+    subject: '[TEST] 4 new notifications on Investigator Events',
     html: buildDailyDigestEmail('James', [
       { type: 'follow', actorName: 'Mike LaCorte', actorAvatar: 'https://investigatorevents.com/faces/mike2.png', actorUsername: 'mike-lacorte', createdAt: new Date(Date.now() - 2 * 3600000).toISOString() },
-      { type: 'connection_request', actorName: 'Charlotte Notley', actorAvatar: null, actorUsername: 'charlotte-notley', createdAt: new Date(Date.now() - 3 * 3600000).toISOString() },
-      { type: 'post_like', actorName: 'Mike LaCorte', actorAvatar: 'https://investigatorevents.com/faces/mike2.png', actorUsername: 'mike-lacorte', createdAt: new Date(Date.now() - 4 * 3600000).toISOString() },
-      { type: 'follow', actorName: 'Peter Coleman', actorAvatar: null, actorUsername: 'peter-coleman', createdAt: new Date(Date.now() - 5 * 3600000).toISOString() },
-      { type: 'post_comment', actorName: 'Charlotte Notley', actorAvatar: null, actorUsername: 'charlotte-notley', createdAt: new Date(Date.now() - 6 * 3600000).toISOString() },
-      { type: 'connection_accepted', actorName: 'Robert Fried', actorAvatar: null, actorUsername: 'robert-fried', createdAt: new Date(Date.now() - 7 * 3600000).toISOString() },
+      { type: 'connection_request', actorName: 'Charlotte Notley', actorAvatar: 'https://dbeyznsxcetpwfcicimz.supabase.co/storage/v1/object/public/avatars/ad551a2d-c5cf-4a0c-8c9f-f97e4b77acd3/avatar.jpg', actorUsername: 'charlotte-notley', createdAt: new Date(Date.now() - 3 * 3600000).toISOString() },
+      { type: 'post_like', actorName: 'Robert Fried', actorAvatar: 'https://dbeyznsxcetpwfcicimz.supabase.co/storage/v1/object/public/avatars/6c1ea32e-8d2f-498a-9177-05dbdfca7556/avatar.jpg', actorUsername: 'robert-fried', createdAt: new Date(Date.now() - 4 * 3600000).toISOString() },
+      { type: 'post_comment', actorName: 'Charlotte Notley', actorAvatar: 'https://dbeyznsxcetpwfcicimz.supabase.co/storage/v1/object/public/avatars/ad551a2d-c5cf-4a0c-8c9f-f97e4b77acd3/avatar.jpg', actorUsername: 'charlotte-notley', createdAt: new Date(Date.now() - 5 * 3600000).toISOString() },
     ]),
   }),
 };

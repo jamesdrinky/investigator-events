@@ -42,10 +42,37 @@ export function ConnectionButton({ targetUserId }: { targetUserId: string }) {
     if (status === 'none') {
       await supabase.from('connections').insert({ requester_id: userId, addressee_id: targetUserId, status: 'pending' });
       setStatus('pending-sent');
+      // Notify target of connection request
+      const { data: myProfile } = await supabase.from('profiles').select('full_name, username').eq('id', userId).single();
+      fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: targetUserId,
+          actorId: userId,
+          type: 'connection_request',
+          title: `${myProfile?.full_name ?? 'Someone'} wants to connect`,
+          body: 'You have a new connection request.',
+          link: myProfile?.username ? `/profile/${myProfile.username}` : '/people?tab=discover',
+        }),
+      }).catch(() => {});
     } else if (status === 'pending-received') {
       // Accept
       await supabase.from('connections').update({ status: 'accepted' }).or(`and(requester_id.eq.${targetUserId},addressee_id.eq.${userId})`);
       setStatus('connected');
+      // Notify requester that connection was accepted
+      const { data: myProfile } = await supabase.from('profiles').select('full_name, username').eq('id', userId).single();
+      fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: targetUserId,
+          actorId: userId,
+          type: 'connection_accepted',
+          title: `${myProfile?.full_name ?? 'Someone'} accepted your connection`,
+          link: myProfile?.username ? `/profile/${myProfile.username}` : '/people?tab=discover',
+        }),
+      }).catch(() => {});
     } else if (status === 'connected' || status === 'pending-sent') {
       // Remove/withdraw
       await supabase.from('connections').delete().or(`and(requester_id.eq.${userId},addressee_id.eq.${targetUserId}),and(requester_id.eq.${targetUserId},addressee_id.eq.${userId})`);

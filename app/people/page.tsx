@@ -92,6 +92,21 @@ function PeoplePageInner() {
       await supabase.from('followers').insert({ follower_id: userId, following_id: targetId });
       setFollowing((prev) => new Set(prev).add(targetId));
       setFollowerCounts((prev) => ({ ...prev, [targetId]: (prev[targetId] ?? 0) + 1 }));
+
+      // Get current user's name for notification
+      const { data: myProfile } = await supabase.from('profiles').select('full_name, username').eq('id', userId).single();
+      const myName = myProfile?.full_name ?? 'Someone';
+      fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: targetId,
+          actorId: userId,
+          type: 'follow',
+          title: `${myName} started following you`,
+          link: myProfile?.username ? `/profile/${myProfile.username}` : '/people?tab=discover',
+        }),
+      }).catch(() => {});
     }
     setTogglingFollow(null);
   };

@@ -1,7 +1,7 @@
 'use client';
 
 import type { Route } from 'next';
-import { Menu, X, LogOut, User, Send } from 'lucide-react';
+import { Menu, X, LogOut, User, Send, Bell, UserPlus, Heart, MessageCircle, CheckCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
@@ -44,7 +44,19 @@ function isActiveRoute(pathname: string, href: Route) {
   return pathname === getRoutePathname(href);
 }
 
-const DARK_ROUTES = ['/advice'];
+function getTimeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
+
+const DARK_ROUTES = ['/advice', '/about'];
 
 export function Navbar() {
   const [pathname, setPathname] = useState('');
@@ -52,7 +64,12 @@ export function Navbar() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [notifCount, setNotifCount] = useState(0);
+  const [showNotifs, setShowNotifs] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [loadingNotifs, setLoadingNotifs] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
   const isDark = DARK_ROUTES.includes(pathname);
 
   useEffect(() => {
@@ -80,6 +97,10 @@ export function Navbar() {
         supabase.from('messages' as any).select('id', { count: 'exact', head: true }).eq('receiver_id', data.user.id).eq('is_read', false).then(({ count }) => {
           setUnreadCount(count ?? 0);
         });
+        // Fetch unread notification count
+        supabase.from('notifications' as any).select('id', { count: 'exact', head: true }).eq('user_id', data.user.id).eq('is_read', false).then(({ count }) => {
+          setNotifCount(count ?? 0);
+        });
         // Update last_seen
         supabase.from('profiles').update({ last_seen: new Date().toISOString() } as any).eq('id', data.user.id).then(() => {});
       }
@@ -98,17 +119,23 @@ export function Navbar() {
       supabase.from('messages' as any).select('id', { count: 'exact', head: true }).eq('receiver_id', user.id).eq('is_read', false).then(({ count }) => {
         setUnreadCount(count ?? 0);
       });
+      supabase.from('notifications' as any).select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('is_read', false).then(({ count }) => {
+        setNotifCount(count ?? 0);
+      });
       // Update last_seen
       supabase.from('profiles').update({ last_seen: new Date().toISOString() } as any).eq('id', user.id).then(() => {});
     }, 15000);
     return () => clearInterval(interval);
   }, [user]);
 
-  // Close dropdown on outside click
+  // Close dropdowns on outside click
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setShowDropdown(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setShowNotifs(false);
       }
     }
     document.addEventListener('mousedown', handleClick);
@@ -201,11 +228,112 @@ export function Navbar() {
             {user ? (
               <div ref={dropdownRef} className="relative flex items-center gap-2">
                 <Link
-                  href="/why-join-an-association"
+                  href="/submit-event"
                   className={`hidden whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition sm:inline-flex ${isDark ? 'text-cyan-300 border border-cyan-400/30 hover:bg-cyan-400/10' : 'text-blue-600 border border-blue-200 hover:bg-blue-50'}`}
                 >
-                  Why Join?
+                  Submit Event
                 </Link>
+                {/* Notifications bell */}
+                <div ref={notifRef} className="relative">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const opening = !showNotifs;
+                      setShowNotifs(opening);
+                      if (opening && notifications.length === 0) {
+                        setLoadingNotifs(true);
+                        try {
+                          const res = await fetch('/api/notifications');
+                          const data = await res.json();
+                          setNotifications(data.notifications ?? []);
+                        } catch {}
+                        setLoadingNotifs(false);
+                      }
+                      if (opening && notifCount > 0) {
+                        // Mark all as read
+                        fetch('/api/notifications', { method: 'PATCH' }).then(() => setNotifCount(0));
+                      }
+                    }}
+                    className={`relative flex h-10 w-10 sm:h-8 sm:w-8 items-center justify-center rounded-full border transition ${
+                      isDark
+                        ? 'border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
+                        : 'border-slate-200/80 bg-white text-slate-500 hover:bg-slate-50 hover:text-blue-600'
+                    }`}
+                    title="Notifications"
+                  >
+                    <Bell className="h-4 w-4" />
+                    {notifCount > 0 && (
+                      <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-none text-white shadow-sm">
+                        {notifCount > 99 ? '99+' : notifCount}
+                      </span>
+                    )}
+                  </button>
+
+                  {showNotifs && (
+                    <div className="absolute right-0 top-full mt-2 w-80 rounded-xl border border-slate-200 bg-white shadow-xl">
+                      <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+                        <p className="text-sm font-bold text-slate-900">Notifications</p>
+                        {notifications.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              fetch('/api/notifications', { method: 'PATCH' });
+                              setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+                              setNotifCount(0);
+                            }}
+                            className="text-xs font-medium text-blue-600 hover:text-blue-700"
+                          >
+                            Mark all read
+                          </button>
+                        )}
+                      </div>
+                      <div className="max-h-80 overflow-y-auto">
+                        {loadingNotifs ? (
+                          <div className="flex items-center justify-center py-8">
+                            <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+                          </div>
+                        ) : notifications.length === 0 ? (
+                          <div className="py-10 text-center">
+                            <Bell className="mx-auto h-8 w-8 text-slate-200" />
+                            <p className="mt-2 text-sm text-slate-400">No notifications yet</p>
+                          </div>
+                        ) : (
+                          notifications.map((n: any) => {
+                            const icon = n.type === 'follow' ? <UserPlus className="h-4 w-4 text-blue-500" />
+                              : n.type === 'connection_request' || n.type === 'connection_accepted' ? <UserPlus className="h-4 w-4 text-emerald-500" />
+                              : n.type === 'post_like' ? <Heart className="h-4 w-4 text-pink-500" />
+                              : n.type === 'post_comment' ? <MessageCircle className="h-4 w-4 text-violet-500" />
+                              : <CheckCircle className="h-4 w-4 text-blue-500" />;
+
+                            const timeAgo = getTimeAgo(n.created_at);
+
+                            const inner = (
+                              <div
+                                key={n.id}
+                                className={`flex items-start gap-3 px-4 py-3 transition hover:bg-slate-50 ${!n.is_read ? 'bg-blue-50/40' : ''}`}
+                              >
+                                <div className="mt-0.5 flex-shrink-0">{icon}</div>
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-sm text-slate-700">{n.title}</p>
+                                  {n.body && <p className="mt-0.5 text-xs text-slate-400">{n.body}</p>}
+                                  <p className="mt-1 text-[11px] text-slate-300">{timeAgo}</p>
+                                </div>
+                                {!n.is_read && <div className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-blue-500" />}
+                              </div>
+                            );
+
+                            return n.link ? (
+                              <Link key={n.id} href={n.link as any} onClick={() => setShowNotifs(false)}>{inner}</Link>
+                            ) : (
+                              <div key={n.id}>{inner}</div>
+                            );
+                          })
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <Link
                   href="/messages"
                   className={`relative flex h-10 w-10 sm:h-8 sm:w-8 items-center justify-center rounded-full border transition ${

@@ -162,6 +162,23 @@ export function CommunityFeed() {
       await supabase.from('post_likes').insert({ user_id: userId, post_id: postId });
       setLikedPosts((prev) => new Set(prev).add(postId));
       setPosts((prev) => prev.map((p) => p.id === postId ? { ...p, likes_count: p.likes_count + 1 } : p));
+
+      // Notify post author
+      const post = posts.find((p) => p.id === postId);
+      if (post && post.user_id !== userId) {
+        const { data: myProfile } = await supabase.from('profiles').select('full_name, username').eq('id', userId).single();
+        fetch('/api/notifications', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: post.user_id,
+            actorId: userId,
+            type: 'post_like',
+            title: `${myProfile?.full_name ?? 'Someone'} liked your post`,
+            link: '/people?tab=feed',
+          }),
+        }).catch(() => {});
+      }
     }
   };
 
@@ -210,6 +227,22 @@ export function CommunityFeed() {
       }));
       setPosts((prev) => prev.map((p) => p.id === postId ? { ...p, comments_count: p.comments_count + 1 } : p));
       setCommentText((prev) => ({ ...prev, [postId]: '' }));
+
+      // Notify post author
+      const post = posts.find((p) => p.id === postId);
+      if (post && post.user_id !== userId) {
+        fetch('/api/notifications', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: post.user_id,
+            actorId: userId,
+            type: 'post_comment',
+            title: `${userName ?? 'Someone'} commented on your post`,
+            link: '/people?tab=feed',
+          }),
+        }).catch(() => {});
+      }
     }
   };
 

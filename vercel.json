@@ -1,8 +1,8 @@
 {
   "crons": [
     {
-      "path": "/api/cron/outreach-queue",
-      "schedule": "0 9 * * *"
+      "path": "/api/cron/daily",
+      "schedule": "0 18 * * *"
     }
   ]
 }

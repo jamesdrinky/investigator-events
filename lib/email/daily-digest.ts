@@ -12,68 +12,75 @@ const C = {
   white: '#ffffff',
 };
 
-interface DigestCounts {
-  followers: number;
-  connectionRequests: number;
-  connectionsAccepted: number;
-  likes: number;
-  comments: number;
+export interface DigestNotification {
+  type: string;
+  actorName: string;
+  actorAvatar: string | null;
+  actorUsername: string | null;
+  createdAt: string;
 }
 
-export function buildDailyDigestEmail(name: string, counts: DigestCounts): string {
-  const items: string[] = [];
+function avatarCell(avatar: string | null, name: string): string {
+  if (avatar) {
+    return `<img src="${avatar}" alt="" width="44" height="44" style="display:block;width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid ${C.border};" />`;
+  }
+  return `<div style="width:44px;height:44px;border-radius:50%;background-color:#dbeafe;text-align:center;line-height:44px;font-size:17px;font-weight:700;color:${C.blue};border:2px solid ${C.border};">${name.charAt(0)}</div>`;
+}
 
-  if (counts.followers > 0) {
-    items.push(`<tr><td style="padding:10px 0;border-bottom:1px solid ${C.border};">
-      <table cellpadding="0" cellspacing="0" border="0"><tr>
-        <td width="36" valign="top" style="padding-right:12px;font-size:20px;">👤</td>
-        <td><p style="margin:0;font-size:14px;color:${C.dark};font-weight:600;">${counts.followers} new follower${counts.followers !== 1 ? 's' : ''}</p>
-        <p style="margin:2px 0 0;font-size:12px;color:${C.muted};">People are finding your profile.</p></td>
-      </tr></table>
-    </td></tr>`);
+function actionText(type: string): string {
+  switch (type) {
+    case 'follow': return 'started following you';
+    case 'connection_request': return 'wants to connect with you';
+    case 'connection_accepted': return 'accepted your connection request';
+    case 'post_like': return 'liked your post';
+    case 'post_comment': return 'commented on your post';
+    default: return 'interacted with you';
+  }
+}
+
+function formatTime(dateStr: string): string {
+  const d = new Date(dateStr);
+  return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/London' });
+}
+
+export function buildDailyDigestEmail(name: string, notifications: DigestNotification[]): string {
+  // Group by type for the summary line
+  const counts: Record<string, number> = {};
+  for (const n of notifications) {
+    counts[n.type] = (counts[n.type] ?? 0) + 1;
   }
 
-  if (counts.connectionRequests > 0) {
-    items.push(`<tr><td style="padding:10px 0;border-bottom:1px solid ${C.border};">
-      <table cellpadding="0" cellspacing="0" border="0"><tr>
-        <td width="36" valign="top" style="padding-right:12px;font-size:20px;">🤝</td>
-        <td><p style="margin:0;font-size:14px;color:${C.dark};font-weight:600;">${counts.connectionRequests} connection request${counts.connectionRequests !== 1 ? 's' : ''}</p>
-        <p style="margin:2px 0 0;font-size:12px;color:${C.muted};">Investigators want to connect with you.</p></td>
-      </tr></table>
-    </td></tr>`);
-  }
+  const summaryParts: string[] = [];
+  if (counts['follow']) summaryParts.push(`${counts['follow']} new follower${counts['follow'] !== 1 ? 's' : ''}`);
+  if (counts['connection_request']) summaryParts.push(`${counts['connection_request']} connection request${counts['connection_request'] !== 1 ? 's' : ''}`);
+  if (counts['connection_accepted']) summaryParts.push(`${counts['connection_accepted']} accepted`);
+  if (counts['post_like']) summaryParts.push(`${counts['post_like']} like${counts['post_like'] !== 1 ? 's' : ''}`);
+  if (counts['post_comment']) summaryParts.push(`${counts['post_comment']} comment${counts['post_comment'] !== 1 ? 's' : ''}`);
+  const summaryLine = summaryParts.join(', ');
 
-  if (counts.connectionsAccepted > 0) {
-    items.push(`<tr><td style="padding:10px 0;border-bottom:1px solid ${C.border};">
-      <table cellpadding="0" cellspacing="0" border="0"><tr>
-        <td width="36" valign="top" style="padding-right:12px;font-size:20px;">✅</td>
-        <td><p style="margin:0;font-size:14px;color:${C.dark};font-weight:600;">${counts.connectionsAccepted} connection${counts.connectionsAccepted !== 1 ? 's' : ''} accepted</p>
-        <p style="margin:2px 0 0;font-size:12px;color:${C.muted};">You're growing your network.</p></td>
+  // Build notification rows (max 10, most recent first)
+  const rows = notifications.slice(0, 10).map((n) => {
+    const profileLink = n.actorUsername ? `${SITE}/profile/${n.actorUsername}` : `${SITE}/people?tab=discover`;
+    return `
+    <tr><td style="padding:12px 0;border-bottom:1px solid ${C.border};">
+      <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
+        <td width="56" valign="top" style="padding-right:12px;">
+          <a href="${profileLink}" style="text-decoration:none;">
+            ${avatarCell(n.actorAvatar, n.actorName)}
+          </a>
+        </td>
+        <td valign="top">
+          <p style="margin:0;font-size:14px;color:${C.dark};line-height:1.4;">
+            <a href="${profileLink}" style="font-weight:700;color:${C.dark};text-decoration:none;">${n.actorName}</a>
+            <span style="color:${C.body};"> ${actionText(n.type)}</span>
+          </p>
+          <p style="margin:3px 0 0;font-size:11px;color:${C.faint};">${formatTime(n.createdAt)}</p>
+        </td>
       </tr></table>
-    </td></tr>`);
-  }
+    </td></tr>`;
+  }).join('\n');
 
-  if (counts.likes > 0) {
-    items.push(`<tr><td style="padding:10px 0;border-bottom:1px solid ${C.border};">
-      <table cellpadding="0" cellspacing="0" border="0"><tr>
-        <td width="36" valign="top" style="padding-right:12px;font-size:20px;">❤️</td>
-        <td><p style="margin:0;font-size:14px;color:${C.dark};font-weight:600;">${counts.likes} like${counts.likes !== 1 ? 's' : ''} on your posts</p>
-        <p style="margin:2px 0 0;font-size:12px;color:${C.muted};">Your content is resonating.</p></td>
-      </tr></table>
-    </td></tr>`);
-  }
-
-  if (counts.comments > 0) {
-    items.push(`<tr><td style="padding:10px 0;">
-      <table cellpadding="0" cellspacing="0" border="0"><tr>
-        <td width="36" valign="top" style="padding-right:12px;font-size:20px;">💬</td>
-        <td><p style="margin:0;font-size:14px;color:${C.dark};font-weight:600;">${counts.comments} new comment${counts.comments !== 1 ? 's' : ''}</p>
-        <p style="margin:2px 0 0;font-size:12px;color:${C.muted};">People are engaging with your posts.</p></td>
-      </tr></table>
-    </td></tr>`);
-  }
-
-  const totalActivity = counts.followers + counts.connectionRequests + counts.connectionsAccepted + counts.likes + counts.comments;
+  const remaining = notifications.length - 10;
 
   return `<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -97,31 +104,37 @@ export function buildDailyDigestEmail(name: string, counts: DigestCounts): strin
 
         <tr><td>
           <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:${C.white};border-radius:16px;border:1px solid ${C.border};">
-            <tr><td style="padding:32px 28px;">
+            <tr><td style="padding:28px 24px;">
 
-              <p style="margin:0;font-size:22px;font-weight:800;color:${C.dark};letter-spacing:-0.02em;">
-                Your daily update
+              <p style="margin:0;font-size:20px;font-weight:800;color:${C.dark};letter-spacing:-0.02em;">
+                Hi ${name}, here's what you missed
               </p>
-              <p style="margin:8px 0 0;font-size:14px;color:${C.muted};">
-                Hi ${name}, here's what happened today.
+              <p style="margin:6px 0 0;font-size:13px;color:${C.muted};">
+                ${summaryLine}
               </p>
 
-              <!-- Activity summary -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0 0;">
-                ${items.join('\n')}
+              <!-- Notification rows -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0 0;">
+                ${rows}
               </table>
 
+              ${remaining > 0 ? `
+              <p style="margin:12px 0 0;font-size:12px;color:${C.faint};text-align:center;">
+                and ${remaining} more notification${remaining !== 1 ? 's' : ''}
+              </p>
+              ` : ''}
+
               <!-- CTA -->
-              <table cellpadding="0" cellspacing="0" role="presentation" style="margin:28px auto 0;">
+              <table cellpadding="0" cellspacing="0" role="presentation" style="margin:24px auto 0;">
                 <tr><td align="center" style="background-color:${C.dark};border-radius:99px;">
                   <!--[if mso]>
-                  <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${SITE}/people?tab=discover" style="height:46px;v-text-anchor:middle;width:200px;" arcsize="50%" fillcolor="${C.dark}" stroke="false">
-                    <v:textbox inset="0,0,0,0"><center style="color:#ffffff;font-family:sans-serif;font-size:14px;font-weight:600;">View your activity</center></v:textbox>
+                  <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${SITE}/people?tab=feed" style="height:46px;v-text-anchor:middle;width:200px;" arcsize="50%" fillcolor="${C.dark}" stroke="false">
+                    <v:textbox inset="0,0,0,0"><center style="color:#ffffff;font-family:sans-serif;font-size:14px;font-weight:600;">View all activity</center></v:textbox>
                   </v:roundrect>
                   <![endif]-->
                   <!--[if !mso]><!-->
                   <a href="${SITE}/people?tab=feed" style="display:inline-block;padding:13px 32px;background-color:${C.dark};color:${C.white};text-decoration:none;font-size:14px;font-weight:600;border-radius:99px;">
-                    View your activity
+                    View all activity
                   </a>
                   <!--<![endif]-->
                 </td></tr>

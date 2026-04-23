@@ -53,11 +53,11 @@ export function Footer() {
           <p className="mt-2 text-sm text-slate-500">Global coverage. Free listings. Reviewed submissions.</p>
         </div>
 
-        <div className="hidden md:block">
+        <div>
           <div className="rounded-[1.4rem] border border-slate-200 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(247,250,255,0.88))] p-4 shadow-[0_24px_48px_-30px_rgba(15,23,42,0.16)]">
             <p className="text-[10px] uppercase tracking-[0.18em] text-blue-700">Email updates</p>
             <p className="mt-2 text-sm leading-relaxed text-slate-600">
-              Read the weekly page or subscribe for new events, approaching dates, and one useful featured listing.
+              Subscribe for weekly event alerts, approaching dates, and featured listings.
             </p>
           </div>
         </div>

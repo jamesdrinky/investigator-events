@@ -5,9 +5,7 @@ import { buildSubmissionConfirmationEmail } from '@/lib/email/submission-confirm
 import { buildWelcomeEmail } from '@/lib/email/welcome-email';
 import { buildApprovalOutreachEmail } from '@/lib/email/association-outreach';
 import { buildDailyDigestEmail } from '@/lib/email/daily-digest';
-import { buildNotificationEmail } from '@/lib/email/notification-email';
 
-// Only these addresses can receive test emails
 const ALLOWED_RECIPIENTS = new Set([
   'james@drinky.com',
   'info@investigatorevents.com',
@@ -34,33 +32,17 @@ const TEMPLATES = {
   }),
   digest: () => ({
     subject: '[TEST] 6 new notifications on Investigator Events',
-    html: buildDailyDigestEmail('James', {
-      followers: 2,
-      connectionRequests: 1,
-      connectionsAccepted: 1,
-      likes: 3,
-      comments: 1,
-    }),
-  }),
-  notification: () => ({
-    subject: '[TEST] Mike LaCorte started following you',
-    html: buildNotificationEmail({
-      title: 'Mike LaCorte started following you',
-      body: 'Mike LaCorte started following you on Investigator Events.',
-      actorName: 'Mike LaCorte',
-      actorAvatar: 'https://investigatorevents.com/faces/mike2.png',
-      link: 'https://investigatorevents.com/profile/mike-lacorte',
-      ctaText: 'View profile',
-    }),
+    html: buildDailyDigestEmail('James', [
+      { type: 'follow', actorName: 'Mike LaCorte', actorAvatar: 'https://investigatorevents.com/faces/mike2.png', actorUsername: 'mike-lacorte', createdAt: new Date(Date.now() - 2 * 3600000).toISOString() },
+      { type: 'connection_request', actorName: 'Charlotte Notley', actorAvatar: null, actorUsername: 'charlotte-notley', createdAt: new Date(Date.now() - 3 * 3600000).toISOString() },
+      { type: 'post_like', actorName: 'Mike LaCorte', actorAvatar: 'https://investigatorevents.com/faces/mike2.png', actorUsername: 'mike-lacorte', createdAt: new Date(Date.now() - 4 * 3600000).toISOString() },
+      { type: 'follow', actorName: 'Peter Coleman', actorAvatar: null, actorUsername: 'peter-coleman', createdAt: new Date(Date.now() - 5 * 3600000).toISOString() },
+      { type: 'post_comment', actorName: 'Charlotte Notley', actorAvatar: null, actorUsername: 'charlotte-notley', createdAt: new Date(Date.now() - 6 * 3600000).toISOString() },
+      { type: 'connection_accepted', actorName: 'Robert Fried', actorAvatar: null, actorUsername: 'robert-fried', createdAt: new Date(Date.now() - 7 * 3600000).toISOString() },
+    ]),
   }),
 };
 
-/**
- * Test email endpoint — admin-only, rate-limited, locked to allowed recipients.
- *
- * Usage:
- *   GET /api/test-email?template=submission&to=james@drinky.com&password=...
- */
 export async function GET(request: Request) {
   try {
     enforceRateLimit('test-email', { maxRequests: 10, windowMs: 60_000 });

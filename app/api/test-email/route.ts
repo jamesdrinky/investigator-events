@@ -9,6 +9,7 @@ import { buildApprovalOutreachEmail } from '@/lib/email/association-outreach';
 const ALLOWED_RECIPIENTS = new Set([
   'james@drinky.com',
   'info@investigatorevents.com',
+  'm.lacorte@conflictinternational.com',
 ]);
 
 const TEMPLATES = {

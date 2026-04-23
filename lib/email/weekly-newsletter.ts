@@ -146,7 +146,7 @@ function reviewSection(events: EventItem[]) {
 
   return `
   <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:36px;">
-    <tr><td style="padding:24px 20px;background:linear-gradient(135deg,#eff6ff,#f5f3ff,#fdf2f8);border-radius:16px;">
+    <tr><td style="padding:24px 20px;background-color:#f0f4ff;border-radius:16px;">
       <table width="100%" cellpadding="0" cellspacing="0">
         <tr><td>
           <p style="margin:0;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:${C.faint};">Recently happened</p>
@@ -294,8 +294,12 @@ export function buildWeeklyNewsletterHtml({
     </tr>
   </table>
 
-  <!-- Gradient accent line -->
-  <div style="margin:24px 0 0;height:3px;border-radius:2px;background:linear-gradient(90deg,${C.blue},${C.purple},${C.pink});"></div>
+  <!-- Brand accent line -->
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:24px 0 0;"><tr>
+    <td width="33%" style="height:3px;background-color:${C.blue};font-size:0;line-height:0;">&nbsp;</td>
+    <td width="34%" style="height:3px;background-color:${C.purple};font-size:0;line-height:0;">&nbsp;</td>
+    <td width="33%" style="height:3px;background-color:${C.pink};font-size:0;line-height:0;">&nbsp;</td>
+  </tr></table>
 
   <!-- Featured hero -->
   ${hero ? heroCard(hero) : ''}
@@ -312,8 +316,33 @@ export function buildWeeklyNewsletterHtml({
   <!-- How-to -->
   ${howToSection()}
 
+  <!-- Community section -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:32px;">
+    <tr><td>
+      <p style="margin:0;font-size:13px;font-weight:700;color:${C.dark};text-transform:uppercase;letter-spacing:0.1em;">Beyond the calendar</p>
+    </td></tr>
+    <tr><td style="padding-top:12px;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td width="50%" style="padding-right:6px;vertical-align:top;">
+            <a href="${SITE}/people?tab=discover" style="text-decoration:none;display:block;padding:14px;background-color:#f0f4ff;border-radius:10px;border:1px solid #dbeafe;">
+              <p style="margin:0;font-size:13px;font-weight:700;color:${C.dark};">Find investigators</p>
+              <p style="margin:4px 0 0;font-size:11px;color:${C.muted};">Connect with PIs worldwide</p>
+            </a>
+          </td>
+          <td width="50%" style="padding-left:6px;vertical-align:top;">
+            <a href="${SITE}/associations" style="text-decoration:none;display:block;padding:14px;background-color:#f0fdf4;border-radius:10px;border:1px solid #d1fae5;">
+              <p style="margin:0;font-size:13px;font-weight:700;color:${C.dark};">Associations</p>
+              <p style="margin:4px 0 0;font-size:11px;color:${C.muted};">Browse 40+ PI bodies</p>
+            </a>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+
   <!-- Primary CTA -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:36px;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:28px;">
     <tr><td align="center">
       <!--[if mso]>
       <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${SITE}/calendar" style="height:46px;v-text-anchor:middle;width:240px;" arcsize="50%" fillcolor="#2563eb">
@@ -321,10 +350,10 @@ export function buildWeeklyNewsletterHtml({
       </v:roundrect>
       <![endif]-->
       <!--[if !mso]><!-->
-      <a href="${SITE}/calendar" style="display:inline-block;padding:14px 40px;background:linear-gradient(135deg,${C.blue},${C.purple});color:${C.white};text-decoration:none;font-size:14px;font-weight:700;border-radius:99px;letter-spacing:0.01em;">Browse full calendar</a>
+      <a href="${SITE}/calendar" style="display:inline-block;padding:14px 40px;background-color:${C.blue};color:${C.white};text-decoration:none;font-size:14px;font-weight:700;border-radius:99px;letter-spacing:0.01em;">Browse full calendar</a>
       <!--<![endif]-->
     </td></tr>
-    <tr><td align="center" style="padding-top:12px;">
+    <tr><td align="center" style="padding-top:10px;">
       <a href="${SITE}/submit-event" style="font-size:12px;color:${C.blue};text-decoration:none;font-weight:600;">Submit an event for free &rarr;</a>
     </td></tr>
   </table>
@@ -332,8 +361,14 @@ export function buildWeeklyNewsletterHtml({
   <div style="height:32px;"></div>
 </td></tr>
 
-<!-- Wave banner bottom (flipped) -->
-<tr><td style="border-radius:0 0 20px 20px;overflow:hidden;"><img src="${WAVE}" alt="" width="560" style="display:block;width:100%;height:auto;-webkit-transform:rotate(180deg);transform:rotate(180deg);border-radius:0 0 20px 20px;" /></td></tr>
+<!-- Brand divider bottom -->
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+    <td width="33%" style="height:3px;background-color:${C.blue};font-size:0;line-height:0;">&nbsp;</td>
+    <td width="34%" style="height:3px;background-color:${C.purple};font-size:0;line-height:0;">&nbsp;</td>
+    <td width="33%" style="height:3px;background-color:${C.pink};font-size:0;line-height:0;">&nbsp;</td>
+  </tr></table>
+</td></tr>
 
 <!-- Footer -->
 <tr><td style="padding:20px 8px 8px;text-align:center;">

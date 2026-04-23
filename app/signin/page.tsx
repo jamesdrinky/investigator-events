@@ -16,7 +16,7 @@ function SignInPageInner() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSignIn = async ({ email, password }: { email: string; password: string }) => {
+  const handleSignIn = async ({ email, password, newsletterOptIn }: { email: string; password: string; newsletterOptIn?: boolean }) => {
     setError('');
     setLoading(true);
     const supabase = createSupabaseBrowserClient();
@@ -25,6 +25,13 @@ function SignInPageInner() {
     if (authError) {
       setError(authError.message);
     } else {
+      if (newsletterOptIn) {
+        fetch('/api/newsletter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        }).catch(() => {});
+      }
       router.push('/profile');
     }
   };

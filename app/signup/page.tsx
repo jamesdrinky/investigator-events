@@ -19,7 +19,7 @@ function SignUpPageInner() {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSignUp = async ({ email, password, name, tosAccepted }: { email: string; password: string; name?: string; tosAccepted?: boolean }) => {
+  const handleSignUp = async ({ email, password, name, tosAccepted, newsletterOptIn }: { email: string; password: string; name?: string; tosAccepted?: boolean; newsletterOptIn?: boolean }) => {
     setError('');
     setSuccess('');
     setLoading(true);
@@ -48,6 +48,15 @@ function SignUpPageInner() {
         setLoading(false);
         setError(result.error || 'Failed to create account.');
         return;
+      }
+
+      // Subscribe to newsletter if opted in
+      if (newsletterOptIn) {
+        fetch('/api/newsletter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        }).catch(() => {});
       }
 
       // Sign in immediately

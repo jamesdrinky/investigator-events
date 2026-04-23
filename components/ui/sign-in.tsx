@@ -31,7 +31,7 @@ interface AuthPageProps {
   mode: 'signin' | 'signup';
   heroImageSrc?: string;
   testimonials?: Testimonial[];
-  onSubmit: (data: { email: string; password: string; name?: string; tosAccepted?: boolean }) => void;
+  onSubmit: (data: { email: string; password: string; name?: string; tosAccepted?: boolean; newsletterOptIn?: boolean }) => void;
   onGoogleSignIn?: () => void;
   onLinkedInSignIn?: () => void;
   onSwitchMode?: () => void;
@@ -76,12 +76,13 @@ export function AuthPage({
   const [email, setEmail] = useState(initialEmail ?? '');
   const [password, setPassword] = useState('');
   const [tosAccepted, setTosAccepted] = useState(false);
+  const [newsletterOptIn, setNewsletterOptIn] = useState(true);
 
   const isSignUp = mode === 'signup';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ email, password, ...(isSignUp ? { name, tosAccepted } : {}) });
+    onSubmit({ email, password, ...(isSignUp ? { name, tosAccepted, newsletterOptIn } : { newsletterOptIn }) });
   };
 
   return (
@@ -228,6 +229,22 @@ export function AuthPage({
                   </label>
                 </div>
               )}
+
+              <div
+                className="flex items-start gap-3"
+                style={{ opacity: 0, animation: `fadeSlideIn 0.5s ease forwards ${isSignUp ? '0.54s' : '0.48s'}` }}
+              >
+                <input
+                  type="checkbox"
+                  id="newsletter-opt-in"
+                  checked={newsletterOptIn}
+                  onChange={(e) => setNewsletterOptIn(e.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                />
+                <label htmlFor="newsletter-opt-in" className="text-xs leading-relaxed text-slate-500">
+                  Send me the weekly events newsletter and activity notifications by email. You can unsubscribe at any time.
+                </label>
+              </div>
 
               {error && (
                 <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>

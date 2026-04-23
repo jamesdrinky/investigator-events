@@ -387,18 +387,21 @@ export function Navbar() {
             ) : (
               <>
                 <Link
-                  href="/signup"
-                  onClick={() => handleNavigation('/signup' as Route)}
-                  className={`hidden whitespace-nowrap rounded-full px-4 py-1.5 text-xs font-semibold transition sm:inline-flex ${isDark ? 'bg-white/15 text-white hover:bg-white/25' : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'}`}
+                  href="/why-join-an-association"
+                  onClick={() => handleNavigation('/why-join-an-association' as Route)}
+                  className={`hidden whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition xl:inline-flex ${isDark ? 'text-cyan-300 border border-cyan-400/30 hover:bg-cyan-400/10' : 'text-blue-600 border border-blue-200 hover:bg-blue-50'}`}
                 >
-                  Join Free
+                  Why Join?
                 </Link>
                 <Link
                   href="/signin"
                   onClick={() => handleNavigation('/signin' as Route)}
-                  className={`hidden whitespace-nowrap rounded-full px-4 py-1.5 text-xs font-semibold transition sm:inline-flex ${isDark ? 'text-white/70 border border-white/20 hover:bg-white/10' : 'text-slate-700 border border-slate-200 hover:bg-slate-50'}`}
+                  className={`hidden whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition sm:inline-flex ${isDark ? 'bg-white/15 text-white hover:bg-white/25' : 'bg-slate-900 text-white hover:bg-slate-800 shadow-sm'}`}
                 >
                   Sign in
+                </Link>
+                <Link href="/weekly" className="hidden xl:inline-flex">
+                  <ShinyButton className="whitespace-nowrap px-3 py-1.5 text-xs">Newsletter</ShinyButton>
                 </Link>
               </>
             )}

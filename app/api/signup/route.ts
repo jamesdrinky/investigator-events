@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
+import { Resend } from 'resend';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { enforceRateLimit, assertSameOriginRequest } from '@/lib/security/server';
+import { buildWelcomeEmail } from '@/lib/email/welcome-email';
 
 export async function POST(request: Request) {
   try {
@@ -52,6 +54,18 @@ export async function POST(request: Request) {
       if (profileError) {
         console.error('Failed to create profile:', profileError.message);
       }
+    }
+
+    // Send welcome email (fire-and-forget)
+    const resendKey = process.env.RESEND_API_KEY;
+    if (resendKey && email) {
+      const resend = new Resend(resendKey);
+      resend.emails.send({
+        from: 'Investigator Events <info@investigatorevents.com>',
+        to: email,
+        subject: 'Welcome to Investigator Events',
+        html: buildWelcomeEmail(fullName || null),
+      }).catch((err) => console.error('Welcome email failed:', err));
     }
 
     return NextResponse.json({ message: 'Account created', userId: data.user?.id });

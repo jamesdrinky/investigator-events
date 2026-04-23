@@ -2,11 +2,13 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { Resend } from 'resend';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import type { EventSubmissionInsert } from '@/lib/data/event-submissions';
 import { eventRegions } from '@/lib/forms/event-form-options';
 import { assertSameOriginRequest, enforceRateLimit, verifySignedFormState } from '@/lib/security/server';
 import { normalizeRequiredUrl } from '@/lib/utils/url';
+import { buildSubmissionConfirmationEmail } from '@/lib/email/submission-confirmation';
 
 const categories = new Set(['Conference', 'Training', 'Association Meeting', 'Seminar', 'Expo', 'Summit']);
 const regions = new Set(eventRegions);
@@ -135,6 +137,18 @@ export async function submitEventAction(formData: FormData) {
     if (error) {
       console.error('submitEventAction insert failed', error);
       redirect('/submit-event?status=error');
+    }
+
+    // Send confirmation email to submitter (fire-and-forget)
+    const resendKey = process.env.RESEND_API_KEY;
+    if (resendKey) {
+      const resend = new Resend(resendKey);
+      resend.emails.send({
+        from: 'Investigator Events <info@investigatorevents.com>',
+        to: payload.contact_email,
+        subject: `Event received — ${payload.event_name}`,
+        html: buildSubmissionConfirmationEmail(payload.event_name),
+      }).catch((err) => console.error('Submission confirmation email failed:', err));
     }
 
     revalidatePath('/submit-event');

@@ -16,6 +16,7 @@ import {
   hasValidAdminSessionCookie,
   setAdminSessionCookie
 } from '@/lib/admin/session';
+import { sendApprovalOutreachEmail } from '@/lib/email/association-outreach';
 
 function ensureAdminSession() {
   if (!hasValidAdminSessionCookie()) {
@@ -289,6 +290,23 @@ export async function approveSubmissionAction(formData: FormData) {
 
   if (updateError) {
     throw new Error(`Failed to update submission status: ${updateError.message}`);
+  }
+
+  // Send outreach email to association contact (once per association, fire-and-forget)
+  if (submission.contact_email) {
+    // Extract association name from notes "[Association: XYZ]" or fall back to organiser
+    const assocMatch = submission.notes?.match(/\[Association:\s*(.+?)\]/);
+    const association = (assocMatch?.[1] && assocMatch[1] !== 'other')
+      ? assocMatch[1]
+      : submission.organiser;
+
+    sendApprovalOutreachEmail({
+      contactEmail: submission.contact_email,
+      contactName: submission.organiser,
+      eventName: submission.event_name,
+      association,
+      region: submission.region ?? undefined,
+    }).catch((err) => console.error('Approval outreach email failed:', err));
   }
 
   revalidatePath('/');

@@ -18,6 +18,9 @@ export async function POST(request: Request) {
     if (!email || !password) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
     }
+    if (!fullName || fullName.length < 2) {
+      return NextResponse.json({ error: 'Full name is required' }, { status: 400 });
+    }
     if (password.length < 6) {
       return NextResponse.json({ error: 'Password must be at least 6 characters' }, { status: 400 });
     }

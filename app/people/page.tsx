@@ -1,13 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Search, ShieldCheck, UserPlus, UserCheck, Users, TrendingUp, Globe, BookUser, XCircle } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Search, UserPlus, UserCheck, Users, TrendingUp, Globe, BookUser, XCircle, MapPin, Briefcase, Calendar, Mail, ArrowRight } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { getCountryFlag } from '@/lib/utils/location';
 import { CommunityFeed } from '@/components/CommunityFeed';
 import { CaseReferralBoard } from '@/components/CaseReferralBoard';
+import { Suspense } from 'react';
 
 type Person = {
   id: string; full_name: string | null; avatar_url: string | null;
@@ -15,17 +17,31 @@ type Person = {
   username: string | null;
 };
 
-export default function PeoplePage() {
+type Tab = 'feed' | 'discover' | 'lfg';
+
+function PeoplePageInner() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialTab = (searchParams.get('tab') as Tab) || 'feed';
+
   const [suggested, setSuggested] = useState<Person[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
   const [following, setFollowing] = useState<Set<string>>(new Set());
   const [togglingFollow, setTogglingFollow] = useState<string | null>(null);
-  const [tab, setTab] = useState<'feed' | 'discover' | 'lfg'>('feed');
+  const [tab, setTabState] = useState<Tab>(initialTab);
 
   // Discover state
   const [allPeople, setAllPeople] = useState<Person[]>([]);
   const [search, setSearch] = useState('');
+  const [specFilter, setSpecFilter] = useState<string | null>(null);
   const [followerCounts, setFollowerCounts] = useState<Record<string, number>>({});
+
+  const setTab = useCallback((t: Tab) => {
+    setTabState(t);
+    const url = new URL(window.location.href);
+    url.searchParams.set('tab', t);
+    window.history.replaceState({}, '', url.toString());
+  }, []);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -37,7 +53,6 @@ export default function PeoplePage() {
         const { data: follows } = await supabase.from('followers').select('following_id').eq('follower_id', uid);
         setFollowing(new Set((follows ?? []).map((f) => f.following_id)));
 
-        // Get suggested (same country or specialisation)
         const { data: myProfile } = await supabase.from('profiles').select('country, specialisation').eq('id', uid).single();
         if (myProfile) {
           let q = supabase.from('profiles').select('id, full_name, avatar_url, country, specialisation, profile_color, username').eq('is_public', true).neq('id', uid).limit(8);
@@ -52,7 +67,6 @@ export default function PeoplePage() {
       }
     });
 
-    // Follower counts
     supabase.from('followers').select('following_id').then(({ data }) => {
       const counts: Record<string, number> = {};
       (data ?? []).forEach((f) => { counts[f.following_id] = (counts[f.following_id] ?? 0) + 1; });
@@ -60,7 +74,6 @@ export default function PeoplePage() {
     });
   }, []);
 
-  // Lazy load all people only when discover tab is active
   useEffect(() => {
     if (tab !== 'discover' || allPeople.length > 0) return;
     const supabase = createSupabaseBrowserClient();
@@ -83,15 +96,23 @@ export default function PeoplePage() {
     setTogglingFollow(null);
   };
 
+  // Get unique specialisations for filter chips
+  const specialisations = [...new Set(allPeople.map((p) => p.specialisation).filter(Boolean))] as string[];
+
   const filtered = allPeople.filter((p) => {
     if (p.id === userId) return false;
     if (!p.full_name?.trim()) return false;
     if (search) {
       const q = search.toLowerCase();
-      if (!p.full_name.toLowerCase().includes(q)) return false;
+      if (!p.full_name.toLowerCase().includes(q) && !p.country?.toLowerCase().includes(q) && !p.specialisation?.toLowerCase().includes(q)) return false;
     }
+    if (specFilter && p.specialisation !== specFilter) return false;
     return true;
   });
+
+  // Stats
+  const totalPeople = allPeople.filter((p) => p.full_name?.trim()).length;
+  const totalCountries = new Set(allPeople.map((p) => p.country).filter(Boolean)).size;
 
   const MiniCard = ({ person }: { person: Person }) => {
     const color = person.profile_color ?? '#3b82f6';
@@ -108,7 +129,7 @@ export default function PeoplePage() {
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-slate-900">{person.full_name ?? 'Investigator'}</p>
+          <p className="truncate text-sm font-semibold text-slate-900">{person.full_name}</p>
           <p className="truncate text-xs text-slate-400">
             {person.country ? `${getCountryFlag(person.country)} ` : ''}
             {person.specialisation ?? ''}
@@ -135,7 +156,7 @@ export default function PeoplePage() {
     <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-white">
       <div className="relative overflow-hidden bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_25%,#f0e8ff_50%,#f4f0ff_75%,#f8fbff_100%)] pb-6 pt-24 sm:pb-10 sm:pt-32">
         <div className="container-shell relative text-center">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-blue-600 sm:text-xs">Forum</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-blue-600 sm:text-xs">Community</p>
           <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Forum</h1>
           <p className="mx-auto mt-3 max-w-lg text-sm text-slate-500">Share insights, promote your services, and connect with investigators worldwide.</p>
 
@@ -165,12 +186,21 @@ export default function PeoplePage() {
           </div>
 
           {/* Quick links */}
-          <div className="mx-auto mt-4 flex flex-wrap items-center justify-center gap-3">
+          <div className="mx-auto mt-4 flex flex-wrap items-center justify-center gap-2.5">
             <Link href="/directory" className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white px-4 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:border-blue-200 hover:text-blue-600">
               <BookUser className="h-3.5 w-3.5" /> Find a PI
             </Link>
             <Link href="/network" className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white px-4 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:border-blue-200 hover:text-blue-600">
               <Globe className="h-3.5 w-3.5" /> Global Directory Map
+            </Link>
+            <Link href="/calendar" className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white px-4 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:border-blue-200 hover:text-blue-600">
+              <Calendar className="h-3.5 w-3.5" /> Events Calendar
+            </Link>
+            <Link href="/submit-event" className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white px-4 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:border-blue-200 hover:text-blue-600">
+              <Mail className="h-3.5 w-3.5" /> Submit an Event
+            </Link>
+            <Link href="/associations" className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white px-4 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:border-blue-200 hover:text-blue-600">
+              <Briefcase className="h-3.5 w-3.5" /> Associations
             </Link>
           </div>
         </div>
@@ -181,10 +211,8 @@ export default function PeoplePage() {
           <CaseReferralBoard />
         ) : tab === 'feed' ? (
           <div className="grid gap-8 lg:grid-cols-[1fr_20rem]">
-            {/* Main feed */}
             <CommunityFeed />
 
-            {/* Sidebar: suggestions */}
             <div className="hidden lg:block">
               {suggested.length > 0 && (
                 <div className="sticky top-24 rounded-2xl border border-slate-200/60 bg-white p-4 shadow-sm">
@@ -202,9 +230,28 @@ export default function PeoplePage() {
         ) : (
           /* Discover tab */
           <div>
-            <div className="mx-auto mb-6 flex max-w-xl items-center gap-2 rounded-2xl border border-slate-200/80 bg-white px-4 py-2.5">
+            {/* Stats bar */}
+            <div className="mx-auto mb-6 flex max-w-2xl items-center justify-center gap-6 sm:gap-10">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-slate-900">{totalPeople}</p>
+                <p className="text-xs text-slate-500">Investigators</p>
+              </div>
+              <div className="h-8 w-px bg-slate-200" />
+              <div className="text-center">
+                <p className="text-2xl font-bold text-slate-900">{totalCountries}</p>
+                <p className="text-xs text-slate-500">Countries</p>
+              </div>
+              <div className="h-8 w-px bg-slate-200" />
+              <div className="text-center">
+                <p className="text-2xl font-bold text-slate-900">{specialisations.length}</p>
+                <p className="text-xs text-slate-500">Specialisations</p>
+              </div>
+            </div>
+
+            {/* Search */}
+            <div className="mx-auto mb-4 flex max-w-xl items-center gap-2 rounded-2xl border border-slate-200/80 bg-white px-4 py-2.5 shadow-sm">
               <Search className="h-4 w-4 text-slate-400" />
-              <input className="flex-1 border-0 bg-transparent text-sm outline-none" placeholder="Search investigators..." value={search} onChange={(e) => setSearch(e.target.value)} />
+              <input className="flex-1 border-0 bg-transparent text-sm outline-none" placeholder="Search by name, country, or specialisation..." value={search} onChange={(e) => setSearch(e.target.value)} />
               {search && (
                 <button type="button" onClick={() => setSearch('')} className="flex-shrink-0 rounded-full p-1 text-slate-300 transition hover:bg-slate-100 hover:text-slate-500">
                   <XCircle className="h-4 w-4" />
@@ -212,14 +259,43 @@ export default function PeoplePage() {
               )}
             </div>
 
+            {/* Specialisation filter chips */}
+            {specialisations.length > 0 && (
+              <div className="mx-auto mb-6 flex max-w-3xl flex-wrap items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSpecFilter(null)}
+                  className={`rounded-full px-3 py-1 text-xs font-medium transition ${!specFilter ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                >
+                  All
+                </button>
+                {specialisations.sort().map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setSpecFilter(specFilter === s ? null : s)}
+                    className={`rounded-full px-3 py-1 text-xs font-medium transition ${specFilter === s ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Results count */}
+            <p className="mb-4 text-center text-xs text-slate-400">
+              {filtered.length} investigator{filtered.length !== 1 ? 's' : ''}{specFilter ? ` in ${specFilter}` : ''}{search ? ` matching "${search}"` : ''}
+            </p>
+
+            {/* Cards grid */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((p) => {
                 const color = p.profile_color ?? '#3b82f6';
                 const isFollowing = following.has(p.id);
                 const card = (
-                  <div className="rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm transition hover:shadow-md">
+                  <div className="group rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm transition hover:border-blue-200/60 hover:shadow-md">
                     <div className="flex items-center gap-4">
-                      <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-full border-2" style={{ borderColor: color }}>
+                      <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-full border-2 transition group-hover:scale-105" style={{ borderColor: color }}>
                         {p.avatar_url ? (
                           <Image src={p.avatar_url} alt="" width={56} height={56} className="h-full w-full object-cover" />
                         ) : (
@@ -229,15 +305,20 @@ export default function PeoplePage() {
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-bold text-slate-900">{p.full_name ?? 'Investigator'}</p>
-                        <p className="text-xs text-slate-400">
-                          {p.country ? `${getCountryFlag(p.country)} ${p.country}` : ''}
-                        </p>
-                        {p.specialisation && <span className="mt-1 inline-block rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-600">{p.specialisation}</span>}
+                        <div className="flex items-center gap-2">
+                          <p className="truncate text-sm font-bold text-slate-900">{p.full_name}</p>
+                          <ArrowRight className="hidden h-3 w-3 flex-shrink-0 text-blue-400 opacity-0 transition group-hover:opacity-100 sm:block" />
+                        </div>
+                        {p.country && (
+                          <p className="flex items-center gap-1 text-xs text-slate-400">
+                            <MapPin className="h-3 w-3" /> {getCountryFlag(p.country)} {p.country}
+                          </p>
+                        )}
+                        {p.specialisation && <span className="mt-1.5 inline-block rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-semibold text-blue-600">{p.specialisation}</span>}
                       </div>
                     </div>
-                    <div className="mt-3 flex items-center justify-between">
-                      <span className="text-xs text-slate-400">{followerCounts[p.id] ?? 0} followers</span>
+                    <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
+                      <span className="text-xs text-slate-400">{followerCounts[p.id] ?? 0} follower{(followerCounts[p.id] ?? 0) !== 1 ? 's' : ''}</span>
                       {userId && userId !== p.id && (
                         <button
                           type="button"
@@ -255,11 +336,25 @@ export default function PeoplePage() {
                 );
                 return p.username ? <Link key={p.id} href={`/profile/${p.username}` as any} className="block">{card}</Link> : <div key={p.id}>{card}</div>;
               })}
-              {filtered.length === 0 && <p className="col-span-full py-12 text-center text-sm text-slate-400">No investigators found.</p>}
+              {filtered.length === 0 && (
+                <div className="col-span-full py-16 text-center">
+                  <Users className="mx-auto h-10 w-10 text-slate-300" />
+                  <p className="mt-3 text-sm font-medium text-slate-500">No investigators found</p>
+                  <p className="mt-1 text-xs text-slate-400">Try a different search or filter</p>
+                </div>
+              )}
             </div>
           </div>
         )}
       </div>
     </main>
+  );
+}
+
+export default function PeoplePage() {
+  return (
+    <Suspense>
+      <PeoplePageInner />
+    </Suspense>
   );
 }

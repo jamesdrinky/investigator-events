@@ -47,7 +47,7 @@ export default function PeoplePage() {
             q = q.or(filters.join(','));
           }
           const { data: sugg } = await q;
-          setSuggested(sugg ?? []);
+          setSuggested((sugg ?? []).filter((p) => p.full_name?.trim()));
         }
       }
     });
@@ -64,7 +64,7 @@ export default function PeoplePage() {
   useEffect(() => {
     if (tab !== 'discover' || allPeople.length > 0) return;
     const supabase = createSupabaseBrowserClient();
-    supabase.from('profiles').select('id, full_name, avatar_url, country, specialisation, profile_color, username').eq('is_public', true).order('created_at', { ascending: false }).limit(200).then(({ data }) => setAllPeople(data ?? []));
+    supabase.from('profiles').select('id, full_name, avatar_url, country, specialisation, profile_color, username').eq('is_public', true).not('full_name', 'is', null).order('created_at', { ascending: false }).limit(200).then(({ data }) => setAllPeople(data ?? []));
   }, [tab, allPeople.length]);
 
   const toggleFollow = async (targetId: string) => {
@@ -85,9 +85,10 @@ export default function PeoplePage() {
 
   const filtered = allPeople.filter((p) => {
     if (p.id === userId) return false;
+    if (!p.full_name?.trim()) return false;
     if (search) {
       const q = search.toLowerCase();
-      if (!p.full_name?.toLowerCase().includes(q)) return false;
+      if (!p.full_name.toLowerCase().includes(q)) return false;
     }
     return true;
   });
@@ -127,7 +128,7 @@ export default function PeoplePage() {
         )}
       </div>
     );
-    return person.username ? <Link href={`/profile/${person.username}`}>{inner}</Link> : inner;
+    return person.username ? <Link href={`/profile/${person.username}` as any}>{inner}</Link> : inner;
   };
 
   return (
@@ -252,7 +253,7 @@ export default function PeoplePage() {
                     </div>
                   </div>
                 );
-                return p.username ? <Link key={p.id} href={`/profile/${p.username}`}>{card}</Link> : <div key={p.id}>{card}</div>;
+                return p.username ? <Link key={p.id} href={`/profile/${p.username}` as any} className="block">{card}</Link> : <div key={p.id}>{card}</div>;
               })}
               {filtered.length === 0 && <p className="col-span-full py-12 text-center text-sm text-slate-400">No investigators found.</p>}
             </div>

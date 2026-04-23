@@ -4,6 +4,8 @@ import { enforceRateLimit } from '@/lib/security/server';
 import { buildSubmissionConfirmationEmail } from '@/lib/email/submission-confirmation';
 import { buildWelcomeEmail } from '@/lib/email/welcome-email';
 import { buildApprovalOutreachEmail } from '@/lib/email/association-outreach';
+import { buildDailyDigestEmail } from '@/lib/email/daily-digest';
+import { buildNotificationEmail } from '@/lib/email/notification-email';
 
 // Only these addresses can receive test emails
 const ALLOWED_RECIPIENTS = new Set([
@@ -28,6 +30,26 @@ const TEMPLATES = {
       contactName: 'John Smith',
       eventName: 'ACFE Annual Conference 2026',
       association: 'Association of Certified Fraud Examiners',
+    }),
+  }),
+  digest: () => ({
+    subject: '[TEST] 8 new notifications on Investigator Events',
+    html: buildDailyDigestEmail('James', {
+      followers: 3,
+      connectionRequests: 2,
+      connectionsAccepted: 1,
+      likes: 5,
+      comments: 2,
+    }),
+  }),
+  notification: () => ({
+    subject: '[TEST] Peter Coleman started following you',
+    html: buildNotificationEmail({
+      title: 'Peter Coleman started following you',
+      body: 'Peter Coleman started following you on Investigator Events.',
+      actorName: 'Peter Coleman',
+      link: 'https://investigatorevents.com/profile/peter-coleman',
+      ctaText: 'View profile',
     }),
   }),
 };

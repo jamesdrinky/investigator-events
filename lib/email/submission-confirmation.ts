@@ -1,5 +1,6 @@
 const SITE = 'https://investigatorevents.com';
 const LOGO = `${SITE}/logo/ielogo1.PNG`;
+const WAVE = `${SITE}/email/wave-banner.png`;
 
 const C = {
   blue: '#2563eb',
@@ -33,43 +34,57 @@ export function buildSubmissionConfirmationEmail(eventName: string): string {
 <body style="margin:0;padding:0;background-color:#f0f4f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#f0f4f8;padding:24px 16px;">
     <tr><td align="center">
-      <table width="480" cellpadding="0" cellspacing="0" role="presentation" style="max-width:480px;width:100%;">
+      <table width="560" cellpadding="0" cellspacing="0" role="presentation" style="max-width:560px;width:100%;">
 
-        <tr><td style="padding:0 0 20px;text-align:center;">
+        <!-- Wave banner header -->
+        <tr><td>
+          <img src="${WAVE}" alt="" width="560" style="display:block;width:100%;height:auto;" />
+        </td></tr>
+
+        <!-- Logo bar -->
+        <tr><td style="background-color:${C.white};padding:20px 0 0;text-align:center;">
           <img src="${LOGO}" alt="Investigator Events" width="40" height="40" style="display:inline-block;width:40px;height:40px;border-radius:50%;" />
         </td></tr>
 
-        <tr><td>
-          <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:${C.white};border-radius:16px;border:1px solid ${C.border};">
-            <tr><td style="padding:36px 28px;text-align:center;">
-              <p style="margin:0;font-size:22px;font-weight:800;color:${C.dark};letter-spacing:-0.02em;">
-                Event received
-              </p>
-              <p style="margin:16px 0 0;font-size:14px;color:${C.body};line-height:1.6;">
-                Thank you for submitting <strong>${eventName}</strong> to Investigator Events.
-              </p>
-              <p style="margin:12px 0 0;font-size:14px;color:${C.body};line-height:1.6;">
-                We'll review your submission and get back to you shortly. Most events are approved within 24 hours.
-              </p>
-              <table cellpadding="0" cellspacing="0" role="presentation" style="margin:28px auto 0;">
-                <tr><td align="center" style="background-color:${C.dark};border-radius:99px;">
-                  <!--[if mso]>
-                  <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${SITE}/calendar" style="height:46px;v-text-anchor:middle;width:200px;" arcsize="50%" fillcolor="${C.dark}" stroke="false">
-                    <v:textbox inset="0,0,0,0"><center style="color:#ffffff;font-family:sans-serif;font-size:14px;font-weight:600;">Browse the calendar</center></v:textbox>
-                  </v:roundrect>
-                  <![endif]-->
-                  <!--[if !mso]><!-->
-                  <a href="${SITE}/calendar" style="display:inline-block;padding:14px 36px;background-color:${C.dark};color:${C.white};text-decoration:none;font-size:14px;font-weight:600;border-radius:99px;">
-                    Browse the calendar
-                  </a>
-                  <!--<![endif]-->
-                </td></tr>
-              </table>
+        <!-- Body -->
+        <tr><td style="background-color:${C.white};padding:24px 32px 36px;text-align:center;">
+          <p style="margin:0;font-size:22px;font-weight:800;color:${C.dark};letter-spacing:-0.02em;">
+            Event received
+          </p>
+          <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.6;">
+            Thank you for submitting <strong>${eventName}</strong> to Investigator Events.
+          </p>
+          <p style="margin:12px 0 0;font-size:15px;color:${C.body};line-height:1.6;">
+            We'll review your submission and get back to you shortly. Most events are approved within 24 hours.
+          </p>
+
+          <table cellpadding="0" cellspacing="0" role="presentation" style="margin:28px auto 0;">
+            <tr><td align="center" style="background-color:${C.dark};border-radius:99px;">
+              <!--[if mso]>
+              <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${SITE}/calendar" style="height:46px;v-text-anchor:middle;width:200px;" arcsize="50%" fillcolor="${C.dark}" stroke="false">
+                <v:textbox inset="0,0,0,0"><center style="color:#ffffff;font-family:sans-serif;font-size:14px;font-weight:600;">Browse the calendar</center></v:textbox>
+              </v:roundrect>
+              <![endif]-->
+              <!--[if !mso]><!-->
+              <a href="${SITE}/calendar" style="display:inline-block;padding:14px 36px;background-color:${C.dark};color:${C.white};text-decoration:none;font-size:14px;font-weight:600;border-radius:99px;">
+                Browse the calendar
+              </a>
+              <!--<![endif]-->
             </td></tr>
           </table>
         </td></tr>
 
-        <tr><td style="padding:16px 0 0;text-align:center;">
+        <!-- Brand divider -->
+        <tr><td>
+          <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+            <td width="33%" style="height:3px;background-color:${C.blue};font-size:0;line-height:0;">&nbsp;</td>
+            <td width="34%" style="height:3px;background-color:${C.purple};font-size:0;line-height:0;">&nbsp;</td>
+            <td width="33%" style="height:3px;background-color:#06b6d4;font-size:0;line-height:0;">&nbsp;</td>
+          </tr></table>
+        </td></tr>
+
+        <!-- Footer -->
+        <tr><td style="padding:20px 8px 8px;text-align:center;">
           <p style="margin:0;font-size:11px;color:${C.faint};">
             Investigator Events &middot;
             <a href="mailto:info@investigatorevents.com" style="color:${C.faint};text-decoration:none;">info@investigatorevents.com</a>

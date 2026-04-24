@@ -270,7 +270,7 @@ export function Navbar() {
                   </button>
 
                   {showNotifs && (
-                    <div className="absolute right-0 top-full mt-2 w-80 rounded-xl border border-slate-200 bg-white shadow-xl">
+                    <div className="fixed inset-x-3 top-14 z-50 sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80 rounded-xl border border-slate-200 bg-white shadow-xl">
                       <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
                         <p className="text-sm font-bold text-slate-900">Notifications</p>
                         {notifications.length > 0 && (

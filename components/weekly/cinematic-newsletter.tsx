@@ -236,7 +236,7 @@ export function CinematicNewsletterPage() {
               </motion.div>
 
               <p className="mt-6 text-xs text-blue-200/30">
-                Trusted by investigators across 30+ countries
+                The global PI conference calendar.
               </p>
             </motion.div>
           </div>

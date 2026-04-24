@@ -181,10 +181,10 @@ export function AuthPage({
                     <input
                       type={showPassword ? 'text' : 'password'}
                       required
-                      minLength={6}
+                      minLength={8}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder={isSignUp ? 'Min 6 characters' : 'Enter your password'}
+                      placeholder={isSignUp ? 'Min 8 characters' : 'Enter your password'}
                       className="w-full bg-transparent px-4 py-3 pr-12 text-sm text-slate-900 outline-none placeholder:text-slate-400"
                     />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-3 flex items-center">

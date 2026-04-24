@@ -21,8 +21,8 @@ export async function POST(request: Request) {
     if (!fullName || fullName.length < 2) {
       return NextResponse.json({ error: 'Full name is required' }, { status: 400 });
     }
-    if (password.length < 6) {
-      return NextResponse.json({ error: 'Password must be at least 6 characters' }, { status: 400 });
+    if (password.length < 8) {
+      return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 });
     }
     if (!tosAccepted) {
       return NextResponse.json({ error: 'You must accept the Terms of Service' }, { status: 400 });

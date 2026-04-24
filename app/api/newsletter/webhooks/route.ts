@@ -1,10 +1,32 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
+import { createHmac } from 'crypto';
+
+const RESEND_WEBHOOK_SECRET = process.env.RESEND_WEBHOOK_SECRET;
+
+function verifyResendSignature(payload: string, signature: string | null): boolean {
+  if (!RESEND_WEBHOOK_SECRET || !signature) return false;
+  const expected = createHmac('sha256', RESEND_WEBHOOK_SECRET)
+    .update(payload)
+    .digest('base64');
+  return signature === expected;
+}
 
 // Resend sends webhooks for email events: delivered, opened, clicked, bounced, complained
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const rawBody = await request.text();
+
+    // Verify webhook signature if secret is configured
+    if (RESEND_WEBHOOK_SECRET) {
+      const signature = request.headers.get('svix-signature');
+      if (!verifyResendSignature(rawBody, signature)) {
+        console.warn('Webhook signature verification failed');
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+      }
+    }
+
+    const body = JSON.parse(rawBody);
     const type = body?.type as string;
     const email = body?.data?.to?.[0] ?? body?.data?.email ?? null;
 

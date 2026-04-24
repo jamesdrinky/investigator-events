@@ -39,6 +39,7 @@ export async function submitAdvertiserLead(
     company_name: companyName,
     contact_name: contactName,
     email,
+    business_type: inquiryType,
     website: normalizeOptionalUrl(website),
     inquiry_type: inquiryType,
     region_or_audience: regionOrAudience || null,

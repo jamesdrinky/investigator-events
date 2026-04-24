@@ -66,7 +66,7 @@ export function AttendeeAvatars({ eventId }: { eventId: string }) {
       if (data) {
         const { data: profile } = await supabase.from('profiles').select('full_name, avatar_url, username, specialisation').eq('id', userId).single();
         setAttendees((prev) => [{
-          id: data.id, user_id: data.user_id,
+          id: data.id, user_id: data.user_id ?? userId,
           avatar_url: profile?.avatar_url ?? null, full_name: profile?.full_name ?? null,
           username: profile?.username ?? null, specialisation: profile?.specialisation ?? null,
         }, ...prev]);

@@ -7,7 +7,7 @@ import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { getCountryFlag } from '@/lib/utils/location';
 import { UserAvatar } from '@/components/UserAvatar';
 
-type EventResult = { id: string; title: string; slug: string; start_date: string; city: string; country: string; association: string | null; organiser: string | null; description: string | null };
+type EventResult = { id: string; title: string; slug: string | null; start_date: string | null; city: string; country: string; association: string | null; organiser: string | null; description: string | null };
 type PersonResult = { id: string; full_name: string | null; username: string | null; avatar_url: string | null; country: string | null; specialisation: string | null };
 
 export function GlobalSearch({ isDark }: { isDark?: boolean }) {
@@ -84,7 +84,7 @@ export function GlobalSearch({ isDark }: { isDark?: boolean }) {
     if (e.key === 'Escape') { setOpen(false); setMobileOpen(false); }
   };
 
-  const formatDate = (d: string) => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  const formatDate = (d: string | null) => d ? new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
 
   // Desktop search bar
   const searchBar = (

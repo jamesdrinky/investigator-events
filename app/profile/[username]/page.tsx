@@ -94,19 +94,19 @@ export default async function PublicProfilePage({ params }: { params: { username
   const { data: sections } = await supabase.from('profile_sections').select('*').eq('user_id', profile.id).eq('visible', true).order('sort_order');
 
   const { data: attendingRows } = await supabase.from('event_attendees').select('event_id').eq('user_id', profile.id).eq('is_going', true);
-  const attendingIds = (attendingRows ?? []).map((r) => r.event_id);
+  const attendingIds = (attendingRows ?? []).map((r) => r.event_id).filter((id): id is string => id !== null);
   const today = new Date().toISOString().slice(0, 10);
   const { data: allAttendedEvents } = attendingIds.length > 0
     ? await supabase.from('events').select('id, title, slug, city, country, start_date, image_path').in('id', attendingIds).order('start_date', { ascending: false }).limit(20)
     : { data: [] };
-  const attendanceEvents = (allAttendedEvents ?? []).map((e) => ({ ...e, is_past: e.start_date < today }));
+  const attendanceEvents = (allAttendedEvents ?? []).map((e) => ({ ...e, slug: e.slug ?? '', start_date: e.start_date ?? '', is_past: (e.start_date ?? '') < today }));
 
   const { data: experienceRows } = await supabase.from('work_experience').select('*').eq('user_id', profile.id).order('sort_order');
 
   const { data: recentPosts } = await supabase.from('posts').select('id, content, image_url, likes_count, comments_count, created_at').eq('user_id', profile.id).order('created_at', { ascending: false }).limit(3);
 
   const { data: reviewRows } = await supabase.from('event_reviews').select('id, event_id, rating, review_text, created_at').eq('user_id', profile.id).order('created_at', { ascending: false }).limit(4);
-  const reviewEventIds = (reviewRows ?? []).map((r) => r.event_id);
+  const reviewEventIds = (reviewRows ?? []).map((r) => r.event_id).filter((id): id is string => id !== null);
   const { data: reviewedEvents } = reviewEventIds.length > 0
     ? await supabase.from('events').select('id, title, slug, city, country').in('id', reviewEventIds) : { data: [] };
   const eventMap = new Map((reviewedEvents ?? []).map((e) => [e.id, e]));
@@ -469,7 +469,7 @@ export default async function PublicProfilePage({ params }: { params: { username
                   <div className="mt-2 flex items-center gap-3 text-[11px] text-slate-400">
                     {post.likes_count > 0 && <span>{post.likes_count} likes</span>}
                     {post.comments_count > 0 && <span>{post.comments_count} comments</span>}
-                    <span>{new Date(post.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
+                    <span>{new Date(post.created_at ?? '').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
                   </div>
                 </div>
               ))}
@@ -490,7 +490,7 @@ export default async function PublicProfilePage({ params }: { params: { username
             <h2 className="text-base font-bold text-slate-900">Event reviews</h2>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               {(reviewRows ?? []).map((r) => {
-                const ev = eventMap.get(r.event_id);
+                const ev = r.event_id ? eventMap.get(r.event_id) : undefined;
                 return (
                   <div key={r.id} className="rounded-xl border border-slate-100 bg-slate-50/50 p-3.5 transition hover:shadow-sm">
                     <div className="flex items-center justify-between gap-2">
@@ -499,7 +499,7 @@ export default async function PublicProfilePage({ params }: { params: { username
                       </Link>
                       <div className="flex gap-0.5">
                         {[1, 2, 3, 4, 5].map((s) => (
-                          <Star key={s} className={`h-3.5 w-3.5 ${s <= r.rating ? 'fill-amber-400 text-amber-400' : 'fill-slate-200 text-slate-200'}`} />
+                          <Star key={s} className={`h-3.5 w-3.5 ${s <= (r.rating ?? 0) ? 'fill-amber-400 text-amber-400' : 'fill-slate-200 text-slate-200'}`} />
                         ))}
                       </div>
                     </div>

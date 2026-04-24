@@ -10,21 +10,23 @@ import { UserAvatar } from '@/components/UserAvatar';
 type MyEvent = {
   id: string;
   title: string;
-  slug: string;
+  slug: string | null;
   city: string;
   country: string;
-  start_date: string;
+  start_date: string | null;
   end_date: string | null;
   image_path: string | null;
   category: string;
   is_past: boolean;
 };
 
-function formatDate(d: string) {
+function formatDate(d: string | null) {
+  if (!d) return '';
   return new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
 }
 
-function daysUntil(d: string) {
+function daysUntil(d: string | null) {
+  if (!d) return '';
   const now = new Date();
   const target = new Date(d + 'T00:00:00Z');
   const diff = Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
@@ -61,7 +63,7 @@ export function MyEventsPanel() {
         .eq('user_id', data.user.id)
         .eq('is_going', true);
 
-      const ids = (attendingRows ?? []).map((r) => r.event_id);
+      const ids = (attendingRows ?? []).map((r) => r.event_id).filter((id): id is string => id !== null);
       if (ids.length === 0) { setLoading(false); return; }
 
       const { data: eventRows } = await supabase
@@ -74,7 +76,7 @@ export function MyEventsPanel() {
       const today = new Date().toISOString().slice(0, 10);
       setEvents((eventRows ?? []).map((e) => ({
         ...e,
-        is_past: e.start_date < today,
+        is_past: (e.start_date ?? '') < today,
       })));
       setLoading(false);
     });
@@ -118,8 +120,8 @@ export function MyEventsPanel() {
             <div className="relative flex items-center gap-4 px-5 py-5 sm:gap-5 sm:px-6">
               {/* Countdown */}
               <div className="flex h-16 w-16 flex-shrink-0 flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/20 sm:h-20 sm:w-20">
-                <span className="text-xl font-bold sm:text-2xl">{new Date(nextEvent.start_date + 'T00:00:00Z').getUTCDate()}</span>
-                <span className="text-[10px] font-semibold uppercase tracking-wider opacity-80">{new Date(nextEvent.start_date + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' })}</span>
+                <span className="text-xl font-bold sm:text-2xl">{new Date((nextEvent.start_date ?? '') + 'T00:00:00Z').getUTCDate()}</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider opacity-80">{new Date((nextEvent.start_date ?? '') + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' })}</span>
               </div>
               {/* Details */}
               <div className="min-w-0 flex-1">
@@ -144,8 +146,8 @@ export function MyEventsPanel() {
             {upcoming.slice(1).map((e) => (
               <Link key={e.id} href={`/events/${e.slug}`} className="group flex items-center gap-4 px-5 py-3.5 transition hover:bg-slate-50/50 sm:px-6">
                 <div className="flex h-11 w-11 flex-shrink-0 flex-col items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-900">
-                  <span className="text-sm font-bold leading-none">{new Date(e.start_date + 'T00:00:00Z').getUTCDate()}</span>
-                  <span className="text-[8px] font-semibold uppercase text-slate-400">{new Date(e.start_date + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' })}</span>
+                  <span className="text-sm font-bold leading-none">{new Date((e.start_date ?? '') + 'T00:00:00Z').getUTCDate()}</span>
+                  <span className="text-[8px] font-semibold uppercase text-slate-400">{new Date((e.start_date ?? '') + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' })}</span>
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-slate-900 group-hover:text-blue-600">{e.title}</p>

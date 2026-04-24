@@ -224,7 +224,7 @@ export function CommunityFeed() {
     if (data) {
       setComments((prev) => ({
         ...prev,
-        [postId]: [...(prev[postId] ?? []), { ...data, full_name: userName, avatar_url: userAvatar }],
+        [postId]: [...(prev[postId] ?? []), { ...data, created_at: data.created_at ?? '', full_name: userName, avatar_url: userAvatar }],
       }));
       setPosts((prev) => prev.map((p) => p.id === postId ? { ...p, comments_count: p.comments_count + 1 } : p));
       setCommentText((prev) => ({ ...prev, [postId]: '' }));

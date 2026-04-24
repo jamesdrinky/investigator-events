@@ -74,7 +74,7 @@ export function mapEventRowToItem(row: CompatEventRow): EventItem | null {
     coverImageAlt: row.cover_image_alt ?? undefined,
     featured: row.featured ?? false,
     approved: row.approved ?? true,
-    createdAt: row.created_at,
+    createdAt: row.created_at ?? undefined,
     updatedAt: row.updated_at ?? undefined
   };
 }

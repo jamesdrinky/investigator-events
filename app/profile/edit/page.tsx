@@ -249,8 +249,8 @@ export default function EditProfilePage() {
       const { data: assocs } = await supabase.from('user_associations').select('*').eq('user_id', data.user.id);
       if (assocs) {
         setAssociations(assocs.map((a) => ({
-          id: a.id, association_name: a.association_name, association_slug: a.association_slug,
-          role: a.role ?? '', member_since: a.member_since ?? '',
+          id: a.id, association_name: a.association_name, association_slug: a.association_slug ?? '',
+          role: a.role ?? '', member_since: String(a.member_since ?? ''),
         })));
       }
 
@@ -410,8 +410,8 @@ export default function EditProfilePage() {
     if (associations.length > 0) {
       await supabase.from('user_associations').insert(
         associations.map((a) => ({
-          user_id: userId, association_name: a.association_name, association_slug: a.association_slug,
-          role: a.role || null, member_since: a.member_since || null,
+          user_id: userId, association_name: a.association_name, association_slug: a.association_slug || null,
+          role: a.role || null, member_since: a.member_since ? parseInt(a.member_since) || null : null,
         }))
       );
     }
@@ -421,7 +421,7 @@ export default function EditProfilePage() {
     if (experience.length > 0) {
       await supabase.from('work_experience').insert(
         experience.filter((e) => e.company_name && e.job_title).map((e, i) => ({
-          user_id: userId, company_name: e.company_name, organisation_id: e.organisation_id || null,
+          user_id: userId!, company_name: e.company_name, organisation_id: e.organisation_id || null,
           job_title: e.job_title, description: e.description || null,
           start_year: parseInt(e.start_year) || new Date().getFullYear(),
           end_year: e.is_current ? null : (parseInt(e.end_year) || null),
@@ -435,7 +435,7 @@ export default function EditProfilePage() {
     if (profileSections.length > 0) {
       await supabase.from('profile_sections').insert(
         profileSections.filter((s) => s.title.trim()).map((s, i) => ({
-          user_id: userId, type: s.type, title: s.title.trim(), content: s.content.trim() || null, sort_order: i, visible: true,
+          user_id: userId!, type: s.type, title: s.title.trim(), content: s.content.trim() || '', sort_order: i, visible: true,
         }))
       );
     }

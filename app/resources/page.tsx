@@ -26,7 +26,10 @@ export default function ResourcesPage() {
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
-    supabase.from('resources').select('*').eq('approved', true).order('created_at', { ascending: false }).then(({ data }) => setResources(data ?? []));
+    supabase.from('resources').select('*').eq('approved', true).order('created_at', { ascending: false }).then(({ data }) => setResources((data ?? []).map((r) => ({
+      id: r.id, title: r.title, description: r.description, url: r.url,
+      category: r.category, association_slug: r.association_slug, created_at: r.created_at ?? '',
+    }))));
   }, []);
 
   const filtered = resources.filter((r) => !filterCat || r.category === filterCat);

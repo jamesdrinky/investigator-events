@@ -51,7 +51,7 @@ function PeoplePageInner() {
       setUserId(uid);
       if (uid) {
         const { data: follows } = await supabase.from('followers').select('following_id').eq('follower_id', uid);
-        setFollowing(new Set((follows ?? []).map((f) => f.following_id)));
+        setFollowing(new Set((follows ?? []).map((f) => f.following_id).filter((id): id is string => id !== null)));
 
         const { data: myProfile } = await supabase.from('profiles').select('country, specialisation').eq('id', uid).single();
         if (myProfile) {
@@ -69,7 +69,7 @@ function PeoplePageInner() {
 
     supabase.from('followers').select('following_id').then(({ data }) => {
       const counts: Record<string, number> = {};
-      (data ?? []).forEach((f) => { counts[f.following_id] = (counts[f.following_id] ?? 0) + 1; });
+      (data ?? []).forEach((f) => { if (!f.following_id) return; counts[f.following_id] = (counts[f.following_id] ?? 0) + 1; });
       setFollowerCounts(counts);
     });
   }, []);

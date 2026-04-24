@@ -27,7 +27,7 @@ function mapAdvertiserLead(row: AdvertiserLeadRow): AdvertiserLeadItem {
     regionOrAudience: row.region_or_audience ?? undefined,
     message: row.message,
     status: row.status,
-    createdAt: row.created_at
+    createdAt: row.created_at ?? ''
   };
 }
 

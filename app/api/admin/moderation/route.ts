@@ -130,7 +130,7 @@ export async function DELETE(request: Request) {
     await admin.from('post_likes').delete().eq('post_id', id);
   }
 
-  await admin.from(table).delete().eq('id', id);
+  await admin.from(table as 'event_reviews' | 'post_comments' | 'posts' | 'reports').delete().eq('id', id);
 
   return NextResponse.json({ success: true });
 }

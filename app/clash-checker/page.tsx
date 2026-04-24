@@ -6,7 +6,7 @@ import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 
 const REGIONS = ['Europe', 'North America', 'Asia-Pacific', 'Middle East', 'Latin America', 'Africa'];
 
-type ClashEvent = { id: string; title: string; slug: string; start_date: string; end_date: string | null; city: string; country: string; association: string | null };
+type ClashEvent = { id: string; title: string; slug: string | null; start_date: string | null; end_date: string | null; city: string; country: string; association: string | null };
 
 export default function ClashCheckerPage() {
   const [startDate, setStartDate] = useState('');
@@ -35,8 +35,8 @@ export default function ClashCheckerPage() {
 
     // Filter: event overlaps with proposed range
     const results = (data ?? []).filter((e) => {
-      const eStart = e.start_date;
-      const eEnd = e.end_date ?? e.start_date;
+      const eStart = e.start_date ?? '';
+      const eEnd = e.end_date ?? e.start_date ?? '';
       return eStart <= endDate && eEnd >= startDate;
     });
 
@@ -108,7 +108,7 @@ export default function ClashCheckerPage() {
                         <div className="flex-1">
                           <p className="text-sm font-semibold text-slate-900">{e.title}</p>
                           <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
-                            <span className="flex items-center gap-1"><Calendar className="h-3 w-3 shrink-0" /> {new Date(e.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}{e.end_date ? ` – ${new Date(e.end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}` : ''}</span>
+                            <span className="flex items-center gap-1"><Calendar className="h-3 w-3 shrink-0" /> {new Date(e.start_date ?? '').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}{e.end_date ? ` – ${new Date(e.end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}` : ''}</span>
                             <span className="flex items-center gap-1"><MapPin className="h-3 w-3 shrink-0" /> {e.city}, {e.country}</span>
                           </div>
                           {e.association && <span className="mt-1 inline-block rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">{e.association}</span>}

@@ -178,6 +178,7 @@ export default function DirectoryPage() {
 
       const followerCounts: Record<string, number> = {};
       (followers ?? []).forEach((f) => {
+        if (!f.following_id) return;
         followerCounts[f.following_id] = (followerCounts[f.following_id] ?? 0) + 1;
       });
 

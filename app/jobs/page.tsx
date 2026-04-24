@@ -33,7 +33,10 @@ export default function JobsPage() {
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
-    supabase.from('job_posts').select('*').eq('is_active', true).order('created_at', { ascending: false }).then(({ data }) => setJobs(data ?? []));
+    supabase.from('job_posts').select('*').eq('is_active', true).order('created_at', { ascending: false }).then(({ data }) => setJobs((data ?? []).map((j) => ({
+      id: j.id, title: j.title, description: j.description, location: j.location, country: j.country,
+      type: j.type, specialisation: j.specialisation, contact_email: j.contact_email ?? '', created_at: j.created_at ?? '',
+    }))));
   }, []);
 
   const filtered = jobs.filter((j) => {
@@ -54,7 +57,10 @@ export default function JobsPage() {
       type: type || null, specialisation: spec || null, contact_email: email, is_active: true,
     }).select('*').single();
     if (data) {
-      setJobs((prev) => [data, ...prev]);
+      setJobs((prev) => [{
+        id: data.id, title: data.title, description: data.description, location: data.location, country: data.country,
+        type: data.type, specialisation: data.specialisation, contact_email: data.contact_email ?? '', created_at: data.created_at ?? '',
+      }, ...prev]);
       setShowForm(false);
       setTitle(''); setDescription(''); setLocation(''); setCountry(''); setType(''); setSpec(''); setEmail('');
     }

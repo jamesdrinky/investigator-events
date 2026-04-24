@@ -36,7 +36,7 @@ function mapSubmissionRow(row: SubmissionRow): EventSubmissionItem {
     website: row.website,
     contactEmail: row.contact_email,
     notes: row.notes ?? undefined,
-    eventScope: row.event_scope,
+    eventScope: row.event_scope as 'main' | 'secondary',
     status: row.status,
     createdAt: row.created_at
   };

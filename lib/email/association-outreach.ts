@@ -267,14 +267,22 @@ export async function processOutreachQueue(): Promise<{ sent: number; failed: nu
 
     if (error) {
       console.error(`Outreach to "${row.association}" failed:`, error.message);
-      await supabase.from('outreach_sends' as any)
-        .update({ status: 'failed' } as any)
-        .eq('id', row.id);
+      try {
+        await supabase.from('outreach_sends' as any)
+          .update({ status: 'failed' } as any)
+          .eq('id', row.id);
+      } catch (dbErr) {
+        console.error(`Failed to mark outreach as failed for "${row.association}":`, dbErr);
+      }
       failed++;
     } else {
-      await supabase.from('outreach_sends' as any)
-        .update({ status: 'sent', resend_id: data?.id, sent_at: new Date().toISOString() } as any)
-        .eq('id', row.id);
+      try {
+        await supabase.from('outreach_sends' as any)
+          .update({ status: 'sent', resend_id: data?.id, sent_at: new Date().toISOString() } as any)
+          .eq('id', row.id);
+      } catch (dbErr) {
+        console.error(`Failed to mark outreach as sent for "${row.association}":`, dbErr);
+      }
       sent++;
     }
   }

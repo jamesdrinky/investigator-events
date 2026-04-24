@@ -32,7 +32,6 @@ async function runDigest() {
   const { Resend } = await import('resend');
   const { createSupabaseAdminServerClient } = await import('@/lib/supabase/admin');
   const { buildDailyDigestEmail } = await import('@/lib/email/daily-digest');
-  const type = await import('@/lib/email/daily-digest');
 
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) return { sent: 0, failed: 0, reason: 'no api key' };
@@ -86,6 +85,8 @@ async function runDigest() {
 
   let sent = 0;
   let failed = 0;
+  const successUserIds: string[] = [];
+  const skippedUserIds: string[] = [];
 
   for (const [userId, userNotifs] of Object.entries(byUser)) {
     if (userNotifs.length === 0) continue;
@@ -96,7 +97,11 @@ async function runDigest() {
     ]);
 
     const email = emailResult?.data;
-    if (!email) continue;
+    if (!email) {
+      console.warn(`Digest skipped: no email for user ${userId}`);
+      skippedUserIds.push(userId);
+      continue;
+    }
 
     const name = profileResult?.data?.full_name ?? 'there';
     const html = buildDailyDigestEmail(name, userNotifs);
@@ -110,13 +115,23 @@ async function runDigest() {
       tags: [{ name: 'type', value: 'daily-digest' }],
     });
 
-    if (error) { failed++; } else { sent++; }
+    if (error) {
+      console.error(`Digest failed for ${userId}:`, error.message);
+      failed++;
+    } else {
+      sent++;
+      successUserIds.push(userId);
+    }
   }
 
-  await supabase.from('notifications' as any)
-    .update({ emailed: true } as any)
-    .eq('emailed', false)
-    .gte('created_at', since.toISOString());
+  // Fix #2: Only mark notifications as emailed for users whose digest actually sent
+  for (const uid of successUserIds) {
+    await supabase.from('notifications' as any)
+      .update({ emailed: true } as any)
+      .eq('user_id', uid)
+      .eq('emailed', false)
+      .gte('created_at', since.toISOString());
+  }
 
-  return { sent, failed, users: Object.keys(byUser).length };
+  return { sent, failed, skipped: skippedUserIds.length, users: Object.keys(byUser).length };
 }

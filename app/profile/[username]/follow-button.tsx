@@ -41,37 +41,41 @@ export function ConnectionButton({ targetUserId }: { targetUserId: string }) {
     const supabase = createSupabaseBrowserClient();
 
     if (status === 'none') {
-      await supabase.from('connections').insert({ requester_id: userId, addressee_id: targetUserId, status: 'pending' });
-      setStatus('pending-sent');
-      const { data: myProfile } = await supabase.from('profiles').select('full_name, username').eq('id', userId).single();
-      fetch('/api/notifications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: targetUserId,
-          actorId: userId,
-          type: 'connection_request',
-          title: `${myProfile?.full_name ?? 'Someone'} wants to connect`,
-          body: 'You have a new connection request.',
-          link: myProfile?.username ? `/profile/${myProfile.username}` : '/people?tab=discover',
-        }),
-      }).catch(() => {});
+      const { error: insertErr } = await supabase.from('connections').insert({ requester_id: userId, addressee_id: targetUserId, status: 'pending' });
+      if (!insertErr) {
+        setStatus('pending-sent');
+        const { data: myProfile } = await supabase.from('profiles').select('full_name, username').eq('id', userId).single();
+        fetch('/api/notifications', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: targetUserId,
+            actorId: userId,
+            type: 'connection_request',
+            title: `${myProfile?.full_name ?? 'Someone'} wants to connect`,
+            body: 'You have a new connection request.',
+            link: myProfile?.username ? `/profile/${myProfile.username}` : '/people?tab=discover',
+          }),
+        }).catch(() => {});
+      }
     } else if (status === 'pending-received') {
-      await supabase.from('connections').update({ status: 'accepted' }).or(`and(requester_id.eq.${targetUserId},addressee_id.eq.${userId})`);
-      setStatus('connected');
-      setShowMessagePrompt(true);
-      const { data: myProfile } = await supabase.from('profiles').select('full_name, username').eq('id', userId).single();
-      fetch('/api/notifications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: targetUserId,
-          actorId: userId,
-          type: 'connection_accepted',
-          title: `${myProfile?.full_name ?? 'Someone'} accepted your connection`,
-          link: myProfile?.username ? `/profile/${myProfile.username}` : '/people?tab=discover',
-        }),
-      }).catch(() => {});
+      const { error: updateErr } = await supabase.from('connections').update({ status: 'accepted' }).or(`and(requester_id.eq.${targetUserId},addressee_id.eq.${userId})`);
+      if (!updateErr) {
+        setStatus('connected');
+        setShowMessagePrompt(true);
+        const { data: myProfile } = await supabase.from('profiles').select('full_name, username').eq('id', userId).single();
+        fetch('/api/notifications', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: targetUserId,
+            actorId: userId,
+            type: 'connection_accepted',
+            title: `${myProfile?.full_name ?? 'Someone'} accepted your connection`,
+            link: myProfile?.username ? `/profile/${myProfile.username}` : '/people?tab=discover',
+          }),
+        }).catch(() => {});
+      }
     } else if (status === 'connected' || status === 'pending-sent') {
       await supabase.from('connections').delete().or(`and(requester_id.eq.${userId},addressee_id.eq.${targetUserId}),and(requester_id.eq.${targetUserId},addressee_id.eq.${userId})`);
       setStatus('none');

@@ -20,6 +20,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    // Fix #3: Verify target user exists
+    const { data: targetProfile } = await supabase.from('profiles').select('id').eq('id', body.userId).maybeSingle();
+    if (!targetProfile) {
+      return NextResponse.json({ error: 'Target user not found' }, { status: 404 });
+    }
+
     await createNotification({
       userId: body.userId,
       actorId: user.id,

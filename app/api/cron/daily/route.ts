@@ -44,7 +44,7 @@ async function runDigest() {
 
   // Fetch all unemailed notifications with actor_id
   const { data: notifications } = await supabase
-    .from('notifications' as any)
+    .from('notifications')
     .select('user_id, actor_id, type, created_at')
     .eq('emailed', false)
     .gte('created_at', since.toISOString())
@@ -126,7 +126,7 @@ async function runDigest() {
 
   // Fix #2: Only mark notifications as emailed for users whose digest actually sent
   for (const uid of successUserIds) {
-    await supabase.from('notifications' as any)
+    await supabase.from('notifications')
       .update({ emailed: true } as any)
       .eq('user_id', uid)
       .eq('emailed', false)

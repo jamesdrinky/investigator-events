@@ -183,7 +183,7 @@ export async function queueApprovalOutreachEmail(params: ApprovalOutreachParams)
   // Check if we've already queued or sent an outreach to this association
   const normalizedAssociation = params.association.trim().toLowerCase();
   const { data: existing } = await supabase
-    .from('outreach_sends' as any)
+    .from('outreach_sends')
     .select('id')
     .ilike('association', normalizedAssociation)
     .limit(1)
@@ -200,7 +200,7 @@ export async function queueApprovalOutreachEmail(params: ApprovalOutreachParams)
   const subject = `${params.eventName} is live on Investigator Events`;
   const html = buildApprovalOutreachEmail(params);
 
-  const { error } = await supabase.from('outreach_sends' as any).insert({
+  const { error } = await supabase.from('outreach_sends').insert({
     recipient_email: params.contactEmail,
     recipient_name: params.contactName,
     association: params.association,
@@ -238,7 +238,7 @@ export async function processOutreachQueue(): Promise<{ sent: number; failed: nu
 
   // Get all pending sends where send_after has passed
   const { data: pending, error: fetchError } = await supabase
-    .from('outreach_sends' as any)
+    .from('outreach_sends')
     .select('*')
     .eq('status', 'pending')
     .lte('send_after', new Date().toISOString())
@@ -268,7 +268,7 @@ export async function processOutreachQueue(): Promise<{ sent: number; failed: nu
     if (error) {
       console.error(`Outreach to "${row.association}" failed:`, error.message);
       try {
-        await supabase.from('outreach_sends' as any)
+        await supabase.from('outreach_sends')
           .update({ status: 'failed' } as any)
           .eq('id', row.id);
       } catch (dbErr) {
@@ -277,7 +277,7 @@ export async function processOutreachQueue(): Promise<{ sent: number; failed: nu
       failed++;
     } else {
       try {
-        await supabase.from('outreach_sends' as any)
+        await supabase.from('outreach_sends')
           .update({ status: 'sent', resend_id: data?.id, sent_at: new Date().toISOString() } as any)
           .eq('id', row.id);
       } catch (dbErr) {

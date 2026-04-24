@@ -98,7 +98,7 @@ export function Navbar() {
           setUnreadCount(count ?? 0);
         });
         // Fetch unread notification count
-        supabase.from('notifications' as any).select('id', { count: 'exact', head: true }).eq('user_id', data.user.id).eq('is_read', false).then(({ count }) => {
+        supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', data.user.id).eq('is_read', false).then(({ count }) => {
           setNotifCount(count ?? 0);
         });
         // Update last_seen
@@ -119,7 +119,7 @@ export function Navbar() {
       supabase.from('messages' as any).select('id', { count: 'exact', head: true }).eq('receiver_id', user.id).eq('is_read', false).then(({ count }) => {
         setUnreadCount(count ?? 0);
       });
-      supabase.from('notifications' as any).select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('is_read', false).then(({ count }) => {
+      supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('is_read', false).then(({ count }) => {
         setNotifCount(count ?? 0);
       });
       // Update last_seen

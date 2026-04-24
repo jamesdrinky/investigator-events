@@ -26,7 +26,7 @@ export async function createNotification(params: CreateNotificationParams) {
     // Fix #12: Prevent duplicate notifications (same actor + type + user within 5 minutes)
     const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
     const { data: existing } = await supabase
-      .from('notifications' as any)
+      .from('notifications')
       .select('id')
       .eq('user_id', userId)
       .eq('actor_id', actorId)
@@ -37,7 +37,7 @@ export async function createNotification(params: CreateNotificationParams) {
 
     if (existing) return;
 
-    await supabase.from('notifications' as any).insert({
+    await supabase.from('notifications').insert({
       user_id: userId,
       actor_id: actorId,
       type,

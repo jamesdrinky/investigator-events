@@ -52,7 +52,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const unreadOnly = searchParams.get('unread') === 'true';
 
-    let query = supabase.from('notifications' as any)
+    let query = supabase.from('notifications')
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
@@ -106,7 +106,7 @@ export async function PATCH(request: Request) {
     }
 
     // Mark all as read
-    await supabase.from('notifications' as any)
+    await supabase.from('notifications')
       .update({ is_read: true } as any)
       .eq('user_id', user.id)
       .eq('is_read', false);

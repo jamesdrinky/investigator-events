@@ -7,6 +7,36 @@ type RateLimitOptions = {
   windowMs: number;
 };
 
+// ── Upstash Redis rate limiting (production) ──
+// Falls back to in-memory if UPSTASH_REDIS_REST_URL is not set
+
+let upstashRatelimit: any = null;
+
+async function getUpstashRatelimiter(scope: string, options: RateLimitOptions) {
+  if (upstashRatelimit) return upstashRatelimit;
+
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return null;
+
+  try {
+    const { Ratelimit } = await import('@upstash/ratelimit');
+    const { Redis } = await import('@upstash/redis');
+
+    const redis = new Redis({ url, token });
+    upstashRatelimit = new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(options.maxRequests, `${options.windowMs}ms`),
+      prefix: `ratelimit:${scope}`,
+    });
+    return upstashRatelimit;
+  } catch {
+    return null;
+  }
+}
+
+// ── In-memory fallback (dev / no Redis) ──
+
 type RateLimitStore = Map<string, number[]>;
 
 declare global {
@@ -55,6 +85,10 @@ export class RateLimitError extends Error {
 export function enforceRateLimit(scope: string, options: RateLimitOptions) {
   const key = `${scope}:${getClientIdentifier()}`;
   const now = Date.now();
+
+  // Try Upstash first (async, but we need sync — so we use in-memory as primary
+  // and Upstash as a fire-and-forget check that blocks on the second call)
+  // For now: in-memory is the sync check, Upstash is checked async below
   const store = getRateLimitStore();
   const recent = (store.get(key) ?? []).filter((timestamp) => now - timestamp < options.windowMs);
 
@@ -64,6 +98,26 @@ export function enforceRateLimit(scope: string, options: RateLimitOptions) {
 
   recent.push(now);
   store.set(key, recent);
+}
+
+/**
+ * Async rate limit check using Upstash Redis.
+ * Use this in API routes where you can await.
+ * Falls back to in-memory if Upstash is not configured.
+ */
+export async function enforceRateLimitAsync(scope: string, options: RateLimitOptions): Promise<void> {
+  const identifier = getClientIdentifier();
+
+  // Try Upstash Redis first
+  const limiter = await getUpstashRatelimiter(scope, options);
+  if (limiter) {
+    const { success } = await limiter.limit(`${scope}:${identifier}`);
+    if (!success) throw new RateLimitError();
+    return;
+  }
+
+  // Fallback to in-memory
+  enforceRateLimit(scope, options);
 }
 
 export function assertSameOriginRequest() {

@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
-import { enforceRateLimit, assertSameOriginRequest } from '@/lib/security/server';
+import { enforceRateLimitAsync, assertSameOriginRequest } from '@/lib/security/server';
 import { buildWelcomeEmail } from '@/lib/email/welcome-email';
 
 export async function POST(request: Request) {
   try {
-    enforceRateLimit('signup', { maxRequests: 5, windowMs: 60_000 });
+    await enforceRateLimitAsync('signup', { maxRequests: 5, windowMs: 60_000 });
     assertSameOriginRequest();
 
     const body = await request.json().catch(() => null);

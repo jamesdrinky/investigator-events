@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
-import { enforceRateLimit, assertSameOriginRequest, RateLimitError } from '@/lib/security/server';
+import { enforceRateLimitAsync, assertSameOriginRequest, RateLimitError } from '@/lib/security/server';
 import { buildConfirmationEmail } from '@/lib/email/confirmation-email';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -13,7 +13,7 @@ function normalizeEmail(value: unknown) {
 export async function POST(request: Request) {
   try {
     assertSameOriginRequest();
-    enforceRateLimit('newsletter', { maxRequests: 10, windowMs: 60_000 });
+    await enforceRateLimitAsync('newsletter', { maxRequests: 10, windowMs: 60_000 });
 
     const body = await request.json().catch(() => null);
     const email = normalizeEmail(body?.email);

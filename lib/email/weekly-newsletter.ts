@@ -10,6 +10,8 @@ const WAVE = `${SITE}/email/wave-banner.png`;
 /* ── Colours ── */
 const C = {
   blue: '#2563eb',
+  blueLight: '#dbeafe',
+  blueBg: '#eff6ff',
   purple: '#7c3aed',
   pink: '#ec4899',
   dark: '#0f172a',
@@ -19,6 +21,8 @@ const C = {
   border: '#e2e8f0',
   bgSoft: '#f8fafc',
   white: '#ffffff',
+  red: '#dc2626',
+  redLight: '#fee2e2',
 };
 
 function fmtDate(d: string) { return new Date(`${d}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }); }
@@ -41,7 +45,7 @@ function eventCover(ev: EventItem) {
 
 /* ── Pill badge ── */
 function pill(text: string, bg: string, fg: string) {
-  return `<span style="display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;background-color:${bg};color:${fg};letter-spacing:0.02em;">${text}</span>`;
+  return `<span style="display:inline-block;padding:3px 10px;border-radius:99px;font-size:10px;font-weight:700;background-color:${bg};color:${fg};letter-spacing:0.03em;line-height:1.4;">${text}</span>`;
 }
 
 /* ── Hero featured card ── */
@@ -52,23 +56,31 @@ function heroCard(ev: EventItem) {
   const host = ev.association ?? ev.organiser;
   const days = daysUntil(ev.date);
   const badge = days <= 0 ? 'HAPPENING NOW' : days <= 7 ? `IN ${days} DAYS` : days <= 14 ? `IN ${days} DAYS` : 'FEATURED';
+  const urgent = days <= 7;
 
   return `
-  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:24px;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:28px;">
     <tr><td>
       <a href="${url}" style="text-decoration:none;display:block;">
-        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-          ${img ? `<tr><td style="position:relative;">
-            <img src="${img}" alt="" width="524" style="display:block;width:100%;height:auto;max-height:210px;object-fit:cover;" />
-            <div style="position:absolute;top:12px;left:12px;">${pill(badge, days <= 7 ? '#fee2e2' : '#dbeafe', days <= 7 ? '#dc2626' : C.blue)}</div>
+        <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${C.border};border-radius:16px;overflow:hidden;">
+          ${img ? `<tr><td style="background-color:${C.bgSoft};line-height:0;font-size:0;">
+            <!--[if mso]>
+            <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:504px;height:220px;">
+            <v:fill type="frame" src="${img}" />
+            <v:textbox inset="0,0,0,0"><div style="font-size:0;line-height:0;"></div></v:textbox>
+            </v:rect>
+            <![endif]-->
+            <!--[if !mso]><!-->
+            <img src="${img}" alt="${ev.title}" width="504" height="220" class="hero-img" style="display:block;width:100%;height:220px;object-fit:cover;" />
+            <!--<![endif]-->
           </td></tr>` : ''}
-          <tr><td style="padding:18px 20px 20px;background-color:${C.white};border:1px solid ${C.border};${img ? 'border-top:none;' : ''}border-radius:${img ? '0 0 16px 16px' : '16px'};">
+          <tr><td style="padding:20px 22px 22px;background-color:${C.white};">
+            <div style="margin-bottom:12px;">${pill(badge, urgent ? C.redLight : C.blueLight, urgent ? C.red : C.blue)}</div>
             <table width="100%" cellpadding="0" cellspacing="0"><tr>
-              ${lg ? `<td width="44" style="vertical-align:top;padding-right:14px;"><img src="${lg}" alt="" width="44" height="44" style="display:block;width:44px;height:44px;border-radius:12px;object-fit:contain;border:1px solid ${C.border};" /></td>` : ''}
+              ${lg ? `<td width="46" style="vertical-align:top;padding-right:14px;"><img src="${lg}" alt="${host}" width="46" height="46" style="display:block;width:46px;height:46px;border-radius:12px;border:1px solid ${C.border};background-color:${C.bgSoft};" /></td>` : ''}
               <td style="vertical-align:top;">
-                ${!img ? `<div style="margin-bottom:6px;">${pill(badge, days <= 7 ? '#fee2e2' : '#dbeafe', days <= 7 ? '#dc2626' : C.blue)}</div>` : ''}
-                <p style="margin:0;font-size:18px;font-weight:700;color:${C.dark};line-height:1.25;">${ev.title}</p>
-                <p style="margin:6px 0 0;font-size:13px;color:${C.muted};">${fmtDate(ev.date)}${ev.endDate ? ` – ${fmtShort(ev.endDate)}` : ''} &middot; ${ev.city}, ${ev.country}</p>
+                <p style="margin:0;font-size:19px;font-weight:700;color:${C.dark};line-height:1.25;">${ev.title}</p>
+                <p style="margin:8px 0 0;font-size:13px;color:${C.muted};">${fmtDate(ev.date)}${ev.endDate ? ` – ${fmtShort(ev.endDate)}` : ''} &middot; ${ev.city}, ${ev.country}</p>
                 <p style="margin:4px 0 0;font-size:12px;color:${C.faint};">${host} &middot; ${ev.category}</p>
               </td>
             </tr></table>
@@ -79,81 +91,147 @@ function heroCard(ev: EventItem) {
   </table>`;
 }
 
-/* ── Event row ── */
-function eventRow(ev: EventItem, idx: number) {
+/* ── Event card (with image) ── */
+function eventCardWithImage(ev: EventItem, img: string, lg: string | null, idx: number) {
   const url = `${SITE}/events/${ev.slug}`;
   const host = ev.association ?? ev.organiser;
-  const img = eventCover(ev);
-  const lg = assocLogo(ev);
   const days = daysUntil(ev.date);
   const badge = days <= 0 ? 'Now' : days <= 7 ? `${days}d` : '';
 
-  const visual = img
-    ? `<td width="72" style="vertical-align:top;padding-right:14px;"><img src="${img}" alt="" width="72" height="50" style="display:block;width:72px;height:50px;object-fit:cover;border-radius:10px;" /></td>`
-    : lg
-    ? `<td width="72" style="vertical-align:top;padding-right:14px;"><table width="72" height="50" cellpadding="0" cellspacing="0" style="width:72px;height:50px;border-radius:10px;background-color:${C.bgSoft};"><tr><td align="center" valign="middle"><img src="${lg}" alt="" width="28" height="28" style="display:block;width:28px;height:28px;object-fit:contain;" /></td></tr></table></td>`
-    : '';
-
   return `
-  <tr><td style="padding:${idx === 0 ? '0' : '14px'} 0 14px;${idx > 0 ? `border-top:1px solid ${C.border};` : ''}">
+  <tr><td style="padding:${idx === 0 ? '0' : '8px'} 0 8px;">
     <a href="${url}" style="text-decoration:none;color:inherit;display:block;">
-      <table width="100%" cellpadding="0" cellspacing="0"><tr>
-        ${visual}
-        <td style="vertical-align:top;">
-          <p style="margin:0;font-size:14px;font-weight:600;color:${C.dark};line-height:1.35;">${ev.title}${badge ? ` ${pill(badge, days <= 0 ? '#fee2e2' : '#dbeafe', days <= 0 ? '#dc2626' : C.blue)}` : ''}</p>
-          <p style="margin:4px 0 0;font-size:12px;color:${C.muted};">${fmtDate(ev.date)} &middot; ${ev.city}, ${ev.country}</p>
-          ${lg && img ? `<table cellpadding="0" cellspacing="0" style="margin-top:4px;"><tr><td style="padding-right:5px;vertical-align:middle;"><img src="${lg}" alt="" width="14" height="14" style="display:block;width:14px;height:14px;border-radius:4px;object-fit:contain;" /></td><td style="vertical-align:middle;"><span style="font-size:11px;color:${C.faint};">${host}</span></td></tr></table>` : `<p style="margin:3px 0 0;font-size:11px;color:${C.faint};">${host}</p>`}
-        </td>
-      </tr></table>
+      <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${C.border};border-radius:12px;overflow:hidden;background-color:${C.white};">
+        <tr>
+          <td width="96" style="vertical-align:top;background-color:${C.bgSoft};line-height:0;font-size:0;">
+            <!--[if mso]>
+            <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:96px;height:82px;">
+            <v:fill type="frame" src="${img}" /><v:textbox inset="0,0,0,0"><div style="font-size:0;line-height:0;"></div></v:textbox>
+            </v:rect>
+            <![endif]-->
+            <!--[if !mso]><!-->
+            <img src="${img}" alt="${ev.title}" width="96" height="82" style="display:block;width:96px;height:82px;object-fit:cover;" />
+            <!--<![endif]-->
+          </td>
+          <td style="vertical-align:middle;padding:10px 14px;">
+            <p style="margin:0;font-size:14px;font-weight:600;color:${C.dark};line-height:1.3;">${ev.title}${badge ? ` ${pill(badge, days <= 0 ? C.redLight : C.blueLight, days <= 0 ? C.red : C.blue)}` : ''}</p>
+            <p style="margin:5px 0 0;font-size:12px;color:${C.muted};">${fmtDate(ev.date)} &middot; ${ev.city}, ${ev.country}</p>
+            ${lg ? `<table cellpadding="0" cellspacing="0" style="margin-top:4px;"><tr><td style="padding-right:5px;vertical-align:middle;"><img src="${lg}" alt="" width="14" height="14" style="display:block;width:14px;height:14px;border-radius:4px;" /></td><td style="vertical-align:middle;"><span style="font-size:11px;color:${C.faint};">${host}</span></td></tr></table>` : `<p style="margin:3px 0 0;font-size:11px;color:${C.faint};">${host}</p>`}
+          </td>
+        </tr>
+      </table>
     </a>
   </td></tr>`;
 }
 
+/* ── Event card (text only — no image) ── */
+function eventCardTextOnly(ev: EventItem, lg: string | null, idx: number) {
+  const url = `${SITE}/events/${ev.slug}`;
+  const host = ev.association ?? ev.organiser;
+  const days = daysUntil(ev.date);
+  const badge = days <= 0 ? 'Now' : days <= 7 ? `${days}d` : '';
+
+  return `
+  <tr><td style="padding:${idx === 0 ? '0' : '8px'} 0 8px;">
+    <a href="${url}" style="text-decoration:none;color:inherit;display:block;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${C.border};border-radius:12px;overflow:hidden;background-color:${C.white};">
+        <tr>
+          <td width="4" style="background-color:${C.blue};font-size:0;line-height:0;">&nbsp;</td>
+          <td style="padding:14px 16px;">
+            <p style="margin:0;font-size:14px;font-weight:600;color:${C.dark};line-height:1.3;">${ev.title}${badge ? ` ${pill(badge, days <= 0 ? C.redLight : C.blueLight, days <= 0 ? C.red : C.blue)}` : ''}</p>
+            <p style="margin:5px 0 0;font-size:12px;color:${C.muted};">${fmtDate(ev.date)} &middot; ${ev.city}, ${ev.country}</p>
+            ${lg ? `<table cellpadding="0" cellspacing="0" style="margin-top:4px;"><tr><td style="padding-right:5px;vertical-align:middle;"><img src="${lg}" alt="" width="14" height="14" style="display:block;width:14px;height:14px;border-radius:4px;" /></td><td style="vertical-align:middle;"><span style="font-size:11px;color:${C.faint};">${host}</span></td></tr></table>` : `<p style="margin:3px 0 0;font-size:11px;color:${C.faint};">${host}</p>`}
+          </td>
+        </tr>
+      </table>
+    </a>
+  </td></tr>`;
+}
+
+/* ── Event row (picks card style based on image availability) ── */
+function eventRow(ev: EventItem, idx: number) {
+  const img = eventCover(ev);
+  const lg = assocLogo(ev);
+  if (img) return eventCardWithImage(ev, img, lg, idx);
+  return eventCardTextOnly(ev, lg, idx);
+}
+
+/* ── Section header ── */
+function sectionHeader(title: string) {
+  return `
+  <tr><td style="padding-bottom:14px;">
+    <table cellpadding="0" cellspacing="0"><tr>
+      <td width="3" style="background-color:${C.blue};border-radius:2px;font-size:0;line-height:0;">&nbsp;</td>
+      <td style="padding-left:10px;vertical-align:middle;"><p style="margin:0;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:${C.muted};">${title}</p></td>
+    </tr></table>
+  </td></tr>`;
+}
+
 /* ── Section ── */
-function section(title: string, emoji: string, events: EventItem[]) {
+function section(title: string, events: EventItem[]) {
   if (!events.length) return '';
   return `
-  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:32px;">
-    <tr><td style="padding-bottom:12px;">
-      <table cellpadding="0" cellspacing="0"><tr>
-        <td style="font-size:18px;padding-right:8px;vertical-align:middle;">${emoji}</td>
-        <td style="vertical-align:middle;"><p style="margin:0;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:${C.faint};">${title}</p></td>
-      </tr></table>
-    </td></tr>
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:40px;">
+    ${sectionHeader(title)}
     ${events.map((ev, i) => eventRow(ev, i)).join('')}
   </table>`;
+}
+
+/* ── Review card ── */
+function reviewCard(ev: EventItem) {
+  const lg = assocLogo(ev);
+  const host = ev.association ?? ev.organiser;
+  const img = eventCover(ev);
+  const url = `${SITE}/events/${ev.slug}`;
+
+  return `
+  <tr><td style="padding-bottom:10px;">
+    <a href="${url}" style="text-decoration:none;display:block;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${C.border};border-radius:12px;overflow:hidden;background-color:${C.white};">
+        <tr>
+          ${img ? `<td width="110" style="vertical-align:top;background-color:${C.bgSoft};line-height:0;font-size:0;">
+            <!--[if mso]>
+            <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:110px;height:90px;">
+            <v:fill type="frame" src="${img}" /><v:textbox inset="0,0,0,0"><div style="font-size:0;line-height:0;"></div></v:textbox>
+            </v:rect>
+            <![endif]-->
+            <!--[if !mso]><!-->
+            <img src="${img}" alt="${ev.title}" width="110" height="90" style="display:block;width:110px;height:90px;object-fit:cover;" />
+            <!--<![endif]-->
+          </td>` : ''}
+          <td style="vertical-align:middle;padding:14px 16px;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr><td>
+                ${lg ? `<img src="${lg}" alt="" width="18" height="18" style="display:inline-block;width:18px;height:18px;border-radius:5px;vertical-align:middle;border:1px solid ${C.border};margin-right:6px;background-color:${C.bgSoft};" />` : ''}<span style="font-size:10px;color:${C.faint};vertical-align:middle;">${host}</span>
+              </td></tr>
+              <tr><td style="padding-top:5px;">
+                <p style="margin:0;font-size:13px;font-weight:600;color:${C.dark};line-height:1.3;">${ev.title}</p>
+              </td></tr>
+              <tr><td style="padding-top:8px;">
+                <span style="display:inline-block;padding:5px 14px;border-radius:99px;font-size:10px;font-weight:700;color:${C.white};background-color:${C.blue};letter-spacing:0.02em;">Leave a review &rarr;</span>
+              </td></tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </a>
+  </td></tr>`;
 }
 
 /* ── Review section ── */
 function reviewSection(events: EventItem[]) {
   if (!events.length) return '';
-  const cards = events.map(ev => {
-    const lg = assocLogo(ev);
-    const host = ev.association ?? ev.organiser;
-    const url = `${SITE}/events/${ev.slug}`;
-    return `
-    <td style="padding:0 6px;vertical-align:top;width:${Math.floor(100 / events.length)}%;">
-      <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${C.border};border-radius:14px;background-color:${C.white};">
-        <tr><td style="padding:16px 12px;text-align:center;">
-          ${lg ? `<img src="${lg}" alt="" width="36" height="36" style="display:inline-block;width:36px;height:36px;border-radius:10px;object-fit:contain;border:1px solid ${C.border};" />` : ''}
-          <p style="margin:8px 0 0;font-size:12px;font-weight:600;color:${C.dark};line-height:1.3;">${ev.title}</p>
-          <p style="margin:4px 0 0;font-size:10px;color:${C.faint};">${host}</p>
-          <a href="${url}" style="display:inline-block;margin-top:12px;padding:6px 16px;border-radius:99px;font-size:11px;font-weight:600;color:${C.white};background-color:${C.blue};text-decoration:none;">Review &rarr;</a>
-        </td></tr>
-      </table>
-    </td>`;
-  }).join('');
 
   return `
-  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:36px;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:40px;">
     <tr><td style="padding:24px 20px;background-color:#f0f4ff;border-radius:16px;">
       <table width="100%" cellpadding="0" cellspacing="0">
-        <tr><td>
-          <p style="margin:0;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:${C.faint};">Recently happened</p>
-          <p style="margin:6px 0 0;font-size:20px;font-weight:800;color:${C.dark};line-height:1.2;">Were you there?</p>
-          <p style="margin:4px 0 16px;font-size:13px;color:${C.muted};">Share your experience — takes 60 seconds, helps the whole industry.</p>
+        <tr><td style="padding-bottom:16px;">
+          <p style="margin:0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:${C.blue};">Recently happened</p>
+          <p style="margin:8px 0 0;font-size:20px;font-weight:800;color:${C.dark};line-height:1.2;">Were you there?</p>
+          <p style="margin:4px 0 0;font-size:13px;color:${C.muted};line-height:1.45;">Share your experience — takes 60 seconds, helps the whole industry.</p>
         </td></tr>
-        <tr><td><table width="100%" cellpadding="0" cellspacing="0"><tr>${cards}</tr></table></td></tr>
+        ${events.map(ev => reviewCard(ev)).join('')}
       </table>
     </td></tr>
   </table>`;
@@ -167,20 +245,23 @@ function howToSection() {
     { emoji: '&#11088;', title: 'Review past events', desc: 'Help others decide where to go next.', link: `${SITE}/calendar`, cta: 'Find events' },
   ];
   return `
-  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:36px;">
-    <tr><td style="padding-bottom:12px;">
-      <p style="margin:0;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:${C.faint};">Get more from IE</p>
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:40px;">
+    <tr><td style="padding-bottom:14px;">
+      <table cellpadding="0" cellspacing="0"><tr>
+        <td width="3" style="background-color:${C.purple};border-radius:2px;font-size:0;line-height:0;">&nbsp;</td>
+        <td style="padding-left:10px;vertical-align:middle;"><p style="margin:0;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:${C.muted};">Get more from IE</p></td>
+      </tr></table>
     </td></tr>
     ${items.map((it, i) => `
-    <tr><td style="padding:${i === 0 ? '0' : '12px'} 0 ${i === items.length - 1 ? '0' : '12px'};${i > 0 ? `border-top:1px solid ${C.border};` : ''}">
+    <tr><td style="padding:${i === 0 ? '0' : '10px'} 0 ${i === items.length - 1 ? '0' : '10px'};${i > 0 ? `border-top:1px solid ${C.border};` : ''}">
       <table width="100%" cellpadding="0" cellspacing="0"><tr>
-        <td width="36" style="vertical-align:top;padding-right:12px;font-size:20px;">${it.emoji}</td>
+        <td width="36" style="vertical-align:top;padding-right:12px;font-size:22px;line-height:1;">${it.emoji}</td>
         <td style="vertical-align:top;">
           <p style="margin:0;font-size:14px;font-weight:600;color:${C.dark};">${it.title}</p>
-          <p style="margin:2px 0 0;font-size:12px;color:${C.muted};line-height:1.4;">${it.desc}</p>
+          <p style="margin:3px 0 0;font-size:12px;color:${C.muted};line-height:1.4;">${it.desc}</p>
         </td>
-        <td width="90" style="vertical-align:middle;text-align:right;">
-          <a href="${it.link}" style="display:inline-block;padding:6px 14px;border-radius:99px;font-size:11px;font-weight:600;color:${C.blue};background-color:#eff6ff;text-decoration:none;">${it.cta} &rarr;</a>
+        <td width="94" style="vertical-align:middle;text-align:right;">
+          <a href="${it.link}" style="display:inline-block;padding:7px 14px;border-radius:99px;font-size:11px;font-weight:600;color:${C.blue};background-color:${C.blueBg};text-decoration:none;border:1px solid ${C.blueLight};">${it.cta} &rarr;</a>
         </td>
       </tr></table>
     </td></tr>`).join('')}
@@ -190,9 +271,9 @@ function howToSection() {
 /* ── Stat pill for hero ── */
 function statPill(value: string | number, label: string) {
   return `
-  <td style="text-align:center;padding:0 4px;">
+  <td style="text-align:center;padding:6px 12px;">
     <p style="margin:0;font-size:22px;font-weight:800;color:${C.dark};line-height:1;">${value}</p>
-    <p style="margin:2px 0 0;font-size:10px;font-weight:500;color:${C.faint};text-transform:uppercase;letter-spacing:0.06em;">${label}</p>
+    <p style="margin:3px 0 0;font-size:10px;font-weight:600;color:${C.faint};text-transform:uppercase;letter-spacing:0.06em;">${label}</p>
   </td>`;
 }
 
@@ -235,16 +316,17 @@ export function buildWeeklyNewsletterHtml({
   [data-ogsc] a { color: #2563eb !important; }
   @media (prefers-color-scheme: dark) {
     body, .outer, td, div, table { background-color: #ffffff !important; }
-    .inner, .card, .review-wrap, .howto { background-color: #ffffff !important; }
+    .inner, .card { background-color: #ffffff !important; }
     h1, h2, h3, p, td, span, div { color: #0f172a !important; }
     a { color: #2563eb !important; }
     img { opacity: 1 !important; }
   }
   @media only screen and (max-width: 599px) {
-    .outer-wrap { padding: 8px !important; }
-    .inner { padding: 0 20px !important; }
-    .hero-img { max-height: 180px !important; }
-    .stat-row td { padding: 0 2px !important; }
+    .outer-wrap { padding: 4px !important; }
+    .inner { padding: 0 16px !important; }
+    .hero-img { height: 170px !important; }
+    .stat-row td { padding: 4px 8px !important; }
+    .community-col { display: block !important; width: 100% !important; padding: 0 0 8px !important; }
   }
 </style>
 </head>
@@ -258,16 +340,16 @@ export function buildWeeklyNewsletterHtml({
 <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
 
 <!-- Wave banner top -->
-<tr><td style="border-radius:20px 20px 0 0;overflow:hidden;"><img src="${WAVE}" alt="" width="560" style="display:block;width:100%;height:auto;border-radius:20px 20px 0 0;" /></td></tr>
+<tr><td style="border-radius:20px 20px 0 0;overflow:hidden;background:linear-gradient(135deg,${C.blue},${C.purple});background-color:${C.blue};"><img src="${WAVE}" alt="" width="560" style="display:block;width:100%;height:auto;border-radius:20px 20px 0 0;" /></td></tr>
 
 <!-- White content card -->
 <tr><td class="inner card" style="background-color:${C.white};padding:0 28px;">
 
   <!-- Logo + date -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="padding-top:20px;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding-top:24px;">
     <tr>
       <td style="vertical-align:middle;">
-        <img src="${LOGO}" alt="IE" width="32" height="32" style="display:inline-block;width:32px;height:32px;border-radius:50%;vertical-align:middle;border:2px solid ${C.border};" />
+        <img src="${LOGO}" alt="Investigator Events" width="32" height="32" style="display:inline-block;width:32px;height:32px;border-radius:50%;vertical-align:middle;border:2px solid ${C.border};background-color:${C.bgSoft};" />
         <span style="display:inline-block;vertical-align:middle;margin-left:10px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;color:${C.faint};">Investigator Events</span>
       </td>
       <td style="text-align:right;vertical-align:middle;">
@@ -276,15 +358,16 @@ export function buildWeeklyNewsletterHtml({
     </tr>
   </table>
 
-  <!-- Title + stats -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:20px;">
+  <!-- Title -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:22px;">
     <tr><td>
       <p style="margin:0;font-size:28px;font-weight:800;color:${C.dark};letter-spacing:-0.03em;line-height:1.15;">Weekly Briefing</p>
+      <p style="margin:6px 0 0;font-size:13px;color:${C.muted};line-height:1.4;">Your weekly roundup of PI conferences, meetings, and networking events worldwide.</p>
     </td></tr>
   </table>
 
   <!-- Stat pills -->
-  <table cellpadding="0" cellspacing="0" class="stat-row" style="margin-top:16px;border:1px solid ${C.border};border-radius:12px;overflow:hidden;">
+  <table cellpadding="0" cellspacing="0" class="stat-row" style="margin-top:18px;background-color:${C.bgSoft};border:1px solid ${C.border};border-radius:12px;">
     <tr>
       ${statPill(upcoming.length, 'Upcoming')}
       <td style="width:1px;padding:8px 0;"><div style="width:1px;height:28px;background-color:${C.border};"></div></td>
@@ -295,7 +378,7 @@ export function buildWeeklyNewsletterHtml({
   </table>
 
   <!-- Brand accent line -->
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:24px 0 0;"><tr>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:28px 0 0;"><tr>
     <td width="33%" style="height:3px;background-color:${C.blue};font-size:0;line-height:0;">&nbsp;</td>
     <td width="34%" style="height:3px;background-color:${C.purple};font-size:0;line-height:0;">&nbsp;</td>
     <td width="33%" style="height:3px;background-color:${C.pink};font-size:0;line-height:0;">&nbsp;</td>
@@ -305,10 +388,10 @@ export function buildWeeklyNewsletterHtml({
   ${hero ? heroCard(hero) : ''}
 
   <!-- Upcoming -->
-  ${section('Upcoming Events', '&#128197;', upcoming.filter(e => e.id !== hero?.id))}
+  ${section('Upcoming Events', upcoming.filter(e => e.id !== hero?.id))}
 
   <!-- Just added -->
-  ${section('Just Added', '&#10024;', newlyAdded.filter(e => e.id !== hero?.id))}
+  ${section('Just Added', newlyAdded.filter(e => e.id !== hero?.id))}
 
   <!-- Review section -->
   ${reviewSection(recentlyPast)}
@@ -317,23 +400,26 @@ export function buildWeeklyNewsletterHtml({
   ${howToSection()}
 
   <!-- Community section -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:32px;">
-    <tr><td>
-      <p style="margin:0;font-size:13px;font-weight:700;color:${C.dark};text-transform:uppercase;letter-spacing:0.1em;">Beyond the calendar</p>
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:40px;">
+    <tr><td style="padding-bottom:14px;">
+      <table cellpadding="0" cellspacing="0"><tr>
+        <td width="3" style="background-color:${C.pink};border-radius:2px;font-size:0;line-height:0;">&nbsp;</td>
+        <td style="padding-left:10px;vertical-align:middle;"><p style="margin:0;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:${C.muted};">Beyond the calendar</p></td>
+      </tr></table>
     </td></tr>
-    <tr><td style="padding-top:12px;">
+    <tr><td>
       <table width="100%" cellpadding="0" cellspacing="0">
         <tr>
-          <td width="50%" style="padding-right:6px;vertical-align:top;">
-            <a href="${SITE}/people?tab=discover" style="text-decoration:none;display:block;padding:14px;background-color:#f0f4ff;border-radius:10px;border:1px solid #dbeafe;">
+          <td width="50%" class="community-col" style="padding-right:6px;vertical-align:top;">
+            <a href="${SITE}/people?tab=discover" style="text-decoration:none;display:block;padding:16px;background-color:${C.blueBg};border-radius:12px;border:1px solid ${C.blueLight};">
               <p style="margin:0;font-size:13px;font-weight:700;color:${C.dark};">Find investigators</p>
-              <p style="margin:4px 0 0;font-size:11px;color:${C.muted};">Connect with PIs worldwide</p>
+              <p style="margin:5px 0 0;font-size:11px;color:${C.muted};line-height:1.4;">Connect with PIs worldwide</p>
             </a>
           </td>
-          <td width="50%" style="padding-left:6px;vertical-align:top;">
-            <a href="${SITE}/associations" style="text-decoration:none;display:block;padding:14px;background-color:#f0fdf4;border-radius:10px;border:1px solid #d1fae5;">
+          <td width="50%" class="community-col" style="padding-left:6px;vertical-align:top;">
+            <a href="${SITE}/associations" style="text-decoration:none;display:block;padding:16px;background-color:#f0fdf4;border-radius:12px;border:1px solid #d1fae5;">
               <p style="margin:0;font-size:13px;font-weight:700;color:${C.dark};">Associations</p>
-              <p style="margin:4px 0 0;font-size:11px;color:${C.muted};">Browse 40+ PI bodies</p>
+              <p style="margin:5px 0 0;font-size:11px;color:${C.muted};line-height:1.4;">Browse 40+ PI bodies</p>
             </a>
           </td>
         </tr>
@@ -342,23 +428,23 @@ export function buildWeeklyNewsletterHtml({
   </table>
 
   <!-- Primary CTA -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:28px;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:32px;">
     <tr><td align="center">
       <!--[if mso]>
-      <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${SITE}/calendar" style="height:46px;v-text-anchor:middle;width:240px;" arcsize="50%" fillcolor="#2563eb">
-        <w:anchorlock/><center style="color:#ffffff;font-family:sans-serif;font-size:14px;font-weight:bold;">Browse full calendar</center>
+      <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${SITE}/calendar" style="height:48px;v-text-anchor:middle;width:260px;" arcsize="50%" fillcolor="#2563eb">
+        <w:anchorlock/><center style="color:#ffffff;font-family:sans-serif;font-size:14px;font-weight:bold;">Browse full calendar &rarr;</center>
       </v:roundrect>
       <![endif]-->
       <!--[if !mso]><!-->
-      <a href="${SITE}/calendar" style="display:inline-block;padding:14px 40px;background-color:${C.blue};color:${C.white};text-decoration:none;font-size:14px;font-weight:700;border-radius:99px;letter-spacing:0.01em;">Browse full calendar</a>
+      <a href="${SITE}/calendar" style="display:inline-block;padding:14px 44px;background-color:${C.blue};color:${C.white};text-decoration:none;font-size:14px;font-weight:700;border-radius:99px;letter-spacing:0.01em;">Browse full calendar &rarr;</a>
       <!--<![endif]-->
     </td></tr>
-    <tr><td align="center" style="padding-top:10px;">
+    <tr><td align="center" style="padding-top:12px;">
       <a href="${SITE}/submit-event" style="font-size:12px;color:${C.blue};text-decoration:none;font-weight:600;">Submit an event for free &rarr;</a>
     </td></tr>
   </table>
 
-  <div style="height:32px;"></div>
+  <div style="height:36px;"></div>
 </td></tr>
 
 <!-- Brand divider bottom -->
@@ -371,7 +457,7 @@ export function buildWeeklyNewsletterHtml({
 </td></tr>
 
 <!-- Footer -->
-<tr><td style="padding:20px 8px 8px;text-align:center;">
+<tr><td style="padding:24px 8px 12px;text-align:center;">
   <p style="margin:0;font-size:12px;color:${C.muted};font-weight:500;">
     <a href="${SITE}" style="color:${C.muted};text-decoration:none;">Site</a>
     &nbsp;&middot;&nbsp;
@@ -381,7 +467,7 @@ export function buildWeeklyNewsletterHtml({
     &nbsp;&middot;&nbsp;
     <a href="${SITE}/directory" style="color:${C.muted};text-decoration:none;">Find a PI</a>
   </p>
-  <p style="margin:10px 0 0;font-size:11px;color:${C.faint};">Investigator Events &middot; <a href="mailto:info@investigatorevents.com" style="color:${C.faint};text-decoration:none;">info@investigatorevents.com</a></p>
+  <p style="margin:12px 0 0;font-size:11px;color:${C.faint};">Investigator Events &middot; <a href="mailto:info@investigatorevents.com" style="color:${C.faint};text-decoration:none;">info@investigatorevents.com</a></p>
   <p style="margin:4px 0 0;font-size:10px;color:${C.faint};">You subscribed at <a href="${SITE}" style="color:${C.faint};text-decoration:none;">investigatorevents.com</a>${unsubscribeToken ? ` &middot; <a href="${SITE}/api/newsletter/unsubscribe?token=${unsubscribeToken}" style="color:${C.faint};text-decoration:underline;">Unsubscribe</a>` : ''}</p>
 </td></tr>
 

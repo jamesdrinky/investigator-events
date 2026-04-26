@@ -51,6 +51,10 @@ const cityImageMap: Record<string, string> = {
   'New York': 'nyc.jpg',
   'New York City': 'nyc.jpg',
   'New York, NY': 'nyc.jpg',
+  'Warsaw': 'warsaw.avif',
+  'Bonita Springs': 'beach.jpg',
+  'Bonita Springs, FL': 'beach.jpg',
+  'San José': 'beach.jpg',
 };
 
 /** Map specific event slugs to event-branded images */

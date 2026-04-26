@@ -28,16 +28,17 @@ export function getWeeklyCollections(events: EventItem[], now = new Date()) {
     .slice(0, 8);
 
   const featured = [...events]
-    .filter((event) => event.featured)
+    .filter((event) => event.featured && parseDate(event.date).getTime() >= start.getTime())
     .sort((a, b) => parseDate(a.date).getTime() - parseDate(b.date).getTime())
     .slice(0, 4);
 
-  // Events that ended in the last 14 days — prompt reviews
+  // Events that ended in the last 14 days — prompt reviews (exclude online/webinar events)
   const past14 = start.getTime() - 14 * 24 * 60 * 60 * 1000;
   const recentlyPast = [...events]
     .filter((event) => {
       const endTime = parseDate(event.endDate ?? event.date).getTime();
-      return endTime < start.getTime() && endTime >= past14;
+      const isOnline = event.city?.toLowerCase() === 'online' || event.category?.toLowerCase().includes('webinar') || event.category?.toLowerCase().includes('seminar');
+      return endTime < start.getTime() && endTime >= past14 && !isOnline;
     })
     .sort((a, b) => parseDate(b.endDate ?? b.date).getTime() - parseDate(a.endDate ?? a.date).getTime())
     .slice(0, 3);

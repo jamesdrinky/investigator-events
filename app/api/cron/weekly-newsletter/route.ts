@@ -25,6 +25,8 @@ export async function GET(request: Request) {
 
   const events = await fetchAllEvents();
   const { upcoming, newlyAdded, featured, recentlyPast, hasFreshActivity } = getWeeklyCollections(events);
+  const heroEvent = featured[0] ?? upcoming[0];
+  const countries = new Set([...upcoming, ...newlyAdded].map(e => e.country)).size;
 
   if (!hasFreshActivity) {
     return NextResponse.json({ message: 'No fresh activity, skipping send', sent: 0 });
@@ -67,7 +69,9 @@ export async function GET(request: Request) {
         batch.map((sub) => ({
           from: 'Investigator Events <weekly@investigatorevents.com>',
           to: sub.email,
-          subject: `Weekly Briefing — ${upcoming.length} upcoming event${upcoming.length !== 1 ? 's' : ''}, ${newlyAdded.length} newly added`,
+          subject: heroEvent
+            ? `${heroEvent.title} + ${Math.max(0, upcoming.length + newlyAdded.length - 1)} more — Weekly Briefing`
+            : `Weekly Briefing — ${upcoming.length} event${upcoming.length !== 1 ? 's' : ''} across ${countries} countries`,
           html: buildWeeklyNewsletterHtml({ upcoming, newlyAdded, featured, recentlyPast, unsubscribeToken: sub.unsubscribe_token }),
         }))
       );

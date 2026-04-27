@@ -15,7 +15,6 @@ const desktopNavItems: Array<{ href: Route; label: string; authOnly?: boolean }>
   { href: '/calendar', label: 'Events' },
   { href: '/associations', label: 'Associations' },
   { href: '/people', label: 'Forum' },
-  { href: '/submit-event', label: 'Submit' },
   { href: '/reviews' as Route, label: 'Reviews', authOnly: true },
   { href: '/advice', label: 'Advice' },
   { href: '/about', label: 'About' }
@@ -28,7 +27,6 @@ const mobileMenuItems: Array<{ href: Route; label: string; authOnly?: boolean }>
   { href: '/people', label: 'Forum' },
   { href: '/reviews' as Route, label: 'Reviews', authOnly: true },
   { href: '/why-join-an-association' as Route, label: 'Why Join?' },
-  { href: '/submit-event', label: 'Submit' },
   { href: '/advice', label: 'Advice' },
   { href: '/about', label: 'About' }
 ];

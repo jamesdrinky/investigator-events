@@ -1,26 +1,32 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
-import { createHmac } from 'crypto';
+import { Webhook } from 'svix';
 
 const RESEND_WEBHOOK_SECRET = process.env.RESEND_WEBHOOK_SECRET;
-
-function verifyResendSignature(payload: string, signature: string | null): boolean {
-  if (!RESEND_WEBHOOK_SECRET || !signature) return false;
-  const expected = createHmac('sha256', RESEND_WEBHOOK_SECRET)
-    .update(payload)
-    .digest('base64');
-  return signature === expected;
-}
 
 // Resend sends webhooks for email events: delivered, opened, clicked, bounced, complained
 export async function POST(request: Request) {
   try {
     const rawBody = await request.text();
 
-    // Verify webhook signature if secret is configured
+    // Verify webhook signature using Svix
     if (RESEND_WEBHOOK_SECRET) {
-      const signature = request.headers.get('svix-signature');
-      if (!verifyResendSignature(rawBody, signature)) {
+      const svixId = request.headers.get('svix-id');
+      const svixTimestamp = request.headers.get('svix-timestamp');
+      const svixSignature = request.headers.get('svix-signature');
+
+      if (!svixId || !svixTimestamp || !svixSignature) {
+        return NextResponse.json({ error: 'Missing svix headers' }, { status: 401 });
+      }
+
+      try {
+        const wh = new Webhook(RESEND_WEBHOOK_SECRET);
+        wh.verify(rawBody, {
+          'svix-id': svixId,
+          'svix-timestamp': svixTimestamp,
+          'svix-signature': svixSignature,
+        });
+      } catch {
         console.warn('Webhook signature verification failed');
         return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
       }

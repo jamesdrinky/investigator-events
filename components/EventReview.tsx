@@ -45,27 +45,29 @@ function SubRatingInput({ value, onChange, label, icon }: { value: number; onCha
         <span className="text-base">{icon}</span>
         <span className="text-sm font-medium text-slate-700">{label}</span>
       </div>
-      <div className="flex items-center gap-1">
+      <div
+        className="flex items-center gap-1.5"
+        onMouseLeave={() => setHover(0)}
+      >
         {[1, 2, 3, 4, 5].map((s) => (
           <button
             key={s}
             type="button"
             onClick={() => onChange(s)}
             onMouseEnter={() => setHover(s)}
-            onMouseLeave={() => setHover(0)}
-            className="p-0.5 transition-transform hover:scale-110 active:scale-95"
+            className="p-1"
           >
             <div
-              className={`h-5 w-5 rounded-full border-2 transition-all duration-200 ${
+              className={`h-5 w-5 rounded-full border-2 transition-colors duration-150 ${
                 s <= active
                   ? 'border-blue-500 bg-blue-500 shadow-[0_0_8px_rgba(37,99,235,0.5)]'
-                  : 'border-slate-200 bg-white'
+                  : 'border-slate-200 bg-white hover:border-slate-300'
               }`}
             />
           </button>
         ))}
         {active > 0 && (
-          <span className="ml-1.5 w-7 text-right text-xs font-semibold text-blue-600">{active}/5</span>
+          <span className="ml-1 w-7 text-right text-xs font-semibold text-blue-600">{active}/5</span>
         )}
       </div>
     </div>
@@ -264,7 +266,10 @@ export function EventReview({ eventId, isPast }: { eventId: string; isPast: bool
               <div className="mt-5" style={{ animation: 'fadeSlideIn 0.3s ease forwards' }}>
                 {/* Sub-category ratings */}
                 <div className="rounded-xl border border-slate-200/60 bg-white p-4">
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Rate specific areas</p>
+                  <div className="mb-3 flex items-center justify-between">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Rate specific areas</p>
+                    <p className="text-[10px] text-slate-400">These ratings are anonymous</p>
+                  </div>
                   <div className="divide-y divide-slate-100">
                     {SUB_CATEGORIES.map((cat) => (
                       <SubRatingInput

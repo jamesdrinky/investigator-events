@@ -30,9 +30,9 @@ const cityImageMap: Record<string, string> = {
   'Texas': 'sanantonio.jpg',
   'Prague': 'budapest.jpg',
   'San Jose': 'beach.jpg',
-  'Casablanca': 'casablanca.avif',
-  'Nashville': 'nashville.avif',
-  'Nashville, TN': 'nashville.avif',
+  'Casablanca': 'casablanca.jpg',
+  'Nashville': 'nashville.jpg',
+  'Nashville, TN': 'nashville.jpg',
 
   // New city images
   'London': 'london.jpg',
@@ -51,7 +51,7 @@ const cityImageMap: Record<string, string> = {
   'New York': 'nyc.jpg',
   'New York City': 'nyc.jpg',
   'New York, NY': 'nyc.jpg',
-  'Warsaw': 'warsaw.avif',
+  'Warsaw': 'warsaw.jpg',
   'Bonita Springs': 'beach.jpg',
   'Bonita Springs, FL': 'beach.jpg',
   'San José': 'beach.jpg',

@@ -12,6 +12,23 @@ export async function GET(request: Request) {
   }
 
   const supabase = createSupabaseAdminServerClient();
+
+  // First check if the token matches a subscriber
+  const { data: subscriber } = await supabase
+    .from('newsletter_subscribers' as never)
+    .select('id, status')
+    .eq('unsubscribe_token', token)
+    .single() as any;
+
+  if (!subscriber) {
+    // Token doesn't match anyone (e.g. preview emails) — redirect gracefully
+    return NextResponse.redirect(new URL('/unsubscribe?success=true', request.url));
+  }
+
+  if (subscriber.status === 'unsubscribed') {
+    return NextResponse.redirect(new URL('/unsubscribe?success=true', request.url));
+  }
+
   const { error } = await supabase
     .from('newsletter_subscribers' as never)
     .update({ status: 'unsubscribed', unsubscribed_at: new Date().toISOString() } as never)
@@ -21,6 +38,5 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Failed to unsubscribe' }, { status: 500 });
   }
 
-  // Redirect to the unsubscribe confirmation page
   return NextResponse.redirect(new URL('/unsubscribe?success=true', request.url));
 }

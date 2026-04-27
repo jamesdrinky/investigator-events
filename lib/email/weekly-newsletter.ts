@@ -101,9 +101,9 @@ function eventCardWithImage(ev: EventItem, img: string, lg: string | null, idx: 
   return `
   <tr><td style="padding:${idx === 0 ? '0' : '8px'} 0 8px;">
     <a href="${url}" style="text-decoration:none;color:inherit;display:block;">
-      <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${C.border};border-radius:12px;overflow:hidden;background-color:${C.white};">
+      <table width="100%" cellpadding="0" cellspacing="0" class="ev-card" style="border:1px solid ${C.border};border-radius:12px;overflow:hidden;background-color:${C.white};">
         <tr>
-          <td width="96" style="vertical-align:top;background-color:${C.bgSoft};line-height:0;font-size:0;">
+          <td width="96" class="bg-soft" style="vertical-align:top;background-color:${C.bgSoft};line-height:0;font-size:0;">
             <!--[if mso]>
             <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:96px;height:82px;">
             <v:fill type="frame" src="${img}" /><v:textbox inset="0,0,0,0"><div style="font-size:0;line-height:0;"></div></v:textbox>
@@ -134,9 +134,9 @@ function eventCardTextOnly(ev: EventItem, lg: string | null, idx: number) {
   return `
   <tr><td style="padding:${idx === 0 ? '0' : '8px'} 0 8px;">
     <a href="${url}" style="text-decoration:none;color:inherit;display:block;">
-      <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${C.border};border-radius:12px;overflow:hidden;background-color:${C.white};">
+      <table width="100%" cellpadding="0" cellspacing="0" class="ev-card" style="border:1px solid ${C.border};border-radius:12px;overflow:hidden;background-color:${C.white};">
         <tr>
-          <td width="4" style="background-color:${C.blue};font-size:0;line-height:0;">&nbsp;</td>
+          <td width="4" class="accent-bar" style="background-color:${C.blue};font-size:0;line-height:0;">&nbsp;</td>
           <td style="padding:14px 16px;">
             <p style="margin:0;font-size:14px;font-weight:600;color:${C.dark};line-height:1.3;">${ev.title}${badge ? ` ${pill(badge, days <= 0 ? C.redLight : C.blueLight, days <= 0 ? C.red : C.blue)}` : ''}</p>
             <p style="margin:5px 0 0;font-size:12px;color:${C.muted};">${fmtDate(ev.date)} &middot; ${ev.city}, ${ev.country}</p>
@@ -187,9 +187,9 @@ function reviewCard(ev: EventItem) {
   return `
   <tr><td style="padding-bottom:10px;">
     <a href="${url}" style="text-decoration:none;display:block;">
-      <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${C.border};border-radius:12px;overflow:hidden;background-color:${C.white};">
+      <table width="100%" cellpadding="0" cellspacing="0" class="ev-card" style="border:1px solid ${C.border};border-radius:12px;overflow:hidden;background-color:${C.white};">
         <tr>
-          ${img ? `<td width="110" style="vertical-align:top;background-color:${C.bgSoft};line-height:0;font-size:0;">
+          ${img ? `<td width="110" class="bg-soft" style="vertical-align:top;background-color:${C.bgSoft};line-height:0;font-size:0;">
             <!--[if mso]>
             <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:110px;height:90px;">
             <v:fill type="frame" src="${img}" /><v:textbox inset="0,0,0,0"><div style="font-size:0;line-height:0;"></div></v:textbox>
@@ -224,7 +224,7 @@ function reviewSection(events: EventItem[]) {
 
   return `
   <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:40px;">
-    <tr><td style="padding:24px 20px;background-color:#f0f4ff;border-radius:16px;">
+    <tr><td class="review-bg" style="padding:24px 20px;background-color:#f0f4ff;border-radius:16px;">
       <table width="100%" cellpadding="0" cellspacing="0">
         <tr><td style="padding-bottom:16px;">
           <p style="margin:0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:${C.blue};">Recently happened</p>
@@ -305,22 +305,47 @@ export function buildWeeklyNewsletterHtml({
 </noscript>
 <![endif]-->
 <style>
-  :root { color-scheme: light only !important; }
-  * { color-scheme: light only !important; }
-  body, table, td, div, p, span, a { color-scheme: light only !important; }
+  /* ── Force light mode everywhere ── */
+  :root, * { color-scheme: light only !important; }
+  body, table, td, div, p, span, a, tr, th { color-scheme: light only !important; }
   body { background-color: #ffffff !important; margin: 0; padding: 0; }
-  u + .body { background-color: #ffffff !important; }
+  u + .body, u + #body { background-color: #ffffff !important; }
 
-  [data-ogsc] body, [data-ogsc] .outer, [data-ogsc] td, [data-ogsc] div { background-color: #ffffff !important; color: #0f172a !important; }
-  [data-ogsc] .inner, [data-ogsc] .card { background-color: #ffffff !important; }
+  /* ── Outlook.com / Outlook Apps dark mode ── */
+  [data-ogsc] body, [data-ogsc] .outer, [data-ogsc] #wrapper,
+  [data-ogsc] table, [data-ogsc] td, [data-ogsc] tr, [data-ogsc] div { background-color: #ffffff !important; color: #0f172a !important; border-color: #e2e8f0 !important; }
+  [data-ogsc] .inner, [data-ogsc] .card, [data-ogsc] .ev-card { background-color: #ffffff !important; }
+  [data-ogsc] p, [data-ogsc] span, [data-ogsc] h1, [data-ogsc] h2, [data-ogsc] h3 { color: #0f172a !important; }
+  [data-ogsc] .txt-muted { color: #64748b !important; }
+  [data-ogsc] .txt-faint { color: #94a3b8 !important; }
   [data-ogsc] a { color: #2563eb !important; }
+  [data-ogsc] a.btn-primary { color: #ffffff !important; background-color: #2563eb !important; }
+  [data-ogsc] a.btn-outline { color: #2563eb !important; background-color: #eff6ff !important; }
+  [data-ogsc] .review-bg { background-color: #f0f4ff !important; }
+  [data-ogsc] .bg-soft { background-color: #f8fafc !important; }
+  [data-ogsc] .accent-bar { background-color: #2563eb !important; }
+  [data-ogsc] img { opacity: 1 !important; }
+  [data-ogsb] body, [data-ogsb] #wrapper, [data-ogsb] table, [data-ogsb] td { background-color: #ffffff !important; }
+
+  /* ── ProtonMail dark mode ── */
+  .protonmail-dark body, .protonmail-dark table, .protonmail-dark td { background-color: #ffffff !important; color: #0f172a !important; }
+
+  /* ── Generic dark mode override ── */
   @media (prefers-color-scheme: dark) {
-    body, .outer, td, div, table { background-color: #ffffff !important; }
-    .inner, .card { background-color: #ffffff !important; }
+    body, #wrapper, .outer, table, td, tr, div { background-color: #ffffff !important; border-color: #e2e8f0 !important; }
+    .inner, .card, .ev-card { background-color: #ffffff !important; }
     h1, h2, h3, p, td, span, div { color: #0f172a !important; }
+    .txt-muted { color: #64748b !important; }
+    .txt-faint { color: #94a3b8 !important; }
     a { color: #2563eb !important; }
+    a.btn-primary { color: #ffffff !important; background-color: #2563eb !important; }
+    a.btn-outline { color: #2563eb !important; background-color: #eff6ff !important; }
+    .review-bg { background-color: #f0f4ff !important; }
+    .bg-soft { background-color: #f8fafc !important; }
     img { opacity: 1 !important; }
   }
+
+  /* ── Mobile ── */
   @media only screen and (max-width: 599px) {
     .outer-wrap { padding: 4px !important; }
     .inner { padding: 0 16px !important; }
@@ -330,7 +355,8 @@ export function buildWeeklyNewsletterHtml({
   }
 </style>
 </head>
-<body class="outer body" style="margin:0;padding:0;background-color:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased;color:${C.dark};">
+<body id="body" class="outer body" style="margin:0;padding:0;background-color:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased;color:${C.dark};">
+<div id="wrapper" style="background-color:#ffffff;">
 
 <!-- Preheader -->
 <div style="display:none;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:#ffffff;">${upcoming.length} upcoming event${upcoming.length !== 1 ? 's' : ''} across ${countries} countr${countries !== 1 ? 'ies' : 'y'} &middot; investigatorevents.com &#847; &#847; &#847; &#847; &#847;</div>
@@ -367,7 +393,7 @@ export function buildWeeklyNewsletterHtml({
   </table>
 
   <!-- Stat pills -->
-  <table cellpadding="0" cellspacing="0" class="stat-row" style="margin-top:18px;background-color:${C.bgSoft};border:1px solid ${C.border};border-radius:12px;">
+  <table cellpadding="0" cellspacing="0" class="stat-row bg-soft" style="margin-top:18px;background-color:${C.bgSoft};border:1px solid ${C.border};border-radius:12px;">
     <tr>
       ${statPill(upcoming.length, 'Upcoming')}
       <td style="width:1px;padding:8px 0;"><div style="width:1px;height:28px;background-color:${C.border};"></div></td>
@@ -436,7 +462,7 @@ export function buildWeeklyNewsletterHtml({
       </v:roundrect>
       <![endif]-->
       <!--[if !mso]><!-->
-      <a href="${SITE}/calendar" style="display:inline-block;padding:14px 44px;background-color:${C.blue};color:${C.white};text-decoration:none;font-size:14px;font-weight:700;border-radius:99px;letter-spacing:0.01em;">Browse full calendar &rarr;</a>
+      <a href="${SITE}/calendar" class="btn-primary" style="display:inline-block;padding:14px 44px;background-color:${C.blue};color:${C.white};text-decoration:none;font-size:14px;font-weight:700;border-radius:99px;letter-spacing:0.01em;">Browse full calendar &rarr;</a>
       <!--<![endif]-->
     </td></tr>
     <tr><td align="center" style="padding-top:12px;">
@@ -474,6 +500,7 @@ export function buildWeeklyNewsletterHtml({
 </table>
 </td></tr>
 </table>
+</div>
 </body>
 </html>`;
 }

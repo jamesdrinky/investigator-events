@@ -6,14 +6,14 @@ import { EventChat } from '@/components/EventChat';
 import { EventReview } from '@/components/EventReview';
 
 const tabs = [
-  { id: 'discussion', label: 'Discussion', icon: MessageCircle },
   { id: 'reviews', label: 'Reviews', icon: Star },
+  { id: 'discussion', label: 'Discussion', icon: MessageCircle },
 ] as const;
 
 type TabId = (typeof tabs)[number]['id'];
 
 export function EventCommunityTabs({ eventId, isPast }: { eventId: string; isPast: boolean }) {
-  const [active, setActive] = useState<TabId>('discussion');
+  const [active, setActive] = useState<TabId>('reviews');
 
   return (
     <div className="mt-10 overflow-hidden rounded-2xl border border-slate-200/60 bg-white shadow-sm">

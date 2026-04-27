@@ -440,24 +440,42 @@ export type Database = {
           event_id: string | null
           id: string
           rating: number | null
+          rating_content: number | null
+          rating_networking: number | null
+          rating_organisation: number | null
+          rating_value: number | null
+          rating_venue: number | null
           review_text: string | null
           user_id: string | null
+          would_recommend: boolean | null
         }
         Insert: {
           created_at?: string | null
           event_id?: string | null
           id?: string
           rating?: number | null
+          rating_content?: number | null
+          rating_networking?: number | null
+          rating_organisation?: number | null
+          rating_value?: number | null
+          rating_venue?: number | null
           review_text?: string | null
           user_id?: string | null
+          would_recommend?: boolean | null
         }
         Update: {
           created_at?: string | null
           event_id?: string | null
           id?: string
           rating?: number | null
+          rating_content?: number | null
+          rating_networking?: number | null
+          rating_organisation?: number | null
+          rating_value?: number | null
+          rating_venue?: number | null
           review_text?: string | null
           user_id?: string | null
+          would_recommend?: boolean | null
         }
         Relationships: [
           {

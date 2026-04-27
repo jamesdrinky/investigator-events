@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Cormorant_Garamond, Plus_Jakarta_Sans } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/next';
 import { CookieBanner } from '@/components/CookieBanner';
 import { Footer } from '@/components/footer';
 import { Navbar } from '@/components/navbar';
@@ -56,6 +57,7 @@ export default function RootLayout({
         <NewsletterBanner />
         <CookieBanner />
         <BackToTop />
+        <Analytics />
       </body>
     </html>
   );

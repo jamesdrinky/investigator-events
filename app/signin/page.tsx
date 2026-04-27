@@ -13,6 +13,7 @@ function SignInPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const prefillEmail = searchParams.get('email') ?? '';
+  const nextUrl = searchParams.get('next') ?? '/profile';
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -32,7 +33,7 @@ function SignInPageInner() {
           body: JSON.stringify({ email }),
         }).catch(() => {});
       }
-      router.push('/profile');
+      router.push(nextUrl as any);
     }
   };
 
@@ -40,7 +41,7 @@ function SignInPageInner() {
     const supabase = createSupabaseBrowserClient();
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin + '/auth/callback' },
+      options: { redirectTo: window.location.origin + '/auth/callback?next=' + encodeURIComponent(nextUrl) },
     });
   };
 
@@ -48,7 +49,7 @@ function SignInPageInner() {
     const supabase = createSupabaseBrowserClient();
     await supabase.auth.signInWithOAuth({
       provider: 'linkedin_oidc',
-      options: { redirectTo: window.location.origin + '/auth/callback' },
+      options: { redirectTo: window.location.origin + '/auth/callback?next=' + encodeURIComponent(nextUrl) },
     });
   };
 

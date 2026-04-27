@@ -40,13 +40,13 @@ function SubRatingInput({ value, onChange, label, icon }: { value: number; onCha
   const active = hover || value;
 
   return (
-    <div className="flex items-center justify-between py-2">
-      <div className="flex items-center gap-2">
-        <span className="text-base">{icon}</span>
-        <span className="text-sm font-medium text-slate-700">{label}</span>
+    <div className="py-2.5">
+      <div className="flex items-center gap-2 mb-1.5">
+        <span className="text-sm">{icon}</span>
+        <span className="text-xs font-medium text-slate-700">{label}</span>
       </div>
       <div
-        className="flex items-center gap-1.5"
+        className="flex items-center gap-2"
         onMouseLeave={() => setHover(0)}
       >
         {[1, 2, 3, 4, 5].map((s) => (
@@ -55,19 +55,19 @@ function SubRatingInput({ value, onChange, label, icon }: { value: number; onCha
             type="button"
             onClick={() => onChange(s)}
             onMouseEnter={() => setHover(s)}
-            className="p-1"
+            className="p-0.5"
           >
             <div
-              className={`h-5 w-5 rounded-full border-2 transition-colors duration-150 ${
+              className={`h-7 w-7 sm:h-6 sm:w-6 rounded-full border-2 transition-colors duration-150 ${
                 s <= active
                   ? 'border-blue-500 bg-blue-500 shadow-[0_0_8px_rgba(37,99,235,0.5)]'
-                  : 'border-slate-200 bg-white hover:border-slate-300'
+                  : 'border-slate-200 bg-white'
               }`}
             />
           </button>
         ))}
         {active > 0 && (
-          <span className="ml-1 w-7 text-right text-xs font-semibold text-blue-600">{active}/5</span>
+          <span className="text-xs font-semibold text-blue-600">{active}/5</span>
         )}
       </div>
     </div>
@@ -361,7 +361,7 @@ export function EventReview({ eventId, isPast }: { eventId: string; isPast: bool
           </div>
           <p className="mt-3 text-base font-bold text-slate-900">Attended this event?</p>
           <p className="mt-1 text-sm text-slate-500">Sign in to leave a review and help others decide.</p>
-          <a href="/signin" className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800">
+          <a href={`/signin?next=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : '/events')}`} className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800">
             Sign in to review
           </a>
         </div>

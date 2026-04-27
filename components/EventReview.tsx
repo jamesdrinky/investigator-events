@@ -201,9 +201,13 @@ export function EventReview({ eventId, isPast }: { eventId: string; isPast: bool
         )}
       </div>
 
-      {/* ── Aggregate breakdown ── */}
-      {reviews.length > 0 && reviews.some((r) => r.rating_content != null) && (
+      {/* ── Aggregate breakdown (members only) ── */}
+      {userId && reviews.length > 0 && reviews.some((r) => r.rating_content != null) && (
         <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50/50 p-4 sm:p-5">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Member insights</p>
+            <p className="text-[10px] text-slate-400">Anonymous ratings</p>
+          </div>
           <div className="space-y-0.5">
             {SUB_CATEGORIES.map((cat) => {
               const a = subAvg(cat.key);
@@ -217,6 +221,12 @@ export function EventReview({ eventId, isPast }: { eventId: string; isPast: bool
               <span className="text-xs text-slate-500">would recommend this event</span>
             </div>
           )}
+        </div>
+      )}
+      {!userId && reviews.length > 0 && reviews.some((r) => r.rating_content != null) && (
+        <div className="mt-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50/30 p-4 text-center">
+          <p className="text-sm font-semibold text-slate-500">Detailed ratings available for members</p>
+          <p className="mt-1 text-xs text-slate-400">Sign in to see anonymous category breakdowns from attendees</p>
         </div>
       )}
 

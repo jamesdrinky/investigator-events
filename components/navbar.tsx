@@ -11,22 +11,24 @@ import { UserAvatar } from '@/components/UserAvatar';
 import { ShinyButton } from '@/components/ui/shiny-button';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
-const desktopNavItems: Array<{ href: Route; label: string }> = [
+const desktopNavItems: Array<{ href: Route; label: string; authOnly?: boolean }> = [
   { href: '/calendar', label: 'Events' },
   { href: '/associations', label: 'Associations' },
   { href: '/people', label: 'Forum' },
-  { href: '/submit-event', label: 'Submit Event' },
+  { href: '/submit-event', label: 'Submit' },
+  { href: '/reviews' as Route, label: 'Reviews', authOnly: true },
   { href: '/advice', label: 'Advice' },
   { href: '/about', label: 'About' }
 ];
 
-const mobileMenuItems: Array<{ href: Route; label: string }> = [
+const mobileMenuItems: Array<{ href: Route; label: string; authOnly?: boolean }> = [
   { href: '/calendar', label: 'Events' },
   { href: '/calendar?view=calendar' as Route, label: 'Calendar' },
   { href: '/associations', label: 'Associations' },
   { href: '/people', label: 'Forum' },
+  { href: '/reviews' as Route, label: 'Reviews', authOnly: true },
   { href: '/why-join-an-association' as Route, label: 'Why Join?' },
-  { href: '/submit-event', label: 'Submit Event' },
+  { href: '/submit-event', label: 'Submit' },
   { href: '/advice', label: 'Advice' },
   { href: '/about', label: 'About' }
 ];
@@ -203,7 +205,7 @@ export function Navbar() {
 
           {/* Desktop nav */}
           <nav aria-label="Main navigation" className="hidden min-w-0 flex-1 items-center gap-0.5 lg:flex">
-            {desktopNavItems.map((item) => {
+            {desktopNavItems.filter((item) => !item.authOnly || user).map((item) => {
               const active = isActiveRoute(pathname, item.href);
               return (
                 <Link
@@ -477,7 +479,7 @@ export function Navbar() {
 
         <nav className="flex h-[calc(100%-4rem)] flex-col justify-between overflow-y-auto px-8 pb-[max(6rem,calc(6rem+env(safe-area-inset-bottom)))] pt-6">
           <ul className="space-y-1">
-            {mobileMenuItems.map((item, i) => {
+            {mobileMenuItems.filter((item) => !item.authOnly || user).map((item, i) => {
               const active = isActiveRoute(pathname, item.href);
               return (
                 <li key={item.href}>

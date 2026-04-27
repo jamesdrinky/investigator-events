@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Search, UserPlus, UserCheck, Users, TrendingUp, Globe, BookUser, XCircle, MapPin, Briefcase, Calendar, Mail, ArrowRight } from 'lucide-react';
+import { Search, UserPlus, UserCheck, Users, TrendingUp, Globe, BookUser, XCircle, MapPin, Briefcase, Calendar, Mail, ArrowRight, Star } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { getCountryFlag } from '@/lib/utils/location';
 import { CommunityFeed } from '@/components/CommunityFeed';
@@ -199,6 +199,12 @@ function PeoplePageInner() {
             >
               <Users className="h-4 w-4" /> Discover
             </button>
+            <Link
+              href="/reviews"
+              className="flex shrink-0 items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3.5 py-2 text-xs font-semibold text-white shadow-[0_0_16px_rgba(245,158,11,0.4),0_0_6px_rgba(249,115,22,0.3)] transition hover:shadow-[0_0_24px_rgba(245,158,11,0.6),0_0_10px_rgba(249,115,22,0.4)] hover:brightness-110 sm:px-5 sm:text-sm"
+            >
+              <Star className="h-4 w-4" /> Reviews
+            </Link>
           </div>
 
           {/* Quick links */}

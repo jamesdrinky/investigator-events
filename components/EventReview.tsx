@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Star, Send, ThumbsUp, ThumbsDown, ChevronDown, ChevronUp } from 'lucide-react';
+import { Star, Send, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { UserAvatar } from '@/components/UserAvatar';
 
@@ -112,7 +112,6 @@ export function EventReview({ eventId, isPast }: { eventId: string; isPast: bool
   const [submitted, setSubmitted] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [hasReviewed, setHasReviewed] = useState(false);
-  const [expandedReview, setExpandedReview] = useState<string | null>(null);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -378,11 +377,7 @@ export function EventReview({ eventId, isPast }: { eventId: string; isPast: bool
       {/* ── Reviews list ── */}
       {reviews.length > 0 && (
         <div className="mt-6 space-y-4">
-          {reviews.map((r) => {
-            const hasSubRatings = r.rating_content != null || r.rating_networking != null;
-            const isExpanded = expandedReview === r.id;
-
-            return (
+          {reviews.map((r) => (
               <div key={r.id} className="rounded-xl border border-slate-100 bg-white p-4">
                 <div className="flex gap-3">
                   <UserAvatar src={r.profiles?.avatar_url} name={r.profiles?.full_name} size={36} />
@@ -398,65 +393,10 @@ export function EventReview({ eventId, isPast }: { eventId: string; isPast: bool
                     </div>
                     {r.review_text && <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{r.review_text}</p>}
 
-                    {/* Recommend badge */}
-                    {r.would_recommend != null && (
-                      <div className="mt-2 inline-flex items-center gap-1">
-                        {r.would_recommend ? (
-                          <>
-                            <ThumbsUp className="h-3 w-3 text-emerald-500" />
-                            <span className="text-[11px] font-medium text-emerald-600">Recommends</span>
-                          </>
-                        ) : (
-                          <>
-                            <ThumbsDown className="h-3 w-3 text-slate-400" />
-                            <span className="text-[11px] font-medium text-slate-400">Doesn&apos;t recommend</span>
-                          </>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Expandable sub-ratings */}
-                    {hasSubRatings && (
-                      <button
-                        type="button"
-                        onClick={() => setExpandedReview(isExpanded ? null : r.id)}
-                        className="mt-2 flex items-center gap-1 text-[11px] font-medium text-blue-500 hover:text-blue-600"
-                      >
-                        {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                        {isExpanded ? 'Hide' : 'View'} detailed ratings
-                      </button>
-                    )}
                   </div>
                 </div>
-
-                {/* Expanded sub-ratings */}
-                {hasSubRatings && isExpanded && (
-                  <div className="mt-3 ml-12 rounded-lg bg-slate-50 p-3">
-                    {SUB_CATEGORIES.map((cat) => {
-                      const val = r[cat.key];
-                      if (val == null) return null;
-                      return (
-                        <div key={cat.key} className="flex items-center justify-between py-1">
-                          <span className="text-[11px] text-slate-500">{cat.icon} {cat.label}</span>
-                          <div className="flex items-center gap-1">
-                            {[1, 2, 3, 4, 5].map((s) => (
-                              <div
-                                key={s}
-                                className={`h-2.5 w-2.5 rounded-full ${
-                                  s <= val ? 'bg-blue-500 shadow-[0_0_4px_rgba(37,99,235,0.4)]' : 'bg-slate-200'
-                                }`}
-                              />
-                            ))}
-                            <span className="ml-1 text-[10px] font-semibold text-slate-500">{val}/5</span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
               </div>
-            );
-          })}
+            ))}
         </div>
       )}
     </div>

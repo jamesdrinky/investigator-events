@@ -15,6 +15,7 @@ export interface EventItem {
   country: string;
   organiser: string;
   association?: string;
+  coAssociation?: string;
   category: string;
   description: string;
   website: string;
@@ -66,6 +67,7 @@ export function mapEventRowToItem(row: CompatEventRow): EventItem | null {
     country: row.country,
     organiser: row.organiser,
     association: row.association ?? undefined,
+    coAssociation: (row as any).co_association ?? undefined,
     category: row.category,
     description: row.description ?? '',
     website: row.website,

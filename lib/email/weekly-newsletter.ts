@@ -34,6 +34,17 @@ function assocLogo(ev: EventItem) {
   return b?.logoFileName ? `${SITE}/associations/${b.logoFileName}` : null;
 }
 
+function coAssocLogo(ev: EventItem) {
+  if (!ev.coAssociation) return null;
+  const b = findAssociationBranding(ev.coAssociation);
+  return b?.logoFileName ? `${SITE}/associations/${b.logoFileName}` : null;
+}
+
+function hostName(ev: EventItem) {
+  const primary = ev.association ?? ev.organiser;
+  return ev.coAssociation ? `${primary} & ${ev.coAssociation}` : primary;
+}
+
 function eventCover(ev: EventItem) {
   if (ev.image_path?.startsWith('/')) return `${SITE}${ev.image_path}`;
   if (ev.image_path?.startsWith('http')) return ev.image_path;
@@ -53,7 +64,7 @@ function heroCard(ev: EventItem) {
   const url = `${SITE}/events/${ev.slug}`;
   const img = eventCover(ev);
   const lg = assocLogo(ev);
-  const host = ev.association ?? ev.organiser;
+  const host = hostName(ev);
   const days = daysUntil(ev.date);
   const badge = days <= 0 ? 'HAPPENING NOW' : days <= 7 ? `IN ${days} DAYS` : days <= 14 ? `IN ${days} DAYS` : 'FEATURED';
   const urgent = days <= 7;
@@ -94,7 +105,7 @@ function heroCard(ev: EventItem) {
 /* ── Event card (with image) ── */
 function eventCardWithImage(ev: EventItem, img: string, lg: string | null, idx: number) {
   const url = `${SITE}/events/${ev.slug}`;
-  const host = ev.association ?? ev.organiser;
+  const host = hostName(ev);
   const days = daysUntil(ev.date);
   const badge = days <= 0 ? 'Now' : days <= 7 ? `${days}d` : '';
 
@@ -127,7 +138,7 @@ function eventCardWithImage(ev: EventItem, img: string, lg: string | null, idx: 
 /* ── Event card (text only — no image) ── */
 function eventCardTextOnly(ev: EventItem, lg: string | null, idx: number) {
   const url = `${SITE}/events/${ev.slug}`;
-  const host = ev.association ?? ev.organiser;
+  const host = hostName(ev);
   const days = daysUntil(ev.date);
   const badge = days <= 0 ? 'Now' : days <= 7 ? `${days}d` : '';
 
@@ -180,7 +191,7 @@ function section(title: string, events: EventItem[]) {
 /* ── Review card ── */
 function reviewCard(ev: EventItem) {
   const lg = assocLogo(ev);
-  const host = ev.association ?? ev.organiser;
+  const host = hostName(ev);
   const img = eventCover(ev);
   const url = `${SITE}/events/${ev.slug}`;
 

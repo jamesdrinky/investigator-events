@@ -241,7 +241,7 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
                     { label: 'Event type', value: category },
                     { label: 'Region', value: region },
                     { label: 'Host', value: event.organiser ?? organiser },
-                    { label: 'Association', value: event.association ?? 'Not specified' },
+                    { label: 'Association', value: event.coAssociation ? `${event.association ?? 'Not specified'} & ${event.coAssociation}` : event.association ?? 'Not specified' },
                     { label: 'Scope', value: event.eventScope === 'main' ? 'Major event' : 'Additional listing' },
                   ].map((item) => (
                     <div key={item.label} className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3 last:border-0 last:pb-0">

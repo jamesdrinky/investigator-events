@@ -595,6 +595,7 @@ export type Database = {
           association: string | null
           category: string
           city: string
+          co_association: string | null
           country: string
           created_at: string | null
           date: string
@@ -618,6 +619,7 @@ export type Database = {
           association?: string | null
           category: string
           city: string
+          co_association?: string | null
           country: string
           created_at?: string | null
           date: string
@@ -641,6 +643,7 @@ export type Database = {
           association?: string | null
           category?: string
           city?: string
+          co_association?: string | null
           country?: string
           created_at?: string | null
           date?: string

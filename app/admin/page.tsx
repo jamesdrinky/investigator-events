@@ -94,6 +94,14 @@ function EventFields({
         </select>
       </div>
       <div>
+        <label htmlFor={`${idPrefix}-co-association`} className="text-xs font-medium uppercase tracking-wider text-slate-500">Co-association</label>
+        <select id={`${idPrefix}-co-association`} name="coAssociation" defaultValue={(defaults as any)?.coAssociation ?? ''} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20">
+          <option value="">None</option>
+          {associationRecords.map((a) => <option key={a.slug} value={a.shortName}>{a.shortName} — {a.name}</option>)}
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div>
         <label htmlFor={`${idPrefix}-category`} className="text-xs font-medium uppercase tracking-wider text-slate-500">Category</label>
         <input id={`${idPrefix}-category`} name="category" required defaultValue={defaults?.category ?? ''} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20" />
       </div>
@@ -476,51 +484,101 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
             </div>
           )}
 
-          {activeTab === 'newsletter' && (
+          {activeTab === 'newsletter' && (() => {
+            const activeCount = recentSubscribers.filter((s: any) => s.status === 'active').length;
+            const pendingCount = recentSubscribers.filter((s: any) => s.status === 'pending').length;
+            const bouncedCount = recentSubscribers.filter((s: any) => s.status === 'bounced').length;
+            const latestSend = newsletterSends[0];
+            const openRate = latestSend && latestSend.recipient_count > 0 ? Math.round((latestSend.open_count / latestSend.recipient_count) * 100) : 0;
+            const clickRate = latestSend && latestSend.recipient_count > 0 ? Math.round((latestSend.click_count / latestSend.recipient_count) * 100) : 0;
+
+            return (
             <div className="space-y-6">
-              {/* Send controls */}
+              {/* Overview stats */}
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm">
+                  <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Total subscribers</p>
+                  <p className="mt-2 text-3xl font-extrabold text-slate-900">{subscriberCountResult.count ?? 0}</p>
+                </div>
+                <div className="rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm">
+                  <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Last send</p>
+                  <p className="mt-2 text-3xl font-extrabold text-emerald-600">{latestSend?.recipient_count ?? 0}</p>
+                  <p className="text-xs text-slate-400">{latestSend ? new Date(latestSend.sent_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'Never'}</p>
+                </div>
+                <div className="rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm">
+                  <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Open rate</p>
+                  <p className="mt-2 text-3xl font-extrabold text-blue-600">{openRate}%</p>
+                  <p className="text-xs text-slate-400">{latestSend?.open_count ?? 0} opens</p>
+                </div>
+                <div className="rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm">
+                  <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Click rate</p>
+                  <p className="mt-2 text-3xl font-extrabold text-purple-600">{clickRate}%</p>
+                  <p className="text-xs text-slate-400">{latestSend?.click_count ?? 0} clicks</p>
+                </div>
+              </div>
+
+              {/* Controls */}
               <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
                     <h2 className="text-lg font-bold text-slate-900">Weekly Newsletter</h2>
-                    <p className="mt-1 text-sm text-slate-500">{subscriberCountResult.count ?? 0} subscribers · Sends every Monday at 9am UK</p>
+                    <p className="mt-1 text-sm text-slate-500">Sends every Monday at 9am UK via Vercel Cron + Resend</p>
                   </div>
-                  <a
-                    href={`/api/cron/weekly-newsletter`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
-                  >
-                    <Mail className="h-4 w-4" /> Preview in browser
-                  </a>
+                  <div className="flex gap-2">
+                    <a
+                      href="/api/newsletter/preview"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                    >
+                      Preview
+                    </a>
+                    <a
+                      href="/api/newsletter/preview?send=james@drinky.com"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                    >
+                      <Mail className="h-4 w-4" /> Send test to me
+                    </a>
+                  </div>
                 </div>
               </div>
 
-              {/* Recent sends */}
+              {/* Send history */}
               <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
                 <h2 className="text-lg font-bold text-slate-900">Send History</h2>
                 {newsletterSends.length === 0 ? (
-                  <p className="mt-3 text-sm text-slate-500">No newsletters sent yet. First send will be Monday 9am UK.</p>
+                  <p className="mt-3 text-sm text-slate-500">No newsletters sent yet.</p>
                 ) : (
                   <div className="mt-4 space-y-3">
-                    {newsletterSends.map((send: any) => (
-                      <div key={send.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/50 px-4 py-3 text-sm">
-                        <span className="font-medium text-slate-900">{new Date(send.sent_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                        <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">{send.recipient_count} sent</span>
-                        {send.failed_count > 0 && <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-700">{send.failed_count} failed</span>}
-                        <span className="text-xs text-slate-400">{send.upcoming_count} upcoming · {send.new_count} new · {send.featured_count} featured</span>
-                        {(send.open_count > 0 || send.click_count > 0) && (
-                          <span className="text-xs text-blue-600">{send.open_count} opens · {send.click_count} clicks</span>
-                        )}
+                    {newsletterSends.map((send: any, i: number) => (
+                      <div key={send.id} className={`rounded-xl border px-4 py-3.5 text-sm ${i === 0 ? 'border-blue-200 bg-blue-50/30' : 'border-slate-100 bg-slate-50/50'}`}>
+                        <div className="flex flex-wrap items-center gap-3">
+                          <span className="font-semibold text-slate-900">{new Date(send.sent_at).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                          {i === 0 && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700">Latest</span>}
+                        </div>
+                        <div className="mt-2 flex flex-wrap gap-3">
+                          <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700">{send.recipient_count} delivered</span>
+                          {send.failed_count > 0 && <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-[10px] font-bold text-red-700">{send.failed_count} failed</span>}
+                          {send.open_count > 0 && <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-[10px] font-bold text-blue-700">{send.open_count} opens ({send.recipient_count > 0 ? Math.round((send.open_count / send.recipient_count) * 100) : 0}%)</span>}
+                          {send.click_count > 0 && <span className="rounded-full bg-purple-100 px-2.5 py-0.5 text-[10px] font-bold text-purple-700">{send.click_count} clicks ({send.recipient_count > 0 ? Math.round((send.click_count / send.recipient_count) * 100) : 0}%)</span>}
+                        </div>
+                        <div className="mt-1.5 text-xs text-slate-400">Content: {send.upcoming_count} upcoming · {send.new_count} new · {send.featured_count} featured</div>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
 
-              {/* Recent subscribers */}
+              {/* Subscriber breakdown */}
               <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
-                <h2 className="text-lg font-bold text-slate-900">Recent Subscribers</h2>
+                <h2 className="text-lg font-bold text-slate-900">Subscribers</h2>
+                <div className="mt-3 flex gap-3">
+                  <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">{activeCount} active</span>
+                  <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">{pendingCount} pending</span>
+                  {bouncedCount > 0 && <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-700">{bouncedCount} bounced</span>}
+                </div>
                 <div className="mt-4 divide-y divide-slate-100">
                   {recentSubscribers.map((sub: any) => (
                     <div key={sub.email} className="flex items-center justify-between gap-3 py-2.5 text-sm">
@@ -542,7 +600,8 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                 </div>
               </div>
             </div>
-          )}
+            );
+          })()}
 
           {activeTab === 'users' && (
             <div className="space-y-4">

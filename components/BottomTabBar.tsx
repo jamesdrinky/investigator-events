@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Calendar, Users, Search, User, MessageCircle } from 'lucide-react';
+import { Home, Calendar, Users, User, MessageCircle } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 
 const tabs = [
-  { href: '/', icon: Search, label: 'Explore' },
+  { href: '/', icon: Home, label: 'Home' },
   { href: '/calendar', icon: Calendar, label: 'Events' },
   { href: '/people', icon: MessageCircle, label: 'Forum' },
   { href: '/associations', icon: Users, label: 'Network' },

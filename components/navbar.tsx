@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
+import { registerPushNotifications, unregisterPushToken } from '@/lib/capacitor';
 import { GlobalSearch } from '@/components/GlobalSearch';
 import { UserAvatar } from '@/components/UserAvatar';
 import { ShinyButton } from '@/components/ui/shiny-button';
@@ -103,10 +104,15 @@ export function Navbar() {
         });
         // Update last_seen
         supabase.from('profiles').update({ last_seen: new Date().toISOString() } as any).eq('id', data.user.id).then(() => {});
+        // Register for push notifications on native app
+        registerPushNotifications(supabase);
       }
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        registerPushNotifications(supabase);
+      }
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -144,6 +150,7 @@ export function Navbar() {
 
   const handleSignOut = async () => {
     const supabase = createSupabaseBrowserClient();
+    await unregisterPushToken(supabase);
     await supabase.auth.signOut();
     setShowDropdown(false);
     window.location.href = '/';
@@ -251,7 +258,7 @@ export function Navbar() {
                       }
                       if (opening && notifCount > 0) {
                         // Mark all as read
-                        fetch('/api/notifications', { method: 'PATCH' }).then(() => setNotifCount(0));
+                        fetch('/api/notifications', { method: 'PATCH' }).then(() => setNotifCount(0)).catch(() => {});
                       }
                     }}
                     className={`relative flex h-10 w-10 sm:h-8 sm:w-8 items-center justify-center rounded-full border transition ${
@@ -277,7 +284,7 @@ export function Navbar() {
                           <button
                             type="button"
                             onClick={() => {
-                              fetch('/api/notifications', { method: 'PATCH' });
+                              fetch('/api/notifications', { method: 'PATCH' }).catch(() => {});
                               setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
                               setNotifCount(0);
                             }}

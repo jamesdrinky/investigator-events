@@ -159,7 +159,7 @@ function StatCard({ icon: Icon, label, value, color }: { icon: any; label: strin
 }
 
 export default async function AdminPage({ searchParams }: { searchParams?: { error?: string; tab?: string } }) {
-  const isAuthed = hasValidAdminSessionCookie();
+  const isAuthed = await hasValidAdminSessionCookie();
 
   if (!isAuthed) {
     return (

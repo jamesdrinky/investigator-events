@@ -18,8 +18,8 @@ import {
 } from '@/lib/admin/session';
 import { queueApprovalOutreachEmail } from '@/lib/email/association-outreach';
 
-function ensureAdminSession() {
-  if (!hasValidAdminSessionCookie()) {
+async function ensureAdminSession() {
+  if (!await hasValidAdminSessionCookie()) {
     redirect('/admin?error=auth');
   }
 }
@@ -42,7 +42,8 @@ async function generateUniqueEventSlug(title: string, currentEventId?: string) {
   const { data, error } = await supabase.from('events').select('id, slug').ilike('slug', `${baseSlug}%`);
 
   if (error) {
-    throw new Error(`Failed to check existing slugs: ${error.message}`);
+    console.error('Slug check failed:', error.message);
+    throw new Error('Failed to check existing slugs');
   }
 
   const existingSlugs = new Set(
@@ -184,24 +185,25 @@ export async function adminLoginAction(formData: FormData) {
     redirect('/admin?error=invalid');
   }
 
-  setAdminSessionCookie(createAdminSessionToken());
+  await setAdminSessionCookie(createAdminSessionToken());
   redirect('/admin');
 }
 
 export async function adminLogoutAction() {
-  clearAdminSessionCookie();
+  await clearAdminSessionCookie();
   redirect('/admin');
 }
 
 export async function createEventAction(formData: FormData) {
-  ensureAdminSession();
+  await ensureAdminSession();
 
   const payload = await parseEventData(formData);
   const supabase = createSupabaseAdminServerClient();
   const { error } = await supabase.from('events').insert(payload);
 
   if (error) {
-    throw new Error(`Failed to create event: ${error.message}`);
+    console.error('Event create failed:', error.message);
+    throw new Error('Failed to create event');
   }
 
   revalidatePath('/');
@@ -212,7 +214,7 @@ export async function createEventAction(formData: FormData) {
 }
 
 export async function updateEventAction(formData: FormData) {
-  ensureAdminSession();
+  await ensureAdminSession();
 
   const id = parseRequired(formData, 'id');
   const payload: EventUpdate = await parseEventData(formData, id);
@@ -220,7 +222,8 @@ export async function updateEventAction(formData: FormData) {
   const { error } = await supabase.from('events').update(payload).eq('id', id);
 
   if (error) {
-    throw new Error(`Failed to update event: ${error.message}`);
+    console.error('Event update failed:', error.message);
+    throw new Error('Failed to update event');
   }
 
   revalidatePath('/');
@@ -231,14 +234,15 @@ export async function updateEventAction(formData: FormData) {
 }
 
 export async function deleteEventAction(formData: FormData) {
-  ensureAdminSession();
+  await ensureAdminSession();
 
   const id = parseRequired(formData, 'id');
   const supabase = createSupabaseAdminServerClient();
   const { error } = await supabase.from('events').delete().eq('id', id);
 
   if (error) {
-    throw new Error(`Failed to delete event: ${error.message}`);
+    console.error('Event delete failed:', error.message);
+    throw new Error('Failed to delete event');
   }
 
   revalidatePath('/');
@@ -249,7 +253,7 @@ export async function deleteEventAction(formData: FormData) {
 }
 
 export async function approveSubmissionAction(formData: FormData) {
-  ensureAdminSession();
+  await ensureAdminSession();
 
   const submissionId = parseRequired(formData, 'submissionId');
   const supabase = createSupabaseAdminServerClient();
@@ -263,7 +267,8 @@ export async function approveSubmissionAction(formData: FormData) {
   const submission = data as SubmissionRow | null;
 
   if (submissionError) {
-    throw new Error(`Failed to load submission: ${submissionError.message}`);
+    console.error('Load submission failed:', submissionError.message);
+    throw new Error('Failed to load submission');
   }
 
   if (!submission) {
@@ -280,7 +285,8 @@ export async function approveSubmissionAction(formData: FormData) {
   const { error: createError } = await supabase.from('events').insert(finalPayload);
 
   if (createError) {
-    throw new Error(`Failed to approve event submission: ${createError.message}`);
+    console.error('Approve submission failed:', createError.message);
+    throw new Error('Failed to approve event submission');
   }
 
   const { error: updateError } = await supabase
@@ -289,7 +295,8 @@ export async function approveSubmissionAction(formData: FormData) {
     .eq('id', submissionId);
 
   if (updateError) {
-    throw new Error(`Failed to update submission status: ${updateError.message}`);
+    console.error('Update submission status failed:', updateError.message);
+    throw new Error('Failed to update submission status');
   }
 
   // Send outreach email to association contact (once per association, fire-and-forget)
@@ -318,14 +325,15 @@ export async function approveSubmissionAction(formData: FormData) {
 }
 
 export async function rejectSubmissionAction(formData: FormData) {
-  ensureAdminSession();
+  await ensureAdminSession();
 
   const submissionId = parseRequired(formData, 'submissionId');
   const supabase = createSupabaseAdminServerClient();
   const { error } = await supabase.from('event_submissions').update({ status: 'rejected' }).eq('id', submissionId);
 
   if (error) {
-    throw new Error(`Failed to reject submission: ${error.message}`);
+    console.error('Reject submission failed:', error.message);
+    throw new Error('Failed to reject submission');
   }
 
   revalidatePath('/submit-event');
@@ -334,7 +342,7 @@ export async function rejectSubmissionAction(formData: FormData) {
 }
 
 export async function toggleUserVerifiedAction(formData: FormData) {
-  ensureAdminSession();
+  await ensureAdminSession();
 
   const userId = parseRequired(formData, 'userId');
   const currentlyVerified = formData.get('currentlyVerified') === 'true';
@@ -346,14 +354,15 @@ export async function toggleUserVerifiedAction(formData: FormData) {
     .eq('id', userId);
 
   if (error) {
-    throw new Error(`Failed to update verification: ${error.message}`);
+    console.error('Verification update failed:', error.message);
+    throw new Error('Failed to update verification');
   }
 
   revalidatePath('/admin');
 }
 
 export async function adminAddAssociationAction(formData: FormData) {
-  ensureAdminSession();
+  await ensureAdminSession();
 
   const userId = parseRequired(formData, 'userId');
   const associationName = parseRequired(formData, 'associationName');
@@ -379,14 +388,15 @@ export async function adminAddAssociationAction(formData: FormData) {
     .insert({ user_id: userId, association_name: associationName, association_slug: slug });
 
   if (error) {
-    throw new Error(`Failed to add association: ${error.message}`);
+    console.error('Add association failed:', error.message);
+    throw new Error('Failed to add association');
   }
 
   revalidatePath('/admin');
 }
 
 export async function adminRemoveAssociationAction(formData: FormData) {
-  ensureAdminSession();
+  await ensureAdminSession();
 
   const userId = parseRequired(formData, 'userId');
   const associationName = parseRequired(formData, 'associationName');
@@ -399,7 +409,8 @@ export async function adminRemoveAssociationAction(formData: FormData) {
     .eq('association_name', associationName);
 
   if (error) {
-    throw new Error(`Failed to remove association: ${error.message}`);
+    console.error('Remove association failed:', error.message);
+    throw new Error('Failed to remove association');
   }
 
   revalidatePath('/admin');

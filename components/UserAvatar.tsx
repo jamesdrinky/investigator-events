@@ -30,7 +30,7 @@ export function UserAvatar({ src, name, size = 32, className = '', color }: Prop
   return (
     <img
       src={src}
-      alt={name ?? ''}
+      alt={name ?? 'User avatar'}
       width={size}
       height={size}
       className={`rounded-full object-cover ${className}`}

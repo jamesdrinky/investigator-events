@@ -1,13 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import { hasValidAdminSessionCookie } from '@/lib/admin/session';
-import { assertSameOriginRequest, enforceRateLimit, RateLimitError } from '@/lib/security/server';
+import { assertSameOriginRequest, enforceRateLimit, RateLimitError, validateImageMagicBytes } from '@/lib/security/server';
 
 export async function POST(request: Request) {
   try {
     assertSameOriginRequest();
 
-    if (!hasValidAdminSessionCookie()) {
+    if (!await hasValidAdminSessionCookie()) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -28,10 +28,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid file type. Only JPEG, PNG, and WebP are allowed.' }, { status: 400 });
     }
 
+    const buffer = Buffer.from(await file.arrayBuffer());
+    if (!validateImageMagicBytes(buffer)) {
+      return NextResponse.json({ error: 'File content does not match a valid image format.' }, { status: 400 });
+    }
+
     const ext = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg';
     const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
     const filePath = `covers/${filename}`;
-    const buffer = Buffer.from(await file.arrayBuffer());
 
     const admin = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -43,7 +47,8 @@ export async function POST(request: Request) {
       .upload(filePath, buffer, { upsert: false, contentType: file.type });
 
     if (uploadError) {
-      return NextResponse.json({ error: uploadError.message }, { status: 500 });
+      console.error('Event image upload failed:', uploadError.message);
+      return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
     }
 
     const { data: urlData } = admin.storage.from('event-images').getPublicUrl(filePath);

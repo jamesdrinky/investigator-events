@@ -54,7 +54,7 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
   if (!slug) notFound();
   const { event, events } = await resolveEvent(slug);
   if (!event) notFound();
-  const isAdmin = hasValidAdminSessionCookie();
+  const isAdmin = await hasValidAdminSessionCookie();
 
   const category = event.category ?? 'Event';
   const region = event.region ?? 'Global';
@@ -115,7 +115,7 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
       {/* ── Hero — full-width cover image ── */}
-      <div className="relative h-[28rem] w-full overflow-hidden sm:h-[36rem] lg:h-[40rem]">
+      <div className="relative h-[22rem] w-full overflow-hidden sm:h-[36rem] lg:h-[40rem]">
         <Image src={imageSrc} alt={title} fill className="object-cover" priority />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
 

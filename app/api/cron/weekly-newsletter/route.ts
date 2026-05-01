@@ -4,16 +4,13 @@ import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { fetchAllEvents } from '@/lib/data/events';
 import { getWeeklyCollections } from '@/lib/data/weekly';
 import { buildWeeklyNewsletterHtml } from '@/lib/email/weekly-newsletter';
+import { verifyCronSecret } from '@/lib/security/server';
 
 const BATCH_SIZE = 50;
 
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization');
-  const cronSecret = process.env.CRON_SECRET;
-
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const authError = verifyCronSecret(request);
+  if (authError) return authError;
 
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) {
@@ -49,7 +46,8 @@ export async function GET(request: Request) {
   const { data: subscribers, error: fetchError } = await query as any;
 
   if (fetchError || !subscribers) {
-    return NextResponse.json({ error: 'Failed to fetch subscribers', details: fetchError?.message }, { status: 500 });
+    console.error('Failed to fetch subscribers:', fetchError?.message);
+    return NextResponse.json({ error: 'Failed to fetch subscribers' }, { status: 500 });
   }
 
   const subs = subscribers as { email: string; unsubscribe_token: string }[];

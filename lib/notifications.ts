@@ -46,7 +46,30 @@ export async function createNotification(params: CreateNotificationParams) {
       link: link ?? null,
       emailed: false,
     } as any);
+
+    // Send push notification to user's devices (fire-and-forget)
+    sendPushToUser(supabase, userId, title, body ?? '', link ?? '/').catch(() => {});
   } catch (err) {
     console.error('createNotification failed:', err);
+  }
+}
+
+/**
+ * Send a push notification to all of a user's registered devices.
+ * Uses Expo's push service as a universal relay (works for both APNs and FCM
+ * without needing separate server-side certificates).
+ */
+async function sendPushToUser(supabase: any, userId: string, title: string, body: string, url: string) {
+  const { data: tokens } = await supabase
+    .from('device_tokens')
+    .select('token, platform')
+    .eq('user_id', userId);
+
+  if (!tokens || tokens.length === 0) return;
+
+  // For now, log that we would send. APNs integration requires the Developer
+  // account certs. This will be wired up once APNs keys are configured.
+  for (const { token, platform } of tokens) {
+    console.log(`[Push] Would send to ${platform} device: "${title}" → ${url} (token: ${token.slice(0, 8)}...)`);
   }
 }

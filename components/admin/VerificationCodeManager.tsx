@@ -29,10 +29,14 @@ export function VerificationCodeManager({ associations }: { associations: Associ
 
   const loadCodes = async () => {
     setLoading(true);
-    const res = await fetch('/api/admin/verification-codes');
-    if (res.ok) {
-      const data = await res.json();
-      setCodes(data.codes ?? []);
+    try {
+      const res = await fetch('/api/admin/verification-codes');
+      if (res.ok) {
+        const data = await res.json();
+        setCodes(data.codes ?? []);
+      }
+    } catch {
+      // Network error — codes stay empty
     }
     setLoading(false);
   };
@@ -53,12 +57,12 @@ export function VerificationCodeManager({ associations }: { associations: Associ
   };
 
   const deactivateCode = async (codeId: string) => {
-    await fetch('/api/admin/verification-codes', {
+    const res = await fetch('/api/admin/verification-codes', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code_id: codeId }),
     });
-    await loadCodes();
+    if (res.ok) await loadCodes();
   };
 
   const copyCode = (code: string) => {

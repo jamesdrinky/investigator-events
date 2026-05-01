@@ -145,6 +145,47 @@ export function assertSameOriginRequest() {
   }
 }
 
+/**
+ * Validate file content matches an allowed image type by checking magic bytes.
+ * Prevents MIME type spoofing where client sends a non-image with a fake content type.
+ */
+/**
+ * Verify a request has a valid CRON_SECRET bearer token.
+ * Returns a 401 Response if invalid, or null if authorized.
+ */
+export function verifyCronSecret(request: Request): Response | null {
+  const authHeader = request.headers.get('authorization');
+  const cronSecret = process.env.CRON_SECRET;
+
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  return null;
+}
+
+export function validateImageMagicBytes(buffer: Buffer): boolean {
+  if (buffer.length < 12) return false;
+
+  // JPEG: FF D8 FF
+  if (buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF) return true;
+
+  // PNG: 89 50 4E 47 0D 0A 1A 0A
+  if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) return true;
+
+  // WebP: RIFF....WEBP
+  if (buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46 &&
+      buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50) return true;
+
+  // AVIF: ....ftypavif or ....ftypavis
+  if (buffer[4] === 0x66 && buffer[5] === 0x74 && buffer[6] === 0x79 && buffer[7] === 0x70) {
+    const brand = buffer.toString('ascii', 8, 12);
+    if (brand === 'avif' || brand === 'avis') return true;
+  }
+
+  return false;
+}
+
 export function createSignedFormState(scope: string) {
   const issuedAt = String(Date.now());
   const token = sign(`${scope}:${issuedAt}`);

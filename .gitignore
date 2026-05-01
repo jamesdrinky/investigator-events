@@ -8,3 +8,9 @@ build
 
 # Original uncompressed video (166MB — too large for git)
 public/conference/ie reel.mp4
+
+# iOS build artifacts
+ios/App/Pods
+ios/DerivedData
+ios/App/App/public
+*.xcworkspace/xcuserdata

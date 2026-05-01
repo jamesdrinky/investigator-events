@@ -1,27 +1,14 @@
-import { createServerClient } from '@supabase/ssr';
-import { createClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { enforceRateLimit, assertSameOriginRequest, RateLimitError } from '@/lib/security/server';
+import { createSupabaseSSRServerClient } from '@/lib/supabase/ssr-server';
+import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
+import { enforceRateLimit, assertSameOriginRequest, RateLimitError, validateImageMagicBytes } from '@/lib/security/server';
 
 export async function POST(request: Request) {
   try {
   assertSameOriginRequest();
 
   // Verify the user is authenticated before consuming rate limit
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() { return cookieStore.getAll(); },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
-        },
-      },
-    }
-  );
+  const supabase = await createSupabaseSSRServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -48,11 +35,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid file type. Only JPEG, PNG, WebP, and AVIF are allowed.' }, { status: 400 });
   }
 
+  // Validate file content matches an actual image (prevents MIME spoofing)
+  const buffer = Buffer.from(await file.arrayBuffer());
+  if (!validateImageMagicBytes(buffer)) {
+    return NextResponse.json({ error: 'File content does not match a valid image format.' }, { status: 400 });
+  }
+
   // Upload using service role key (bypasses RLS)
-  const admin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const admin = createSupabaseAdminServerClient();
 
   // Support avatar or banner upload
   const uploadType = formData.get('type') as string | null;
@@ -61,14 +51,14 @@ export async function POST(request: Request) {
   const filePath = isBanner
     ? `banners/${user.id}/banner.jpg`
     : `${user.id}/avatar.jpg`;
-  const buffer = Buffer.from(await file.arrayBuffer());
 
   const { error: uploadError } = await admin.storage
     .from('avatars')
     .upload(filePath, buffer, { upsert: true, contentType: 'image/jpeg' });
 
   if (uploadError) {
-    return NextResponse.json({ error: uploadError.message }, { status: 500 });
+    console.error('Avatar upload failed:', uploadError.message);
+    return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
   }
 
   const { data: urlData } = admin.storage.from('avatars').getPublicUrl(filePath);

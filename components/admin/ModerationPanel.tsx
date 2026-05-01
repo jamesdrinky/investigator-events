@@ -20,10 +20,14 @@ export function ModerationPanel() {
 
   const loadContent = async () => {
     setLoading(true);
-    const res = await fetch('/api/admin/moderation');
-    if (res.ok) {
-      const data = await res.json();
-      setItems(data.items ?? []);
+    try {
+      const res = await fetch('/api/admin/moderation');
+      if (res.ok) {
+        const data = await res.json();
+        setItems(data.items ?? []);
+      }
+    } catch {
+      // Network error — items stay empty
     }
     setLoading(false);
   };
@@ -33,13 +37,18 @@ export function ModerationPanel() {
   const deleteItem = async (id: string, type: string) => {
     if (!confirm('Delete this content permanently?')) return;
     setDeleting(id);
-    await fetch('/api/admin/moderation', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, type }),
-    });
-    setItems((prev) => prev.filter((i) => i.id !== id));
-    setDeleting(null);
+    try {
+      const res = await fetch('/api/admin/moderation', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, type }),
+      });
+      if (res.ok) {
+        setItems((prev) => prev.filter((i) => i.id !== id));
+      }
+    } finally {
+      setDeleting(null);
+    }
   };
 
   const filtered = filter === 'all' ? items : items.filter((i) => i.type === filter);

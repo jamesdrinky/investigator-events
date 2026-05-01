@@ -5,7 +5,7 @@ import { assertSameOriginRequest } from '@/lib/security/server';
 
 // GET — fetch all moderatable content
 export async function GET() {
-  if (!hasValidAdminSessionCookie()) {
+  if (!await hasValidAdminSessionCookie()) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -99,7 +99,7 @@ export async function GET() {
 // DELETE — remove content
 export async function DELETE(request: Request) {
   assertSameOriginRequest();
-  if (!hasValidAdminSessionCookie()) {
+  if (!await hasValidAdminSessionCookie()) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

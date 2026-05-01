@@ -3,15 +3,21 @@ import { Resend } from 'resend';
 import { fetchAllEvents } from '@/lib/data/events';
 import { getWeeklyCollections } from '@/lib/data/weekly';
 import { buildWeeklyNewsletterHtml } from '@/lib/email/weekly-newsletter';
+import { verifyCronSecret } from '@/lib/security/server';
+
+const ALLOWED_RECIPIENTS = new Set([
+  'james@drinky.com',
+  'info@investigatorevents.com',
+  'm.lacorte@conflictinternational.com',
+]);
 
 export async function GET(request: Request) {
   // Only allow in development or with CRON_SECRET
-  const authHeader = request.headers.get('authorization');
-  const cronSecret = process.env.CRON_SECRET;
   const isDev = process.env.NODE_ENV === 'development';
 
-  if (!isDev && cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!isDev) {
+    const authError = verifyCronSecret(request);
+    if (authError) return authError;
   }
 
   const events = await fetchAllEvents();
@@ -29,6 +35,10 @@ export async function GET(request: Request) {
   const sendTo = searchParams.get('send');
 
   // If ?send=email@example.com, actually send the email via Resend
+  if (sendTo && !ALLOWED_RECIPIENTS.has(sendTo.toLowerCase())) {
+    return NextResponse.json({ error: 'Recipient not in allowed list' }, { status: 403 });
+  }
+
   if (sendTo) {
     const resendKey = process.env.RESEND_API_KEY;
     if (!resendKey) {

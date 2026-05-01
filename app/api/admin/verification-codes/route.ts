@@ -1,3 +1,4 @@
+import { randomInt } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { hasValidAdminSessionCookie } from '@/lib/admin/session';
@@ -7,14 +8,14 @@ function generateCode(prefix: string): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // No 0/O/1/I to avoid confusion
   let code = prefix.toUpperCase().slice(0, 6) + '-';
   for (let i = 0; i < 6; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)];
+    code += chars[randomInt(chars.length)];
   }
   return code;
 }
 
 // GET — list all codes
 export async function GET() {
-  if (!hasValidAdminSessionCookie()) {
+  if (!await hasValidAdminSessionCookie()) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -44,7 +45,7 @@ export async function GET() {
 // POST — generate a new code
 export async function POST(request: Request) {
   assertSameOriginRequest();
-  if (!hasValidAdminSessionCookie()) {
+  if (!await hasValidAdminSessionCookie()) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -108,7 +109,7 @@ export async function POST(request: Request) {
 // DELETE — deactivate a code
 export async function DELETE(request: Request) {
   assertSameOriginRequest();
-  if (!hasValidAdminSessionCookie()) {
+  if (!await hasValidAdminSessionCookie()) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

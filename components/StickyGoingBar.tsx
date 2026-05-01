@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { ThumbsUp, X } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
+import { hapticMedium, hapticSuccess } from '@/lib/capacitor';
 
 export function StickyGoingBar({ eventId, eventTitle }: { eventId: string; eventTitle: string }) {
   const [userId, setUserId] = useState<string | null>(null);
@@ -21,8 +22,8 @@ export function StickyGoingBar({ eventId, eventTitle }: { eventId: string; event
       }
     });
 
-    // Show bar after scrolling past the hero
-    const handleScroll = () => setVisible(window.scrollY > 500);
+    // Show bar after scrolling past the hero (sooner on mobile)
+    const handleScroll = () => setVisible(window.scrollY > 250);
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [eventId]);
@@ -34,9 +35,11 @@ export function StickyGoingBar({ eventId, eventTitle }: { eventId: string; event
     if (isGoing) {
       await supabase.from('event_attendees').delete().eq('event_id', eventId).eq('user_id', userId);
       setIsGoing(false);
+      hapticMedium();
     } else {
       await supabase.from('event_attendees').insert({ user_id: userId, event_id: eventId, is_going: true });
       setIsGoing(true);
+      hapticSuccess();
     }
     setToggling(false);
   };
@@ -44,7 +47,7 @@ export function StickyGoingBar({ eventId, eventTitle }: { eventId: string; event
   if (!userId || !visible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200/80 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-lg lg:hidden">
+    <div className="fixed bottom-[4.5rem] left-0 right-0 z-50 border-t border-slate-200/80 bg-white/95 backdrop-blur-lg lg:hidden">
       <div className="flex items-center gap-3 px-4 py-3">
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold text-slate-900">{eventTitle}</p>

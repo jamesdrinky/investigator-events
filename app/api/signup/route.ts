@@ -42,7 +42,8 @@ export async function POST(request: Request) {
       if (error.message.includes('already been registered') || error.message.includes('already exists')) {
         return NextResponse.json({ error: 'An account with this email already exists. Try signing in.' }, { status: 409 });
       }
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      console.error('Signup error:', error.message);
+      return NextResponse.json({ error: 'Unable to create account. Please try again.' }, { status: 400 });
     }
 
     // Create profile row

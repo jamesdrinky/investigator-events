@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseSSRServerClient } from '@/lib/supabase/ssr-server';
 import { createNotification } from '@/lib/notifications';
+import { enforceRateLimitAsync, assertSameOriginRequest, RateLimitError } from '@/lib/security/server';
 
 export async function POST(request: Request) {
   try {
+    assertSameOriginRequest();
+    await enforceRateLimitAsync('notifications', { maxRequests: 30, windowMs: 60_000 });
     const supabase = await createSupabaseSSRServerClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -36,7 +39,10 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ ok: true });
-  } catch {
+  } catch (err) {
+    if (err instanceof RateLimitError) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
@@ -64,7 +70,8 @@ export async function GET(request: Request) {
 
     const { data, error } = await query;
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error('Notification fetch failed:', error.message);
+      return NextResponse.json({ error: 'Failed to load notifications' }, { status: 500 });
     }
 
     const notifications = data ?? [];
@@ -99,6 +106,7 @@ export async function GET(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
+    assertSameOriginRequest();
     const supabase = await createSupabaseSSRServerClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {

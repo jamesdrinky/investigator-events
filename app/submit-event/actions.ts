@@ -157,7 +157,8 @@ export async function submitEventAction(formData: FormData) {
     revalidatePath('/admin/events');
     redirect('/submit-event?status=success');
   } catch (error) {
-    if (error instanceof Error && error.message === 'NEXT_REDIRECT') {
+    // Re-throw Next.js redirect errors — they use error.digest, not error.message
+    if (error instanceof Error && 'digest' in error && typeof (error as any).digest === 'string' && (error as any).digest.startsWith('NEXT_REDIRECT')) {
       throw error;
     }
 

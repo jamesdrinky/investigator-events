@@ -63,40 +63,32 @@ export function verifyAdminSessionToken(token: string | undefined): boolean {
   }
 }
 
-export function setAdminSessionCookie(token: string) {
-  const cookieStore = cookies() as any;
-  const store = typeof cookieStore.then === 'function' ? null : cookieStore;
-  if (store) {
-    store.set(ADMIN_SESSION_COOKIE, token, {
-      httpOnly: true,
-      sameSite: 'strict',
-      secure: process.env.NODE_ENV === 'production',
-      path: '/',
-      maxAge: ADMIN_SESSION_DURATION_SECONDS,
-      priority: 'high'
-    });
-  }
+export async function setAdminSessionCookie(token: string) {
+  const store = await cookies();
+  store.set(ADMIN_SESSION_COOKIE, token, {
+    httpOnly: true,
+    sameSite: 'strict',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    maxAge: ADMIN_SESSION_DURATION_SECONDS,
+    priority: 'high'
+  });
 }
 
-export function clearAdminSessionCookie() {
-  const cookieStore = cookies() as any;
-  const store = typeof cookieStore.then === 'function' ? null : cookieStore;
-  if (store) {
-    store.set(ADMIN_SESSION_COOKIE, '', {
-      httpOnly: true,
-      sameSite: 'strict',
-      secure: process.env.NODE_ENV === 'production',
-      path: '/',
-      priority: 'high',
-      expires: new Date(0)
-    });
-  }
+export async function clearAdminSessionCookie() {
+  const store = await cookies();
+  store.set(ADMIN_SESSION_COOKIE, '', {
+    httpOnly: true,
+    sameSite: 'strict',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    priority: 'high',
+    expires: new Date(0)
+  });
 }
 
-export function hasValidAdminSessionCookie(): boolean {
-  const cookieStore = cookies() as any;
-  const store = typeof cookieStore.then === 'function' ? null : cookieStore;
-  if (!store) return false;
+export async function hasValidAdminSessionCookie(): Promise<boolean> {
+  const store = await cookies();
   const token = store.get(ADMIN_SESSION_COOKIE)?.value;
   return verifyAdminSessionToken(token);
 }

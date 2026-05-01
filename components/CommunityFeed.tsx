@@ -82,7 +82,12 @@ export function CommunityFeed() {
       .order('is_pinned', { ascending: false })
       .order('created_at', { ascending: false })
       .limit(50)
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('Failed to load posts:', error.message);
+          setLoading(false);
+          return;
+        }
         const rows = (data ?? []).map((r: any) => ({
           id: r.id, user_id: r.user_id, title: r.title ?? null, content: r.content, image_url: r.image_url,
           link_url: r.link_url, likes_count: r.likes_count ?? 0, comments_count: r.comments_count ?? 0,

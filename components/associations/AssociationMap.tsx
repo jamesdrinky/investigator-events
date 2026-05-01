@@ -48,7 +48,8 @@ export function AssociationMap({ associations, onCountryClick, selectedCountry, 
       .then((topo) => {
         const geo = feature(topo, topo.objects.countries) as any;
         setWorldData(geo);
-      });
+      })
+      .catch(() => {});
   }, []);
 
   // Responsive

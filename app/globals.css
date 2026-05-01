@@ -2,6 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── iOS safe areas (notch, home indicator) ── */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* ── App-like smooth interactions ── */
+* { -webkit-tap-highlight-color: transparent; }
+html { -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
+body { overscroll-behavior-y: none; }
+
+/* Smooth press feedback on tappable elements */
+@media (max-width: 1023px) {
+  a, button { transition: transform 0.15s ease, opacity 0.15s ease; }
+  a:active, button:active { transform: scale(0.97); opacity: 0.8; }
+}
+
 /* Thin scrollbar — visible but unobtrusive */
 html { scrollbar-width: thin; scrollbar-color: rgba(148,163,184,0.3) transparent; }
 html::-webkit-scrollbar { width: 6px; }

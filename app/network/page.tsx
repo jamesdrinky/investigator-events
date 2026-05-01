@@ -226,7 +226,8 @@ export default function NetworkMapPage() {
         setWorldGeo(countries);
         // Stagger fade-in start
         setTimeout(() => setMapReady(true), 50);
-      });
+      })
+      .catch(() => {});
   }, []);
 
   /* ── Fetch US states topology ── */

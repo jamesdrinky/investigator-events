@@ -5,6 +5,7 @@ import { Footer } from '@/components/footer';
 import { Navbar } from '@/components/navbar';
 import { NewsletterBanner } from '@/components/NewsletterBanner';
 import { BackToTop } from '@/components/BackToTop';
+import { BottomTabBar } from '@/components/BottomTabBar';
 import './globals.css';
 
 const sans = Plus_Jakarta_Sans({
@@ -45,14 +46,17 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${sans.variable} ${serif.variable}`}>
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
       <body className="font-[var(--font-sans)]">
         <div className="relative flex min-h-screen flex-col">
           <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <main className="flex-1 pb-[4.5rem] lg:pb-0">{children}</main>
+          <Footer className="hidden lg:block" />
         </div>
+        <BottomTabBar />
         <NewsletterBanner />
         <CookieBanner />
         <BackToTop />

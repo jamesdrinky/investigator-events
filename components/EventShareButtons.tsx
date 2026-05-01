@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Share2, Copy, Check, Send, Users, MessageCircle, X } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { UserAvatar } from '@/components/UserAvatar';
+import { isNativeApp, nativeShare } from '@/lib/capacitor';
 
 export function EventShareButtons({ eventTitle, eventSlug }: { eventTitle: string; eventSlug: string }) {
   const [copied, setCopied] = useState(false);
@@ -49,7 +50,14 @@ export function EventShareButtons({ eventTitle, eventSlug }: { eventTitle: strin
     setTimeout(() => setCopiedMsg(false), 2000);
   };
 
-  const togglePanel = () => setOpen((prev) => !prev);
+  const togglePanel = () => {
+    // On native app, use the OS share sheet instead of custom dropdown
+    if (isNativeApp) {
+      nativeShare({ title: eventTitle, text: `${eventTitle} — details on Investigator Events`, url });
+      return;
+    }
+    setOpen((prev) => !prev);
+  };
 
   const searchUsers = async (q: string) => {
     setSearch(q);

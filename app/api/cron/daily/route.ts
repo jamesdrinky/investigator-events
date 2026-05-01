@@ -1,13 +1,10 @@
 import { NextResponse } from 'next/server';
 import { processOutreachQueue } from '@/lib/email/association-outreach';
+import { verifyCronSecret } from '@/lib/security/server';
 
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization');
-  const cronSecret = process.env.CRON_SECRET;
-
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const authError = verifyCronSecret(request);
+  if (authError) return authError;
 
   const [outreach, digest] = await Promise.all([
     processOutreachQueue().catch((err) => {

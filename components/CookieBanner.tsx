@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { isNativeApp } from '@/lib/capacitor';
 
 const STORAGE_KEY = 'cookie_consent';
 
@@ -9,6 +10,8 @@ export function CookieBanner() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    // Don't show cookie banner in native app — not needed
+    if (isNativeApp) return;
     if (!localStorage.getItem(STORAGE_KEY)) {
       setVisible(true);
     }

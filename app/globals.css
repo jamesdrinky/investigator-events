@@ -15,10 +15,34 @@
 html { -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
 body { overscroll-behavior-y: none; }
 
+/* Disable text selection on mobile — feels more native */
+@media (max-width: 1023px) {
+  body { -webkit-user-select: none; user-select: none; }
+  /* Allow selection in text-heavy areas */
+  p, article, .selectable, input, textarea, [contenteditable] {
+    -webkit-user-select: text; user-select: text;
+  }
+}
+
 /* Smooth press feedback on tappable elements */
 @media (max-width: 1023px) {
   a, button { transition: transform 0.15s ease, opacity 0.15s ease; }
   a:active, button:active { transform: scale(0.97); opacity: 0.8; }
+}
+
+/* Disable long-press context menu on images (feels more native) */
+@media (max-width: 1023px) {
+  img { -webkit-touch-callout: none; pointer-events: none; }
+  a img { pointer-events: auto; }
+}
+
+/* Native-style scrolling momentum on scroll containers */
+.scroll-native {
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+}
+.scroll-native > * {
+  scroll-snap-align: start;
 }
 
 /* Thin scrollbar — visible but unobtrusive */

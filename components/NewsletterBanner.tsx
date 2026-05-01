@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, Zap } from 'lucide-react';
+import { isNativeApp } from '@/lib/capacitor';
 
 const STORAGE_KEY = 'ie_newsletter_dismissed';
 
@@ -12,6 +13,8 @@ export function NewsletterBanner() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
+    // Don't show newsletter popup in native app
+    if (isNativeApp) return;
     const dismissed = localStorage.getItem(STORAGE_KEY);
     if (dismissed === 'subscribed') return;
     if (dismissed) {

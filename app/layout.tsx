@@ -6,6 +6,10 @@ import { Navbar } from '@/components/navbar';
 import { NewsletterBanner } from '@/components/NewsletterBanner';
 import { BackToTop } from '@/components/BackToTop';
 import { BottomTabBar } from '@/components/BottomTabBar';
+import { OfflineNotice } from '@/components/OfflineNotice';
+import { PageTransition } from '@/components/PageTransition';
+import { PullToRefresh } from '@/components/PullToRefresh';
+import { TopLoadingBar } from '@/components/TopLoadingBar';
 import './globals.css';
 
 const sans = Plus_Jakarta_Sans({
@@ -52,11 +56,14 @@ export default function RootLayout({
       </head>
       <body className="font-[var(--font-sans)]">
         <div className="relative flex min-h-screen flex-col">
+          <TopLoadingBar />
           <Navbar />
-          <main className="flex-1 pb-[4.5rem] lg:pb-0">{children}</main>
+          <main className="flex-1 pb-[4.5rem] lg:pb-0"><PageTransition>{children}</PageTransition></main>
           <Footer className="hidden lg:block" />
         </div>
         <BottomTabBar />
+        <OfflineNotice />
+        <PullToRefresh />
         <NewsletterBanner />
         <CookieBanner />
         <BackToTop />

@@ -3,18 +3,20 @@
 import { useEffect, useState } from 'react';
 import { Home, Calendar, Users, User, MessageCircle } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
+import { hapticTap } from '@/lib/capacitor';
 
 const tabs = [
-  { href: '/', icon: Home, label: 'Home' },
-  { href: '/calendar', icon: Calendar, label: 'Events' },
-  { href: '/people', icon: MessageCircle, label: 'Forum' },
-  { href: '/associations', icon: Users, label: 'Network' },
-  { href: '/profile', icon: User, label: 'Profile' },
+  { href: '/', icon: Home, label: 'Home', badge: false },
+  { href: '/calendar', icon: Calendar, label: 'Events', badge: false },
+  { href: '/people', icon: MessageCircle, label: 'Forum', badge: false },
+  { href: '/associations', icon: Users, label: 'Network', badge: false },
+  { href: '/profile', icon: User, label: 'Profile', badge: true },
 ];
 
 export function BottomTabBar() {
   const [pathname, setPathname] = useState('');
   const [profilePath, setProfilePath] = useState('/signin');
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     setPathname(window.location.pathname);
@@ -22,9 +24,18 @@ export function BottomTabBar() {
     const supabase = createSupabaseBrowserClient();
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
-        supabase.from('profiles').select('username').eq('id', data.user.id).single().then(({ data: p }) => {
+        const uid = data.user.id;
+        supabase.from('profiles').select('username').eq('id', uid).single().then(({ data: p }) => {
           if (p?.username) setProfilePath(`/profile/${p.username}`);
           else setProfilePath('/profile/setup');
+        });
+
+        // Fetch unread notifications + messages
+        Promise.all([
+          supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', uid).eq('is_read', false),
+          supabase.from('messages' as any).select('id', { count: 'exact', head: true }).eq('receiver_id', uid).eq('is_read', false),
+        ]).then(([notifs, msgs]) => {
+          setUnreadCount((notifs.count ?? 0) + (msgs.count ?? 0));
         });
       }
     });
@@ -51,11 +62,13 @@ export function BottomTabBar() {
           const active = isActive(tab.href);
           const href = tab.href === '/profile' ? profilePath : tab.href;
           const Icon = tab.icon;
+          const showBadge = tab.badge && unreadCount > 0;
 
           return (
             <a
               key={tab.label}
               href={href}
+              onClick={() => hapticTap()}
               className={`flex flex-1 flex-col items-center gap-0.5 py-2 transition-colors ${
                 active ? 'text-blue-600' : 'text-slate-400'
               }`}
@@ -64,6 +77,11 @@ export function BottomTabBar() {
                 active ? 'bg-blue-50 scale-110' : ''
               }`}>
                 <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.2 : 1.8} />
+                {showBadge && (
+                  <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
               </div>
               <span className={`text-[10px] font-medium transition-colors ${
                 active ? 'text-blue-600' : 'text-slate-400'

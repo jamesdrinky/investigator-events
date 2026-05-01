@@ -3,6 +3,9 @@ import { Capacitor } from '@capacitor/core';
 /** True when running inside the native iOS/Android shell */
 export const isNativeApp = Capacitor.isNativePlatform();
 
+/** Get the current platform */
+export const currentPlatform = Capacitor.getPlatform(); // 'ios' | 'android' | 'web'
+
 /**
  * Register for push notifications and store the device token in Supabase.
  * Call this after the user signs in.

@@ -140,7 +140,13 @@ export function AttendeeAvatars({ eventId }: { eventId: string }) {
       )}
 
       {shown.length === 0 && !isGoing && (
-        <p className="mt-3 text-sm text-slate-400">No one has marked attendance yet. Be the first!</p>
+        <div className="mt-3 flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
+          <div className="flex -space-x-1">
+            <div className="h-6 w-6 rounded-full border-2 border-white bg-slate-200" />
+            <div className="h-6 w-6 rounded-full border-2 border-white bg-slate-200" />
+          </div>
+          <p className="text-xs text-slate-500">Mark yourself as going to see who else is attending</p>
+        </div>
       )}
 
       {/* Expanded attendee list */}

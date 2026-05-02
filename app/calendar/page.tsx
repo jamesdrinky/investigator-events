@@ -96,7 +96,10 @@ export default async function CalendarPage({
                 {/* Mobile: simple list */}
                 <div className="mt-3 space-y-2 sm:hidden">
                   {expandingItems.slice(0, 5).map((item) => {
-                    const d = new Date(item.date.split('–')[0].trim().replace(/(\d+)\s+(\w+)\s+(\d+)/, '$2 $1, $3') || item.date);
+                    // item.date is like "14 May 2026" or "14 May 2026 - 16 May 2026"
+                    const startPart = item.date.split(/\s*[-–]\s/)[0].trim();
+                    const match = startPart.match(/^(\d+)\s+(\w+)\s+(\d+)$/);
+                    const d = match ? new Date(`${match[2]} ${match[1]}, ${match[3]}`) : new Date(startPart);
                     const month = isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-GB', { month: 'short' });
                     const day = isNaN(d.getTime()) ? '' : String(d.getDate());
                     return (

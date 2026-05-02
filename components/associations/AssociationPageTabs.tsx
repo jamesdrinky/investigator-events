@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Calendar, MapPin, Users, Globe, ShieldCheck, ExternalLink, ArrowRight, Award, Briefcase, Clock, Mail, MessageCircle, Heart } from 'lucide-react';
 import { UserAvatar } from '@/components/UserAvatar';
+import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 
 /* ── Types ── */
 interface AssocEvent { id: string; title: string; slug?: string; date: string; city: string; country: string; category?: string; image_path?: string; coverImage?: string; formattedDate: string; }
@@ -37,6 +38,36 @@ function timeAgo(dateStr: string) {
 }
 
 export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past, members, posts, jobs, platformMembers, verifiedCount }: Props) {
+  const [isVerifiedMember, setIsVerifiedMember] = useState(false);
+  const [isMember, setIsMember] = useState(false);
+
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) return;
+      const uid = data.user.id;
+
+      // Check if user is a member of this association
+      const { data: assoc } = await supabase
+        .from('user_associations')
+        .select('id')
+        .eq('user_id', uid)
+        .eq('association_name', page.name)
+        .maybeSingle();
+      if (assoc) setIsMember(true);
+
+      // Check if user is verified for this association
+      const { data: verif } = await supabase
+        .from('member_verifications')
+        .select('status')
+        .eq('user_id', uid)
+        .eq('association_name', page.name)
+        .eq('status', 'verified')
+        .maybeSingle();
+      if (verif) setIsVerifiedMember(true);
+    });
+  }, [page.name]);
+
   return (
     <>
       {/* ═══ HERO — full-width dark section ═══ */}
@@ -115,22 +146,31 @@ export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past,
         </div>
       </div>
 
-      {/* ═══ VERIFY BANNER — full-width gradient section ═══ */}
-      <div className="relative overflow-hidden border-b border-emerald-200/30 bg-[linear-gradient(135deg,#ecfdf5_0%,#eff6ff_50%,#f5f3ff_100%)]">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_50%,rgba(16,185,129,0.08),transparent_50%)]" />
-        <div className="container-shell relative flex flex-col items-start gap-4 py-6 sm:flex-row sm:items-center sm:gap-6 sm:py-8">
-          <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-emerald-100 shadow-[0_8px_24px_-8px_rgba(16,185,129,0.25)]">
-            <ShieldCheck className="h-7 w-7 text-emerald-600" />
+      {/* ═══ VERIFY BANNER — only show if not already verified ═══ */}
+      {isVerifiedMember ? (
+        <div className="border-b border-emerald-200/30 bg-emerald-50/50">
+          <div className="container-shell flex items-center gap-3 py-4">
+            <ShieldCheck className="h-5 w-5 text-emerald-600" />
+            <p className="text-sm font-semibold text-emerald-700">You're a verified {page.name} member</p>
           </div>
-          <div className="flex-1">
-            <p className="text-base font-bold text-slate-950">Are you a {page.name} member?</p>
-            <p className="mt-0.5 text-sm text-slate-500">Verify your membership to display a verified badge on your profile across the entire platform.</p>
-          </div>
-          <Link href="/profile/edit" className="btn-primary flex-shrink-0 !rounded-full !px-6 !py-3 !text-sm">
-            <ShieldCheck className="mr-1.5 h-4 w-4" /> Verify membership
-          </Link>
         </div>
-      </div>
+      ) : (
+        <div className="relative overflow-hidden border-b border-emerald-200/30 bg-[linear-gradient(135deg,#ecfdf5_0%,#eff6ff_50%,#f5f3ff_100%)]">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_50%,rgba(16,185,129,0.08),transparent_50%)]" />
+          <div className="container-shell relative flex flex-col items-start gap-4 py-6 sm:flex-row sm:items-center sm:gap-6 sm:py-8">
+            <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-emerald-100 shadow-[0_8px_24px_-8px_rgba(16,185,129,0.25)]">
+              <ShieldCheck className="h-7 w-7 text-emerald-600" />
+            </div>
+            <div className="flex-1">
+              <p className="text-base font-bold text-slate-950">Are you a {page.name} member?</p>
+              <p className="mt-0.5 text-sm text-slate-500">Verify your membership to display a verified badge on your profile across the entire platform.</p>
+            </div>
+            <Link href="/profile/edit" className="btn-primary flex-shrink-0 !rounded-full !px-6 !py-3 !text-sm">
+              <ShieldCheck className="mr-1.5 h-4 w-4" /> Verify membership
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* ═══ EVENTS SECTION — light background ═══ */}
       <div className="relative overflow-hidden bg-[linear-gradient(165deg,#f0f4ff_0%,#f8fbff_50%,#ffffff_100%)]">

@@ -295,7 +295,8 @@ export function LoggedInHome() {
       {isLoggedIn && (
         <style>{`
           @media (max-width: 1023px) {
-            .mesh-blob, [class*="order-"] { display: none !important; }
+            .mesh-blob { display: none !important; }
+            [data-homepage-section] { display: none !important; }
           }
         `}</style>
       )}

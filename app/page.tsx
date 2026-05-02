@@ -60,24 +60,23 @@ export default async function HomePage() {
       <div className="mesh-blob mesh-blob-3" aria-hidden="true" />
       <div className="mesh-blob mesh-blob-4" aria-hidden="true" />
 
-      <div className="order-1 sm:order-none">
+      <div data-homepage-section className="order-1 sm:order-none">
         <HomepageHero events={heroEvents} stats={heroStats} />
       </div>
 
-      <div className="order-2 mobile-section-divider sm:order-none ">
+      <div data-homepage-section className="order-2 mobile-section-divider sm:order-none ">
         <AssociationLoopSection />
       </div>
 
-      <div className="order-3 mobile-section-divider sm:order-none ">
+      <div data-homepage-section className="order-3 mobile-section-divider sm:order-none ">
         <UpcomingEventsGallery events={upcomingEvents} />
       </div>
 
-      <div className="order-4 sm:order-none">
+      <div data-homepage-section className="order-4 sm:order-none">
         <WhyUseSection />
       </div>
 
-      {/* Submit event prompt */}
-      <div className="order-5 sm:order-none">
+      <div data-homepage-section className="order-5 sm:order-none">
         <div className="container-shell py-6 sm:py-10">
           <div className="flex flex-col items-center gap-4 rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50/80 via-white to-purple-50/80 px-6 py-8 text-center sm:flex-row sm:justify-between sm:px-10 sm:text-left">
             <div>
@@ -94,16 +93,15 @@ export default async function HomePage() {
         </div>
       </div>
 
-      <div className="order-6 sm:order-none">
+      <div data-homepage-section className="order-6 sm:order-none">
         <FounderQuoteSection />
       </div>
 
-      <div className="order-7 sm:order-none">
+      <div data-homepage-section className="order-7 sm:order-none">
         <FeaturedEventsSection events={featuredCarouselEvents} />
       </div>
 
-      {/* Signup CTA banner */}
-      <div className="order-8 sm:order-none">
+      <div data-homepage-section className="order-8 sm:order-none">
         <div className="container-shell py-14 sm:py-20">
           <Reveal>
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 px-6 py-14 text-center sm:px-12 sm:py-20">
@@ -137,7 +135,7 @@ export default async function HomePage() {
         </div>
       </div>
 
-      <div className="order-9 sm:order-none">
+      <div data-homepage-section className="order-9 sm:order-none">
         <div className="container-shell py-14 sm:py-20">
           <div className="app-mobile-shell">
             <Reveal>

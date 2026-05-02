@@ -170,15 +170,15 @@ export function GlobalSearch({ isDark }: { isDark?: boolean }) {
   );
 
   const mobileOverlay = mobileOpen && (
-    <div className="fixed inset-0 z-[70] bg-white lg:hidden" ref={wrapperRef}>
-      <div className="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
+    <div className="fixed inset-0 z-[70] flex flex-col bg-white lg:hidden" ref={wrapperRef}>
+      <div className="flex flex-shrink-0 items-center gap-3 border-b border-slate-100 px-4 py-3">
         <Search className="h-5 w-5 text-slate-400" />
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Search site..."
+          placeholder="Search events, people..."
           className="flex-1 border-0 bg-transparent text-base text-slate-900 outline-none"
           autoFocus
         />
@@ -187,7 +187,7 @@ export function GlobalSearch({ isDark }: { isDark?: boolean }) {
         </button>
       </div>
 
-      <div className="overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto bg-white p-4">
         {loading && <p className="py-8 text-center text-sm text-slate-400">Searching...</p>}
         {!loading && query.length >= 2 && totalResults === 0 && <p className="py-8 text-center text-sm text-slate-400">No results found</p>}
 

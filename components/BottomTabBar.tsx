@@ -1,8 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import type { Route } from 'next';
+import { useEffect, useState, useCallback } from 'react';
 import { Home, Calendar, Users, User, MessageCircle } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { hapticTap } from '@/lib/capacitor';
@@ -20,8 +18,12 @@ export function BottomTabBar() {
   const [profilePath, setProfilePath] = useState('/signin');
   const [unreadCount, setUnreadCount] = useState(0);
 
-  useEffect(() => {
+  const syncPathname = useCallback(() => {
     setPathname(window.location.pathname);
+  }, []);
+
+  useEffect(() => {
+    syncPathname();
 
     const supabase = createSupabaseBrowserClient();
     supabase.auth.getUser().then(({ data }) => {
@@ -32,7 +34,6 @@ export function BottomTabBar() {
           else setProfilePath('/profile/setup');
         });
 
-        // Fetch unread notifications + messages
         Promise.all([
           supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', uid).eq('is_read', false),
           supabase.from('messages' as any).select('id', { count: 'exact', head: true }).eq('receiver_id', uid).eq('is_read', false),
@@ -42,11 +43,19 @@ export function BottomTabBar() {
       }
     });
 
-    // Listen for navigation changes
-    const handlePopState = () => setPathname(window.location.pathname);
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+    // Track pathname changes from all sources
+    window.addEventListener('popstate', syncPathname);
+    // MutationObserver to catch Next.js client-side navigations
+    const observer = new MutationObserver(syncPathname);
+    observer.observe(document.querySelector('head') ?? document.documentElement, {
+      childList: true, subtree: true
+    });
+
+    return () => {
+      window.removeEventListener('popstate', syncPathname);
+      observer.disconnect();
+    };
+  }, [syncPathname]);
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/';
@@ -67,13 +76,11 @@ export function BottomTabBar() {
           const showBadge = tab.badge && unreadCount > 0;
 
           return (
-            <Link
+            <a
               key={tab.label}
-              href={href as Route}
-              prefetch={true}
+              href={href}
               onClick={(e) => {
                 hapticTap();
-                // Tap active tab → scroll to top (iOS-style)
                 if (active) {
                   e.preventDefault();
                   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -98,7 +105,7 @@ export function BottomTabBar() {
               }`}>
                 {tab.label}
               </span>
-            </Link>
+            </a>
           );
         })}
       </div>

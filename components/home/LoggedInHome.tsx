@@ -40,7 +40,7 @@ function EventRow({ event, accent = 'blue', showCountdown = false }: { event: Qu
   return (
     <Link
       href={`/events/${event.slug}` as Route}
-      className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white p-2.5 shadow-sm transition active:scale-[0.98]"
+      className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white p-2.5 shadow-sm transition active:scale-[0.98] lg:rounded-2xl lg:p-3.5 lg:hover:shadow-md lg:hover:border-blue-200"
     >
       {hasImage ? (
         <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg">
@@ -313,34 +313,34 @@ export function LoggedInHome() {
           </div>
 
           {/* Quick stats row */}
-          <div className="mt-4 grid grid-cols-4 gap-1.5">
-            <Link href={"/calendar" as Route} className="flex flex-col items-center gap-0.5 rounded-xl bg-white/[0.07] px-2 py-2.5">
-              <Calendar className="h-4 w-4 text-blue-400" />
-              <span className="text-sm font-bold text-white">{upcomingGoing.length}</span>
-              <span className="text-[9px] text-slate-400">Going</span>
+          <div className="mt-4 grid grid-cols-4 gap-1.5 lg:mt-6 lg:gap-3">
+            <Link href={"/my-events" as Route} className="flex flex-col items-center gap-0.5 rounded-xl bg-white/[0.07] px-2 py-2.5 transition hover:bg-white/[0.12] lg:flex-row lg:gap-3 lg:rounded-2xl lg:px-5 lg:py-4">
+              <Calendar className="h-4 w-4 text-blue-400 lg:h-5 lg:w-5" />
+              <span className="text-sm font-bold text-white lg:text-lg">{upcomingGoing.length}</span>
+              <span className="text-[9px] text-slate-400 lg:text-xs">Going</span>
             </Link>
-            <Link href={"/people?tab=discover" as Route} className="flex flex-col items-center gap-0.5 rounded-xl bg-white/[0.07] px-2 py-2.5">
-              <Users className="h-4 w-4 text-purple-400" />
-              <span className="text-sm font-bold text-white">{connectionCount}</span>
-              <span className="text-[9px] text-slate-400">Connections</span>
+            <Link href={"/my-connections" as Route} className="flex flex-col items-center gap-0.5 rounded-xl bg-white/[0.07] px-2 py-2.5 transition hover:bg-white/[0.12] lg:flex-row lg:gap-3 lg:rounded-2xl lg:px-5 lg:py-4">
+              <Users className="h-4 w-4 text-purple-400 lg:h-5 lg:w-5" />
+              <span className="text-sm font-bold text-white lg:text-lg">{connectionCount}</span>
+              <span className="text-[9px] text-slate-400 lg:text-xs">Connections</span>
             </Link>
-            <Link href={"/messages" as Route} className="relative flex flex-col items-center gap-0.5 rounded-xl bg-white/[0.07] px-2 py-2.5">
-              <MessageCircle className="h-4 w-4 text-cyan-400" />
-              <span className="text-sm font-bold text-white">{unreadMessages}</span>
-              <span className="text-[9px] text-slate-400">Messages</span>
+            <Link href={"/messages" as Route} className="relative flex flex-col items-center gap-0.5 rounded-xl bg-white/[0.07] px-2 py-2.5 transition hover:bg-white/[0.12] lg:flex-row lg:gap-3 lg:rounded-2xl lg:px-5 lg:py-4">
+              <MessageCircle className="h-4 w-4 text-cyan-400 lg:h-5 lg:w-5" />
+              <span className="text-sm font-bold text-white lg:text-lg">{unreadMessages}</span>
+              <span className="text-[9px] text-slate-400 lg:text-xs">Messages</span>
             </Link>
-            <Link href={"/associations" as Route} className="flex flex-col items-center gap-0.5 rounded-xl bg-white/[0.07] px-2 py-2.5">
-              <Globe className="h-4 w-4 text-amber-400" />
-              <span className="text-sm font-bold text-white">{associationCount}</span>
-              <span className="text-[9px] text-slate-400">Assocs</span>
+            <Link href={"/my-associations" as Route} className="flex flex-col items-center gap-0.5 rounded-xl bg-white/[0.07] px-2 py-2.5 transition hover:bg-white/[0.12] lg:flex-row lg:gap-3 lg:rounded-2xl lg:px-5 lg:py-4">
+              <Globe className="h-4 w-4 text-amber-400 lg:h-5 lg:w-5" />
+              <span className="text-sm font-bold text-white lg:text-lg">{associationCount}</span>
+              <span className="text-[9px] text-slate-400 lg:text-xs">Assocs</span>
             </Link>
           </div>
           </div>{/* close max-w-5xl */}
         </div>
 
-        {/* ── Quick actions grid ── */}
-        <div className="bg-slate-50 px-4 py-4">
-          <div className="mx-auto grid max-w-5xl grid-cols-4 gap-2 lg:grid-cols-8">
+        {/* ── Quick actions grid — mobile only ── */}
+        <div className="bg-slate-50 px-4 py-4 lg:hidden">
+          <div className="grid grid-cols-4 gap-2">
             {[
               { href: '/calendar' as Route, icon: Calendar, label: 'Events', color: 'text-blue-600 bg-blue-50' },
               { href: '/directory' as Route, icon: Search, label: 'Find a PI', color: 'text-purple-600 bg-purple-50' },
@@ -386,14 +386,14 @@ export function LoggedInHome() {
         )}
 
         {/* ── Main content — single column mobile, two columns desktop ── */}
-        <div className="mx-auto max-w-5xl lg:grid lg:grid-cols-[1fr_20rem] lg:gap-8 lg:px-4 lg:py-6">
+        <div className="mx-auto max-w-6xl lg:grid lg:grid-cols-[1fr_22rem] lg:gap-10 lg:px-6 lg:py-8">
         <div>{/* Left column */}
 
         {/* ── Your events ── */}
         {upcomingGoing.length > 0 && (
           <div className="px-4 pt-4 lg:px-0">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-slate-900">Your events</h3>
+              <h3 className="text-sm font-bold text-slate-900 lg:text-base">Your events</h3>
               <Link href="/calendar" className="text-xs font-medium text-blue-600">See all</Link>
             </div>
             <div className="mt-2.5 space-y-2">
@@ -523,7 +523,7 @@ export function LoggedInHome() {
                 <Link
                   key={person.id}
                   href={`/profile/${person.username}` as Route}
-                  className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white p-2.5 shadow-sm transition active:scale-[0.98]"
+                  className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white p-2.5 shadow-sm transition active:scale-[0.98] lg:rounded-2xl lg:p-3.5 lg:hover:shadow-md lg:hover:border-blue-200"
                 >
                   <UserAvatar src={person.avatar_url} name={person.full_name} size={40} />
                   <div className="min-w-0 flex-1">

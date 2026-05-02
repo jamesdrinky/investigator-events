@@ -52,8 +52,8 @@ const cityImageMap: Record<string, string> = {
   'New York City': 'nyc.jpg',
   'New York, NY': 'nyc.jpg',
   'Warsaw': 'warsaw.jpg',
-  'Bonita Springs': 'bonitasprings.avif',
-  'Bonita Springs, FL': 'bonitasprings.avif',
+  'Bonita Springs': 'bonitasprings.jpg',
+  'Bonita Springs, FL': 'bonitasprings.jpg',
   'San José': 'beach.jpg',
 };
 

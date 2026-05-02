@@ -245,34 +245,9 @@ export function LoggedInHome() {
   // Don't render anything for logged-out users
   if (!loading && !user) return null;
 
-  // Show skeleton while loading
-  if (loading) {
-    return (
-      <div>
-        <div className="bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800 px-4 pb-6 pt-20 lg:pt-24">
-          <div className="mx-auto max-w-5xl">
-            <div className="flex items-center gap-3">
-              <div className="h-12 w-12 animate-pulse rounded-full bg-white/10" />
-              <div className="space-y-2">
-                <div className="h-5 w-28 animate-pulse rounded bg-white/10" />
-                <div className="h-3 w-40 animate-pulse rounded bg-white/5" />
-              </div>
-            </div>
-            <div className="mt-5 grid grid-cols-4 gap-2">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="animate-pulse rounded-xl bg-white/10 px-3 py-4" />
-              ))}
-            </div>
-          </div>
-        </div>
-        <div className="mx-auto max-w-5xl space-y-3 px-4 py-5">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 animate-pulse rounded-xl bg-slate-100" />
-          ))}
-        </div>
-      </div>
-    );
-  }
+  // While loading, don't render anything — marketing page shows as fallback for logged-out,
+  // logged-in users see a brief blank before dashboard appears (no flash)
+  if (loading) return null;
 
   const firstName = profile?.full_name?.split(' ')[0] ?? 'there';
   const totalUnread = unreadNotifs + unreadMessages;
@@ -544,12 +519,12 @@ export function LoggedInHome() {
         <div className="h-6" />
       </div>
 
-      {/* Hide the marketing homepage sections when logged in */}
+      {/* Hide the marketing homepage sections when logged in — inject immediately */}
       {isLoggedIn && (
-        <style>{`
+        <style dangerouslySetInnerHTML={{ __html: `
           .mesh-blob { display: none !important; }
           [data-homepage-section] { display: none !important; }
-        `}</style>
+        `}} />
       )}
     </>
   );

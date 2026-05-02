@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import type { Route } from 'next';
 import { Home, Calendar, Users, User, MessageCircle } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { hapticTap } from '@/lib/capacitor';
@@ -65,10 +67,18 @@ export function BottomTabBar() {
           const showBadge = tab.badge && unreadCount > 0;
 
           return (
-            <a
+            <Link
               key={tab.label}
-              href={href}
-              onClick={() => hapticTap()}
+              href={href as Route}
+              prefetch={true}
+              onClick={(e) => {
+                hapticTap();
+                // Tap active tab → scroll to top (iOS-style)
+                if (active) {
+                  e.preventDefault();
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+              }}
               className={`flex flex-1 flex-col items-center gap-0.5 py-2 transition-colors ${
                 active ? 'text-blue-600' : 'text-slate-400'
               }`}
@@ -88,7 +98,7 @@ export function BottomTabBar() {
               }`}>
                 {tab.label}
               </span>
-            </a>
+            </Link>
           );
         })}
       </div>

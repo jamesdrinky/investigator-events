@@ -8,7 +8,7 @@ export async function GET(request: Request) {
   const code = searchParams.get('code');
   const rawNext = searchParams.get('next') ?? '/profile';
   // Prevent open redirect — only allow known path prefixes
-  const ALLOWED_PREFIXES = ['/profile', '/calendar', '/events', '/admin', '/messages', '/people', '/associations', '/directory', '/weekly', '/'];
+  const ALLOWED_PREFIXES = ['/profile', '/calendar', '/events', '/admin', '/messages', '/people', '/associations', '/directory', '/weekly', '/auth/app-redirect', '/'];
   const next = ALLOWED_PREFIXES.some((p) => rawNext === p || rawNext.startsWith(p + '/') || rawNext.startsWith(p + '?')) ? rawNext : '/profile';
 
   if (code) {

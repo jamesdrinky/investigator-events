@@ -133,6 +133,36 @@ export async function hapticSuccess() {
 }
 
 /**
+ * Open a URL in the in-app browser (SFSafariViewController on iOS).
+ * Used for OAuth flows so the redirect comes back to the app.
+ * On web, falls back to normal window.location redirect.
+ */
+export async function openInAppBrowser(url: string): Promise<void> {
+  if (!isNativeApp) {
+    window.location.href = url;
+    return;
+  }
+
+  try {
+    const { Browser } = await import('@capacitor/browser');
+    await Browser.open({ url, presentationStyle: 'popover' });
+  } catch {
+    window.location.href = url;
+  }
+}
+
+/**
+ * Close the in-app browser (call after OAuth callback).
+ */
+export async function closeInAppBrowser(): Promise<void> {
+  if (!isNativeApp) return;
+  try {
+    const { Browser } = await import('@capacitor/browser');
+    await Browser.close();
+  } catch {}
+}
+
+/**
  * Open the native share sheet. Falls back to clipboard copy on web.
  */
 export async function nativeShare(options: { title: string; text?: string; url: string }) {

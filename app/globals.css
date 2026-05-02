@@ -45,6 +45,9 @@ body { overscroll-behavior-y: none; }
   scroll-snap-align: start;
 }
 
+/* Prevent white flash between page navigations */
+html, body { background-color: #f8fafc; }
+
 /* Thin scrollbar — visible but unobtrusive */
 html { scrollbar-width: thin; scrollbar-color: rgba(148,163,184,0.3) transparent; }
 html::-webkit-scrollbar { width: 6px; }

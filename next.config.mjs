@@ -41,7 +41,24 @@ const nextConfig = {
           { key: 'Cross-Origin-Opener-Policy', value: 'same-origin-allow-popups' },
           ...(isProd ? [{ key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains; preload' }] : [])
         ]
-      }
+      },
+      // Cache static assets aggressively — faster repeat page loads
+      {
+        source: '/cities/:path*',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }]
+      },
+      {
+        source: '/logo/:path*',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }]
+      },
+      {
+        source: '/associations/:path*',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=86400' }]
+      },
+      {
+        source: '/hero/:path*',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }]
+      },
     ];
   }
 };

@@ -242,7 +242,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
         </div>
 
         {/* ── Header content ── */}
-        <div className="relative z-10 px-6 pb-10 pt-16 text-center sm:pb-8 sm:pt-12 lg:pt-16">
+        <div className="relative z-10 px-5 pb-8 pt-10 text-center sm:px-6 sm:pb-8 sm:pt-12 lg:pt-16">
           <div
             className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 shadow-[0_20px_50px_-30px_rgba(0,0,60,0.5)]"
             style={{ borderColor: 'rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.07)' }}
@@ -253,7 +253,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
             </span>
           </div>
 
-          <h1 className="mx-auto mt-8 max-w-[10ch] text-5xl font-bold leading-[0.9] tracking-[-0.06em] text-white sm:mt-7 sm:text-[4.5rem] sm:leading-[0.86] lg:mt-8 lg:text-[7.5rem]">
+          <h1 className="mx-auto mt-6 max-w-[10ch] text-4xl font-bold leading-[0.9] tracking-[-0.06em] text-white sm:mt-7 sm:text-[4.5rem] sm:leading-[0.86] lg:mt-8 lg:text-[7.5rem]">
             <span
               className="inline-block bg-[linear-gradient(92deg,#3b82f6_0%,#22d3ee_30%,#a855f7_65%,#ec4899_100%)] bg-[length:200%_100%] bg-clip-text text-transparent"
               style={{ animation: 'gradient-text-cycle 5s ease-in-out infinite' }}
@@ -263,50 +263,50 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
             Miss Another Investigator Event
           </h1>
 
-          <p className="mx-auto mt-7 max-w-md text-base leading-[1.65] text-blue-100/55 sm:mt-6 sm:max-w-xl sm:text-lg">
+          <p className="mx-auto mt-5 max-w-md text-sm leading-[1.65] text-blue-100/55 sm:mt-6 sm:max-w-xl sm:text-lg">
             Every confirmed conference, AGM, and training event for private
             investigators — free to browse, free to list.
           </p>
 
-          <div className="mt-10 flex flex-col items-center gap-3.5 sm:mt-8 sm:flex-row sm:justify-center sm:gap-3">
+          <div className="mt-7 flex flex-col items-center gap-3 sm:mt-8 sm:flex-row sm:justify-center sm:gap-3">
             <Link href="/signup">
-              <ShinyButton className="min-h-[3.5rem] w-full px-8 py-3.5 text-[15px] sm:w-auto sm:px-10 sm:py-4 sm:text-base">Join Free — Create Your Profile</ShinyButton>
+              <ShinyButton className="min-h-[3rem] w-full px-8 py-3 text-sm sm:min-h-[3.5rem] sm:w-auto sm:px-10 sm:py-4 sm:text-base">Join Free — Create Your Profile</ShinyButton>
             </Link>
             <Link
               href="/calendar"
-              className="inline-flex min-h-[3.5rem] w-full items-center justify-center rounded-full border border-slate-300 bg-white px-8 py-3.5 text-[15px] font-semibold text-slate-700 transition hover:bg-slate-50 sm:w-auto sm:px-10 sm:py-4 sm:text-base"
+              className="inline-flex min-h-[3rem] w-full items-center justify-center rounded-full border border-slate-300 bg-white px-8 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 sm:min-h-[3.5rem] sm:w-auto sm:px-10 sm:py-4 sm:text-base"
             >
               Browse PI Events
             </Link>
           </div>
 
-          <p className="mt-4 text-center text-xs text-blue-100/40">Free forever for individual investigators · No credit card required</p>
+          <p className="mt-3 text-center text-[11px] text-blue-100/40">Free forever · No credit card required</p>
 
-          <p className="mt-5 text-center">
-            <Link href="/submit-event" className="text-sm font-medium text-blue-300/70 transition hover:text-blue-200">
+          <p className="mt-4 text-center sm:mt-5">
+            <Link href="/submit-event" className="text-xs font-medium text-blue-300/70 transition hover:text-blue-200 sm:text-sm">
               Run events? List yours for free →
             </Link>
           </p>
 
-          <div className="mx-auto mt-10 grid max-w-md grid-cols-3 gap-3">
+          <div className="mx-auto mt-7 grid max-w-md grid-cols-3 gap-2 sm:mt-10 sm:gap-3">
             {stats.map((item, index) => {
               const colors = ['from-cyan-400 to-blue-400', 'from-violet-400 to-purple-400', 'from-pink-400 to-rose-400'];
               return (
                 <div
                   key={item.label}
-                  className="rounded-[1.2rem] border px-3 py-4 text-center sm:rounded-[1.4rem] sm:px-4"
+                  className="rounded-2xl border px-2.5 py-3 text-center sm:rounded-[1.4rem] sm:px-4 sm:py-4"
                   style={{ borderColor: 'rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)' }}
                 >
-                  <p className="truncate text-[9px] font-semibold uppercase tracking-[0.16em] text-blue-100/60 sm:text-[10px] sm:tracking-[0.2em]">{item.label}</p>
-                  <p className={`mt-1.5 bg-gradient-to-r ${colors[index % 3]} bg-clip-text text-2xl font-bold tracking-tight text-transparent sm:text-[1.8rem]`}>{item.value}</p>
+                  <p className="truncate text-[8px] font-semibold uppercase tracking-[0.16em] text-blue-100/60 sm:text-[10px] sm:tracking-[0.2em]">{item.label}</p>
+                  <p className={`mt-1 bg-gradient-to-r ${colors[index % 3]} bg-clip-text text-xl font-bold tracking-tight text-transparent sm:mt-1.5 sm:text-[1.8rem]`}>{item.value}</p>
                 </div>
               );
             })}
           </div>
         </div>
 
-        {/* ── iPad device mockup — static, no scroll hooks ── */}
-        <div className="relative z-20 mx-auto mt-4 w-[calc(100%-2rem)] max-w-5xl sm:mt-0">
+        {/* ── iPad device mockup — hidden on mobile, visible on desktop ── */}
+        <div className="relative z-20 mx-auto mt-4 hidden w-[calc(100%-2rem)] max-w-5xl sm:mt-0 sm:block">
           <div className="overflow-hidden rounded-[1.4rem] border-4 border-[#2a2a3e] bg-[#12122a] p-2 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.6),0_0_80px_rgba(99,102,241,0.12)] sm:rounded-[1.8rem] sm:p-3 lg:rounded-[2.2rem] lg:p-4">
             <div className="absolute inset-x-0 top-0 z-10 h-px bg-[linear-gradient(90deg,transparent,rgba(99,102,241,0.5),rgba(236,72,153,0.4),transparent)]" />
             <div className="overflow-hidden rounded-xl lg:rounded-2xl">

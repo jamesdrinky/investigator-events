@@ -299,6 +299,24 @@ export async function approveSubmissionAction(formData: FormData) {
     throw new Error('Failed to update submission status');
   }
 
+  // Notify the submitter that their event was approved (fire-and-forget)
+  try {
+    const slug = finalPayload.slug;
+    const { data: authUsers } = await supabase.auth.admin.listUsers({ perPage: 1000 });
+    const submitter = authUsers?.users?.find(u => u.email === submission.contact_email);
+    if (submitter) {
+      const { createNotification } = await import('@/lib/notifications');
+      await createNotification({
+        userId: submitter.id,
+        actorId: submitter.id,
+        type: 'event_approved',
+        title: `Your event "${submission.event_name}" has been approved!`,
+        body: 'Your event is now live on Investigator Events.',
+        link: slug ? `/events/${slug}` : '/calendar',
+      });
+    }
+  } catch {}
+
   // Send outreach email to association contact (once per association, fire-and-forget)
   if (submission.contact_email) {
     // Extract association name from notes "[Association: XYZ]" or fall back to organiser

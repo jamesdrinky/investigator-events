@@ -27,6 +27,12 @@ export interface Testimonial {
   text: string;
 }
 
+const AppleIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+  </svg>
+);
+
 interface AuthPageProps {
   mode: 'signin' | 'signup';
   heroImageSrc?: string;
@@ -34,6 +40,7 @@ interface AuthPageProps {
   onSubmit: (data: { email: string; password: string; name?: string; tosAccepted?: boolean; newsletterOptIn?: boolean }) => void;
   onGoogleSignIn?: () => void;
   onLinkedInSignIn?: () => void;
+  onAppleSignIn?: () => void;
   onSwitchMode?: () => void;
   loading?: boolean;
   error?: string;
@@ -65,6 +72,7 @@ export function AuthPage({
   onSubmit,
   onGoogleSignIn,
   onLinkedInSignIn,
+  onAppleSignIn,
   onSwitchMode,
   loading,
   error,
@@ -136,6 +144,19 @@ export function AuthPage({
               <GoogleIcon />
               Continue with Google
             </button>
+
+            {/* Apple — required for App Store compliance */}
+            {onAppleSignIn && (
+              <button
+                type="button"
+                onClick={onAppleSignIn}
+                className="flex w-full items-center justify-center gap-3 rounded-xl bg-black py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-900"
+                style={{ opacity: 0, animation: 'fadeSlideIn 0.5s ease forwards 0.38s' }}
+              >
+                <AppleIcon />
+                Continue with Apple
+              </button>
+            )}
 
             <div className="relative flex items-center justify-center" style={{ opacity: 0, animation: 'fadeSlideIn 0.5s ease forwards 0.4s' }}>
               <span className="w-full border-t border-slate-200" />

@@ -31,7 +31,7 @@ export default function SubmitEventPage({
   return (
     <section className="relative overflow-hidden">
       {/* ── Hero — compact on mobile ── */}
-      <div className="relative bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_30%,#f0e8ff_60%,#f8fbff_100%)] pb-6 pt-24 sm:pb-10 sm:pt-32">
+      <div className="relative bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_30%,#f0e8ff_60%,#f8fbff_100%)] pb-5 pt-20 sm:pb-10 sm:pt-32">
         <div className="container-shell relative">
           <Reveal>
             <div className="mx-auto max-w-2xl text-center sm:text-left sm:mx-0 sm:max-w-none">

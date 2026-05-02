@@ -43,7 +43,7 @@ export default async function CalendarPage({
   return (
     <section className="relative overflow-hidden">
       {/* ── Hero ── */}
-      <div className="relative overflow-hidden bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_25%,#f0e8ff_50%,#f4f0ff_75%,#f8fbff_100%)] pb-10 pt-28 sm:pb-16 sm:pt-36">
+      <div className="relative overflow-hidden bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_25%,#f0e8ff_50%,#f4f0ff_75%,#f8fbff_100%)] pb-8 pt-20 sm:pb-16 sm:pt-36">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(99,102,241,0.08),transparent_40%),radial-gradient(circle_at_80%_20%,rgba(59,130,246,0.06),transparent_35%)]" />
         <SpinningLogoRings />
 
@@ -51,7 +51,7 @@ export default async function CalendarPage({
           <Reveal>
             <div className="max-w-3xl">
               <p className="eyebrow">Calendar</p>
-              <h1 className="mt-3 text-[2.2rem] font-bold leading-[0.94] tracking-[-0.05em] text-slate-950 sm:mt-4 sm:text-[3.5rem] lg:text-[5rem]">
+              <h1 className="mt-2 text-[1.8rem] font-bold leading-[0.94] tracking-[-0.05em] text-slate-950 sm:mt-4 sm:text-[3.5rem] lg:text-[5rem]">
                 The{' '}
                 <span
                   className="inline-block bg-[linear-gradient(92deg,#3b82f6_0%,#22d3ee_30%,#a855f7_65%,#ec4899_100%)] bg-[length:200%_100%] bg-clip-text text-transparent"
@@ -69,15 +69,15 @@ export default async function CalendarPage({
 
           {/* Stats — responsive */}
           <Reveal delay={0.06}>
-            <div className="mt-8 grid grid-cols-3 gap-3 sm:mt-12 sm:gap-5">
+            <div className="mt-6 grid grid-cols-3 gap-2 sm:mt-12 sm:gap-5">
               {[
                 { label: 'Upcoming', value: upcomingCount, gradient: 'from-blue-500 to-cyan-400' },
                 { label: 'Countries', value: coverage.totalCountries, gradient: 'from-violet-500 to-purple-400' },
                 { label: 'Total', value: coverage.totalEvents, gradient: 'from-cyan-500 to-teal-400' },
               ].map((item) => (
-                <div key={item.label} className="rounded-xl border border-white/70 bg-white/95 px-4 py-4 shadow-[0_12px_30px_-12px_rgba(15,23,42,0.1)] sm:rounded-2xl sm:px-6 sm:py-6">
-                  <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-400 sm:text-[11px]">{item.label}</p>
-                  <p className={`mt-1.5 bg-gradient-to-r ${item.gradient} bg-clip-text text-[1.8rem] font-bold tracking-tight text-transparent sm:mt-2 sm:text-[3rem]`}>{item.value}</p>
+                <div key={item.label} className="rounded-xl border border-white/70 bg-white/95 px-3 py-3 shadow-[0_12px_30px_-12px_rgba(15,23,42,0.1)] sm:rounded-2xl sm:px-6 sm:py-6">
+                  <p className="text-[8px] font-semibold uppercase tracking-[0.16em] text-slate-400 sm:text-[11px]">{item.label}</p>
+                  <p className={`mt-1 bg-gradient-to-r ${item.gradient} bg-clip-text text-xl font-bold tracking-tight text-transparent sm:mt-2 sm:text-[3rem]`}>{item.value}</p>
                 </div>
               ))}
             </div>
@@ -95,15 +95,29 @@ export default async function CalendarPage({
                 </div>
                 {/* Mobile: simple list */}
                 <div className="mt-3 space-y-2 sm:hidden">
-                  {expandingItems.slice(0, 5).map((item) => (
-                    <a key={item.slug} href={`/events/${item.slug}`} className="flex items-center gap-3 rounded-xl border border-slate-200/60 bg-white px-4 py-3 transition hover:shadow-sm">
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-slate-900">{item.title}</p>
-                        <p className="truncate text-xs text-slate-400">{item.date} · {item.city}, {item.country}</p>
-                      </div>
-                      <span className="flex-shrink-0 text-xs font-medium text-blue-600">View →</span>
-                    </a>
-                  ))}
+                  {expandingItems.slice(0, 5).map((item) => {
+                    const d = new Date(item.date.split('–')[0].trim().replace(/(\d+)\s+(\w+)\s+(\d+)/, '$2 $1, $3') || item.date);
+                    const month = isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-GB', { month: 'short' });
+                    const day = isNaN(d.getTime()) ? '' : String(d.getDate());
+                    return (
+                      <a key={item.slug} href={`/events/${item.slug}`} className="flex items-center gap-3 rounded-xl border border-slate-200/60 bg-white p-3 shadow-sm transition active:scale-[0.98]">
+                        {month && day ? (
+                          <div className="flex h-12 w-12 flex-shrink-0 flex-col items-center justify-center rounded-xl bg-blue-50">
+                            <span className="text-[9px] font-bold uppercase text-blue-500">{month}</span>
+                            <span className="text-base font-bold leading-none text-blue-700">{day}</span>
+                          </div>
+                        ) : (
+                          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100">
+                            <span className="text-[10px] font-bold text-slate-400">TBC</span>
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold text-slate-900">{item.title}</p>
+                          <p className="mt-0.5 truncate text-xs text-slate-400">{item.city}, {item.country}</p>
+                        </div>
+                      </a>
+                    );
+                  })}
                 </div>
               </div>
             </Reveal>

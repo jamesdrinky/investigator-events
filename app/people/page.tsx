@@ -30,6 +30,7 @@ function PeoplePageInner() {
   const [togglingFollow, setTogglingFollow] = useState<string | null>(null);
   const [tab, setTabState] = useState<Tab>(initialTab);
 
+  const [pageLoading, setPageLoading] = useState(true);
   // Discover state
   const [allPeople, setAllPeople] = useState<Person[]>([]);
   const [search, setSearch] = useState('');
@@ -71,6 +72,7 @@ function PeoplePageInner() {
       const counts: Record<string, number> = {};
       (data ?? []).forEach((f) => { if (!f.following_id) return; counts[f.following_id] = (counts[f.following_id] ?? 0) + 1; });
       setFollowerCounts(counts);
+      setPageLoading(false);
     });
   }, []);
 
@@ -170,7 +172,7 @@ function PeoplePageInner() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-white">
-      <div className="relative overflow-hidden bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_25%,#f0e8ff_50%,#f4f0ff_75%,#f8fbff_100%)] pb-6 pt-24 sm:pb-10 sm:pt-32">
+      <div className="relative overflow-hidden bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_25%,#f0e8ff_50%,#f4f0ff_75%,#f8fbff_100%)] pb-5 pt-20 sm:pb-10 sm:pt-32">
         <div className="container-shell relative text-center">
           <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-blue-600 sm:text-xs">Community</p>
           <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Forum</h1>
@@ -229,7 +231,25 @@ function PeoplePageInner() {
       </div>
 
       <div className="container-shell py-8 sm:py-12">
-        {tab === 'lfg' ? (
+        {pageLoading ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="animate-pulse rounded-2xl border border-slate-200/60 bg-white p-5">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-slate-200" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-32 rounded bg-slate-200" />
+                    <div className="h-3 w-48 rounded bg-slate-100" />
+                  </div>
+                </div>
+                <div className="mt-4 space-y-2">
+                  <div className="h-3 w-full rounded bg-slate-100" />
+                  <div className="h-3 w-3/4 rounded bg-slate-100" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : tab === 'lfg' ? (
           <CaseReferralBoard />
         ) : tab === 'feed' ? (
           <div className="grid gap-8 lg:grid-cols-[1fr_20rem]">

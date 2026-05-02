@@ -32,10 +32,10 @@ export function EventCard({ event, priority = 'default', isSignalActive = false,
       href={`/events/${getEventSlug(event)}`}
       onMouseEnter={() => onHoverChange?.(true)}
       onMouseLeave={() => onHoverChange?.(false)}
-      className={`group relative flex h-full flex-col overflow-hidden rounded-2xl border bg-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 ${
+      className={`group relative flex h-full flex-col overflow-hidden rounded-2xl border bg-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] sm:hover:-translate-y-1.5 active:scale-[0.98] ${
         isSignalActive
           ? 'border-blue-300 shadow-[0_20px_50px_-16px_rgba(59,130,246,0.25)]'
-          : 'border-slate-200/60 shadow-[0_4px_16px_-8px_rgba(15,23,42,0.06)] hover:shadow-[0_20px_50px_-16px_rgba(59,130,246,0.15)]'
+          : 'border-slate-200/60 shadow-[0_4px_16px_-8px_rgba(15,23,42,0.06)] sm:hover:shadow-[0_20px_50px_-16px_rgba(59,130,246,0.15)]'
       }`}
     >
       {/* ── Cover image with logo + date badge ── */}

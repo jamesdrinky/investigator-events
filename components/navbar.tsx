@@ -130,7 +130,7 @@ export function Navbar() {
       });
       // Update last_seen
       supabase.from('profiles').update({ last_seen: new Date().toISOString() } as any).eq('id', user.id).then(() => {});
-    }, 15000);
+    }, 30000);
     return () => clearInterval(interval);
   }, [user]);
 

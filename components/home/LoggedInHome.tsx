@@ -84,8 +84,30 @@ export function LoggedInHome() {
     });
   }, []);
 
-  // Don't render anything for logged-out users or while loading
-  if (loading || !user) return null;
+  // Don't render anything for logged-out users
+  if (!loading && !user) return null;
+
+  // Show skeleton while loading for logged-in users
+  if (loading) {
+    return (
+      <div className="lg:hidden">
+        <div className="bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800 px-4 pb-6 pt-20">
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 animate-pulse rounded-full bg-white/10" />
+            <div className="space-y-2">
+              <div className="h-5 w-28 animate-pulse rounded bg-white/10" />
+              <div className="h-3 w-40 animate-pulse rounded bg-white/5" />
+            </div>
+          </div>
+          <div className="mt-5 grid grid-cols-3 gap-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="animate-pulse rounded-xl bg-white/10 px-3 py-5" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const firstName = profile?.full_name?.split(' ')[0] ?? 'there';
 

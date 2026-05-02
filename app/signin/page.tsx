@@ -4,7 +4,6 @@ import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthPage } from '@/components/ui/sign-in';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
-import { isNativeApp, openInAppBrowser } from '@/lib/capacitor';
 
 const testimonials = [
   { avatarSrc: '/faces/mike2.png', name: 'Mike LaCorte', role: 'Founder, Investigator Events', text: 'Built for the profession, by someone in it. Free, open, and working with associations — not against them.' },
@@ -38,28 +37,29 @@ function SignInPageInner() {
     }
   };
 
-  const handleOAuth = async (provider: 'google' | 'linkedin_oidc' | 'apple') => {
+  const handleGoogle = async () => {
     const supabase = createSupabaseBrowserClient();
-    // On native: redirect to app-redirect page after callback (closes in-app browser)
-    const callbackNext = isNativeApp ? '/auth/app-redirect' : nextUrl;
-    const redirectTo = window.location.origin + '/auth/callback?next=' + encodeURIComponent(callbackNext);
-
-    if (isNativeApp) {
-      const { data } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: { redirectTo, skipBrowserRedirect: true },
-      });
-      if (data?.url) {
-        await openInAppBrowser(data.url);
-      }
-    } else {
-      await supabase.auth.signInWithOAuth({ provider, options: { redirectTo } });
-    }
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin + '/auth/callback?next=' + encodeURIComponent(nextUrl) },
+    });
   };
 
-  const handleGoogle = () => handleOAuth('google');
-  const handleLinkedIn = () => handleOAuth('linkedin_oidc');
-  const handleApple = () => handleOAuth('apple');
+  const handleLinkedIn = async () => {
+    const supabase = createSupabaseBrowserClient();
+    await supabase.auth.signInWithOAuth({
+      provider: 'linkedin_oidc',
+      options: { redirectTo: window.location.origin + '/auth/callback?next=' + encodeURIComponent(nextUrl) },
+    });
+  };
+
+  const handleApple = async () => {
+    const supabase = createSupabaseBrowserClient();
+    await supabase.auth.signInWithOAuth({
+      provider: 'apple',
+      options: { redirectTo: window.location.origin + '/auth/callback?next=' + encodeURIComponent(nextUrl) },
+    });
+  };
 
   return (
     <AuthPage

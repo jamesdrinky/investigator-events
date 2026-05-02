@@ -9,7 +9,16 @@ const config: CapacitorConfig = {
     url: 'https://investigatorevents.com',
     cleartext: false,
     // Keep all navigation inside the app webview
-    allowNavigation: ['investigatorevents.com', '*.investigatorevents.com'],
+    allowNavigation: [
+      'investigatorevents.com',
+      '*.investigatorevents.com',
+      '*.supabase.co',
+      'accounts.google.com',
+      '*.google.com',
+      '*.linkedin.com',
+      'www.linkedin.com',
+      'appleid.apple.com',
+    ],
   },
   ios: {
     contentInset: 'automatic',

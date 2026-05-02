@@ -67,9 +67,6 @@ async function sendPushToUser(supabase: any, userId: string, title: string, body
 
   if (!tokens || tokens.length === 0) return;
 
-  // For now, log that we would send. APNs integration requires the Developer
-  // account certs. This will be wired up once APNs keys are configured.
-  for (const { token, platform } of tokens) {
-    console.log(`[Push] Would send to ${platform} device: "${title}" → ${url} (token: ${token.slice(0, 8)}...)`);
-  }
+  // APNs/FCM delivery will be wired up once Developer account keys are configured.
+  // Tokens are stored and ready — just needs the push provider integration.
 }

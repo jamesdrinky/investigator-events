@@ -190,7 +190,7 @@ export async function queueApprovalOutreachEmail(params: ApprovalOutreachParams)
     .maybeSingle();
 
   if (existing) {
-    console.log(`Outreach already queued/sent to "${params.association}" — skipping`);
+    // Already queued/sent — skip
     return false;
   }
 
@@ -218,7 +218,7 @@ export async function queueApprovalOutreachEmail(params: ApprovalOutreachParams)
     return false;
   }
 
-  console.log(`Outreach to "${params.association}" queued — will send after ${sendAfter}`);
+  // Outreach queued successfully
   return true;
 }
 

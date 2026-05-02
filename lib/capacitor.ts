@@ -45,7 +45,7 @@ export async function registerPushNotifications(supabase: any) {
     // Handle incoming notifications when app is in foreground
     PushNotifications.addListener('pushNotificationReceived', (notification) => {
       // Could show an in-app toast here
-      console.log('Push received:', notification.title);
+      // Push received in foreground — could show in-app toast
     });
 
     // Handle notification tap — deep link to the relevant page

@@ -4,6 +4,7 @@ import { fetchAllEvents } from '@/lib/data/events';
 import { getWeeklyCollections } from '@/lib/data/weekly';
 import { buildWeeklyNewsletterHtml } from '@/lib/email/weekly-newsletter';
 import { verifyCronSecret } from '@/lib/security/server';
+import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 
 const ALLOWED_RECIPIENTS = new Set([
   'james@drinky.com',
@@ -68,7 +69,7 @@ export async function GET(request: Request) {
     });
 
     // Log a newsletter_sends row so webhook tracking works on test sends
-    const supabase = (await import('@/lib/supabase/admin')).createSupabaseAdminServerClient();
+    const supabase = createSupabaseAdminServerClient();
     await (supabase.from('newsletter_sends' as never).insert({
       recipient_count: 1,
       failed_count: 0,

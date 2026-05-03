@@ -15,13 +15,14 @@ import {
   adminAddAssociationAction,
   adminRemoveAssociationAction
 } from '@/app/admin/actions';
-import { Calendar, Users, FileText, Megaphone, Globe, MapPin, Tag, ExternalLink, CheckCircle2, XCircle, Plus, Trash2, ShieldCheck, AlertTriangle, Mail } from 'lucide-react';
+import { Calendar, Users, FileText, Megaphone, Globe, MapPin, Tag, ExternalLink, CheckCircle2, XCircle, Plus, Trash2, ShieldCheck, AlertTriangle, Mail, Send } from 'lucide-react';
 import { VerificationCodeManager } from '@/components/admin/VerificationCodeManager';
 import { ModerationPanel } from '@/components/admin/ModerationPanel';
 import { QuickAddEvent } from '@/components/admin/QuickAddEvent';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { associationRecords } from '@/lib/data/associations';
 import { ImageDropZone } from '@/components/admin/ImageDropZone';
+import { OutreachManager } from '@/components/admin/OutreachManager';
 
 export const dynamic = 'force-dynamic';
 
@@ -261,6 +262,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
             { id: 'users', label: `Users (${allUsers.length})`, icon: Users },
             { id: 'verification', label: 'Verification Codes', icon: ShieldCheck },
             { id: 'moderation', label: 'Moderation', icon: AlertTriangle },
+            { id: 'outreach', label: 'Outreach', icon: Send },
           ].map((tab) => (
             <a
               key={tab.id}
@@ -757,6 +759,14 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
           {activeTab === 'moderation' && (
             <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
               <ModerationPanel />
+            </div>
+          )}
+
+          {activeTab === 'outreach' && (
+            <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
+              <h2 className="mb-1 text-lg font-bold text-slate-900">Association Outreach</h2>
+              <p className="mb-4 text-sm text-slate-500">Send introduction emails to associations. Preview before sending.</p>
+              <OutreachManager />
             </div>
           )}
 

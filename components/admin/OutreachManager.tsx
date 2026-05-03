@@ -53,6 +53,7 @@ export function OutreachManager() {
       contactName,
       association: assoc.name,
       events: assoc.eventNames.join('|||'),
+      slug: assoc.slug,
     });
     const res = await fetch(`/api/admin/outreach/preview?${params}`);
     if (res.ok) {
@@ -75,6 +76,7 @@ export function OutreachManager() {
           association: assoc.name,
           template: assoc.suggestedTemplate,
           eventNames: assoc.eventNames,
+          slug: assoc.slug,
         }),
       });
       if (res.ok) {

@@ -375,8 +375,10 @@ export function buildIntroductionOutreachEmail(params: { contactName: string; as
 /**
  * Version 3 — Cold introduction for associations with NO events listed yet.
  */
-export function buildColdOutreachEmail(params: { contactName: string; association: string }): string {
-  const { contactName, association } = params;
+export function buildColdOutreachEmail(params: { contactName: string; association: string; slug?: string }): string {
+  const { contactName, association, slug } = params;
+  const hasPage = !!slug;
+  const pageUrl = `${SITE}/associations/${slug}`;
 
   return `<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -399,7 +401,7 @@ export function buildColdOutreachEmail(params: { contactName: string; associatio
           <p style="margin:0;font-size:15px;color:${C.body};line-height:1.7;">Dear ${contactName},</p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
-            I'm writing to introduce <a href="${SITE}" style="color:${C.blue};text-decoration:none;">Investigator Events</a>, a free global calendar and community platform for the private investigations profession. We'd love to feature ${association}'s events on the platform.
+            I'm writing to introduce <a href="${SITE}" style="color:${C.blue};text-decoration:none;">Investigator Events</a>, a free global calendar and community platform for the private investigations profession.${hasPage ? ` We've already set up <a href="${pageUrl}" style="color:${C.blue};text-decoration:none;">${association}'s association page</a> on the platform, and we'd love to feature your upcoming events alongside it.` : ` We'd love to feature ${association}'s events on the platform.`}
           </p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
@@ -412,10 +414,6 @@ export function buildColdOutreachEmail(params: { contactName: string; associatio
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
             The platform also includes professional profiles, a member directory, and a community forum — all free for investigators to use. We exist to support associations like yours rather than compete with them. The more associations that list their events with us, the stronger the global calendar becomes for everyone.
-          </p>
-
-          <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
-            I'd be happy to set up ${association}'s association page on the platform, which gives your organisation its own branded space with your events, members, and contact information.
           </p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">

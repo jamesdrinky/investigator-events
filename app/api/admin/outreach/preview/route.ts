@@ -15,8 +15,9 @@ export async function GET(request: Request) {
 
   let html: string;
 
+  const slug = searchParams.get('slug') ?? undefined;
   if (template === 'cold') {
-    html = buildColdOutreachEmail({ contactName, association });
+    html = buildColdOutreachEmail({ contactName, association, slug });
   } else {
     html = buildIntroductionOutreachEmail({ contactName, association, eventNames });
   }

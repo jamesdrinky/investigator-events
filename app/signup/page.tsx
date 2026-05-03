@@ -108,7 +108,7 @@ function SignUpPageInner() {
       onSubmit={handleSignUp}
       onGoogleSignIn={handleGoogle}
       onLinkedInSignIn={handleLinkedIn}
-      onAppleSignIn={handleApple}
+      // onAppleSignIn={handleApple} — enable once Apple auth is configured in Supabase
       onSwitchMode={() => router.push('/signin')}
       loading={loading}
       error={error}

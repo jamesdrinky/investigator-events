@@ -16,8 +16,15 @@ export async function GET(request: Request) {
   const isDev = process.env.NODE_ENV === 'development';
 
   if (!isDev) {
-    const authError = verifyCronSecret(request);
-    if (authError) return authError;
+    // Support both header and query param auth for browser access
+    const { searchParams } = new URL(request.url);
+    const queryPassword = searchParams.get('password');
+    if (queryPassword && queryPassword === process.env.CRON_SECRET) {
+      // Authenticated via query param
+    } else {
+      const authError = verifyCronSecret(request);
+      if (authError) return authError;
+    }
   }
 
   const events = await fetchAllEvents();

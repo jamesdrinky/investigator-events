@@ -313,28 +313,7 @@ export function LoggedInHome() {
           </div>{/* close max-w-5xl */}
         </div>
 
-        {/* ── Quick actions grid — mobile only ── */}
-        <div className="bg-slate-50 px-4 py-4 lg:hidden">
-          <div className="grid grid-cols-4 gap-2">
-            {[
-              { href: '/calendar' as Route, icon: Calendar, label: 'Events', color: 'text-blue-600 bg-blue-50' },
-              { href: '/directory' as Route, icon: Search, label: 'Find a PI', color: 'text-purple-600 bg-purple-50' },
-              { href: '/submit-event' as Route, icon: Send, label: 'Submit', color: 'text-emerald-600 bg-emerald-50' },
-              { href: '/associations' as Route, icon: Globe, label: 'Assocs', color: 'text-cyan-600 bg-cyan-50' },
-            ].map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="flex flex-col items-center gap-1.5 rounded-xl bg-white p-3 shadow-sm transition active:scale-95"
-              >
-                <div className={`flex h-9 w-9 items-center justify-center rounded-full ${item.color}`}>
-                  <item.icon className="h-4 w-4" />
-                </div>
-                <span className="text-[10px] font-semibold text-slate-600">{item.label}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
+        {/* Quick actions removed — stats row + bottom tab bar cover all navigation */}
 
         {/* ── Profile completion nudge ── */}
         {!profileComplete && (

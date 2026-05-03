@@ -3,7 +3,7 @@ import { Resend } from 'resend';
 import { enforceRateLimit } from '@/lib/security/server';
 import { buildSubmissionConfirmationEmail } from '@/lib/email/submission-confirmation';
 import { buildWelcomeEmail } from '@/lib/email/welcome-email';
-import { buildApprovalOutreachEmail } from '@/lib/email/association-outreach';
+import { buildApprovalOutreachEmail, buildIntroductionOutreachEmail, buildColdOutreachEmail } from '@/lib/email/association-outreach';
 import { buildDailyDigestEmail } from '@/lib/email/daily-digest';
 import { buildWeeklyNewsletterHtml } from '@/lib/email/weekly-newsletter';
 import type { EventItem } from '@/lib/data/events';
@@ -48,6 +48,21 @@ const TEMPLATES = {
       { type: 'post_like', actorName: 'Robert Fried', actorAvatar: 'https://dbeyznsxcetpwfcicimz.supabase.co/storage/v1/object/public/avatars/6c1ea32e-8d2f-498a-9177-05dbdfca7556/avatar.jpg', actorUsername: 'robert-fried', createdAt: new Date(Date.now() - 4 * 3600000).toISOString() },
       { type: 'post_comment', actorName: 'Charlotte Notley', actorAvatar: 'https://dbeyznsxcetpwfcicimz.supabase.co/storage/v1/object/public/avatars/ad551a2d-c5cf-4a0c-8c9f-f97e4b77acd3/avatar.jpg', actorUsername: 'charlotte-notley', createdAt: new Date(Date.now() - 5 * 3600000).toISOString() },
     ]),
+  }),
+  introduction: () => ({
+    subject: '[TEST] Introducing Investigator Events — your events are live',
+    html: buildIntroductionOutreachEmail({
+      contactName: 'Charlotte Notley',
+      association: 'Association of British Investigators',
+      eventNames: ['Professional Investigators Conference 2027', 'ABI Annual General Meeting 2026'],
+    }),
+  }),
+  cold: () => ({
+    subject: '[TEST] Introducing Investigator Events — free global PI calendar',
+    html: buildColdOutreachEmail({
+      contactName: 'The Team',
+      association: 'ASIS International',
+    }),
   }),
   weekly: () => ({
     subject: '[TEST] Weekly Briefing — 5 upcoming events, 3 newly added',

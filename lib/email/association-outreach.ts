@@ -289,3 +289,154 @@ export async function processOutreachQueue(): Promise<{ sent: number; failed: nu
 
   return { sent, failed };
 }
+
+/**
+ * Version 2 — Introduction email for associations whose events WE added for them.
+ */
+export function buildIntroductionOutreachEmail(params: { contactName: string; association: string; eventNames: string[] }): string {
+  const { contactName, association, eventNames } = params;
+  const eventList = eventNames.length > 0
+    ? eventNames.map(n => `<li style="margin:4px 0;font-size:14px;color:${C.body};">${n}</li>`).join('')
+    : '';
+
+  return `<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light only" />
+  <meta name="supported-color-schemes" content="light only" />
+  <!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><![endif]-->
+</head>
+<body style="margin:0;padding:0;background-color:#f0f4f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#f0f4f8;padding:24px 16px;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" role="presentation" style="max-width:560px;width:100%;">
+        <tr><td><img src="${WAVE}" alt="" width="560" style="display:block;width:100%;height:auto;" /></td></tr>
+        <tr><td style="background-color:${C.white};padding:20px 0 0;text-align:center;">
+          <img src="${LOGO}" alt="Investigator Events" width="40" height="40" style="display:inline-block;width:40px;height:40px;border-radius:50%;" />
+        </td></tr>
+        <tr><td style="background-color:${C.white};padding:20px 32px 32px;">
+          <p style="margin:0;font-size:15px;color:${C.body};line-height:1.7;">Dear ${contactName},</p>
+
+          <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
+            I'm writing to introduce <a href="${SITE}" style="color:${C.blue};text-decoration:none;">Investigator Events</a>, a free global calendar and community platform for the private investigations profession. We've already listed ${association}'s upcoming events on the platform:
+          </p>
+
+          ${eventList ? `<ul style="margin:12px 0;padding-left:20px;">${eventList}</ul>` : ''}
+
+          <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
+            Investigator Events was founded to give our profession a single, freely accessible home for conferences, training and community gatherings worldwide. It exists to support associations like yours rather than compete with them. The more associations that list their events with us, the stronger the global calendar becomes for everyone.
+          </p>
+
+          <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
+            I would be very grateful if you could send a short circular to your members encouraging them to visit <a href="${SITE}" style="color:${C.blue};text-decoration:none;">investigatorevents.com</a>, subscribe for event updates, and set up a free profile to connect with fellow investigators worldwide.
+          </p>
+
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;">
+            <tr>
+              <td width="3" style="background-color:${C.blue};">&nbsp;</td>
+              <td style="padding:20px 24px;background-color:#f8fafc;">
+                <p style="margin:0;font-size:13px;font-weight:600;color:${C.muted};text-transform:uppercase;letter-spacing:0.05em;">Suggested copy for members</p>
+                <p style="margin:12px 0 0;font-size:14px;color:${C.body};line-height:1.7;font-style:italic;">
+                  We are pleased to let you know that our events are now listed on Investigator Events (<a href="${SITE}" style="color:${C.blue};text-decoration:none;">investigatorevents.com</a>), a free global calendar and community platform for the private investigations profession. We encourage you to visit the site, subscribe for event updates and set up a profile so you can connect with colleagues worldwide and stay informed of what is happening across our industry.
+                </p>
+              </td>
+            </tr>
+          </table>
+
+          <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
+            If there is anything I can help with, whether that's updating listings, adding further events, or exploring any of the community features, please just drop me a line.
+          </p>
+
+          <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
+            I look forward to working with ${association}.
+          </p>
+
+          <p style="margin:24px 0 0;font-size:15px;color:${C.body};line-height:1.7;">Warm regards,</p>
+          <table cellpadding="0" cellspacing="0" border="0" style="margin-top:8px;"><tr><td>${signatureBlock()}</td></tr></table>
+        </td></tr>
+        <tr><td><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+          <td width="33%" style="height:3px;background-color:${C.blue};font-size:0;line-height:0;">&nbsp;</td>
+          <td width="34%" style="height:3px;background-color:${C.purple};font-size:0;line-height:0;">&nbsp;</td>
+          <td width="33%" style="height:3px;background-color:#06b6d4;font-size:0;line-height:0;">&nbsp;</td>
+        </tr></table></td></tr>
+        <tr><td style="padding:20px 8px 8px;text-align:center;">
+          <p style="margin:0;font-size:11px;color:${C.faint};">Investigator Events &middot; <a href="mailto:info@investigatorevents.com" style="color:${C.faint};text-decoration:none;">info@investigatorevents.com</a></p>
+          <p style="margin:4px 0 0;font-size:10px;color:${C.faint};">The global PI conference calendar.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
+/**
+ * Version 3 — Cold introduction for associations with NO events listed yet.
+ */
+export function buildColdOutreachEmail(params: { contactName: string; association: string }): string {
+  const { contactName, association } = params;
+
+  return `<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light only" />
+  <meta name="supported-color-schemes" content="light only" />
+  <!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><![endif]-->
+</head>
+<body style="margin:0;padding:0;background-color:#f0f4f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#f0f4f8;padding:24px 16px;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" role="presentation" style="max-width:560px;width:100%;">
+        <tr><td><img src="${WAVE}" alt="" width="560" style="display:block;width:100%;height:auto;" /></td></tr>
+        <tr><td style="background-color:${C.white};padding:20px 0 0;text-align:center;">
+          <img src="${LOGO}" alt="Investigator Events" width="40" height="40" style="display:inline-block;width:40px;height:40px;border-radius:50%;" />
+        </td></tr>
+        <tr><td style="background-color:${C.white};padding:20px 32px 32px;">
+          <p style="margin:0;font-size:15px;color:${C.body};line-height:1.7;">Dear ${contactName},</p>
+
+          <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
+            I'm writing to introduce <a href="${SITE}" style="color:${C.blue};text-decoration:none;">Investigator Events</a>, a free global calendar and community platform for the private investigations profession. We'd love to feature ${association}'s events on the platform.
+          </p>
+
+          <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
+            Investigator Events was founded to give our profession a single, freely accessible home for conferences, training and community gatherings worldwide. We already have events listed from over 40 associations across 10 countries, and the calendar is growing every week.
+          </p>
+
+          <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
+            Listing is completely free. You can submit events directly at <a href="${SITE}/submit-event" style="color:${C.blue};text-decoration:none;">investigatorevents.com/submit-event</a>, or simply reply to this email with your event details and I'll add them for you.
+          </p>
+
+          <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
+            The platform also includes professional profiles, a member directory, and a community forum — all free for investigators to use. We exist to support associations like yours rather than compete with them. The more associations that list their events with us, the stronger the global calendar becomes for everyone.
+          </p>
+
+          <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
+            I'd be happy to set up ${association}'s association page on the platform, which gives your organisation its own branded space with your events, members, and contact information.
+          </p>
+
+          <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
+            If you'd like to learn more or have any questions, please don't hesitate to get in touch.
+          </p>
+
+          <p style="margin:24px 0 0;font-size:15px;color:${C.body};line-height:1.7;">Warm regards,</p>
+          <table cellpadding="0" cellspacing="0" border="0" style="margin-top:8px;"><tr><td>${signatureBlock()}</td></tr></table>
+        </td></tr>
+        <tr><td><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+          <td width="33%" style="height:3px;background-color:${C.blue};font-size:0;line-height:0;">&nbsp;</td>
+          <td width="34%" style="height:3px;background-color:${C.purple};font-size:0;line-height:0;">&nbsp;</td>
+          <td width="33%" style="height:3px;background-color:#06b6d4;font-size:0;line-height:0;">&nbsp;</td>
+        </tr></table></td></tr>
+        <tr><td style="padding:20px 8px 8px;text-align:center;">
+          <p style="margin:0;font-size:11px;color:${C.faint};">Investigator Events &middot; <a href="mailto:info@investigatorevents.com" style="color:${C.faint};text-decoration:none;">info@investigatorevents.com</a></p>
+          <p style="margin:4px 0 0;font-size:10px;color:${C.faint};">The global PI conference calendar.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}

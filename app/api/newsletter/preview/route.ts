@@ -67,6 +67,18 @@ export async function GET(request: Request) {
       html,
     });
 
+    // Log a newsletter_sends row so webhook tracking works on test sends
+    const supabase = (await import('@/lib/supabase/admin')).createSupabaseAdminServerClient();
+    await (supabase.from('newsletter_sends' as never).insert({
+      recipient_count: 1,
+      failed_count: 0,
+      upcoming_count: upcoming.length,
+      new_count: newlyAdded.length,
+      featured_count: featured.length,
+      open_count: 0,
+      click_count: 0,
+    } as never) as any).catch(() => {});
+
     return NextResponse.json({ message: `Test email sent to ${sendTo}`, subject });
   }
 

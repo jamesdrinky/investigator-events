@@ -119,9 +119,9 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
         <Image src={imageSrc} alt={title} fill className="object-cover" priority />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
 
-        {/* Association logo — top-left */}
+        {/* Association logo — top-left, below navbar */}
         {logoSrc && (
-          <div className="absolute left-4 top-20 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/30 bg-white/90 p-2 shadow-xl sm:left-8 sm:top-24 sm:h-16 sm:w-16">
+          <div className="absolute left-3 top-16 flex h-10 w-10 items-center justify-center rounded-xl border border-white/30 bg-white/90 p-1.5 shadow-xl sm:left-8 sm:top-24 sm:h-16 sm:w-16 sm:rounded-2xl sm:p-2">
             <Image src={logoSrc} alt={organiser} width={48} height={48} className={`h-auto max-h-10 w-auto max-w-10 object-contain sm:max-h-12 sm:max-w-12 ${invertLogo ? 'brightness-0' : ''}`} />
           </div>
         )}

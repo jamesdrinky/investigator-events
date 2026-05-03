@@ -43,7 +43,7 @@ export default async function CalendarPage({
   return (
     <section className="relative overflow-hidden">
       {/* ── Hero — compact mobile, full desktop ── */}
-      <div className="relative overflow-hidden bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_25%,#f0e8ff_50%,#f4f0ff_75%,#f8fbff_100%)] pb-4 pt-14 sm:pb-16 sm:pt-36">
+      <div className="relative overflow-hidden bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_25%,#f0e8ff_50%,#f4f0ff_75%,#f8fbff_100%)] pb-4 pt-4 sm:pb-16 sm:pt-36">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(99,102,241,0.08),transparent_40%),radial-gradient(circle_at_80%_20%,rgba(59,130,246,0.06),transparent_35%)]" />
         <div className="hidden sm:block"><SpinningLogoRings /></div>
 

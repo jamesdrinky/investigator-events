@@ -47,24 +47,30 @@ export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past,
       if (!data.user) return;
       const uid = data.user.id;
 
-      // Check if user is a member of this association
-      const { data: assoc } = await supabase
+      // Check if user is a member of this association (match on slug or name)
+      const { data: assocList } = await supabase
         .from('user_associations')
-        .select('id')
-        .eq('user_id', uid)
-        .eq('association_name', page.name)
-        .maybeSingle();
-      if (assoc) setIsMember(true);
+        .select('id, association_name')
+        .eq('user_id', uid);
+      const isMemberMatch = (assocList ?? []).some((a: any) =>
+        a.association_name === page.name ||
+        a.association_name === page.slug.toUpperCase() ||
+        a.association_name.toLowerCase() === page.slug
+      );
+      if (isMemberMatch) setIsMember(true);
 
-      // Check if user is verified for this association
-      const { data: verif } = await supabase
+      // Check if user is verified (match on slug, short name, or full name)
+      const { data: verifList } = await supabase
         .from('member_verifications')
-        .select('status')
+        .select('association_name, status')
         .eq('user_id', uid)
-        .eq('association_name', page.name)
-        .eq('status', 'verified')
-        .maybeSingle();
-      if (verif) setIsVerifiedMember(true);
+        .eq('status', 'verified');
+      const isVerifMatch = (verifList ?? []).some((v: any) =>
+        v.association_name === page.name ||
+        v.association_name === page.slug.toUpperCase() ||
+        v.association_name.toLowerCase() === page.slug
+      );
+      if (isVerifMatch) setIsVerifiedMember(true);
     });
   }, [page.name]);
 

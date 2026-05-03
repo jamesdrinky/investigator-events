@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Users, ChevronRight, UserPlus, Globe, MapPin } from 'lucide-react';
+import { Users, ChevronRight, UserPlus, Globe, MapPin, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
@@ -182,8 +182,11 @@ export default function MyConnectionsPage() {
   );
 
   return (
-    <main className="min-h-screen bg-slate-50 pt-16 lg:pt-20">
-      <div className="container-shell max-w-3xl py-6 lg:py-10">
+    <main className="min-h-screen bg-slate-50 pt-2 lg:pt-20">
+      <div className="container-shell max-w-3xl py-4 lg:py-10">
+        <button onClick={() => window.history.back()} className="mb-3 flex items-center gap-1 text-sm text-slate-500 transition hover:text-slate-700 lg:hidden">
+          <ArrowLeft className="h-4 w-4" /> Back
+        </button>
         <h1 className="text-2xl font-bold text-slate-900 lg:text-3xl">My Connections</h1>
         <p className="mt-1 text-sm text-slate-500">Your professional network on Investigator Events</p>
 

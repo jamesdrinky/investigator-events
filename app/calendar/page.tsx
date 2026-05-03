@@ -42,88 +42,108 @@ export default async function CalendarPage({
 
   return (
     <section className="relative overflow-hidden">
-      {/* ── Hero ── */}
-      <div className="relative overflow-hidden bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_25%,#f0e8ff_50%,#f4f0ff_75%,#f8fbff_100%)] pb-6 pt-16 sm:pb-16 sm:pt-36">
+      {/* ── Hero — compact mobile, full desktop ── */}
+      <div className="relative overflow-hidden bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_25%,#f0e8ff_50%,#f4f0ff_75%,#f8fbff_100%)] pb-4 pt-14 sm:pb-16 sm:pt-36">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(99,102,241,0.08),transparent_40%),radial-gradient(circle_at_80%_20%,rgba(59,130,246,0.06),transparent_35%)]" />
         <div className="hidden sm:block"><SpinningLogoRings /></div>
 
         <div className="container-shell relative">
-          <Reveal>
-            <div className="max-w-3xl">
-              <p className="eyebrow">Calendar</p>
-              <h1 className="mt-2 text-[1.8rem] font-bold leading-[0.94] tracking-[-0.05em] text-slate-950 sm:mt-4 sm:text-[3.5rem] lg:text-[5rem]">
-                The{' '}
-                <span
-                  className="inline-block bg-[linear-gradient(92deg,#3b82f6_0%,#22d3ee_30%,#a855f7_65%,#ec4899_100%)] bg-[length:200%_100%] bg-clip-text text-transparent"
-                  style={{ animation: 'gradient-text-cycle 5s ease-in-out infinite' }}
-                >
-                  live
-                </span>{' '}
-                global events calendar.
-              </h1>
-              <p className="mt-3 hidden max-w-xl text-[0.95rem] leading-relaxed text-slate-600 sm:mt-5 sm:block sm:max-w-2xl sm:text-lg">
-                Browse conferences, training, and association events in one place, then filter by month, region, or organiser.
-              </p>
+          {/* Mobile: compact inline header */}
+          <div className="sm:hidden">
+            <div className="flex items-center justify-between">
+              <h1 className="text-xl font-bold text-slate-950">Events</h1>
+              <div className="flex items-center gap-3 text-xs text-slate-500">
+                <span className="font-bold text-blue-600">{upcomingCount}</span> upcoming
+                <span className="font-bold text-violet-600">{coverage.totalCountries}</span> countries
+              </div>
             </div>
-          </Reveal>
+          </div>
 
-          {/* Stats — responsive */}
-          <Reveal delay={0.06}>
-            <div className="mt-6 grid grid-cols-3 gap-2 sm:mt-12 sm:gap-5">
-              {[
-                { label: 'Upcoming', value: upcomingCount, gradient: 'from-blue-500 to-cyan-400' },
-                { label: 'Countries', value: coverage.totalCountries, gradient: 'from-violet-500 to-purple-400' },
-                { label: 'Total', value: coverage.totalEvents, gradient: 'from-cyan-500 to-teal-400' },
-              ].map((item) => (
-                <div key={item.label} className="rounded-xl border border-white/70 bg-white/95 px-3 py-3 shadow-[0_12px_30px_-12px_rgba(15,23,42,0.1)] sm:rounded-2xl sm:px-6 sm:py-6">
-                  <p className="text-[8px] font-semibold uppercase tracking-[0.16em] text-slate-400 sm:text-[11px]">{item.label}</p>
-                  <p className={`mt-1 bg-gradient-to-r ${item.gradient} bg-clip-text text-xl font-bold tracking-tight text-transparent sm:mt-2 sm:text-[3rem]`}>{item.value}</p>
-                </div>
-              ))}
-            </div>
-          </Reveal>
+          {/* Desktop: full hero */}
+          <div className="hidden sm:block">
+            <Reveal>
+              <div className="max-w-3xl">
+                <p className="eyebrow">Calendar</p>
+                <h1 className="mt-4 text-[3.5rem] font-bold leading-[0.94] tracking-[-0.05em] text-slate-950 lg:text-[5rem]">
+                  The{' '}
+                  <span
+                    className="inline-block bg-[linear-gradient(92deg,#3b82f6_0%,#22d3ee_30%,#a855f7_65%,#ec4899_100%)] bg-[length:200%_100%] bg-clip-text text-transparent"
+                    style={{ animation: 'gradient-text-cycle 5s ease-in-out infinite' }}
+                  >
+                    live
+                  </span>{' '}
+                  global events calendar.
+                </h1>
+                <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-600">
+                  Browse conferences, training, and association events in one place, then filter by month, region, or organiser.
+                </p>
+              </div>
+            </Reveal>
 
-          {/* Expanding cards — full version on desktop, compact list on mobile */}
+            <Reveal delay={0.06}>
+              <div className="mt-12 grid grid-cols-3 gap-5">
+                {[
+                  { label: 'Upcoming', value: upcomingCount, gradient: 'from-blue-500 to-cyan-400' },
+                  { label: 'Countries', value: coverage.totalCountries, gradient: 'from-violet-500 to-purple-400' },
+                  { label: 'Total', value: coverage.totalEvents, gradient: 'from-cyan-500 to-teal-400' },
+                ].map((item) => (
+                  <div key={item.label} className="rounded-2xl border border-white/70 bg-white/95 px-6 py-6 shadow-[0_12px_30px_-12px_rgba(15,23,42,0.1)]">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{item.label}</p>
+                    <p className={`mt-2 bg-gradient-to-r ${item.gradient} bg-clip-text text-[3rem] font-bold tracking-tight text-transparent`}>{item.value}</p>
+                  </div>
+                ))}
+              </div>
+            </Reveal>
+          </div>
+
+          {/* Expanding cards — desktop only */}
           {expandingItems.length > 0 && (
             <Reveal delay={0.1}>
-              <div className="mt-8 sm:mt-12">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400 sm:text-xs">Coming soon</p>
-                <h2 className="mt-1 text-lg font-bold tracking-[-0.03em] text-slate-950 sm:text-xl">Next on the calendar</h2>
-                {/* Desktop: expanding cards */}
-                <div className="mt-4 hidden sm:block">
+              <div className="mt-8 hidden sm:block sm:mt-12">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Coming soon</p>
+                <h2 className="mt-1 text-xl font-bold tracking-[-0.03em] text-slate-950">Next on the calendar</h2>
+                <div className="mt-4">
                   <ExpandingEventCards items={expandingItems} />
-                </div>
-                {/* Mobile: simple list */}
-                <div className="mt-3 space-y-2 sm:hidden">
-                  {expandingItems.slice(0, 5).map((item) => {
-                    // item.date is like "14 May 2026" or "14 May 2026 - 16 May 2026"
-                    const startPart = item.date.split(/\s*[-–]\s/)[0].trim();
-                    const match = startPart.match(/^(\d+)\s+(\w+)\s+(\d+)$/);
-                    const d = match ? new Date(`${match[2]} ${match[1]}, ${match[3]}`) : new Date(startPart);
-                    const month = isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-GB', { month: 'short' });
-                    const day = isNaN(d.getTime()) ? '' : String(d.getDate());
-                    return (
-                      <a key={item.slug} href={`/events/${item.slug}`} className="flex items-center gap-3 rounded-xl border border-slate-200/60 bg-white p-3 shadow-sm transition active:scale-[0.98]">
-                        {month && day ? (
-                          <div className="flex h-12 w-12 flex-shrink-0 flex-col items-center justify-center rounded-xl bg-blue-50">
-                            <span className="text-[9px] font-bold uppercase text-blue-500">{month}</span>
-                            <span className="text-base font-bold leading-none text-blue-700">{day}</span>
-                          </div>
-                        ) : (
-                          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100">
-                            <span className="text-[10px] font-bold text-slate-400">TBC</span>
-                          </div>
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold text-slate-900">{item.title}</p>
-                          <p className="mt-0.5 truncate text-xs text-slate-400">{item.city}, {item.country}</p>
-                        </div>
-                      </a>
-                    );
-                  })}
                 </div>
               </div>
             </Reveal>
+          )}
+
+          {/* Mobile: event cards with images */}
+          {expandingItems.length > 0 && (
+            <div className="mt-4 space-y-2 sm:hidden">
+              {expandingItems.slice(0, 5).map((item) => {
+                const hasImg = item.coverImage && /^(\/(cities|events|images)\/|https?:\/\/)/.test(item.coverImage);
+                const startPart = item.date.split(/\s*[-–]\s/)[0].trim();
+                const match = startPart.match(/^(\d+)\s+(\w+)\s+(\d+)$/);
+                const d = match ? new Date(`${match[2]} ${match[1]}, ${match[3]}`) : new Date(startPart);
+                const month = isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-GB', { month: 'short' });
+                const day = isNaN(d.getTime()) ? '' : String(d.getDate());
+                return (
+                  <a key={item.slug} href={`/events/${item.slug}`} className="flex items-center gap-3 rounded-xl border border-slate-200/60 bg-white p-2.5 shadow-sm transition active:scale-[0.98]">
+                    {hasImg ? (
+                      <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg">
+                        <img src={item.coverImage} alt="" className="h-full w-full object-cover" />
+                        {month && day && (
+                          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-1 pb-0.5 pt-2">
+                            <span className="text-[8px] font-bold uppercase text-white">{day} {month}</span>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex h-14 w-14 flex-shrink-0 flex-col items-center justify-center rounded-lg bg-blue-50">
+                        <span className="text-[9px] font-bold uppercase text-blue-500">{month}</span>
+                        <span className="text-base font-bold leading-none text-blue-700">{day}</span>
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-slate-900">{item.title}</p>
+                      <p className="mt-0.5 truncate text-xs text-slate-400">{item.city}, {item.country}</p>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
           )}
         </div>
       </div>

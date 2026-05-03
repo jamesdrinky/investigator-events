@@ -16,9 +16,10 @@ export async function GET(request: Request) {
   // Only allow in development or with CRON_SECRET
   const isDev = process.env.NODE_ENV === 'development';
 
+  const { searchParams } = new URL(request.url);
+
   if (!isDev) {
     // Support both header and query param auth for browser access
-    const { searchParams } = new URL(request.url);
     const queryPassword = searchParams.get('password');
     if (queryPassword && queryPassword === process.env.CRON_SECRET) {
       // Authenticated via query param
@@ -39,7 +40,6 @@ export async function GET(request: Request) {
     unsubscribeToken: 'preview-token',
   });
 
-  const { searchParams } = new URL(request.url);
   const sendTo = searchParams.get('send');
 
   // If ?send=email@example.com, actually send the email via Resend

@@ -10,6 +10,7 @@ const ALLOWED_RECIPIENTS = new Set([
   'james@drinky.com',
   'info@investigatorevents.com',
   'm.lacorte@conflictinternational.com',
+  'jamesdrinky@yahoo.com',
 ]);
 
 export async function GET(request: Request) {

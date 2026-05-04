@@ -38,7 +38,8 @@ export function getWeeklyCollections(events: EventItem[], now = new Date()) {
     .filter((event) => {
       const endTime = parseDate(event.endDate ?? event.date).getTime();
       const isOnline = event.city?.toLowerCase() === 'online' || event.category?.toLowerCase().includes('webinar') || event.category?.toLowerCase().includes('seminar');
-      return endTime < start.getTime() && endTime >= past14 && !isOnline;
+      const isMain = event.eventScope === 'main';
+      return endTime < start.getTime() && endTime >= past14 && !isOnline && isMain;
     })
     .sort((a, b) => parseDate(b.endDate ?? b.date).getTime() - parseDate(a.endDate ?? a.date).getTime())
     .slice(0, 3);

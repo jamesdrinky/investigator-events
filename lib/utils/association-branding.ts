@@ -58,7 +58,19 @@ const associationBrandingRecords: AssociationBrandingRecord[] = [
   { name: 'National Association of Legal Investigators', shortName: 'NALI', aliases: ['NALI', 'National Association of Legal Investigators'], logoFileName: 'nali.webp' },
   { name: 'Associated Licensed Detectives of New York State', shortName: 'ALDONYS', aliases: ['ALDONYS', 'Associated Licensed Detectives of New York State'], logoFileName: 'aldonys.png' },
   { name: 'World Association of Professional Investigators', shortName: 'WAPI', aliases: ['WAPI', 'World Association of Professional Investigators'], logoFileName: 'wapi.webp' },
-  { name: 'Society of Professional Investigators', shortName: 'SPI', aliases: ['SPI', 'Society of Professional Investigators'], logoFileName: 'spi.png' }
+  { name: 'Society of Professional Investigators', shortName: 'SPI', aliases: ['SPI', 'Society of Professional Investigators'], logoFileName: 'spi.png' },
+  { name: 'ACFE', shortName: 'ACFE', aliases: ['ACFE', 'Association of Certified Fraud Examiners'], logoFileName: 'acfe.png' },
+  { name: 'SCALI', shortName: 'SCALI', aliases: ['SCALI', 'South Carolina Association of Legal Investigators'], logoFileName: 'scali.png' },
+  { name: 'MAPI', shortName: 'MAPI', aliases: ['MAPI', 'Minnesota Association of Private Investigators'], logoFileName: 'mapi.png' },
+  { name: 'CAJP', shortName: 'CAJP', aliases: ['CAJP', 'California Association of Judgment Professionals'], logoFileName: 'cajp.png' },
+  { name: 'SCFIA', shortName: 'SCFIA', aliases: ['SCFIA', 'Southern California Fraud Investigators Association'], logoFileName: 'scfia.jpg' },
+  { name: 'GAPPI', shortName: 'GAPPI', aliases: ['GAPPI', 'Georgia Association of Professional Private Investigators'], logoFileName: 'gappi.png' },
+  { name: 'PIAI', shortName: 'PIAI', aliases: ['PIAI', 'Private Investigators Association of Idaho'], logoFileName: 'piai.png' },
+  { name: 'PAWLI', shortName: 'PAWLI', aliases: ['PAWLI', 'Professional Association of Wisconsin Licensed Investigators'], logoFileName: 'pawli.png' },
+  { name: 'OALI', shortName: 'OALI', aliases: ['OALI', 'Oregon Association of Licensed Investigators'], logoFileName: 'oali.png' },
+  { name: 'ASIS International', shortName: 'ASIS', aliases: ['ASIS', 'ASIS International'], logoFileName: 'asis.png' },
+  { name: 'PBSA', shortName: 'PBSA', aliases: ['PBSA', 'Professional Background Screening Association'], logoFileName: 'pbsa.png' },
+  { name: 'AWI', shortName: 'AWI', aliases: ['AWI', 'Association of Workplace Investigators'], logoFileName: 'awi.png' }
 ];
 
 export function findAssociationBranding(label: string) {

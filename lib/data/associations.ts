@@ -514,6 +514,34 @@ export const associationRecords: AssociationRecord[] = [
     region: 'North America',
     website: 'https://oali.org/',
     aliases: ['OALI', 'Oregon Association of Licensed Investigators'],
+  },
+  {
+    slug: 'asis',
+    shortName: 'ASIS',
+    name: 'ASIS International',
+    country: 'United States',
+    region: 'North America',
+    website: 'https://www.asisonline.org/',
+    aliases: ['ASIS', 'ASIS International'],
+  },
+  {
+    slug: 'pbsa',
+    shortName: 'PBSA',
+    name: 'Professional Background Screening Association',
+    country: 'United States',
+    region: 'North America',
+    website: 'https://thepbsa.org/',
+    aliases: ['PBSA', 'Professional Background Screening Association'],
+    logoFileName: 'pbsa.png'
+  },
+  {
+    slug: 'awi',
+    shortName: 'AWI',
+    name: 'Association of Workplace Investigators',
+    country: 'United States',
+    region: 'North America',
+    website: 'https://www.awi.org/',
+    aliases: ['AWI', 'Association of Workplace Investigators'],
   }
 ];
 

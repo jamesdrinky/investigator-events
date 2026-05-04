@@ -9,8 +9,15 @@ import { verifyCronSecret } from '@/lib/security/server';
 const BATCH_SIZE = 50;
 
 export async function GET(request: Request) {
-  const authError = verifyCronSecret(request);
-  if (authError) return authError;
+  // Support query param auth for manual triggers
+  const { searchParams } = new URL(request.url);
+  const querySecret = searchParams.get('password');
+  if (querySecret && querySecret === process.env.CRON_SECRET) {
+    // Authenticated via query param
+  } else {
+    const authError = verifyCronSecret(request);
+    if (authError) return authError;
+  }
 
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) {
@@ -29,8 +36,20 @@ export async function GET(request: Request) {
     return NextResponse.json({ message: 'No fresh activity, skipping send', sent: 0 });
   }
 
+  // Skip if already sent in the last 6 days (prevents double-send from manual + cron)
+  const { data: recentSend } = await supabase
+    .from('newsletter_sends' as never)
+    .select('id, sent_at')
+    .gte('sent_at', new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString())
+    .order('sent_at', { ascending: false })
+    .limit(1)
+    .maybeSingle() as any;
+
+  if (recentSend && !searchParams.get('force')) {
+    return NextResponse.json({ message: 'Already sent this week', lastSent: recentSend.sent_at, sent: 0 });
+  }
+
   // Optional region filter via query param (e.g. ?region=Europe)
-  const { searchParams } = new URL(request.url);
   const regionFilter = searchParams.get('region');
 
   // Fetch active confirmed subscribers with their unsubscribe tokens

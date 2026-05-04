@@ -83,6 +83,7 @@ const cityImageMap: Record<string, string> = {
   'Ontario': 'toronto.avif',
   'Toronto': 'toronto.avif',
   'Online': 'online.png',
+  'Welch, MN': 'minneapolis.jpg',
 };
 
 /** Map specific event slugs to event-branded images */

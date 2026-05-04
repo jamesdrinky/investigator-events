@@ -82,6 +82,7 @@ const cityImageMap: Record<string, string> = {
   'Downey, CA': 'la.jpg',
   'Ontario': 'toronto.avif',
   'Toronto': 'toronto.avif',
+  'Online': 'online.png',
 };
 
 /** Map specific event slugs to event-branded images */

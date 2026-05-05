@@ -21,8 +21,30 @@ export function NewsletterBanner() {
       const dismissedAt = parseInt(dismissed, 10);
       if (Date.now() - dismissedAt < 24 * 60 * 60 * 1000) return;
     }
-    const timer = setTimeout(() => setVisible(true), 4000);
-    return () => clearTimeout(timer);
+
+    // Check if logged-in user is already subscribed
+    const checkSubscription = async () => {
+      try {
+        const { createSupabaseBrowserClient } = await import('@/lib/supabase/browser');
+        const supabase = createSupabaseBrowserClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.email) {
+          const { data } = await supabase
+            .from('newsletter_subscribers' as any)
+            .select('status')
+            .eq('email', user.email.toLowerCase())
+            .maybeSingle() as any;
+          if (data?.status === 'active') {
+            localStorage.setItem(STORAGE_KEY, 'subscribed');
+            return;
+          }
+        }
+      } catch {}
+      const timer = setTimeout(() => setVisible(true), 4000);
+      return () => clearTimeout(timer);
+    };
+
+    checkSubscription();
   }, []);
 
   const dismiss = () => {

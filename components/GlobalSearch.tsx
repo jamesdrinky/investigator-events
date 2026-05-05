@@ -170,7 +170,7 @@ export function GlobalSearch({ isDark }: { isDark?: boolean }) {
   );
 
   const mobileOverlay = mobileOpen && (
-    <div className="fixed inset-0 z-[200] flex flex-col bg-white lg:hidden" ref={wrapperRef}>
+    <div className="fixed inset-0 z-[200] flex min-h-screen flex-col overflow-hidden bg-white lg:hidden" ref={wrapperRef} style={{ top: 0, left: 0, right: 0, bottom: 0, position: 'fixed' }}>
       <div className="flex flex-shrink-0 items-center gap-3 border-b border-slate-100 px-4 py-3">
         <Search className="h-5 w-5 text-slate-400" />
         <input

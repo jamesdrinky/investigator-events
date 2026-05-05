@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import nextDynamic from 'next/dynamic';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 import { AssociationLoopSection } from '@/components/home/AssociationLoopSection';
 import { FounderQuoteSection } from '@/components/home/FounderQuoteSection';
 import { UpcomingEventsGallery } from '@/components/home/UpcomingEventsGallery';
@@ -32,6 +33,10 @@ export const metadata: Metadata = {
 
 
 export default async function HomePage() {
+  // Check for auth cookie server-side to prevent marketing page flash
+  const cookieStore = await cookies();
+  const hasAuthCookie = cookieStore.getAll().some(c => c.name.startsWith('sb-') && c.name.endsWith('-auth-token'));
+
   const [featuredEvents, allEvents] = await Promise.all([fetchFeaturedEvents(6), fetchAllEvents()]);
   const mainEvents = sortEventsByDate(allEvents.filter((event) => event.eventScope === 'main'));
   const coverage = getCoverageMetrics(mainEvents);
@@ -51,6 +56,11 @@ export default async function HomePage() {
 
   return (
     <div className="relative flex flex-col">
+      {/* Hide marketing sections immediately if auth cookie present (prevents flash) */}
+      {hasAuthCookie && (
+        <style dangerouslySetInnerHTML={{ __html: `.mesh-blob { display: none !important; } [data-homepage-section] { display: none !important; }` }} />
+      )}
+
       {/* ── Personalised home for logged-in mobile users ── */}
       <LoggedInHome />
 

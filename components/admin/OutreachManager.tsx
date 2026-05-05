@@ -15,6 +15,7 @@ interface AssociationOutreach {
   suggestedTemplate: 'approval' | 'introduction' | 'cold';
   eventNames: string[];
   contactEmail: string | null;
+  contactFormUrl: string | null;
 }
 
 export function OutreachManager() {
@@ -204,6 +205,25 @@ export function OutreachManager() {
                       className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400"
                     />
                   </div>
+
+                  {/* Contact form + copy-paste message for associations without email */}
+                  {assoc.contactFormUrl && !email && (
+                    <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50/50 p-3">
+                      <p className="mb-2 text-xs font-semibold text-amber-700">No email — use contact form instead:</p>
+                      <a href={assoc.contactFormUrl} target="_blank" rel="noreferrer" className="mb-3 inline-flex items-center gap-1 rounded-md bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-800 transition hover:bg-amber-200">
+                        Open contact form →
+                      </a>
+                      <p className="mb-1 mt-3 text-[10px] font-semibold uppercase tracking-wider text-slate-400">Copy-paste message:</p>
+                      <textarea
+                        readOnly
+                        rows={12}
+                        className="w-full rounded-lg border border-slate-200 bg-white p-3 text-xs leading-relaxed text-slate-600"
+                        value={`Dear Sir/Madam,\n\nI'm writing to introduce Investigator Events (https://investigatorevents.com), a free global calendar, community platform and professional network for the investigations profession.\n\nWe've already set up your association page on the platform (https://investigatorevents.com/associations/${assoc.slug}) and we'd love to feature your upcoming events alongside it.\n\nThe platform now hosts over 55 events from 50+ associations across 15 countries, with a weekly newsletter reaching over 100 subscribers and growing every week.\n\nListing is completely free. You can submit events directly at https://investigatorevents.com/submit-event, or simply reply with your event details and I'll add them for you.\n\nBeyond the calendar, the platform includes professional profiles and a member directory, a community forum, event reviews, and association pages — all free for investigators to use. We exist to support associations like yours rather than compete with them.\n\nIf you'd like to learn more or have any questions, please don't hesitate to get in touch.\n\nWarm regards,\nMike LaCorte\nFounder, Investigator Events\ninfo@investigatorevents.com\nhttps://investigatorevents.com`}
+                        onClick={e => { (e.target as HTMLTextAreaElement).select(); navigator.clipboard.writeText((e.target as HTMLTextAreaElement).value); }}
+                      />
+                      <p className="mt-1 text-[10px] text-slate-400">Click the text to copy to clipboard</p>
+                    </div>
+                  )}
 
                   {/* Events listed */}
                   {assoc.eventNames.length > 0 && (

@@ -13,14 +13,18 @@ export function NewsletterBanner() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    // Don't show newsletter popup in native app
+    // Don't show newsletter popup in native app or admin pages
     if (isNativeApp) return;
+    if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) return;
+
     const dismissed = localStorage.getItem(STORAGE_KEY);
     if (dismissed === 'subscribed') return;
     if (dismissed) {
       const dismissedAt = parseInt(dismissed, 10);
       if (Date.now() - dismissedAt < 24 * 60 * 60 * 1000) return;
     }
+
+    let timer: ReturnType<typeof setTimeout> | null = null;
 
     // Check if logged-in user is already subscribed
     const checkSubscription = async () => {
@@ -40,11 +44,11 @@ export function NewsletterBanner() {
           }
         }
       } catch {}
-      const timer = setTimeout(() => setVisible(true), 4000);
-      return () => clearTimeout(timer);
+      timer = setTimeout(() => setVisible(true), 4000);
     };
 
     checkSubscription();
+    return () => { if (timer) clearTimeout(timer); };
   }, []);
 
   const dismiss = () => {

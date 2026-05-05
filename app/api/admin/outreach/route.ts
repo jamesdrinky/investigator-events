@@ -3,12 +3,8 @@ import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { hasValidAdminSessionCookie } from '@/lib/admin/session';
 
 const CONTACT_FORM_URLS: Record<string, string> = {
-  cali: 'https://www.cali-pi.org',
-  tali: 'https://members.tali.org/contactus',
   pawli: 'https://pawli.com/contact-us/',
-  sfpp: 'https://www.sfpp.fr/FR/',
   scfia: 'https://scfia.starchapter.com/form.php?form_id=13',
-  snarp: 'https://snarp.org/',
 };
 
 function getContactFormUrl(slug: string): string | null {

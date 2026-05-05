@@ -53,6 +53,7 @@ export function OutreachManager() {
       contactName,
       association: assoc.name,
       events: assoc.eventNames.join('|||'),
+      eventSlugs: ((assoc as any).eventSlugs ?? []).join('|||'),
       slug: assoc.slug,
       memberCount: String(assoc.memberCount),
     });

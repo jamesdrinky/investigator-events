@@ -12,6 +12,7 @@ export async function GET(request: Request) {
   const contactName = searchParams.get('contactName') ?? 'The Team';
   const association = searchParams.get('association') ?? 'Association';
   const eventNames = (searchParams.get('events') ?? '').split('|||').filter(Boolean);
+  const eventSlugs = (searchParams.get('eventSlugs') ?? '').split('|||').filter(Boolean);
 
   let html: string;
 
@@ -20,7 +21,7 @@ export async function GET(request: Request) {
   if (template === 'cold') {
     html = buildColdOutreachEmail({ contactName, association, slug, memberCount });
   } else {
-    html = buildIntroductionOutreachEmail({ contactName, association, eventNames, memberCount });
+    html = buildIntroductionOutreachEmail({ contactName, association, eventNames, eventSlugs, memberCount });
   }
 
   return NextResponse.json({ html });

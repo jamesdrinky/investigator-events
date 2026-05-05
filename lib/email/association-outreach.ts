@@ -293,11 +293,16 @@ export async function processOutreachQueue(): Promise<{ sent: number; failed: nu
 /**
  * Version 2 — Introduction email for associations whose events WE added for them.
  */
-export function buildIntroductionOutreachEmail(params: { contactName: string; association: string; eventNames: string[]; memberCount?: number }): string {
-  const { contactName, association, eventNames, memberCount = 0 } = params;
+export function buildIntroductionOutreachEmail(params: { contactName: string; association: string; eventNames: string[]; eventSlugs?: string[]; memberCount?: number }): string {
+  const { contactName, association, eventNames, eventSlugs = [], memberCount = 0 } = params;
   const hasMembers = memberCount > 0;
+  const memberText = memberCount === 1 ? '1 of your members has already created a profile' : `${memberCount} of your members have already created profiles`;
   const eventList = eventNames.length > 0
-    ? eventNames.map(n => `<li style="margin:4px 0;font-size:14px;color:${C.body};">${n}</li>`).join('')
+    ? eventNames.map((n, i) => {
+        const slug = eventSlugs[i];
+        const link = slug ? `${SITE}/events/${slug}` : SITE;
+        return `<li style="margin:4px 0;font-size:14px;color:${C.body};"><a href="${link}" style="color:${C.blue};text-decoration:none;">${n}</a></li>`;
+      }).join('')
     : '';
 
   return `<!DOCTYPE html>
@@ -321,7 +326,7 @@ export function buildIntroductionOutreachEmail(params: { contactName: string; as
           <p style="margin:0;font-size:15px;color:${C.body};line-height:1.7;">Dear ${contactName},</p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
-            I'm writing to introduce <a href="${SITE}" style="color:${C.blue};text-decoration:none;">Investigator Events</a>, a free global calendar, community platform and professional network for the investigations profession. We've already listed ${association}'s upcoming events on the platform${hasMembers ? `, and ${memberCount} of your members have already created profiles` : ''}:
+            I'm writing to introduce <a href="${SITE}" style="color:${C.blue};text-decoration:none;">Investigator Events</a>, a free global calendar, community platform and professional network for the investigations profession. We've already listed ${association}'s upcoming events on the platform${hasMembers ? `, and ${memberText}` : ''}:
           </p>
 
           ${eventList ? `<ul style="margin:12px 0;padding-left:20px;">${eventList}</ul>` : ''}
@@ -407,7 +412,7 @@ export function buildColdOutreachEmail(params: { contactName: string; associatio
           <p style="margin:0;font-size:15px;color:${C.body};line-height:1.7;">Dear ${contactName},</p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
-            I'm writing to introduce <a href="${SITE}" style="color:${C.blue};text-decoration:none;">Investigator Events</a>, a free global calendar, community platform and professional network for the investigations profession.${hasPage ? ` We've already set up <a href="${pageUrl}" style="color:${C.blue};text-decoration:none;">${association}'s association page</a> on the platform${hasMembers ? `, and ${memberCount} of your members have already created profiles` : ''}, and we'd love to feature your upcoming events alongside it.` : ` We'd love to feature ${association}'s events on the platform.`}
+            I'm writing to introduce <a href="${SITE}" style="color:${C.blue};text-decoration:none;">Investigator Events</a>, a free global calendar, community platform and professional network for the investigations profession.${hasPage ? ` We've already set up <a href="${pageUrl}" style="color:${C.blue};text-decoration:none;">${association}'s association page</a> on the platform${hasMembers ? `, and ${memberCount === 1 ? '1 of your members has already created a profile' : `${memberCount} of your members have already created profiles`}` : ''}, and we'd love to feature your upcoming events alongside it.` : ` We'd love to feature ${association}'s events on the platform.`}
           </p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
@@ -419,7 +424,7 @@ export function buildColdOutreachEmail(params: { contactName: string; associatio
           </p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
-            Beyond the calendar, the platform includes professional profiles and a member directory where investigators can connect across jurisdictions, a community forum for referrals and discussion, event reviews to help professionals decide which conferences are worth attending, and association pages where your organisation can showcase its events and members. Everything is free for investigators to use.
+            Beyond the calendar, the platform includes professional profiles and a member directory where investigators can connect across jurisdictions, a community forum for referrals and discussion, and association pages where your organisation can showcase its events and members. We've also built an event review system where attendees can share their experience after conferences — helping the community decide which events are worth attending and giving organisers valuable feedback. Everything is free for investigators to use.
           </p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">

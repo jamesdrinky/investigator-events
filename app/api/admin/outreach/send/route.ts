@@ -17,7 +17,7 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { recipientEmail, contactName, association, template, eventNames, slug, memberCount } = body;
+  const { recipientEmail, contactName, association, template, eventNames, eventSlugs, slug, memberCount } = body;
 
   if (!recipientEmail || !association || !template) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     html = buildColdOutreachEmail({ contactName: contactName || 'The Team', association, slug, memberCount: memberCount ?? 0 });
     subject = `Introducing Investigator Events — free global PI calendar`;
   } else if (template === 'introduction') {
-    html = buildIntroductionOutreachEmail({ contactName: contactName || association, association, eventNames: eventNames ?? [], memberCount: memberCount ?? 0 });
+    html = buildIntroductionOutreachEmail({ contactName: contactName || association, association, eventNames: eventNames ?? [], eventSlugs: eventSlugs ?? [], memberCount: memberCount ?? 0 });
     subject = `${association}'s events are live on Investigator Events`;
   } else {
     // approval template

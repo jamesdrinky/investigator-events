@@ -77,6 +77,7 @@ export function OutreachManager() {
           association: assoc.name,
           template: assoc.suggestedTemplate,
           eventNames: assoc.eventNames,
+          eventSlugs: (assoc as any).eventSlugs ?? [],
           slug: assoc.slug,
           memberCount: assoc.memberCount,
         }),

@@ -81,6 +81,7 @@ export async function GET() {
       emailStatus: send?.status ?? null,
       suggestedTemplate,
       eventNames: allEvents.map(e => e.title),
+      eventSlugs: allEvents.map(e => e.slug),
       contactEmail: (page as any).contact_email ?? send?.email ?? null,
     };
   });

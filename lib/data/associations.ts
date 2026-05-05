@@ -542,6 +542,16 @@ export const associationRecords: AssociationRecord[] = [
     region: 'North America',
     website: 'https://www.awi.org/',
     aliases: ['AWI', 'Association of Workplace Investigators'],
+  },
+  {
+    slug: 'tapd',
+    shortName: 'TAPD',
+    name: 'Taiwan Association of Professional Detectives',
+    country: 'Taiwan',
+    region: 'Asia-Pacific',
+    website: 'https://www.fafafa.com.tw/',
+    aliases: ['TAPD', 'Taiwan Association of Professional Detectives', 'Taiwan Detective Association'],
+    logoFileName: 'tapd.png'
   }
 ];
 

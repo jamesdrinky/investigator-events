@@ -70,7 +70,8 @@ const associationBrandingRecords: AssociationBrandingRecord[] = [
   { name: 'OALI', shortName: 'OALI', aliases: ['OALI', 'Oregon Association of Licensed Investigators'], logoFileName: 'oali.png' },
   { name: 'ASIS International', shortName: 'ASIS', aliases: ['ASIS', 'ASIS International'], logoFileName: 'asis.png' },
   { name: 'PBSA', shortName: 'PBSA', aliases: ['PBSA', 'Professional Background Screening Association'], logoFileName: 'pbsa.png' },
-  { name: 'AWI', shortName: 'AWI', aliases: ['AWI', 'Association of Workplace Investigators'], logoFileName: 'awi.png' }
+  { name: 'AWI', shortName: 'AWI', aliases: ['AWI', 'Association of Workplace Investigators'], logoFileName: 'awi.png' },
+  { name: 'Taiwan Association of Professional Detectives', shortName: 'TAPD', aliases: ['TAPD', 'Taiwan Association of Professional Detectives', 'Taiwan Detective Association'], logoFileName: 'tapd.png' }
 ];
 
 export function findAssociationBranding(label: string) {

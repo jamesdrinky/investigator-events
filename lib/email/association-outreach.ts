@@ -293,9 +293,11 @@ export async function processOutreachQueue(): Promise<{ sent: number; failed: nu
 /**
  * Version 2 — Introduction email for associations whose events WE added for them.
  */
-export function buildIntroductionOutreachEmail(params: { contactName: string; association: string; eventNames: string[]; eventSlugs?: string[]; memberCount?: number }): string {
-  const { contactName, association, eventNames, eventSlugs = [], memberCount = 0 } = params;
+export function buildIntroductionOutreachEmail(params: { contactName: string; association: string; eventNames: string[]; eventSlugs?: string[]; memberCount?: number; slug?: string }): string {
+  const { contactName, association, eventNames, eventSlugs = [], memberCount = 0, slug } = params;
   const hasMembers = memberCount > 0;
+  const hasPage = !!slug;
+  const pageUrl = `${SITE}/associations/${slug}`;
   const memberText = memberCount === 1 ? '1 of your members has already created a profile' : `${memberCount} of your members have already created profiles`;
   const eventList = eventNames.length > 0
     ? eventNames.map((n, i) => {
@@ -326,7 +328,7 @@ export function buildIntroductionOutreachEmail(params: { contactName: string; as
           <p style="margin:0;font-size:15px;color:${C.body};line-height:1.7;">Dear ${contactName},</p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
-            I'm writing to introduce <a href="${SITE}" style="color:${C.blue};text-decoration:none;">Investigator Events</a>, a free global calendar, community platform and professional network for the investigations profession. We've already listed ${association}'s upcoming events on the platform${hasMembers ? `, and ${memberText}` : ''}:
+            I'm writing to introduce <a href="${SITE}" style="color:${C.blue};text-decoration:none;">Investigator Events</a>, a free global calendar, community platform and professional network for the investigations profession. We've already listed ${association}'s upcoming events${hasPage ? ` and set up <a href="${pageUrl}" style="color:${C.blue};text-decoration:none;">your association page</a>` : ''} on the platform${hasMembers ? `, and ${memberText}` : ''}:
           </p>
 
           ${eventList ? `<ul style="margin:12px 0;padding-left:20px;">${eventList}</ul>` : ''}

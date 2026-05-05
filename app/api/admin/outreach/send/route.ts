@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     html = buildColdOutreachEmail({ contactName: contactName || 'The Team', association, slug, memberCount: memberCount ?? 0 });
     subject = `Introducing Investigator Events — free global PI calendar`;
   } else if (template === 'introduction') {
-    html = buildIntroductionOutreachEmail({ contactName: contactName || association, association, eventNames: eventNames ?? [], eventSlugs: eventSlugs ?? [], memberCount: memberCount ?? 0 });
+    html = buildIntroductionOutreachEmail({ contactName: contactName || association, association, eventNames: eventNames ?? [], eventSlugs: eventSlugs ?? [], memberCount: memberCount ?? 0, slug });
     subject = `${association}'s events are live on Investigator Events`;
   } else {
     // approval template

@@ -30,6 +30,11 @@ body { overscroll-behavior-y: none; }
   a:active, button:active { transform: scale(0.97); opacity: 0.8; }
 }
 
+/* Prevent iOS auto-zoom on input focus — requires 16px minimum font size */
+@media (max-width: 1023px) {
+  input, select, textarea { font-size: 16px !important; }
+}
+
 /* Disable long-press context menu on images (feels more native) */
 @media (max-width: 1023px) {
   img { -webkit-touch-callout: none; pointer-events: none; }

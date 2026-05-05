@@ -16,10 +16,11 @@ export async function GET(request: Request) {
   let html: string;
 
   const slug = searchParams.get('slug') ?? undefined;
+  const memberCount = parseInt(searchParams.get('memberCount') ?? '0', 10);
   if (template === 'cold') {
-    html = buildColdOutreachEmail({ contactName, association, slug });
+    html = buildColdOutreachEmail({ contactName, association, slug, memberCount });
   } else {
-    html = buildIntroductionOutreachEmail({ contactName, association, eventNames });
+    html = buildIntroductionOutreachEmail({ contactName, association, eventNames, memberCount });
   }
 
   return NextResponse.json({ html });

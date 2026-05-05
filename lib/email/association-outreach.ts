@@ -293,8 +293,9 @@ export async function processOutreachQueue(): Promise<{ sent: number; failed: nu
 /**
  * Version 2 — Introduction email for associations whose events WE added for them.
  */
-export function buildIntroductionOutreachEmail(params: { contactName: string; association: string; eventNames: string[] }): string {
-  const { contactName, association, eventNames } = params;
+export function buildIntroductionOutreachEmail(params: { contactName: string; association: string; eventNames: string[]; memberCount?: number }): string {
+  const { contactName, association, eventNames, memberCount = 0 } = params;
+  const hasMembers = memberCount > 0;
   const eventList = eventNames.length > 0
     ? eventNames.map(n => `<li style="margin:4px 0;font-size:14px;color:${C.body};">${n}</li>`).join('')
     : '';
@@ -320,13 +321,17 @@ export function buildIntroductionOutreachEmail(params: { contactName: string; as
           <p style="margin:0;font-size:15px;color:${C.body};line-height:1.7;">Dear ${contactName},</p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
-            I'm writing to introduce <a href="${SITE}" style="color:${C.blue};text-decoration:none;">Investigator Events</a>, a free global calendar and community platform for the private investigations profession. We've already listed ${association}'s upcoming events on the platform:
+            I'm writing to introduce <a href="${SITE}" style="color:${C.blue};text-decoration:none;">Investigator Events</a>, a free global calendar, community platform and professional network for the investigations profession. We've already listed ${association}'s upcoming events on the platform${hasMembers ? `, and ${memberCount} of your members have already created profiles` : ''}:
           </p>
 
           ${eventList ? `<ul style="margin:12px 0;padding-left:20px;">${eventList}</ul>` : ''}
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
-            Investigator Events was founded to give our profession a single, freely accessible home for conferences, training and community gatherings worldwide. It exists to support associations like yours rather than compete with them. The more associations that list their events with us, the stronger the global calendar becomes for everyone.
+            Investigator Events was founded to give our profession a single, freely accessible home for conferences, training and community gatherings worldwide. The platform now hosts over 55 events from 50+ associations across 15 countries, with a weekly newsletter reaching over 100 subscribers and growing every week.
+          </p>
+
+          <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
+            Beyond the calendar, the platform includes professional profiles and a member directory, a community forum for referrals and discussion, event reviews, and dedicated association pages. Everything is free for investigators to use, and we exist to support associations like yours rather than compete with them.
           </p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
@@ -375,10 +380,11 @@ export function buildIntroductionOutreachEmail(params: { contactName: string; as
 /**
  * Version 3 — Cold introduction for associations with NO events listed yet.
  */
-export function buildColdOutreachEmail(params: { contactName: string; association: string; slug?: string }): string {
-  const { contactName, association, slug } = params;
+export function buildColdOutreachEmail(params: { contactName: string; association: string; slug?: string; memberCount?: number }): string {
+  const { contactName, association, slug, memberCount = 0 } = params;
   const hasPage = !!slug;
   const pageUrl = `${SITE}/associations/${slug}`;
+  const hasMembers = memberCount > 0;
 
   return `<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -401,11 +407,11 @@ export function buildColdOutreachEmail(params: { contactName: string; associatio
           <p style="margin:0;font-size:15px;color:${C.body};line-height:1.7;">Dear ${contactName},</p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
-            I'm writing to introduce <a href="${SITE}" style="color:${C.blue};text-decoration:none;">Investigator Events</a>, a free global calendar and community platform for the private investigations profession.${hasPage ? ` We've already set up <a href="${pageUrl}" style="color:${C.blue};text-decoration:none;">${association}'s association page</a> on the platform, and we'd love to feature your upcoming events alongside it.` : ` We'd love to feature ${association}'s events on the platform.`}
+            I'm writing to introduce <a href="${SITE}" style="color:${C.blue};text-decoration:none;">Investigator Events</a>, a free global calendar, community platform and professional network for the investigations profession.${hasPage ? ` We've already set up <a href="${pageUrl}" style="color:${C.blue};text-decoration:none;">${association}'s association page</a> on the platform${hasMembers ? `, and ${memberCount} of your members have already created profiles` : ''}, and we'd love to feature your upcoming events alongside it.` : ` We'd love to feature ${association}'s events on the platform.`}
           </p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
-            Investigator Events was founded to give our profession a single, freely accessible home for conferences, training and community gatherings worldwide. We already have events listed from over 40 associations across 10 countries, and the calendar is growing every week.
+            Investigator Events was founded to give our profession a single, freely accessible home for conferences, training and community gatherings worldwide. The platform now hosts over 55 events from 50+ associations across 15 countries, with a weekly newsletter reaching over 100 subscribers and growing every week.
           </p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
@@ -413,7 +419,11 @@ export function buildColdOutreachEmail(params: { contactName: string; associatio
           </p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
-            The platform also includes professional profiles, a member directory, and a community forum — all free for investigators to use. We exist to support associations like yours rather than compete with them. The more associations that list their events with us, the stronger the global calendar becomes for everyone.
+            Beyond the calendar, the platform includes professional profiles and a member directory where investigators can connect across jurisdictions, a community forum for referrals and discussion, event reviews to help professionals decide which conferences are worth attending, and association pages where your organisation can showcase its events and members. Everything is free for investigators to use.
+          </p>
+
+          <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
+            We exist to support associations like yours rather than compete with them. The more associations that list their events with us, the stronger the global calendar becomes for everyone.
           </p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">

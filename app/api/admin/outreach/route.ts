@@ -5,6 +5,7 @@ import { hasValidAdminSessionCookie } from '@/lib/admin/session';
 const CONTACT_FORM_URLS: Record<string, string> = {
   pawli: 'https://pawli.com/contact-us/',
   scfia: 'https://scfia.starchapter.com/form.php?form_id=13',
+  cajp: 'https://cajp.org/contact-us/',
 };
 
 function getContactFormUrl(slug: string): string | null {

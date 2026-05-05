@@ -302,9 +302,18 @@ export function OutreachManager() {
                   <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">Copy-paste message (click to copy):</p>
                   <textarea
                     readOnly
-                    rows={10}
+                    rows={14}
                     className="w-full rounded-lg border border-slate-200 bg-white p-3 text-xs leading-relaxed text-slate-600"
-                    value={`Dear Sir/Madam,\n\nI'm writing to introduce Investigator Events (https://investigatorevents.com), a free global calendar, community platform and professional network for the investigations profession.\n\nWe've already set up your association page on the platform (https://investigatorevents.com/associations/${assoc.slug}) and we'd love to feature your upcoming events alongside it.\n\nThe platform now hosts over 55 events from 50+ associations across 15 countries, with a weekly newsletter reaching over 100 subscribers and growing every week.\n\nListing is completely free. You can submit events directly at https://investigatorevents.com/submit-event, or simply reply with your event details and I'll add them for you.\n\nBeyond the calendar, the platform includes professional profiles and a member directory, a community forum, event reviews, and association pages — all free for investigators to use. We exist to support associations like yours rather than compete with them.\n\nIf you'd like to learn more or have any questions, please don't hesitate to get in touch.\n\nWarm regards,\nMike LaCorte\nFounder, Investigator Events\ninfo@investigatorevents.com\nhttps://investigatorevents.com`}
+                    value={(() => {
+                      const hasEvents = assoc.eventNames.length > 0;
+                      const hasMembers = assoc.memberCount > 0;
+                      const memberText = assoc.memberCount === 1 ? '1 of your members has already created a profile' : `${assoc.memberCount} of your members have already created profiles`;
+                      const eventList = hasEvents ? `\n\n${assoc.eventNames.map(n => `• ${n}`).join('\n')}` : '';
+                      const pageLine = `We've already set up your association page on the platform (https://investigatorevents.com/associations/${assoc.slug})${hasEvents ? ' and listed your upcoming events' : ''}${hasMembers ? `, and ${memberText}` : ''}.${hasEvents ? '' : " We'd love to feature your upcoming events alongside it."}`;
+                      const eventsSection = hasEvents ? `${eventList}\n` : '';
+
+                      return `Dear Sir/Madam,\n\nI'm writing to introduce Investigator Events (https://investigatorevents.com), a free global calendar, community platform and professional network for the investigations profession.\n\n${pageLine}${eventsSection}\n\nThe platform now hosts over 55 events from 50+ associations across 15 countries, with a weekly newsletter reaching over 100 subscribers and growing every week.\n\nListing is completely free. You can submit events directly at https://investigatorevents.com/submit-event, or simply reply with your event details and I'll add them for you.\n\nBeyond the calendar, the platform includes professional profiles and a member directory, a community forum, event reviews, and association pages — all free for investigators to use. We've also built an event review system where attendees can share their experience — helping the community decide which events are worth attending and giving organisers valuable feedback.\n\nWe exist to support associations like yours rather than compete with them. The more associations that list their events with us, the stronger the global calendar becomes for everyone.\n\nIf you'd like to learn more or have any questions, please don't hesitate to get in touch.\n\nWarm regards,\nMike LaCorte\nFounder, Investigator Events\ninfo@investigatorevents.com\nhttps://investigatorevents.com`;
+                    })()}
                     onClick={e => { (e.target as HTMLTextAreaElement).select(); navigator.clipboard.writeText((e.target as HTMLTextAreaElement).value); }}
                   />
                 </div>

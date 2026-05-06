@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
+import { generateUniqueUsername } from '@/lib/utils/username';
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -57,11 +58,12 @@ export async function GET(request: Request) {
 
           if (!existing) {
             // New user — create profile with OAuth data
+            const username = await generateUniqueUsername(admin, fullName, user.id);
             await admin.from('profiles').insert({
               id: user.id,
               full_name: fullName,
               avatar_url: avatarUrl,
-              username: fullName ? fullName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') : null,
+              username,
               is_public: true,
               auth_provider: provider,
               linkedin_name: linkedinName,

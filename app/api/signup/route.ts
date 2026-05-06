@@ -3,6 +3,7 @@ import { Resend } from 'resend';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { enforceRateLimitAsync, assertSameOriginRequest } from '@/lib/security/server';
 import { buildWelcomeEmail } from '@/lib/email/welcome-email';
+import { generateUniqueUsername } from '@/lib/utils/username';
 
 export async function POST(request: Request) {
   try {
@@ -48,10 +49,11 @@ export async function POST(request: Request) {
 
     // Create profile row
     if (data.user) {
-      const { error: profileError } = await admin.from('profiles').upsert({
+      const username = await generateUniqueUsername(admin, fullName, data.user.id);
+      const { error: profileError } = await admin.from('profiles').insert({
         id: data.user.id,
         full_name: fullName || null,
-        username: fullName ? fullName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') : null,
+        username,
         is_public: true,
         tos_accepted_at: new Date().toISOString(),
       } as any);

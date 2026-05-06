@@ -14,7 +14,13 @@ function SignInPageInner() {
   const searchParams = useSearchParams();
   const prefillEmail = searchParams.get('email') ?? '';
   const nextUrl = searchParams.get('next') ?? '/profile';
-  const [error, setError] = useState('');
+  const authError = searchParams.get('error');
+
+  const initialError = authError === 'auth'
+    ? 'Authentication failed. Please try again.'
+    : '';
+
+  const [error, setError] = useState(initialError);
   const [loading, setLoading] = useState(false);
 
   const handleSignIn = async ({ email, password, newsletterOptIn }: { email: string; password: string; newsletterOptIn?: boolean }) => {

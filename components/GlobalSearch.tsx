@@ -34,7 +34,7 @@ export function GlobalSearch({ isDark }: { isDark?: boolean }) {
     if (!safe) { setEvents([]); setPeople([]); setLoading(false); return; }
     const [{ data: ev }, { data: ppl }] = await Promise.all([
       supabase.from('events').select('id, title, slug, start_date, city, country, association, organiser, description').eq('approved', true).or(`title.ilike.%${safe}%,city.ilike.%${safe}%,country.ilike.%${safe}%,association.ilike.%${safe}%,organiser.ilike.%${safe}%,description.ilike.%${safe}%`).limit(8),
-      supabase.from('profiles').select('id, full_name, username, avatar_url, country, specialisation').eq('is_public', true).or(`full_name.ilike.%${safe}%,username.ilike.%${safe}%,specialisation.ilike.%${safe}%,country.ilike.%${safe}%`).limit(5),
+      supabase.from('profiles').select('id, full_name, username, avatar_url, country, specialisation').eq('is_public', true).not('username', 'is', null).or(`full_name.ilike.%${safe}%,username.ilike.%${safe}%,specialisation.ilike.%${safe}%,country.ilike.%${safe}%`).limit(5),
     ]);
     setEvents(ev ?? []);
     setPeople(ppl ?? []);
@@ -144,7 +144,7 @@ export function GlobalSearch({ isDark }: { isDark?: boolean }) {
                     <p className="truncate text-sm font-medium text-slate-900">{p.full_name ?? p.username}</p>
                     <p className="text-[11px] text-slate-400">
                       {p.country ? `${getCountryFlag(p.country)} ` : ''}
-                      {p.specialisation ?? `@${p.username}`}
+                      {p.specialisation || (p.username ? `@${p.username}` : '')}
                     </p>
                   </div>
                 </button>
@@ -216,7 +216,7 @@ export function GlobalSearch({ isDark }: { isDark?: boolean }) {
                 <UserAvatar src={p.avatar_url} name={p.full_name} size={36} />
                 <div>
                   <p className="text-sm font-medium text-slate-900">{p.full_name ?? p.username}</p>
-                  <p className="text-xs text-slate-400">{p.country ? `${getCountryFlag(p.country)} ` : ''}{p.specialisation ?? `@${p.username}`}</p>
+                  <p className="text-xs text-slate-400">{p.country ? `${getCountryFlag(p.country)} ` : ''}{p.specialisation || (p.username ? `@${p.username}` : '')}</p>
                 </div>
               </button>
             ))}

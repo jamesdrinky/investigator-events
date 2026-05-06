@@ -68,7 +68,7 @@ export async function POST(request: Request) {
   if (isBanner) {
     await admin.from('profiles').update({ banner_url: publicUrl } as any).eq('id', user.id);
   } else {
-    await admin.from('profiles').upsert({ id: user.id, avatar_url: publicUrl });
+    await admin.from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id);
   }
 
   return NextResponse.json({ url: publicUrl });

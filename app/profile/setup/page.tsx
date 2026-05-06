@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { AvatarCropUpload } from '@/components/AvatarCropUpload';
+import { slugifyUsername } from '@/lib/utils/username';
 
 const COUNTRIES = [
   'United Kingdom','United States','Australia','Austria','Belgium','Canada','Czech Republic','Denmark','Finland',
@@ -32,6 +33,7 @@ export default function ProfileSetupPage() {
   const [step, setStep] = useState(1);
   const [userId, setUserId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   // Fields
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -44,29 +46,45 @@ export default function ProfileSetupPage() {
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) { router.push('/signin'); return; }
 
-      // Check if profile already exists with a username — if so, skip setup
-      const { data: profile } = await supabase.from('profiles').select('username, full_name, avatar_url, country').eq('id', data.user.id).maybeSingle();
-      if (profile?.username) { router.push(`/profile/${profile.username}`); return; }
+      // Load existing profile data so refresh doesn't lose progress
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('username, full_name, avatar_url, country, specialisation')
+        .eq('id', data.user.id)
+        .maybeSingle();
 
-      // If profile exists with a name but no username (partial setup), auto-fix it
-      if (profile?.full_name && !profile.username) {
-        const autoUsername = profile.full_name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-        if (autoUsername) {
-          await supabase.from('profiles').update({
-            username: autoUsername,
-            country: profile.country || 'United Kingdom',
-          }).eq('id', data.user.id);
-          router.push(`/profile/${autoUsername}`);
-          return;
-        }
+      // If profile is fully set up (has username + country), skip setup
+      if (profile?.username && profile?.country) {
+        router.push(`/profile/${profile.username}`);
+        return;
       }
 
+      // Pre-fill fields from whatever we already have (OAuth data, partial save, etc.)
       const meta = data.user.user_metadata;
       setUserId(data.user.id);
-      setFullName(meta?.full_name ?? '');
-      if (profile?.avatar_url) setAvatarUrl(profile.avatar_url);
+      setFullName(profile?.full_name || meta?.full_name || meta?.name || '');
+      setAvatarUrl(profile?.avatar_url || meta?.avatar_url || meta?.picture || null);
+      setCountry(profile?.country || '');
+      setSpecialisation((profile as any)?.specialisation || '');
+
+      // If they already have a name + avatar, skip to step 3 (country)
+      if ((profile?.full_name || meta?.full_name) && profile?.avatar_url) {
+        setStep(3);
+      } else if (profile?.avatar_url || meta?.avatar_url) {
+        // Have avatar but maybe not name — go to step 2
+        setStep(2);
+      }
+
+      setLoaded(true);
     });
   }, [router]);
+
+  // Save partial progress to DB (called between steps)
+  const saveProgress = useCallback(async (fields: { avatar_url?: string | null; full_name?: string | null }) => {
+    if (!userId) return;
+    const supabase = createSupabaseBrowserClient();
+    await supabase.from('profiles').update(fields).eq('id', userId);
+  }, [userId]);
 
   const canContinue = () => {
     if (step === 1) return true; // Avatar is optional — can skip
@@ -76,28 +94,70 @@ export default function ProfileSetupPage() {
   };
 
   const handleContinue = async () => {
-    if (step < 3) {
-      setStep(step + 1);
+    if (step === 1) {
+      // Save avatar if they uploaded one
+      if (avatarUrl) {
+        await saveProgress({ avatar_url: avatarUrl });
+      }
+      setStep(2);
       return;
     }
-    // Final step — save everything
+
+    if (step === 2) {
+      // Save name immediately so it persists on refresh
+      await saveProgress({ full_name: fullName.trim() });
+      setStep(3);
+      return;
+    }
+
+    // Final step — save everything including username
     if (!userId) return;
     setSaving(true);
     const supabase = createSupabaseBrowserClient();
+
+    // Generate a unique username with collision detection
+    const baseSlug = slugifyUsername(fullName) || `user-${userId.slice(0, 8)}`;
+    let username = baseSlug;
+
+    // Check for collisions
+    const { data: taken } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('username', baseSlug)
+      .neq('id', userId)
+      .maybeSingle();
+
+    if (taken) {
+      // Find a free suffix
+      for (let i = 2; i <= 99; i++) {
+        const candidate = `${baseSlug}-${i}`;
+        const { data: alsoTaken } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('username', candidate)
+          .neq('id', userId)
+          .maybeSingle();
+        if (!alsoTaken) { username = candidate; break; }
+      }
+    }
+
+    // Use upsert as safety net — if the callback's insert failed, this creates the profile.
+    // Matches on primary key (id), so can never create a duplicate for the same auth user.
     await supabase.from('profiles').upsert({
       id: userId,
       avatar_url: avatarUrl,
       full_name: fullName.trim(),
-      username: fullName.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+      username,
       country,
       specialisation: specialisation || null,
       is_public: true,
     });
+
     setSaving(false);
     router.push('/calendar');
   };
 
-  if (!userId) {
+  if (!loaded || !userId) {
     return <div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" /></div>;
   }
 
@@ -143,7 +203,7 @@ export default function ProfileSetupPage() {
             </div>
           )}
 
-          {/* Step 2: Name + Username */}
+          {/* Step 2: Name */}
           {step === 2 && (
             <div>
               <h1 className="text-2xl font-bold text-slate-900">Your name</h1>

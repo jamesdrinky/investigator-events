@@ -13,7 +13,7 @@ export function NewsletterBanner() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    // Don't show newsletter popup in native app or admin pages
+    // Don't show in native app or admin pages
     if (isNativeApp) return;
     if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) return;
 
@@ -26,28 +26,26 @@ export function NewsletterBanner() {
 
     let timer: ReturnType<typeof setTimeout> | null = null;
 
-    // Check if logged-in user is already subscribed
-    const checkSubscription = async () => {
+    const check = async () => {
       try {
         const { createSupabaseBrowserClient } = await import('@/lib/supabase/browser');
         const supabase = createSupabaseBrowserClient();
         const { data: { user } } = await supabase.auth.getUser();
-        if (user?.email) {
-          const { data } = await supabase
-            .from('newsletter_subscribers' as any)
-            .select('status')
-            .eq('email', user.email.toLowerCase())
-            .maybeSingle() as any;
-          if (data?.status === 'active') {
-            localStorage.setItem(STORAGE_KEY, 'subscribed');
-            return;
-          }
+
+        // Don't show to logged-in users — they can subscribe from their
+        // profile, footer, or homepage.  This also avoids issues with Apple
+        // private relay emails not matching newsletter_subscribers.
+        if (user) {
+          localStorage.setItem(STORAGE_KEY, 'subscribed');
+          return;
         }
       } catch {}
+
+      // Only show to anonymous visitors
       timer = setTimeout(() => setVisible(true), 4000);
     };
 
-    checkSubscription();
+    check();
     return () => { if (timer) clearTimeout(timer); };
   }, []);
 

@@ -8,6 +8,7 @@ import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { getCountryFlag } from '@/lib/utils/location';
 import { AvatarCropUpload } from '@/components/AvatarCropUpload';
 import { getProfileCompletion, PROFILE_VISIBILITY_THRESHOLD } from '@/lib/utils/profile-completion';
+import { slugifyUsername } from '@/lib/utils/username';
 
 const COUNTRIES = [
   'Afghanistan','Albania','Algeria','Andorra','Angola','Argentina','Armenia','Australia','Austria','Azerbaijan',
@@ -389,10 +390,27 @@ export default function EditProfilePage() {
     // Validate website URL — only allow http/https
     const sanitizedWebsite = website && /^https?:\/\//i.test(website.trim()) ? website.trim() : null;
 
-    await supabase.from('profiles').upsert({
-      id: userId,
+    // Ensure username is always set — keep existing, or generate a safe one
+    let username = existingUsername;
+    if (!username) {
+      const baseSlug = slugifyUsername(fullName) || `user-${userId.slice(0, 8)}`;
+      username = baseSlug;
+      // Check for collisions
+      const { data: taken } = await supabase
+        .from('profiles').select('id').eq('username', baseSlug).neq('id', userId).maybeSingle();
+      if (taken) {
+        for (let i = 2; i <= 99; i++) {
+          const candidate = `${baseSlug}-${i}`;
+          const { data: alsoTaken } = await supabase
+            .from('profiles').select('id').eq('username', candidate).neq('id', userId).maybeSingle();
+          if (!alsoTaken) { username = candidate; break; }
+        }
+      }
+    }
+
+    await supabase.from('profiles').update({
       full_name: (fullName || '').slice(0, 100) || null,
-      username: existingUsername || fullName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').slice(0, 50) || null,
+      username,
       country: country || null,
       specialisation: (finalSpec || '').slice(0, 100) || null,
       headline: (headline || '').slice(0, 200) || null,
@@ -403,7 +421,7 @@ export default function EditProfilePage() {
       banner_url: bannerUrl,
       badges: selectedBadges.length > 0 ? selectedBadges : null,
       is_public: true,
-    } as any);
+    } as any).eq('id', userId);
 
     // Sync associations
     await supabase.from('user_associations').delete().eq('user_id', userId);
@@ -833,10 +851,9 @@ export default function EditProfilePage() {
                       const sb = createSupabaseBrowserClient();
                       const finalSpec = useCustomTitle ? customTitle.trim() : specialisation;
                       const sanitizedWebsite = website && /^https?:\/\//i.test(website.trim()) ? website.trim() : null;
-                      await sb.from('profiles').upsert({
-                        id: userId,
+                      await sb.from('profiles').update({
                         full_name: (fullName || '').slice(0, 100) || null,
-                        username: existingUsername || fullName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').slice(0, 50) || null,
+                        username: existingUsername || slugifyUsername(fullName) || `user-${userId.slice(0, 8)}`,
                         country: country || null,
                         specialisation: (finalSpec || '').slice(0, 100) || null,
                         headline: (headline || '').slice(0, 200) || null,
@@ -847,14 +864,16 @@ export default function EditProfilePage() {
                         banner_url: bannerUrl,
                         badges: selectedBadges.length > 0 ? selectedBadges : null,
                         is_public: true,
-                      } as any);
+                      } as any).eq('id', userId);
                     }
                     const supabase = createSupabaseBrowserClient();
-                    const { error } = await supabase.auth.signInWithOAuth({
+                    // Use linkIdentity to ADD LinkedIn to the existing account
+                    // instead of signInWithOAuth which creates a new auth user
+                    const { error } = await supabase.auth.linkIdentity({
                       provider: 'linkedin_oidc',
                       options: { redirectTo: window.location.origin + '/auth/callback?next=/profile/edit' },
                     });
-                    if (error) console.error('LinkedIn OAuth error:', error);
+                    if (error) console.error('LinkedIn link error:', error);
                   }}
                   className="mt-3 flex items-center gap-2 rounded-xl bg-[#0077B5] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#006097]"
                 >

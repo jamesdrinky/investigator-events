@@ -15,25 +15,8 @@
 html { -webkit-overflow-scrolling: touch; scroll-behavior: smooth; overscroll-behavior: none; }
 body { overscroll-behavior: none; }
 
-/* Prevent bottom bar lift on iOS overscroll — fill gap below fixed nav */
-@supports (padding-bottom: env(safe-area-inset-bottom)) {
-  html { background-color: #ffffff; }
-  body::after {
-    content: '';
-    display: block;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: calc(4.5rem + env(safe-area-inset-bottom, 0px));
-    background: #ffffff;
-    z-index: 40;
-    pointer-events: none;
-  }
-  @media (min-width: 1024px) {
-    body::after { display: none; }
-  }
-}
+/* Ensure white background behind tab bar area */
+html { background-color: #ffffff; }
 
 /* Disable text selection on mobile — feels more native */
 @media (max-width: 1023px) {

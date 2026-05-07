@@ -15,8 +15,6 @@
 html { -webkit-overflow-scrolling: touch; scroll-behavior: smooth; overscroll-behavior: none; }
 body { overscroll-behavior: none; }
 
-/* Tap anywhere outside input to dismiss keyboard */
-body { cursor: pointer; }
 
 /* Ensure white background behind tab bar area */
 html { background-color: #ffffff; }

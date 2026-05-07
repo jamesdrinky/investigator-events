@@ -67,7 +67,7 @@ export function AssociationLoopSection() {
       </div>
 
       <div
-        className="relative mt-8 w-screen left-1/2 -translate-x-1/2 sm:mt-10"
+        className="pointer-events-none relative mt-8 w-screen left-1/2 -translate-x-1/2 sm:mt-10"
         style={{
           maskImage: 'linear-gradient(to right, transparent, black 2%, black 98%, transparent)',
           WebkitMaskImage: 'linear-gradient(to right, transparent, black 2%, black 98%, transparent)',

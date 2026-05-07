@@ -88,13 +88,16 @@ export async function initNativePlatform() {
   } catch {}
 
   try {
-    const { Keyboard } = await import('@capacitor/keyboard');
-    // Smooth keyboard handling — scroll input into view
-    Keyboard.addListener('keyboardWillShow', () => {
+    const { Keyboard, KeyboardResize } = await import('@capacitor/keyboard');
+    await Keyboard.setResizeMode({ mode: KeyboardResize.Body });
+    await Keyboard.setScroll({ isDisabled: false });
+    Keyboard.addListener('keyboardWillShow', (info) => {
       document.body.classList.add('keyboard-open');
+      document.documentElement.style.setProperty('--keyboard-height', `${info.keyboardHeight}px`);
     });
     Keyboard.addListener('keyboardWillHide', () => {
       document.body.classList.remove('keyboard-open');
+      document.documentElement.style.setProperty('--keyboard-height', '0px');
     });
   } catch {}
 }

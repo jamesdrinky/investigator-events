@@ -5,10 +5,8 @@ const config: CapacitorConfig = {
   appName: 'Investigator Events',
   webDir: 'out',
   server: {
-    // Load from your live site — keeps all server-side features working
     url: 'https://investigatorevents.com',
     cleartext: false,
-    // Keep all navigation inside the app webview
     allowNavigation: [
       'investigatorevents.com',
       '*.investigatorevents.com',
@@ -21,20 +19,23 @@ const config: CapacitorConfig = {
     ],
   },
   ios: {
-    contentInset: 'automatic',
+    contentInset: 'always',
     preferredContentMode: 'mobile',
     scheme: 'Investigator Events',
+    scrollEnabled: true,
+    allowsLinkPreview: false,
   },
   plugins: {
     SplashScreen: {
       launchAutoHide: true,
-      launchShowDuration: 2000,
+      launchShowDuration: 1500,
       backgroundColor: '#FFFFFF',
       showSpinner: false,
     },
     StatusBar: {
+      overlaysWebView: true,
       style: 'LIGHT',
-      backgroundColor: '#0f172a',
+      backgroundColor: '#00000000',
     },
     Keyboard: {
       resizeOnFullScreen: true,

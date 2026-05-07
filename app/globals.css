@@ -78,6 +78,13 @@ html, body { background-color: #f8fafc; }
   html { background-color: #ffffff; }
 }
 
+/* Hide bottom tab bar when keyboard is open */
+body.keyboard-open nav[class*="fixed bottom-0"] { display: none !important; }
+body.keyboard-open body::after { display: none !important; }
+
+/* Keyboard height CSS variable for layout adjustments */
+:root { --keyboard-height: 0px; }
+
 /* Thin scrollbar — visible but unobtrusive */
 html { scrollbar-width: thin; scrollbar-color: rgba(148,163,184,0.3) transparent; }
 html::-webkit-scrollbar { width: 6px; }

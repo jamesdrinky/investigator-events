@@ -11,6 +11,7 @@ import { PageTransition } from '@/components/PageTransition';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { TopLoadingBar } from '@/components/TopLoadingBar';
 import { GlobalHaptics } from '@/components/GlobalHaptics';
+import { NativeInit } from '@/components/NativeInit';
 import './globals.css';
 
 const sans = Plus_Jakarta_Sans({
@@ -69,6 +70,7 @@ export default function RootLayout({
         <CookieBanner />
         <BackToTop />
         <GlobalHaptics />
+        <NativeInit />
       </body>
     </html>
   );

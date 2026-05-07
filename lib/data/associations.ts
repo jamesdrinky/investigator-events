@@ -261,7 +261,7 @@ export const associationRecords: AssociationRecord[] = [
     region: 'Europe',
     website: 'https://www.collegidetectius.org',
     aliases: ['CODPCAT', 'Col·legi Oficial de Detectius Privats de Catalunya'],
-    logoFileName: 'codpcat.png'
+    logoFileName: 'codpcat.jpg'
   },
   {
     slug: 'apdpe',

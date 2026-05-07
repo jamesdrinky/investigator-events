@@ -242,12 +242,28 @@ export function LoggedInHome() {
     });
   }, []);
 
-  // Don't render anything for logged-out users
+  // Don't render anything for logged-out users — marketing page shows instead
   if (!loading && !user) return null;
 
-  // While loading, don't render anything — marketing page shows as fallback for logged-out,
-  // logged-in users see a brief blank before dashboard appears (no flash)
-  if (loading) return null;
+  // Show dashboard skeleton while loading — prevents flash to marketing page
+  if (loading) return (
+    <div className="min-h-screen animate-pulse bg-white px-4 pt-6 pb-24">
+      <div className="flex items-center gap-3">
+        <div className="h-12 w-12 rounded-full bg-slate-100" />
+        <div>
+          <div className="h-5 w-40 rounded bg-slate-100" />
+          <div className="mt-1.5 h-3 w-56 rounded bg-slate-50" />
+        </div>
+      </div>
+      <div className="mt-6 grid grid-cols-4 gap-3">
+        {[1,2,3,4].map(i => <div key={i} className="h-16 rounded-xl bg-slate-50" />)}
+      </div>
+      <div className="mt-8 h-5 w-32 rounded bg-slate-100" />
+      <div className="mt-4 space-y-3">
+        {[1,2,3,4,5].map(i => <div key={i} className="h-16 rounded-xl bg-slate-50" />)}
+      </div>
+    </div>
+  );
 
   const firstName = profile?.full_name?.split(' ')[0] ?? 'there';
   const totalUnread = unreadNotifs + unreadMessages;

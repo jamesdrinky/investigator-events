@@ -1,3 +1,4 @@
+import { unstable_cache } from 'next/cache';
 import { createSupabasePublicServerClient } from '@/lib/supabase/public';
 import type { Database } from '@/lib/types/database';
 import { slugifyEventTitle } from '@/lib/utils/event-slugs';
@@ -92,13 +93,20 @@ async function fetchRawEvents(): Promise<CompatEventRow[]> {
   return (data ?? []) as CompatEventRow[];
 }
 
-async function fetchVisibleEvents(): Promise<EventItem[]> {
-  const rows = await fetchRawEvents();
+const fetchVisibleEventsCached = unstable_cache(
+  async (): Promise<EventItem[]> => {
+    const rows = await fetchRawEvents();
+    return rows
+      .filter((row) => row.approved !== false)
+      .map(mapEventRowToItem)
+      .filter((event): event is EventItem => event !== null);
+  },
+  ['visible-events'],
+  { revalidate: 60 } // Cache for 60 seconds
+);
 
-  return rows
-    .filter((row) => row.approved !== false)
-    .map(mapEventRowToItem)
-    .filter((event): event is EventItem => event !== null);
+async function fetchVisibleEvents(): Promise<EventItem[]> {
+  return fetchVisibleEventsCached();
 }
 
 export async function fetchFeaturedEvents(limit = 6): Promise<EventItem[]> {

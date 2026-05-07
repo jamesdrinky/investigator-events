@@ -7,7 +7,7 @@ const KNOWN_ASSOCIATIONS = [
   'ABI','WAD','IKD','CII','Intellenet','FEDERPOL','BuDEG','SNARP','EURODET',
   'NCAPI','NCISS','FALI','CALI','TALI','FEWA','NFES','PSLD','LIDEPPE',
   'ANDR','HDA','IBPI','DAF','SYL','FDDE','CKDS','FAPI','FSPD','SFPP',
-  'APDPE','APDU','IAIACE','DeZRS','SAD','ARD','PDPR','ODV','NALI','ALDONYS','WAPI','SPI',
+  'APDPE','APDU','CODPCAT','IAIACE','DeZRS','SAD','ARD','PDPR','ODV','NALI','ALDONYS','WAPI','SPI',
 ];
 
 // Event-specific URLs override the default association website when available

@@ -295,14 +295,14 @@ export function SubmitEventForm({
             <div className="flex flex-1 gap-2">
               <select name="association" defaultValue="" className="flex-1 border-0 bg-transparent text-sm text-slate-900 focus:outline-none">
                 <option value="">Association (optional)</option>
-                {['ABI','WAD','IKD','CII','Intellenet','FEDERPOL','BuDEG','SNARP','EURODET','NCAPI','NCISS','FALI','CALI','TALI','FEWA','NFES','PSLD','LIDEPPE','ANDR','HDA','IBPI','DAF','SYL','FDDE','CKDS','FAPI','FSPD','SFPP','APDPE','APDU','IAIACE','DeZRS','SAD','ARD','PDPR','ALDONYS','NALI','ODV','WAPI','SPI'].sort().map((a) => (
+                {['ABI','WAD','IKD','CII','Intellenet','FEDERPOL','BuDEG','SNARP','EURODET','NCAPI','NCISS','FALI','CALI','TALI','FEWA','NFES','PSLD','LIDEPPE','ANDR','HDA','IBPI','DAF','SYL','FDDE','CKDS','FAPI','FSPD','SFPP','APDPE','APDU','CODPCAT','IAIACE','DeZRS','SAD','ARD','PDPR','ALDONYS','NALI','ODV','WAPI','SPI'].sort().map((a) => (
                   <option key={a} value={a}>{a}</option>
                 ))}
                 <option value="other">Other (specify in notes)</option>
               </select>
               <select name="co_association" defaultValue="" className="flex-1 border-0 bg-transparent text-sm text-slate-900 focus:outline-none">
                 <option value="">Co-host (optional)</option>
-                {['ABI','WAD','IKD','CII','Intellenet','FEDERPOL','BuDEG','SNARP','EURODET','NCAPI','NCISS','FALI','CALI','TALI','FEWA','NFES','PSLD','LIDEPPE','ANDR','HDA','IBPI','DAF','SYL','FDDE','CKDS','FAPI','FSPD','SFPP','APDPE','APDU','IAIACE','DeZRS','SAD','ARD','PDPR','ALDONYS','NALI','ODV','WAPI','SPI'].sort().map((a) => (
+                {['ABI','WAD','IKD','CII','Intellenet','FEDERPOL','BuDEG','SNARP','EURODET','NCAPI','NCISS','FALI','CALI','TALI','FEWA','NFES','PSLD','LIDEPPE','ANDR','HDA','IBPI','DAF','SYL','FDDE','CKDS','FAPI','FSPD','SFPP','APDPE','APDU','CODPCAT','IAIACE','DeZRS','SAD','ARD','PDPR','ALDONYS','NALI','ODV','WAPI','SPI'].sort().map((a) => (
                   <option key={a} value={a}>{a}</option>
                 ))}
                 <option value="other">Other (specify in notes)</option>

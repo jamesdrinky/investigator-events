@@ -47,6 +47,7 @@ const associationBrandingRecords: AssociationBrandingRecord[] = [
   { name: 'APDU', shortName: 'APDU', aliases: ['APDU'], logoFileName: 'apdu.png' },
   { name: 'FAPI', shortName: 'FAPI', aliases: ['FAPI'], logoFileName: 'fapi.png' },
   { name: 'FSPD', shortName: 'FSPD', aliases: ['FSPD'], logoFileName: 'fspd.png' },
+  { name: 'CODPCAT', shortName: 'CODPCAT', aliases: ['CODPCAT', 'Col·legi Oficial de Detectius Privats de Catalunya'], logoFileName: 'codpcat.png' },
   { name: 'IAIACE', shortName: 'IAIACE', aliases: ['IAIACE'], logoFileName: 'iaiace.png' },
   { name: 'SFPP', shortName: 'SFPP', aliases: ['SFPP'], logoFileName: 'sfpp.png' },
   { name: 'CALI', shortName: 'CALI', aliases: ['CALI', 'California Association of Licensed Investigators'], logoFileName: 'cali.png' },

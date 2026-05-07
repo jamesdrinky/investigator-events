@@ -254,6 +254,16 @@ export const associationRecords: AssociationRecord[] = [
   },
   // ── Additional European ──
   {
+    slug: 'codpcat',
+    shortName: 'CODPCAT',
+    name: "Col·legi Oficial de Detectius Privats de Catalunya",
+    country: 'Spain',
+    region: 'Europe',
+    website: 'https://www.collegidetectius.org',
+    aliases: ['CODPCAT', 'Col·legi Oficial de Detectius Privats de Catalunya'],
+    logoFileName: 'codpcat.png'
+  },
+  {
     slug: 'apdpe',
     shortName: 'APDPE',
     name: 'APDPE',
@@ -297,7 +307,7 @@ export const associationRecords: AssociationRecord[] = [
     slug: 'iaiace',
     shortName: 'IAIACE',
     name: 'IAIACE',
-    country: 'Belgium',
+    country: 'Ukraine',
     region: 'Europe',
     website: 'https://www.iaiace.be',
     aliases: ['IAIACE'],

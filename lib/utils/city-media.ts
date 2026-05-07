@@ -82,6 +82,7 @@ const cityImageMap: Record<string, string> = {
   'Downey, CA': 'la.jpg',
   'Ontario': 'toronto.avif',
   'Toronto': 'toronto.avif',
+  'Barcelona': 'barcelona.jpg',
   'Online': 'online.png',
   'Welch, MN': 'minneapolis.jpg',
 };

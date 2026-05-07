@@ -318,6 +318,7 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
             description: event.description,
             website: event.website,
             featured: event.featured,
+            image_path: event.image_path,
           }}
         />
       )}

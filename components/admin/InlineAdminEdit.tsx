@@ -19,6 +19,7 @@ interface InlineAdminEditProps {
     description: string;
     website: string;
     featured: boolean;
+    image_path?: string;
   };
 }
 
@@ -44,6 +45,7 @@ export function InlineAdminEdit({ eventId, initialData }: InlineAdminEditProps) 
       description: data.description,
       website: data.website,
       featured: data.featured,
+      image_path: data.image_path || null,
     }).eq('id', eventId);
     setSaving(false);
     setSaved(true);
@@ -100,6 +102,7 @@ export function InlineAdminEdit({ eventId, initialData }: InlineAdminEditProps) 
               className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-300 focus:bg-white"
             />
           </div>
+          <Field label="Image path (e.g. /cities/london.jpg or full URL)" value={data.image_path ?? ''} onChange={(v) => setData({ ...data, image_path: v })} />
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"

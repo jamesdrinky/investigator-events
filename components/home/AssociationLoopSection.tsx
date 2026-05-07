@@ -57,7 +57,7 @@ function LoopRow({ logos, direction }: { logos: typeof ROW_1; direction: 'left' 
 
 export function AssociationLoopSection() {
   return (
-    <section className="relative overflow-hidden py-16 sm:py-20">
+    <section className="relative overflow-hidden py-16 sm:py-20" style={{ touchAction: 'pan-y' }}>
       <div className="container-shell relative">
         <Reveal>
           <p className="text-center text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400 sm:text-base">
@@ -67,7 +67,7 @@ export function AssociationLoopSection() {
       </div>
 
       <div
-        className="pointer-events-none relative mt-8 w-screen left-1/2 -translate-x-1/2 sm:mt-10"
+        className="relative mt-8 w-screen left-1/2 -translate-x-1/2 sm:mt-10"
         style={{
           maskImage: 'linear-gradient(to right, transparent, black 2%, black 98%, transparent)',
           WebkitMaskImage: 'linear-gradient(to right, transparent, black 2%, black 98%, transparent)',

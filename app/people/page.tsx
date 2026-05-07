@@ -204,13 +204,12 @@ function PeoplePageInner() {
             >
               <Users className="h-4 w-4" /> Discover
             </button>
-            <button
-              type="button"
-              onClick={() => setTab('reviews')}
-              className={`flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold transition sm:px-5 sm:text-sm ${tab === 'reviews' ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-[0_0_16px_rgba(245,158,11,0.4)]' : 'text-amber-600 hover:text-amber-700'}`}
+            <Link
+              href="/reviews"
+              className="flex shrink-0 items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3.5 py-2 text-xs font-semibold text-white shadow-[0_0_16px_rgba(245,158,11,0.4),0_0_6px_rgba(249,115,22,0.3)] transition hover:brightness-110 sm:px-5 sm:text-sm"
             >
               <Star className="h-4 w-4" /> Reviews
-            </button>
+            </Link>
           </div>
 
           {/* Quick links — desktop only */}
@@ -253,8 +252,6 @@ function PeoplePageInner() {
               </div>
             ))}
           </div>
-        ) : tab === 'reviews' ? (
-          <ReviewsTab />
         ) : tab === 'lfg' ? (
           <CaseReferralBoard />
         ) : tab === 'feed' ? (

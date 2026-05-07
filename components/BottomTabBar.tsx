@@ -54,7 +54,7 @@ export function BottomTabBar() {
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200/80 bg-white lg:hidden"
-      style={{ paddingBottom: 'calc(max(env(safe-area-inset-bottom, 0px), 8px) + 50px)', marginBottom: '-50px' }}
+      style={{ paddingBottom: 'env(safe-area-inset-bottom, 8px)' }}
     >
       <div className="flex items-center justify-around px-2">
         {tabs.map((tab) => {

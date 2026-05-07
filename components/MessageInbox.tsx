@@ -239,16 +239,37 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
     return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
   };
 
+  // Handle keyboard on mobile — adjust layout when keyboard opens
+  const [keyboardOffset, setKeyboardOffset] = useState(0);
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.visualViewport) return;
+    const vv = window.visualViewport;
+    const onResize = () => {
+      // When keyboard opens, visualViewport.height shrinks
+      const offset = window.innerHeight - vv!.height;
+      setKeyboardOffset(offset > 50 ? offset : 0);
+      // Auto-scroll to bottom when keyboard opens
+      if (offset > 50) {
+        setTimeout(() => {
+          const container = messagesContainerRef.current;
+          if (container) container.scrollTop = container.scrollHeight;
+        }, 100);
+      }
+    };
+    vv.addEventListener('resize', onResize);
+    return () => vv.removeEventListener('resize', onResize);
+  }, []);
+
   if (!userId) return <div className="flex min-h-[60vh] items-center justify-center"><p className="text-sm text-slate-400">Please sign in to use messaging.</p></div>;
 
   return (
-    <div className="relative mx-auto flex h-full w-full max-w-5xl overflow-hidden rounded-2xl border border-white/10 bg-slate-950 shadow-2xl shadow-black/40">
-      {/* Ambient glow effects */}
-      <div className="pointer-events-none absolute -left-32 -top-32 h-80 w-80 rounded-full bg-indigo-500/10 blur-[100px]" />
-      <div className="pointer-events-none absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-purple-500/8 blur-[100px]" />
+    <div
+      className="relative mx-auto flex w-full max-w-5xl flex-1 overflow-hidden bg-slate-950 sm:rounded-2xl sm:border sm:border-white/10 sm:shadow-2xl sm:shadow-black/40"
+      style={keyboardOffset > 0 ? { marginBottom: keyboardOffset, height: `calc(100% - ${keyboardOffset}px)` } : undefined}
+    >
 
       {/* Left: conversation list */}
-      <div className={`relative w-full flex-shrink-0 border-r border-white/5 sm:w-80 ${activeChat ? 'hidden sm:block' : ''}`}>
+      <div className={`relative flex w-full flex-shrink-0 flex-col border-r border-white/5 sm:w-80 ${activeChat ? 'hidden sm:flex' : ''}`}>
         <div className="border-b border-white/5 p-4">
           <h2 className="text-lg font-bold text-white">Messages</h2>
           <div className="relative mt-3">
@@ -272,7 +293,7 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
           </div>
         </div>
 
-        <div className="overflow-y-auto" style={{ height: 'calc(100% - 7rem)' }}>
+        <div className="min-h-0 flex-1 overflow-y-auto">
           {conversations.length === 0 ? (
             <p className="p-6 text-center text-sm text-slate-500">No conversations yet. Search for someone to message.</p>
           ) : (
@@ -444,11 +465,13 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
                   )}
                 </div>
                 <input
-                  className="flex-1 rounded-xl border border-white/5 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition focus:border-indigo-500/40 focus:bg-white/8"
+                  className="flex-1 rounded-xl border border-white/5 bg-white/5 px-4 py-2.5 text-[16px] text-white placeholder-slate-500 outline-none transition focus:border-indigo-500/40 focus:bg-white/8"
                   value={newMsg}
                   onChange={(e) => setNewMsg(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
                   placeholder="Message..."
+                  autoComplete="off"
+                  autoCorrect="on"
                 />
                 <button
                   type="button"

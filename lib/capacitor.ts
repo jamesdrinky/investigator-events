@@ -83,6 +83,7 @@ export async function initNativePlatform() {
 
   try {
     const { StatusBar, Style } = await import('@capacitor/status-bar');
+    await StatusBar.setOverlaysWebView({ overlay: true });
     await StatusBar.setStyle({ style: Style.Light });
   } catch {}
 

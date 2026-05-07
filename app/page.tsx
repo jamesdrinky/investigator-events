@@ -54,15 +54,16 @@ export default async function HomePage() {
     { label: 'Associations', value: `${uniqueAssociations - 1}+` }
   ];
 
+  if (hasAuthCookie) {
+    return (
+      <div className="relative flex flex-col">
+        <LoggedInHome />
+      </div>
+    );
+  }
+
   return (
     <div className="relative flex flex-col">
-      {/* Hide marketing sections immediately if auth cookie present (prevents flash) */}
-      {hasAuthCookie && (
-        <style dangerouslySetInnerHTML={{ __html: `.mesh-blob { display: none !important; } [data-homepage-section] { display: none !important; }` }} />
-      )}
-
-      {/* ── Personalised home for logged-in mobile users ── */}
-      <LoggedInHome />
 
       {/* ── Stripe-style animated gradient mesh blobs ── */}
       <div className="mesh-blob mesh-blob-1" aria-hidden="true" />

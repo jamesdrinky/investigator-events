@@ -383,7 +383,7 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
             </div>
 
             {/* Input */}
-            <div className="border-t border-white/5 bg-slate-950/80 p-3 backdrop-blur-sm">
+            <div className="flex-shrink-0 border-t border-white/5 bg-slate-950 p-3" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom, 0.75rem))' }}>
               <div className="flex items-center gap-2">
                 <input
                   ref={fileInputRef}

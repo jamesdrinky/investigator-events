@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import Link from 'next/link';
 import { Home, Calendar, Users, User, MessageCircle } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { hapticTap } from '@/lib/capacitor';
@@ -16,9 +15,15 @@ const tabs = [
 ];
 
 export function BottomTabBar() {
+  const router = useRouter();
   const currentPathname = usePathname();
   const [profilePath, setProfilePath] = useState('/signin');
   const [unreadCount, setUnreadCount] = useState(0);
+
+  // Prefetch all tab routes on mount for instant navigation
+  useEffect(() => {
+    tabs.forEach((tab) => router.prefetch(tab.href as any));
+  }, [router]);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -59,15 +64,15 @@ export function BottomTabBar() {
           const showBadge = tab.badge && unreadCount > 0;
 
           return (
-            <Link
+            <button
               key={tab.label}
-              href={href as any}
-              prefetch={true}
-              onClick={(e) => {
+              type="button"
+              onClick={() => {
                 hapticTap();
                 if (active) {
-                  e.preventDefault();
                   window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                  router.push(href as any);
                 }
               }}
               className={`flex flex-1 flex-col items-center gap-0.5 py-2 transition-colors ${
@@ -89,7 +94,7 @@ export function BottomTabBar() {
               }`}>
                 {tab.label}
               </span>
-            </Link>
+            </button>
           );
         })}
       </div>

@@ -172,11 +172,11 @@ function PeoplePageInner() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-white">
-      <div className="relative overflow-hidden bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_25%,#f0e8ff_50%,#f4f0ff_75%,#f8fbff_100%)] pb-5 pt-20 sm:pb-10 sm:pt-32">
+      <div className="relative overflow-hidden bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_25%,#f0e8ff_50%,#f4f0ff_75%,#f8fbff_100%)] pb-5 pt-8 sm:pb-10 sm:pt-32">
         <div className="container-shell relative text-center">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-blue-600 sm:text-xs">Community</p>
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Forum</h1>
-          <p className="mx-auto mt-3 max-w-lg text-sm text-slate-500">Share insights, promote your services, and connect with investigators worldwide.</p>
+          <p className="hidden text-[10px] font-semibold uppercase tracking-[0.34em] text-blue-600 sm:block sm:text-xs">Community</p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:mt-3 sm:text-4xl">Forum</h1>
+          <p className="mx-auto mt-2 hidden max-w-lg text-sm text-slate-500 sm:block">Share insights, promote your services, and connect with investigators worldwide.</p>
 
           {/* Tabs */}
           <div className="mx-auto mt-6 inline-flex max-w-full overflow-x-auto rounded-full border border-slate-200/80 bg-white p-1 shadow-sm [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
@@ -209,8 +209,8 @@ function PeoplePageInner() {
             </Link>
           </div>
 
-          {/* Quick links */}
-          <div className="mx-auto mt-4 flex flex-wrap items-center justify-center gap-2.5">
+          {/* Quick links — desktop only */}
+          <div className="mx-auto mt-4 hidden flex-wrap items-center justify-center gap-2.5 sm:flex">
             <Link href="/directory" className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white px-4 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:border-blue-200 hover:text-blue-600">
               <BookUser className="h-3.5 w-3.5" /> Find a PI
             </Link>

@@ -4,17 +4,29 @@ import { useEffect } from 'react';
 import { isNativeApp } from '@/lib/capacitor';
 
 /**
- * Global haptic feedback — fires a light tap on every interactive element press.
+ * Global haptic feedback + keyboard dismiss.
  * Mounted once in the root layout. No-ops on web.
  */
 export function GlobalHaptics() {
   useEffect(() => {
-    if (!isNativeApp) return;
+    // Keyboard dismiss — tap anywhere non-interactive to blur active input
+    const dismissHandler = (e: TouchEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('input, textarea, select, [contenteditable]')) return;
+      const active = document.activeElement as HTMLElement;
+      if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'SELECT')) {
+        active.blur();
+      }
+    };
+    document.addEventListener('touchstart', dismissHandler, { passive: true });
+
+    if (!isNativeApp) {
+      return () => document.removeEventListener('touchstart', dismissHandler);
+    }
 
     let Haptics: any = null;
     let ImpactStyle: any = null;
 
-    // Pre-load the haptics module so there's no delay on first tap
     import('@capacitor/haptics').then((mod) => {
       Haptics = mod.Haptics;
       ImpactStyle = mod.ImpactStyle;
@@ -30,7 +42,10 @@ export function GlobalHaptics() {
     };
 
     document.addEventListener('pointerdown', handler, { passive: true });
-    return () => document.removeEventListener('pointerdown', handler);
+    return () => {
+      document.removeEventListener('pointerdown', handler);
+      document.removeEventListener('touchstart', dismissHandler);
+    };
   }, []);
 
   return null;

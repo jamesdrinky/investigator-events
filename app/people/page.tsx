@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, UserPlus, UserCheck, Users, TrendingUp, Globe, BookUser, XCircle, MapPin, Briefcase, Calendar, Mail, ArrowRight, Star } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { getCountryFlag } from '@/lib/utils/location';
+import { UserAvatar } from '@/components/UserAvatar';
 import { CommunityFeed } from '@/components/CommunityFeed';
 import { CaseReferralBoard } from '@/components/CaseReferralBoard';
 import dynamic from 'next/dynamic';
@@ -140,14 +140,8 @@ function PeoplePageInner() {
     const isFollowing = following.has(person.id);
     const inner = (
       <div className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white p-3 transition hover:shadow-sm">
-        <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-full border-2" style={{ borderColor: color }}>
-          {person.avatar_url ? (
-            <Image src={person.avatar_url} alt="" width={40} height={40} className="h-full w-full object-cover" />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-sm font-bold" style={{ backgroundColor: `${color}15`, color }}>
-              {(person.full_name ?? 'U').charAt(0)}
-            </div>
-          )}
+        <div className="flex-shrink-0">
+          <UserAvatar src={person.avatar_url} name={person.full_name} size={40} color={color} />
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold text-slate-900">{person.full_name}</p>
@@ -340,14 +334,8 @@ function PeoplePageInner() {
                 const card = (
                   <div className="group rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm transition hover:border-blue-200/60 hover:shadow-md">
                     <div className="flex items-center gap-4">
-                      <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-full border-2 transition group-hover:scale-105" style={{ borderColor: color }}>
-                        {p.avatar_url ? (
-                          <Image src={p.avatar_url} alt="" width={56} height={56} className="h-full w-full object-cover" />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-lg font-bold" style={{ backgroundColor: `${color}15`, color }}>
-                            {(p.full_name ?? 'U').charAt(0)}
-                          </div>
-                        )}
+                      <div className="flex-shrink-0 transition group-hover:scale-105">
+                        <UserAvatar src={p.avatar_url} name={p.full_name} size={56} color={color} />
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">

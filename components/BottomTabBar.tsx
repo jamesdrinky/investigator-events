@@ -63,9 +63,10 @@ export function BottomTabBar() {
               key={tab.label}
               href={href as any}
               prefetch={true}
-              onClick={() => {
+              onClick={(e) => {
                 hapticTap();
                 if (active) {
+                  e.preventDefault();
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
               }}

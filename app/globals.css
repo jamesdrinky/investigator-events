@@ -73,6 +73,11 @@ body { overscroll-behavior: none; }
 /* Prevent white flash between page navigations */
 html, body { background-color: #f8fafc; }
 
+/* Fill the status bar area with a matching color on iOS */
+@supports (padding-top: env(safe-area-inset-top)) {
+  html { background-color: #ffffff; }
+}
+
 /* Thin scrollbar — visible but unobtrusive */
 html { scrollbar-width: thin; scrollbar-color: rgba(148,163,184,0.3) transparent; }
 html::-webkit-scrollbar { width: 6px; }

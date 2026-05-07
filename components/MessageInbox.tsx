@@ -239,34 +239,11 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
     return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
   };
 
-  // Handle keyboard on mobile — adjust layout when keyboard opens
-  const [keyboardOffset, setKeyboardOffset] = useState(0);
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.visualViewport) return;
-    const vv = window.visualViewport;
-    const onResize = () => {
-      // When keyboard opens, visualViewport.height shrinks
-      const offset = window.innerHeight - vv!.height;
-      setKeyboardOffset(offset > 50 ? offset : 0);
-      // Auto-scroll to bottom when keyboard opens
-      if (offset > 50) {
-        setTimeout(() => {
-          const container = messagesContainerRef.current;
-          if (container) container.scrollTop = container.scrollHeight;
-        }, 100);
-      }
-    };
-    vv.addEventListener('resize', onResize);
-    return () => vv.removeEventListener('resize', onResize);
-  }, []);
-
   if (!userId) return <div className="flex min-h-[60vh] items-center justify-center"><p className="text-sm text-slate-400">Please sign in to use messaging.</p></div>;
 
   return (
-    <div
-      className="relative mx-auto flex w-full max-w-5xl flex-1 overflow-hidden bg-slate-950 sm:rounded-2xl sm:border sm:border-white/10 sm:shadow-2xl sm:shadow-black/40"
-      style={keyboardOffset > 0 ? { marginBottom: keyboardOffset, height: `calc(100% - ${keyboardOffset}px)` } : undefined}
-    >
+    <div className="relative mx-auto flex h-full w-full max-w-5xl overflow-hidden bg-slate-950 sm:rounded-2xl sm:border sm:border-white/10 sm:shadow-2xl sm:shadow-black/40">
+
 
       {/* Left: conversation list */}
       <div className={`relative flex w-full flex-shrink-0 flex-col border-r border-white/5 sm:w-80 ${activeChat ? 'hidden sm:flex' : ''}`}>

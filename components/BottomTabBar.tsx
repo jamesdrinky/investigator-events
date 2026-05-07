@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { Home, Calendar, Users, User, MessageCircle } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { hapticTap } from '@/lib/capacitor';
@@ -14,17 +16,11 @@ const tabs = [
 ];
 
 export function BottomTabBar() {
-  const [pathname, setPathname] = useState('');
+  const currentPathname = usePathname();
   const [profilePath, setProfilePath] = useState('/signin');
   const [unreadCount, setUnreadCount] = useState(0);
 
-  const syncPathname = useCallback(() => {
-    setPathname(window.location.pathname);
-  }, []);
-
   useEffect(() => {
-    syncPathname();
-
     const supabase = createSupabaseBrowserClient();
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
@@ -42,25 +38,12 @@ export function BottomTabBar() {
         });
       }
     });
-
-    // Track pathname changes from all sources
-    window.addEventListener('popstate', syncPathname);
-    // MutationObserver to catch Next.js client-side navigations
-    const observer = new MutationObserver(syncPathname);
-    observer.observe(document.querySelector('head') ?? document.documentElement, {
-      childList: true, subtree: true
-    });
-
-    return () => {
-      window.removeEventListener('popstate', syncPathname);
-      observer.disconnect();
-    };
-  }, [syncPathname]);
+  }, []);
 
   const isActive = (href: string) => {
-    if (href === '/') return pathname === '/';
-    if (href === '/profile') return pathname.startsWith('/profile');
-    return pathname.startsWith(href);
+    if (href === '/') return currentPathname === '/';
+    if (href === '/profile') return currentPathname.startsWith('/profile');
+    return currentPathname.startsWith(href);
   };
 
   return (
@@ -76,13 +59,13 @@ export function BottomTabBar() {
           const showBadge = tab.badge && unreadCount > 0;
 
           return (
-            <a
+            <Link
               key={tab.label}
-              href={href}
-              onClick={(e) => {
+              href={href as any}
+              prefetch={true}
+              onClick={() => {
                 hapticTap();
                 if (active) {
-                  e.preventDefault();
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
               }}
@@ -105,7 +88,7 @@ export function BottomTabBar() {
               }`}>
                 {tab.label}
               </span>
-            </a>
+            </Link>
           );
         })}
       </div>

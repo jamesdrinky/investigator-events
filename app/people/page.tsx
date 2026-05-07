@@ -333,7 +333,7 @@ function PeoplePageInner() {
             </p>
 
             {/* Cards grid */}
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((p) => {
                 const color = p.profile_color ?? '#3b82f6';
                 const isFollowing = following.has(p.id);
@@ -363,7 +363,7 @@ function PeoplePageInner() {
                       </div>
                     </div>
                     <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
-                      <span className="text-xs text-slate-400">{followerCounts[p.id] ?? 0} follower{(followerCounts[p.id] ?? 0) !== 1 ? 's' : ''}</span>
+                      <span className="text-xs text-slate-400">{followerCounts[p.id] ?? 0} connection{(followerCounts[p.id] ?? 0) !== 1 ? 's' : ''}</span>
                       {userId && userId !== p.id && (
                         <button
                           type="button"
@@ -373,13 +373,13 @@ function PeoplePageInner() {
                             isFollowing ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' : 'bg-blue-600 text-white hover:bg-blue-700'
                           }`}
                         >
-                          {isFollowing ? <><UserCheck className="h-3.5 w-3.5" /> Following</> : <><UserPlus className="h-3.5 w-3.5" /> Follow</>}
+                          {isFollowing ? <><UserCheck className="h-3.5 w-3.5" /> Connected</> : <><UserPlus className="h-3.5 w-3.5" /> Connect</>}
                         </button>
                       )}
                     </div>
                   </div>
                 );
-                return p.username ? <Link key={p.id} href={`/profile/${p.username}` as any} className="block">{card}</Link> : <div key={p.id}>{card}</div>;
+                return p.username ? <Link key={p.id} href={`/profile/${p.username}` as any} className="block min-w-0">{card}</Link> : <div key={p.id} className="min-w-0">{card}</div>;
               })}
               {filtered.length === 0 && (
                 <div className="col-span-full py-16 text-center">

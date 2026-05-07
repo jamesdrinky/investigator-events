@@ -212,11 +212,11 @@ export default function MyConnectionsPage() {
           )}
         </section>
 
-        {/* ── Followers ── */}
+        {/* ── Connecters ── */}
         {followers.length > 0 && (
           <section className="mt-10">
             <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-slate-400">
-              <UserPlus className="h-4 w-4" /> Followers ({followers.length})
+              <UserPlus className="h-4 w-4" /> Connecters ({followers.length})
             </h2>
             <div className="mt-3 space-y-2">
               {followers.map(person => (
@@ -233,7 +233,7 @@ export default function MyConnectionsPage() {
                           : 'bg-blue-600 text-white hover:bg-blue-700'
                       }`}
                     >
-                      {following.has(person.id) ? 'Following' : 'Follow back'}
+                      {following.has(person.id) ? 'Connected' : 'Connect back'}
                     </button>
                   }
                 />
@@ -264,8 +264,8 @@ export default function MyConnectionsPage() {
                           : 'bg-blue-600 text-white hover:bg-blue-700'
                       }`}
                     >
-                      {following.has(person.id) ? 'Following' : (
-                        <><UserPlus className="h-3 w-3" /> Follow</>
+                      {following.has(person.id) ? 'Connected' : (
+                        <><UserPlus className="h-3 w-3" /> Connect</>
                       )}
                     </button>
                   }

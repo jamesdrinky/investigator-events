@@ -165,7 +165,7 @@ function PeoplePageInner() {
               isFollowing ? 'bg-blue-50 text-blue-600' : 'bg-blue-600 text-white hover:bg-blue-700'
             }`}
           >
-            {isFollowing ? 'Following' : 'Follow'}
+            {isFollowing ? 'Connected' : 'Connect'}
           </button>
         )}
       </div>

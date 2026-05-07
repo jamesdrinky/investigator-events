@@ -61,7 +61,7 @@ export default function RootLayout({
         <div className="relative flex min-h-screen flex-col">
           <TopLoadingBar />
           <Navbar />
-          <main className="flex-1 overflow-x-hidden pb-[4.5rem] lg:pb-0"><PageTransition>{children}</PageTransition></main>
+          <main className="flex-1 pb-[4.5rem] lg:pb-0"><PageTransition>{children}</PageTransition></main>
           <Footer className="hidden lg:block" />
         </div>
         <MobileBackButton />

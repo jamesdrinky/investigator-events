@@ -81,6 +81,18 @@ export async function unregisterPushToken(supabase: any) {
 export async function initNativePlatform() {
   if (!isNativeApp) return;
 
+  // Fix white screen on app resume — reload if page is blank
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      // Check if body is empty (white screen) and reload
+      setTimeout(() => {
+        if (!document.body.children.length || document.body.innerHTML.trim().length < 100) {
+          window.location.reload();
+        }
+      }, 300);
+    }
+  });
+
   try {
     const { StatusBar, Style } = await import('@capacitor/status-bar');
     await StatusBar.setOverlaysWebView({ overlay: true });

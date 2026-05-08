@@ -205,7 +205,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
     admin.from('association_suggestions' as any).select('*').eq('status', 'pending').order('created_at', { ascending: false }),
     admin.from('newsletter_subscribers' as never).select('id', { count: 'exact', head: true }),
     admin.from('newsletter_sends' as never).select('*').order('sent_at', { ascending: false }).limit(5) as any,
-    admin.from('newsletter_subscribers' as never).select('email, status, region, created_at, confirmed_at').order('created_at', { ascending: false }).limit(20) as any,
+    admin.from('newsletter_subscribers' as never).select('email, status, region, created_at, confirmed_at').order('created_at', { ascending: false }).limit(500) as any,
     admin.from('profiles' as never).select('*').order('created_at', { ascending: false }).limit(200) as any,
   ]);
   const associationPages = (assocPagesResult.data ?? []) as { id: string; name: string; slug: string }[];
@@ -349,16 +349,63 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
           )}
 
           {/* Pending Submissions */}
-          {activeTab === 'submissions' && (
+          {activeTab === 'submissions' && (() => {
+            const subsSort = searchParams?.sort ?? 'newest';
+            const subsQuery = (searchParams?.q ?? '').trim().toLowerCase();
+            let visibleSubs = pendingSubmissions;
+            if (subsQuery) {
+              visibleSubs = visibleSubs.filter((s) => {
+                const haystack = [s.eventName, s.city, s.country, s.organiser, s.contactEmail].filter(Boolean).join(' ').toLowerCase();
+                return haystack.includes(subsQuery);
+              });
+            }
+            visibleSubs = [...visibleSubs].sort((a, b) => {
+              if (subsSort === 'oldest') return (a.startDate ?? '').localeCompare(b.startDate ?? '');
+              return (b.startDate ?? '').localeCompare(a.startDate ?? '');
+            });
+            const buildSubsHref = (overrides: { q?: string; sort?: string }) => {
+              const params = new URLSearchParams();
+              params.set('tab', 'submissions');
+              const next = { q: subsQuery, sort: subsSort, ...overrides };
+              if (next.q) params.set('q', next.q);
+              if (next.sort && next.sort !== 'newest') params.set('sort', next.sort);
+              return `/admin?${params.toString()}`;
+            };
+            return (
             <div className="space-y-4">
-              {pendingSubmissions.length === 0 ? (
+              {pendingSubmissions.length > 0 && (
+                <div className="rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm">
+                  <form action="/admin" method="get" className="flex flex-wrap items-center gap-2">
+                    <input type="hidden" name="tab" value="submissions" />
+                    {subsSort && subsSort !== 'newest' && <input type="hidden" name="sort" value={subsSort} />}
+                    <input
+                      type="search"
+                      name="q"
+                      defaultValue={subsQuery}
+                      placeholder="Search submissions..."
+                      className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-blue-400"
+                    />
+                    <button type="submit" className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800">Search</button>
+                    {subsQuery && <a href={buildSubsHref({ q: '' })} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">Clear</a>}
+                    <span className="ml-auto text-xs text-slate-400">Sort:</span>
+                    {([{ id: 'newest', label: 'Newest event date' }, { id: 'oldest', label: 'Oldest event date' }] as const).map((opt) => {
+                      const active = subsSort === opt.id;
+                      return (
+                        <a key={opt.id} href={buildSubsHref({ sort: opt.id })} className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition ${active ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>{opt.label}</a>
+                      );
+                    })}
+                  </form>
+                  <p className="mt-3 text-xs text-slate-400">Showing {visibleSubs.length} of {pendingSubmissions.length} pending submissions</p>
+                </div>
+              )}
+              {visibleSubs.length === 0 ? (
                 <div className="rounded-2xl border border-slate-200/60 bg-white p-8 text-center shadow-sm">
                   <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-400" />
-                  <p className="mt-3 text-sm font-medium text-slate-900">All caught up!</p>
-                  <p className="mt-1 text-sm text-slate-500">No pending submissions to review.</p>
+                  <p className="mt-3 text-sm font-medium text-slate-900">{pendingSubmissions.length === 0 ? 'All caught up!' : 'No matches'}</p>
+                  <p className="mt-1 text-sm text-slate-500">{pendingSubmissions.length === 0 ? 'No pending submissions to review.' : 'Try a different search.'}</p>
                 </div>
               ) : (
-                pendingSubmissions.map((submission) => (
+                visibleSubs.map((submission) => (
                   <div key={submission.id} className="overflow-hidden rounded-2xl border border-slate-200/60 bg-white shadow-sm">
                     {/* Submission header */}
                     <div className="border-b border-slate-100 bg-amber-50/50 px-6 py-4">
@@ -428,12 +475,118 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                 ))
               )}
             </div>
-          )}
+            );
+          })()}
 
           {/* All Events */}
-          {activeTab === 'events' && (
+          {activeTab === 'events' && (() => {
+            const eventsQuery = (searchParams?.q ?? '').trim().toLowerCase();
+            const eventsFilter = searchParams?.filter ?? '';
+            const eventsSort = searchParams?.sort ?? 'date_asc';
+            const todayStr = new Date().toISOString().slice(0, 10);
+            const isPast = (e: typeof events[number]) => (e.date ?? '') < todayStr;
+
+            const upcomingCount = events.filter((e) => !isPast(e)).length;
+            const pastCount = events.filter((e) => isPast(e)).length;
+            const featuredCount = events.filter((e) => e.featured).length;
+
+            let visibleEvents = events.filter((e) => {
+              if (eventsFilter === 'upcoming') return !isPast(e);
+              if (eventsFilter === 'past') return isPast(e);
+              if (eventsFilter === 'featured') return !!e.featured;
+              return true;
+            });
+            if (eventsQuery) {
+              visibleEvents = visibleEvents.filter((e) => {
+                const haystack = [e.title, e.city, e.country, e.organiser, e.association, e.category].filter(Boolean).join(' ').toLowerCase();
+                return haystack.includes(eventsQuery);
+              });
+            }
+            visibleEvents = [...visibleEvents].sort((a, b) => {
+              if (eventsSort === 'date_desc') return (b.date ?? '').localeCompare(a.date ?? '');
+              if (eventsSort === 'title') return (a.title ?? '').localeCompare(b.title ?? '');
+              return (a.date ?? '').localeCompare(b.date ?? '');
+            });
+
+            const buildEventsHref = (overrides: { filter?: string; q?: string; sort?: string }) => {
+              const params = new URLSearchParams();
+              params.set('tab', 'events');
+              const next = { filter: eventsFilter, q: eventsQuery, sort: eventsSort, ...overrides };
+              if (next.filter) params.set('filter', next.filter);
+              if (next.q) params.set('q', next.q);
+              if (next.sort && next.sort !== 'date_asc') params.set('sort', next.sort);
+              return `/admin?${params.toString()}`;
+            };
+
+            const eventChips: { id: string; label: string; count: number }[] = [
+              { id: '', label: 'All', count: events.length },
+              { id: 'upcoming', label: 'Upcoming', count: upcomingCount },
+              { id: 'past', label: 'Past', count: pastCount },
+              { id: 'featured', label: 'Featured', count: featuredCount },
+            ];
+
+            return (
             <div className="space-y-3">
-              {events.map((event) => (
+              <div className="rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm">
+                <form action="/admin" method="get" className="flex flex-wrap items-center gap-2">
+                  <input type="hidden" name="tab" value="events" />
+                  {eventsFilter && <input type="hidden" name="filter" value={eventsFilter} />}
+                  {eventsSort && eventsSort !== 'date_asc' && <input type="hidden" name="sort" value={eventsSort} />}
+                  <input
+                    type="search"
+                    name="q"
+                    defaultValue={eventsQuery}
+                    placeholder="Search events by title, city, country, organiser..."
+                    className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-blue-400"
+                  />
+                  <button type="submit" className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800">Search</button>
+                  {eventsQuery && (
+                    <a href={buildEventsHref({ q: '' })} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">Clear</a>
+                  )}
+                  <span className="ml-auto text-xs text-slate-400">Sort:</span>
+                  {([
+                    { id: 'date_asc', label: 'Soonest' },
+                    { id: 'date_desc', label: 'Latest' },
+                    { id: 'title', label: 'A–Z' },
+                  ] as const).map((opt) => {
+                    const active = eventsSort === opt.id;
+                    return (
+                      <a
+                        key={opt.id}
+                        href={buildEventsHref({ sort: opt.id })}
+                        className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition ${
+                          active ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        }`}
+                      >
+                        {opt.label}
+                      </a>
+                    );
+                  })}
+                </form>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {eventChips.map((chip) => {
+                    const active = (eventsFilter || '') === chip.id;
+                    return (
+                      <a
+                        key={chip.id || 'all'}
+                        href={buildEventsHref({ filter: chip.id })}
+                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                          active ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        }`}
+                      >
+                        {chip.label}
+                        <span className={`rounded-full px-1.5 py-0.5 text-[10px] ${active ? 'bg-white/20 text-white' : 'bg-white text-slate-500'}`}>{chip.count}</span>
+                      </a>
+                    );
+                  })}
+                </div>
+                <p className="mt-3 text-xs text-slate-400">Showing {visibleEvents.length} of {events.length} events</p>
+              </div>
+
+              {visibleEvents.length === 0 && (
+                <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-8 text-center text-sm text-slate-400">No events match this filter.</p>
+              )}
+              {visibleEvents.map((event) => (
                 <details key={event.id} className="group overflow-hidden rounded-2xl border border-slate-200/60 bg-white shadow-sm">
                   <summary className="flex cursor-pointer items-center gap-4 px-5 py-4 text-sm [&::-webkit-details-marker]:hidden">
                     <div className="min-w-0 flex-1">
@@ -492,7 +645,8 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                 </details>
               ))}
             </div>
-          )}
+            );
+          })()}
 
           {/* Advertising Inquiries */}
           {activeTab === 'verification' && (
@@ -615,15 +769,79 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
               </div>
 
               {/* Subscriber breakdown */}
+              {(() => {
+                const subQuery = (searchParams?.q ?? '').trim().toLowerCase();
+                const subFilter = searchParams?.filter ?? '';
+                const allSubs = recentSubscribers as { email: string; status: string; region: string | null; created_at: string }[];
+                const statusCounts = {
+                  all: allSubs.length,
+                  active: allSubs.filter((s) => s.status === 'active').length,
+                  pending: allSubs.filter((s) => s.status === 'pending').length,
+                  bounced: allSubs.filter((s) => s.status === 'bounced').length,
+                  unsubscribed: allSubs.filter((s) => s.status === 'unsubscribed').length,
+                };
+                let visibleSubs = allSubs.filter((s) => {
+                  if (subFilter === 'active') return s.status === 'active';
+                  if (subFilter === 'pending') return s.status === 'pending';
+                  if (subFilter === 'bounced') return s.status === 'bounced';
+                  if (subFilter === 'unsubscribed') return s.status === 'unsubscribed';
+                  return true;
+                });
+                if (subQuery) {
+                  visibleSubs = visibleSubs.filter((s) => s.email.toLowerCase().includes(subQuery));
+                }
+                const buildSubHref = (overrides: { q?: string; filter?: string }) => {
+                  const params = new URLSearchParams();
+                  params.set('tab', 'newsletter');
+                  const next = { q: subQuery, filter: subFilter, ...overrides };
+                  if (next.q) params.set('q', next.q);
+                  if (next.filter) params.set('filter', next.filter);
+                  return `/admin?${params.toString()}`;
+                };
+                const subChips: { id: string; label: string; count: number }[] = [
+                  { id: '', label: 'All', count: statusCounts.all },
+                  { id: 'active', label: 'Active', count: statusCounts.active },
+                  { id: 'pending', label: 'Pending', count: statusCounts.pending },
+                  { id: 'bounced', label: 'Bounced', count: statusCounts.bounced },
+                  { id: 'unsubscribed', label: 'Unsubscribed', count: statusCounts.unsubscribed },
+                ];
+                return (
               <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
                 <h2 className="text-lg font-bold text-slate-900">Subscribers</h2>
-                <div className="mt-3 flex gap-3">
-                  <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">{activeCount} active</span>
-                  <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">{pendingCount} pending</span>
-                  {bouncedCount > 0 && <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-700">{bouncedCount} bounced</span>}
+                <form action="/admin" method="get" className="mt-4 flex flex-wrap items-center gap-2">
+                  <input type="hidden" name="tab" value="newsletter" />
+                  {subFilter && <input type="hidden" name="filter" value={subFilter} />}
+                  <input
+                    type="search"
+                    name="q"
+                    defaultValue={subQuery}
+                    placeholder="Search by email..."
+                    className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-blue-400"
+                  />
+                  <button type="submit" className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800">Search</button>
+                  {subQuery && <a href={buildSubHref({ q: '' })} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">Clear</a>}
+                </form>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {subChips.map((chip) => {
+                    const active = (subFilter || '') === chip.id;
+                    return (
+                      <a
+                        key={chip.id || 'all'}
+                        href={buildSubHref({ filter: chip.id })}
+                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                          active ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        }`}
+                      >
+                        {chip.label}
+                        <span className={`rounded-full px-1.5 py-0.5 text-[10px] ${active ? 'bg-white/20 text-white' : 'bg-white text-slate-500'}`}>{chip.count}</span>
+                      </a>
+                    );
+                  })}
                 </div>
+                <p className="mt-3 text-xs text-slate-400">Showing {visibleSubs.length} of {allSubs.length} subscribers</p>
                 <div className="mt-4 divide-y divide-slate-100">
-                  {recentSubscribers.map((sub: any) => (
+                  {visibleSubs.length === 0 && <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-6 text-center text-sm text-slate-400">No subscribers match.</p>}
+                  {visibleSubs.map((sub: any) => (
                     <div key={sub.email} className="flex items-center justify-between gap-3 py-2.5 text-sm">
                       <div className="min-w-0">
                         <span className="truncate font-medium text-slate-900">{sub.email}</span>
@@ -642,6 +860,8 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                   ))}
                 </div>
               </div>
+                );
+              })()}
             </div>
             );
           })()}

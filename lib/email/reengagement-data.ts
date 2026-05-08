@@ -1,0 +1,144 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@/lib/types/database';
+import { getProfileCompletion } from '@/lib/utils/profile-completion';
+import type { ReengagementInput } from '@/lib/email/reengagement';
+
+const SITE = 'https://investigatorevents.com';
+
+const FIELD_HREF: Record<string, string> = {
+  full_name: `${SITE}/profile/edit`,
+  avatar_url: `${SITE}/profile/edit`,
+  headline: `${SITE}/profile/edit`,
+  country: `${SITE}/profile/edit`,
+  specialisation: `${SITE}/profile/edit`,
+  bio: `${SITE}/profile/edit`,
+  website: `${SITE}/profile/edit`,
+  banner_url: `${SITE}/profile/edit`,
+  auth_provider: `${SITE}/profile/edit`,
+  hasAssociations: `${SITE}/profile/edit`,
+  hasExperience: `${SITE}/profile/edit`,
+};
+
+interface BuildArgs {
+  admin: SupabaseClient<Database>;
+  userId: string;
+}
+
+export interface UserSnapshot {
+  userId: string;
+  email: string | null;
+  fullName: string | null;
+  username: string | null;
+  isLinkedInVerified: boolean;
+  isManuallyVerified: boolean;
+  completionScore: number;
+  input: ReengagementInput;
+}
+
+export async function buildReengagementSnapshot({ admin, userId }: BuildArgs): Promise<UserSnapshot | null> {
+  // Profile
+  const { data: profile } = await admin.from('profiles').select('*').eq('id', userId).maybeSingle();
+  if (!profile) return null;
+
+  // Email + last_sign_in_at via auth admin API
+  const { data: authData } = await admin.auth.admin.getUserById(userId);
+  const email = authData?.user?.email ?? null;
+  const lastSignInAt = authData?.user?.last_sign_in_at ?? null;
+
+  // Associations and experience flags for completion score
+  const [{ data: assocs }, { data: experiences }] = await Promise.all([
+    admin.from('user_associations').select('id').eq('user_id', userId).limit(1),
+    admin.from('work_experience').select('id').eq('user_id', userId).limit(1),
+  ]);
+  const hasAssociations = (assocs ?? []).length > 0;
+  const hasExperience = (experiences ?? []).length > 0;
+
+  const p = profile as any;
+  const completion = getProfileCompletion({
+    full_name: p.full_name,
+    avatar_url: p.avatar_url,
+    headline: p.headline,
+    country: p.country,
+    specialisation: p.specialisation,
+    bio: p.bio,
+    website: p.website,
+    banner_url: p.banner_url,
+    auth_provider: p.auth_provider,
+    hasAssociations,
+    hasExperience,
+  });
+
+  const missingItems = completion.checks
+    .filter((c) => !c.completed)
+    .sort((a, b) => b.weight - a.weight)
+    .map((c) => ({ label: c.label, href: FIELD_HREF[c.key] ?? `${SITE}/profile/edit` }));
+
+  const isLinkedInVerified = p.auth_provider === 'linkedin_oidc';
+  const isManuallyVerified = p.is_verified === true;
+
+  // Stats since last sign-in (or last 30 days if never)
+  const sinceISO = lastSignInAt ?? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const [eventsResult, assocsResult] = await Promise.all([
+    admin.from('events').select('id', { count: 'exact', head: true }).eq('approved', true).gt('created_at', sinceISO),
+    admin.from('association_pages').select('id', { count: 'exact', head: true }).gt('created_at', sinceISO),
+  ]);
+  const newEventsCount = eventsResult.count ?? 0;
+  const newAssociationsCount = assocsResult.count ?? 0;
+
+  const daysSinceLastSeen = lastSignInAt
+    ? Math.max(0, Math.round((Date.now() - new Date(lastSignInAt).getTime()) / (1000 * 60 * 60 * 24)))
+    : null;
+
+  // Upcoming events: prefer same country if user has one, otherwise nearest 3 globally
+  const today = new Date().toISOString().slice(0, 10);
+  let upcomingQuery = admin.from('events')
+    .select('title, slug, city, country, start_date')
+    .eq('approved', true)
+    .gte('start_date', today)
+    .order('start_date', { ascending: true })
+    .limit(3);
+  if (p.country) {
+    const { data: localEvents } = await admin.from('events')
+      .select('title, slug, city, country, start_date')
+      .eq('approved', true)
+      .eq('country', p.country)
+      .gte('start_date', today)
+      .order('start_date', { ascending: true })
+      .limit(3);
+    if (localEvents && localEvents.length > 0) {
+      upcomingQuery = upcomingQuery; // keep below as global fallback fill
+    }
+  }
+  const { data: globalUpcoming } = await upcomingQuery;
+  const upcomingEvents = (globalUpcoming ?? []).map((e: any) => ({
+    title: e.title,
+    slug: e.slug ?? '',
+    city: e.city,
+    country: e.country,
+    startDate: e.start_date,
+  }));
+
+  const input: ReengagementInput = {
+    fullName: p.full_name,
+    username: p.username,
+    completionScore: completion.score,
+    missingItems,
+    isLinkedInVerified,
+    isManuallyVerified,
+    daysSinceLastSeen,
+    newEventsCount,
+    newAssociationsCount,
+    upcomingEvents,
+  };
+
+  return {
+    userId,
+    email,
+    fullName: p.full_name,
+    username: p.username,
+    isLinkedInVerified,
+    isManuallyVerified,
+    completionScore: completion.score,
+    input,
+  };
+}

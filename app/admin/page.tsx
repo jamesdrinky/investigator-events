@@ -12,6 +12,7 @@ import {
   rejectSubmissionAction,
   updateEventAction,
   toggleUserVerifiedAction,
+  toggleUserPublicAction,
   adminAddAssociationAction,
   adminRemoveAssociationAction
 } from '@/app/admin/actions';
@@ -23,6 +24,7 @@ import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { associationRecords } from '@/lib/data/associations';
 import { ImageDropZone } from '@/components/admin/ImageDropZone';
 import { OutreachManager } from '@/components/admin/OutreachManager';
+import { ReengageSender } from '@/components/admin/ReengageSender';
 
 export const dynamic = 'force-dynamic';
 
@@ -210,7 +212,18 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
 
   const newsletterSends = (newsletterSendsResult?.data ?? []) as any[];
   const recentSubscribers = (recentSubscribersResult?.data ?? []) as any[];
-  const allUsers = (allUsersResult?.data ?? []) as { id: string; full_name: string | null; username: string | null; avatar_url: string | null; country: string | null; specialisation: string | null; is_verified: boolean; is_public: boolean; created_at: string; linkedin_url: string | null; auth_provider: string | null }[];
+  const allUsers = (allUsersResult?.data ?? []) as { id: string; full_name: string | null; username: string | null; avatar_url: string | null; country: string | null; specialisation: string | null; is_verified: boolean; is_public: boolean; created_at: string; linkedin_url: string | null; linkedin_name: string | null; linkedin_picture: string | null; auth_provider: string | null }[];
+
+  // Re-engagement campaign state
+  const { data: reengageRows } = await (admin.from('reengagement_sends' as any)
+    .select('user_id, variant, status, sent_at')
+    .eq('campaign', 'reengagement_v1')
+    .order('sent_at', { ascending: false }) as any);
+  const reengageMap: Record<string, { variant: string; status: string; sent_at: string }> = {};
+  for (const r of (reengageRows ?? []) as { user_id: string; variant: string; status: string; sent_at: string }[]) {
+    if (!reengageMap[r.user_id]) reengageMap[r.user_id] = { variant: r.variant, status: r.status, sent_at: r.sent_at };
+  }
+  const reengageNotSentCount = allUsers.filter((u) => !reengageMap[u.id]).length;
 
   // Fetch all user_associations for the admin panel
   let userAssocMap: Record<string, { association_name: string; association_slug: string; role: string | null }[]> = {};
@@ -263,6 +276,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
             { id: 'verification', label: 'Verification Codes', icon: ShieldCheck },
             { id: 'moderation', label: 'Moderation', icon: AlertTriangle },
             { id: 'outreach', label: 'Outreach', icon: Send },
+            { id: 'reengage', label: 'Re-engage', icon: Send },
           ].map((tab) => (
             <a
               key={tab.id}
@@ -611,7 +625,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div>
                     <h2 className="text-lg font-bold text-slate-900">Registered Users</h2>
-                    <p className="mt-1 text-sm text-slate-500">{allUsers.length} users · {allUsers.filter(u => u.is_verified === true).length} verified · {allUsers.filter(u => u.linkedin_url || u.auth_provider === 'linkedin_oidc').length} with LinkedIn</p>
+                    <p className="mt-1 text-sm text-slate-500">{allUsers.length} users · {allUsers.filter(u => u.is_verified === true).length} verified · {allUsers.filter(u => u.auth_provider === 'linkedin_oidc').length} LinkedIn-verified · {allUsers.filter(u => u.is_public === false).length} private</p>
                   </div>
                 </div>
 
@@ -619,8 +633,14 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                 <div className="mt-6 space-y-3">
                   {allUsers.map((user) => {
                     const assocs = userAssocMap[user.id] ?? [];
-                    const linkedinUrl = user.linkedin_url || (user.auth_provider === 'linkedin_oidc' && user.full_name ? `https://www.linkedin.com/search/results/all/?keywords=${encodeURIComponent(user.full_name)}` : '');
+                    const isLinkedInVerified = user.auth_provider === 'linkedin_oidc';
+                    const linkedinSearchName = user.linkedin_name || user.full_name || '';
+                    const linkedinUrl = user.linkedin_url
+                      || (isLinkedInVerified && linkedinSearchName
+                        ? `https://www.linkedin.com/search/results/all/?keywords=${encodeURIComponent(linkedinSearchName)}`
+                        : '');
                     const isVerified = user.is_verified === true;
+                    const isPublic = user.is_public !== false;
 
                     return (
                       <details key={user.id} className="group rounded-xl border border-slate-200/60 bg-white transition open:shadow-sm">
@@ -641,8 +661,13 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                             <div className="flex items-center gap-2">
                               <p className="truncate text-sm font-semibold text-slate-900">{user.full_name ?? 'No name'}</p>
                               {isVerified && <ShieldCheck className="h-4 w-4 flex-shrink-0 text-blue-600" />}
-                              {user.auth_provider === 'linkedin_oidc' && <span className="rounded bg-blue-50 px-1.5 py-0.5 text-[9px] font-bold text-blue-600">LI</span>}
-                              {user.is_public === false && <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-medium text-slate-500">Private</span>}
+                              {isLinkedInVerified && (
+                                <span className="inline-flex items-center gap-1 rounded bg-blue-50 px-1.5 py-0.5 text-[9px] font-bold text-blue-700" title="Authenticated via LinkedIn">
+                                  <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.94v5.67H9.37V9h3.41v1.56h.05c.48-.9 1.65-1.85 3.39-1.85 3.62 0 4.29 2.39 4.29 5.49v6.25zM5.34 7.43a2.06 2.06 0 11.001-4.121 2.06 2.06 0 01-.001 4.121zM7.12 20.45H3.56V9h3.56v11.45z"/></svg>
+                                  LinkedIn
+                                </span>
+                              )}
+                              {!isPublic && <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[9px] font-bold text-amber-700">Private</span>}
                             </div>
                             <p className="truncate text-xs text-slate-400">
                               {user.username ? `@${user.username}` : ''}
@@ -680,22 +705,67 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
 
                         {/* Expanded detail panel */}
                         <div className="border-t border-slate-100 px-4 pb-4 pt-3">
+                          {/* Quick action bar */}
+                          <div className="mb-4 flex flex-wrap items-center gap-2">
+                            {user.username && (
+                              <a
+                                href={`/profile/${user.username}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-800"
+                              >
+                                <ExternalLink className="h-3.5 w-3.5" />
+                                View site profile
+                              </a>
+                            )}
+                            {linkedinUrl ? (
+                              <a
+                                href={linkedinUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-700"
+                              >
+                                <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.94v5.67H9.37V9h3.41v1.56h.05c.48-.9 1.65-1.85 3.39-1.85 3.62 0 4.29 2.39 4.29 5.49v6.25zM5.34 7.43a2.06 2.06 0 11.001-4.121 2.06 2.06 0 01-.001 4.121zM7.12 20.45H3.56V9h3.56v11.45z"/></svg>
+                                {user.linkedin_url ? 'View LinkedIn' : `Find on LinkedIn`}
+                              </a>
+                            ) : (
+                              <span className="inline-flex items-center rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-400">
+                                No LinkedIn
+                              </span>
+                            )}
+                            <form action={toggleUserPublicAction} className="inline">
+                              <input type="hidden" name="userId" value={user.id} />
+                              <input type="hidden" name="currentlyPublic" value={String(isPublic)} />
+                              <button
+                                type="submit"
+                                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                                  isPublic
+                                    ? 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                    : 'bg-amber-500 text-white hover:bg-amber-600'
+                                }`}
+                                title={isPublic ? 'Profile is publicly visible' : 'Profile is hidden — clicking will make it public'}
+                              >
+                                {isPublic ? 'Public ✓' : 'Make public'}
+                              </button>
+                            </form>
+                          </div>
+
                           <div className="grid gap-4 sm:grid-cols-2">
-                            {/* LinkedIn section */}
+                            {/* LinkedIn details */}
                             <div>
                               <p className="text-xs font-bold uppercase tracking-wider text-slate-400">LinkedIn</p>
-                              {linkedinUrl ? (
-                                <a href={linkedinUrl} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700">
-                                  <ExternalLink className="h-3.5 w-3.5" />
-                                  {user.linkedin_url ? 'View profile' : `Search "${user.full_name}"`}
-                                </a>
+                              {isLinkedInVerified ? (
+                                <div className="mt-1 flex items-center gap-2">
+                                  {user.linkedin_picture && (
+                                    <img src={user.linkedin_picture} alt="" className="h-7 w-7 flex-shrink-0 rounded-full object-cover" />
+                                  )}
+                                  <div className="min-w-0">
+                                    <p className="truncate text-sm font-medium text-slate-900">{user.linkedin_name || user.full_name}</p>
+                                    <p className="text-[11px] text-emerald-600">✓ Verified via LinkedIn OAuth</p>
+                                  </div>
+                                </div>
                               ) : (
-                                <p className="mt-1 text-sm text-slate-400">No LinkedIn linked</p>
-                              )}
-                              {user.username && (
-                                <a href={`/profile/${user.username}`} target="_blank" rel="noreferrer" className="mt-1 block text-sm text-slate-500 hover:text-blue-600">
-                                  View site profile →
-                                </a>
+                                <p className="mt-1 text-sm text-slate-400">Not authenticated via LinkedIn</p>
                               )}
                             </div>
 
@@ -703,7 +773,6 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                             <div>
                               <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Details</p>
                               <p className="mt-1 text-sm text-slate-600">{user.username ? `@${user.username}` : 'No username'}</p>
-                              <p className="text-sm text-slate-600">{user.username ? `@${user.username}` : 'No username'}</p>
                               <p className="text-sm text-slate-600">Signed up via {user.auth_provider === 'linkedin_oidc' ? 'LinkedIn' : user.auth_provider === 'google' ? 'Google' : 'email'}</p>
                             </div>
                           </div>
@@ -767,6 +836,69 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
               <h2 className="mb-1 text-lg font-bold text-slate-900">Association Outreach</h2>
               <p className="mb-4 text-sm text-slate-500">Send introduction emails to associations. Preview before sending.</p>
               <OutreachManager />
+            </div>
+          )}
+
+          {activeTab === 'reengage' && (
+            <div className="space-y-4">
+              <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
+                <h2 className="mb-1 text-lg font-bold text-slate-900">Re-engagement Campaign</h2>
+                <p className="mb-4 text-sm text-slate-500">
+                  Personalised email per user — variant chosen from profile completeness (3 tiers) × LinkedIn-verified status. Includes "what's new since you were last here" stats.
+                </p>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-xl border border-slate-200/60 bg-slate-50 p-4">
+                    <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Total users</p>
+                    <p className="mt-1 text-2xl font-bold text-slate-900">{allUsers.length}</p>
+                  </div>
+                  <div className="rounded-xl border border-emerald-200/60 bg-emerald-50 p-4">
+                    <p className="text-xs font-bold uppercase tracking-wider text-emerald-700">Already sent</p>
+                    <p className="mt-1 text-2xl font-bold text-emerald-900">{Object.keys(reengageMap).length}</p>
+                  </div>
+                  <div className="rounded-xl border border-blue-200/60 bg-blue-50 p-4">
+                    <p className="text-xs font-bold uppercase tracking-wider text-blue-700">Pending</p>
+                    <p className="mt-1 text-2xl font-bold text-blue-900">{reengageNotSentCount}</p>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <ReengageSender totalUsers={reengageNotSentCount} />
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
+                <h3 className="mb-3 text-sm font-bold text-slate-900">Per-user preview & status</h3>
+                <p className="mb-4 text-xs text-slate-500">Click "Preview" to open the exact email that user would receive in a new tab.</p>
+                <div className="divide-y divide-slate-100">
+                  {allUsers.map((user) => {
+                    const sent = reengageMap[user.id];
+                    return (
+                      <div key={user.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
+                        <div className="min-w-0 flex-1 truncate">
+                          <span className="font-medium text-slate-900">{user.full_name ?? 'No name'}</span>
+                          {user.username && <span className="ml-2 text-xs text-slate-400">@{user.username}</span>}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {sent ? (
+                            <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700">
+                              Sent · {sent.variant.replace('tier_', 'T').replace('_unverified', '·U').replace('_verified', '·V')}
+                            </span>
+                          ) : (
+                            <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold text-slate-500">Pending</span>
+                          )}
+                          <a
+                            href={`/api/admin/reengagement/preview?userId=${user.id}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                          >
+                            Preview
+                          </a>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           )}
 

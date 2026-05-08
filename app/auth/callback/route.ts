@@ -44,7 +44,7 @@ export async function GET(request: Request) {
           const provider = providers.includes('linkedin_oidc') ? 'linkedin_oidc' : currentProvider;
           const meta = user.user_metadata ?? {};
           const fullName = meta.full_name || meta.name || null;
-          const avatarUrl = meta.avatar_url || meta.picture || null;
+          const oauthAvatarUrl: string | null = meta.avatar_url || meta.picture || null;
 
           const admin = createSupabaseAdminServerClient();
 
@@ -56,13 +56,43 @@ export async function GET(request: Request) {
           const linkedinName = linkedinIdentity ? ((linkedinIdentity.identity_data as any)?.name || (linkedinIdentity.identity_data as any)?.full_name || null) : (meta.name || meta.full_name || null);
           const linkedinPicture = linkedinIdentity ? ((linkedinIdentity.identity_data as any)?.picture || null) : (meta.picture || null);
 
+          // LinkedIn CDN URLs (media.licdn.com) are signed and expire after ~6 weeks.
+          // If the OAuth avatar is from licdn, copy it into our own storage so we own the URL.
+          // Otherwise (Google, custom upload, etc.) keep the original URL.
+          let resolvedAvatarUrl = oauthAvatarUrl;
+          const existingAvatar = existing?.avatar_url ?? null;
+          const existingIsLicdn = !!existingAvatar && existingAvatar.includes('media.licdn.com');
+          const shouldRehost = !!oauthAvatarUrl
+            && oauthAvatarUrl.includes('media.licdn.com')
+            && (!existingAvatar || existingIsLicdn);
+          if (shouldRehost) {
+            try {
+              const res = await fetch(oauthAvatarUrl!, {
+                headers: { 'User-Agent': 'Mozilla/5.0 (compatible; InvestigatorEvents/1.0)' },
+              });
+              if (res.ok) {
+                const buf = Buffer.from(await res.arrayBuffer());
+                const filePath = `${user.id}/avatar.jpg`;
+                const { error: upErr } = await admin.storage
+                  .from('avatars')
+                  .upload(filePath, buf, { upsert: true, contentType: 'image/jpeg' });
+                if (!upErr) {
+                  const { data: urlData } = admin.storage.from('avatars').getPublicUrl(filePath);
+                  resolvedAvatarUrl = `${urlData.publicUrl}?v=${Date.now()}`;
+                }
+              }
+            } catch {
+              // Don't fail the login flow over a profile-pic copy
+            }
+          }
+
           if (!existing) {
             // New user — create profile with OAuth data
             const username = await generateUniqueUsername(admin, fullName, user.id);
             await admin.from('profiles').insert({
               id: user.id,
               full_name: fullName,
-              avatar_url: avatarUrl,
+              avatar_url: resolvedAvatarUrl,
               username,
               is_public: true,
               auth_provider: provider,
@@ -74,11 +104,14 @@ export async function GET(request: Request) {
             // Redirect new OAuth users to profile setup
             return NextResponse.redirect(`${origin}/profile/setup`);
           } else {
-            // Existing user — always update auth_provider, backfill missing data
+            // Existing user — always update auth_provider, backfill missing data,
+            // and refresh the avatar if the existing one was a (now-likely-stale) licdn URL.
             const updates: Record<string, string | null> = {
               auth_provider: provider,
             };
-            if (!existing.avatar_url && avatarUrl) updates.avatar_url = avatarUrl;
+            if (resolvedAvatarUrl && (!existingAvatar || existingIsLicdn)) {
+              updates.avatar_url = resolvedAvatarUrl;
+            }
             if (!existing.full_name && fullName) updates.full_name = fullName;
             if (linkedinName) updates.linkedin_name = linkedinName;
             if (linkedinPicture) updates.linkedin_picture = linkedinPicture;

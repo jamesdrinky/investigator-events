@@ -379,6 +379,26 @@ export async function toggleUserVerifiedAction(formData: FormData) {
   revalidatePath('/admin');
 }
 
+export async function toggleUserPublicAction(formData: FormData) {
+  await ensureAdminSession();
+
+  const userId = parseRequired(formData, 'userId');
+  const currentlyPublic = formData.get('currentlyPublic') === 'true';
+  const supabase = createSupabaseAdminServerClient();
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ is_public: !currentlyPublic } as any)
+    .eq('id', userId);
+
+  if (error) {
+    console.error('Privacy toggle failed:', error.message);
+    throw new Error('Failed to update privacy');
+  }
+
+  revalidatePath('/admin');
+}
+
 export async function adminAddAssociationAction(formData: FormData) {
   await ensureAdminSession();
 

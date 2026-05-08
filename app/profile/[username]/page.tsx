@@ -188,8 +188,8 @@ export default async function PublicProfilePage({ params }: { params: { username
 
           <div className="relative px-6 pb-6 sm:px-8 sm:pb-8">
             {/* Avatar + actions */}
-            <div className="-mt-14 flex items-end justify-between gap-3 sm:-mt-20">
-              <div className="relative z-10">
+            <div className="-mt-14 sm:-mt-20">
+              <div className="relative z-10 inline-block">
                 {/* Verified glow ring */}
                 {isFullyVerified && (
                   <div className="absolute -inset-1 rounded-full opacity-50" style={{
@@ -217,20 +217,44 @@ export default async function PublicProfilePage({ params }: { params: { username
                   </div>
                 )}
               </div>
-              <div className="flex items-center gap-2 pb-1">
+            </div>
+
+            {/* ── Name + headline (LinkedIn style — right after avatar) ── */}
+            <div className="mt-4">
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">{profile.full_name}</h1>
+                {flag && <span className="text-xl">{flag}</span>}
+                {isLinkedInVerified && (
+                  <ShieldCheck className="h-5 w-5 text-[#0077B5]" />
+                )}
+              </div>
+
+              {hasHeadline && (
+                <p className="mt-1 text-[15px] leading-snug text-slate-600">{profile.headline || profile.specialisation}</p>
+              )}
+
+              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-400">
+                {profile.country && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {profile.country}</span>}
+                <span className="flex items-center gap-1" style={{ color: accentColor }}>
+                  <strong>{connectionCount ?? 0}</strong> connection{(connectionCount ?? 0) !== 1 ? 's' : ''}
+                </span>
+              </div>
+
+              {/* Action buttons — LinkedIn style row */}
+              <div className="mt-4 flex flex-wrap items-center gap-2">
                 {isOwner ? (
                   <>
-                    <Link href="/profile/edit" className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 hover:shadow-md">
+                    <Link href="/profile/edit" className="flex items-center gap-1.5 rounded-full border-2 px-5 py-2 text-sm font-semibold transition hover:bg-slate-50" style={{ borderColor: accentColor, color: accentColor }}>
                       <Pencil className="h-3.5 w-3.5" /> Edit profile
                     </Link>
                     <ShareProfileButton username={profile.username ?? ''} fullName={profile.full_name} avatarUrl={profile.avatar_url} specialisation={profile.specialisation} accentColor={accentColor} />
                   </>
                 ) : (
                   <>
-                    <Link href={`/messages?to=${profile.id}`} className="flex items-center gap-1.5 rounded-full border bg-white px-4 py-2 text-sm font-medium shadow-sm transition hover:shadow-md" style={{ borderColor: `${accentColor}30`, color: accentColor }}>
+                    <ConnectionButton targetUserId={profile.id} />
+                    <Link href={`/messages?to=${profile.id}`} className="flex items-center gap-1.5 rounded-full border border-slate-300 px-5 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
                       <MessageCircle className="h-3.5 w-3.5" /> Message
                     </Link>
-                    <ConnectionButton targetUserId={profile.id} />
                     <ShareProfileButton username={profile.username ?? ''} fullName={profile.full_name} avatarUrl={profile.avatar_url} specialisation={profile.specialisation} accentColor={accentColor} />
                     <ReportButton reportedUserId={profile.id} contentType="profile" />
                   </>
@@ -240,137 +264,57 @@ export default async function PublicProfilePage({ params }: { params: { username
 
             {/* Unverified nudge — owner only */}
             {isOwner && !isFullyVerified && (
-              <Link href="/profile/edit" className="mt-4 flex items-center gap-2.5 rounded-xl border border-amber-200/60 bg-amber-50/30 px-4 py-2.5 transition hover:bg-amber-50/60">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-100">
-                  <ShieldCheck className="h-3.5 w-3.5 text-amber-600" />
-                </div>
+              <Link href="/profile/edit" className="mt-5 flex items-center gap-2.5 rounded-xl border border-amber-200/60 bg-amber-50/30 px-4 py-2.5 transition hover:bg-amber-50/60">
+                <ShieldCheck className="h-5 w-5 flex-shrink-0 text-amber-600" />
                 <div className="flex-1">
                   <p className="text-xs font-bold text-amber-700">Verify your identity</p>
-                  <p className="text-[11px] text-slate-500">Connect LinkedIn or enter an association code to show you are who you say you are.</p>
+                  <p className="text-[11px] text-slate-500">Connect LinkedIn or enter an association code.</p>
                 </div>
                 <ArrowRight className="h-4 w-4 text-amber-400" />
               </Link>
             )}
 
-            {/* Verified identity banner — shows OAuth data that can't be faked */}
-            {isFullyVerified && (
-              <div className="mt-4 overflow-hidden rounded-2xl" style={{
-                background: isLinkedInVerified
-                  ? `linear-gradient(135deg, #0077B5 0%, #005f8f 100%)`
-                  : `linear-gradient(135deg, ${accentColor} 0%, ${accentColor}cc 100%)`,
-              }}>
-                <div className="relative px-4 py-3.5 sm:px-5 sm:py-4">
-                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,rgba(255,255,255,0.1),transparent_50%)]" />
-                  <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 opacity-[0.07]">
-                    <ShieldCheck className="h-16 w-16 text-white sm:h-20 sm:w-20" />
-                  </div>
-
-                  <div className="relative space-y-3">
-                    <div className="flex items-center gap-3">
-                      {/* LinkedIn photo from OAuth — hosted on LinkedIn's CDN, can't be faked */}
-                      {isLinkedInVerified && linkedinPicture ? (
-                        <img src={linkedinPicture} alt="" className="h-10 w-10 flex-shrink-0 rounded-full border-2 border-white/30 object-cover shadow-lg" />
-                      ) : (
-                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-white/20">
-                          <ShieldCheck className="h-5 w-5 text-white" />
-                        </div>
-                      )}
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm font-bold text-white">
-                            {isLinkedInVerified ? 'LinkedIn Verified Identity' : 'Verified Association Member'}
-                          </p>
-                          <ShieldCheck className="h-4 w-4 text-white/60" />
-                        </div>
-                        <p className="text-[11px] text-white/60">
-                          {isLinkedInVerified && linkedinName && (
-                            <span>Authenticated as <strong className="text-white/80">{linkedinName}</strong> on LinkedIn. </span>
-                          )}
-                          {isLinkedInVerified && !linkedinName && 'Authenticated through LinkedIn. '}
-                          {activeVerifications.length > 0 && `Member of ${activeVerifications.map((v: any) => v.association_name).join(', ')}.`}
-                        </p>
-                      </div>
-                    </div>
-
-                    {isLinkedInVerified && linkedinName && (
-                      <a
-                        href={linkedinUrl || `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(linkedinName)}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-[#0077B5] shadow-lg transition hover:shadow-xl sm:w-auto sm:inline-flex sm:rounded-full"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 48 48"><path fill="#0077B5" d="M42 37a5 5 0 01-5 5H11a5 5 0 01-5-5V11a5 5 0 015-5h26a5 5 0 015 5v26z" /><path fill="#FFF" d="M12 19h5v17h-5V19zm2.485-2h-.028C12.965 17 12 15.888 12 14.499 12 13.08 12.995 12 14.514 12c1.521 0 2.458 1.08 2.486 2.499C17 15.887 16.035 17 14.485 17zM36 36h-5v-9.099c0-2.198-1.225-3.698-3.192-3.698-1.501 0-2.313 1.012-2.707 1.99-.144.35-.101.858-.101 1.365V36h-5s.07-16 0-17h5v2.616C25.721 21.865 27.085 20 30.1 20c3.386 0 5.9 2.215 5.9 6.978V36z" /></svg>
-                        Find on LinkedIn
-                        <ExternalLink className="h-3 w-3 opacity-50" />
-                      </a>
-                    )}
-                  </div>
+            {/* LinkedIn verified banner — compact */}
+            {isLinkedInVerified && linkedinName && (
+              <div className="mt-5 flex items-center gap-3 rounded-xl bg-[#0077B5]/8 px-4 py-3 border border-[#0077B5]/15">
+                {linkedinPicture && (
+                  <img src={linkedinPicture} alt="" className="h-9 w-9 flex-shrink-0 rounded-full border border-[#0077B5]/30 object-cover" />
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-[#0077B5]">LinkedIn Verified</p>
+                  <p className="truncate text-[11px] text-slate-500">Authenticated as {linkedinName}</p>
                 </div>
+                <a
+                  href={linkedinUrl || `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(linkedinName)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex-shrink-0 rounded-full bg-[#0077B5] px-3 py-1.5 text-[11px] font-bold text-white transition hover:bg-[#006097]"
+                >
+                  View
+                </a>
               </div>
             )}
 
-            {/* Name + info */}
-            <div className="mt-4">
-              <div className="flex flex-wrap items-center gap-2.5">
-                <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">{profile.full_name}</h1>
-                {flag && <span className="text-xl">{flag}</span>}
-                {/* LinkedIn verified badge — shows OAuth-verified name */}
-                {isLinkedInVerified && (
-                  <span className="flex items-center gap-1.5 rounded-full bg-[#0077B5] px-3 py-1 text-[11px] font-bold text-white shadow-sm" title="Identity verified through LinkedIn OAuth">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 48 48"><path fill="#ffffff" d="M42 37a5 5 0 01-5 5H11a5 5 0 01-5-5V11a5 5 0 015-5h26a5 5 0 015 5v26z" /><path fill="#0077B5" d="M12 19h5v17h-5V19zm2.485-2h-.028C12.965 17 12 15.888 12 14.499 12 13.08 12.995 12 14.514 12c1.521 0 2.458 1.08 2.486 2.499C17 15.887 16.035 17 14.485 17zM36 36h-5v-9.099c0-2.198-1.225-3.698-3.192-3.698-1.501 0-2.313 1.012-2.707 1.99-.144.35-.101.858-.101 1.365V36h-5s.07-16 0-17h5v2.616C25.721 21.865 27.085 20 30.1 20c3.386 0 5.9 2.215 5.9 6.978V36z" /></svg>
-                    Verified
-                    <ShieldCheck className="h-3 w-3" />
-                  </span>
-                )}
+            {/* Badges + associations — compact row */}
+            {(badges.length > 0 || hasAssociations) && (
+              <div className="mt-4 flex flex-wrap gap-1.5">
                 {badges.map((b) => {
                   const meta = BADGE_META[b];
                   if (!meta) return null;
                   return (
-                    <span key={b} className="rounded-full px-2.5 py-0.5 text-[10px] font-bold shadow-sm" style={{ backgroundColor: `${meta.color}15`, color: meta.color, border: `1px solid ${meta.color}25` }}>
+                    <span key={b} className="rounded-full px-2.5 py-0.5 text-[10px] font-bold" style={{ backgroundColor: `${meta.color}12`, color: meta.color }}>
                       {meta.label}
                     </span>
                   );
                 })}
+                {(assocs ?? []).map((a) => (
+                  <span key={a.id} className="flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold" style={{ borderColor: `${accentColor}20`, color: accentColor }}>
+                    {verifiedSet.has(a.association_name) && <ShieldCheck className="h-2.5 w-2.5" />}
+                    {a.association_name}
+                  </span>
+                ))}
               </div>
-
-              {/* Verified badges */}
-              {(activeVerifications.length > 0 || authProvider === 'linkedin_oidc') && (
-                <div className="mt-2">
-                  <VerifiedBadges
-                    verifications={activeVerifications.map((v: any) => ({ association_name: v.association_name, status: v.status, expires_at: v.expires_at }))}
-                    authProvider={authProvider}
-                    linkedinUrl={null}
-                  />
-                </div>
-              )}
-
-              {hasHeadline && (
-                <p className="mt-1.5 text-[15px] leading-snug text-slate-600">{profile.headline || profile.specialisation}</p>
-              )}
-
-              <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-slate-400 sm:text-sm">
-                {profile.country && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {profile.country}</span>}
-                <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" /> <strong className="text-slate-700">{connectionCount ?? 0}</strong> connections</span>
-                {profile.website && (
-                  <a href={profile.website} target="_blank" rel="noreferrer" className="flex items-center gap-1 transition hover:underline" style={{ color: accentColor }}>
-                    <Globe className="h-3.5 w-3.5" /> Website <ExternalLink className="h-3 w-3" />
-                  </a>
-                )}
-              </div>
-
-              {/* Association chips */}
-              {hasAssociations && (
-                <div className="mt-4 flex flex-wrap gap-1.5">
-                  {(assocs ?? []).map((a) => (
-                    <span key={a.id} className="flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold transition hover:shadow-sm" style={{ borderColor: `${accentColor}20`, backgroundColor: `${accentColor}06`, color: accentColor }}>
-                      {a.association_name}
-                      {a.role && <span className="font-normal text-slate-400">· {a.role}</span>}
-                      {verifiedSet.has(a.association_name) && <ShieldCheck className="h-3 w-3" style={{ color: accentColor }} />}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
+            )}
           </div>
         </div>
 

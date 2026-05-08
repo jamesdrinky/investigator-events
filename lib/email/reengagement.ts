@@ -30,7 +30,10 @@ export interface ReengagementInput {
   daysSinceLastSeen: number | null;
   newEventsCount: number;
   newAssociationsCount: number;
+  newEventNames: { title: string; slug: string; city: string | null; country: string | null; startDate: string }[];
+  newAssociationNames: { name: string; slug: string }[];
   upcomingEvents: { title: string; slug: string; city: string | null; country: string | null; startDate: string }[];
+  unsubscribeToken: string | null;
 }
 
 export type ReengagementVariant = 'tier_a_unverified' | 'tier_a_verified'
@@ -147,33 +150,69 @@ function verifyCallout(): string {
   </table>`;
 }
 
-function statsBlock(input: ReengagementInput): string {
-  const eventsLine = input.newEventsCount > 0
-    ? `<strong style="color:${C.dark};">${input.newEventsCount}</strong> new event${input.newEventsCount === 1 ? '' : 's'}`
-    : null;
-  const assocLine = input.newAssociationsCount > 0
-    ? `<strong style="color:${C.dark};">${input.newAssociationsCount}</strong> new association${input.newAssociationsCount === 1 ? '' : 's'}`
-    : null;
-  const parts = [eventsLine, assocLine].filter(Boolean) as string[];
-  if (parts.length === 0) return '';
+function eventNameRow(e: ReengagementInput['newEventNames'][number]): string {
+  const loc = [e.city, e.country].filter(Boolean).join(', ');
+  return `
+  <tr><td style="padding:6px 0;border-top:1px solid ${C.border};">
+    <a href="${SITE}/events/${e.slug}" style="text-decoration:none;color:${C.dark};">
+      <p style="margin:0;font-size:13px;font-weight:600;color:${C.dark};line-height:1.4;">${e.title}</p>
+      <p style="margin:2px 0 0;font-size:11px;color:${C.muted};">${formatDate(e.startDate)}${loc ? ` · ${loc}` : ''}</p>
+    </a>
+  </td></tr>`;
+}
 
+function assocNameRow(a: ReengagementInput['newAssociationNames'][number]): string {
+  return `
+  <tr><td style="padding:6px 0;border-top:1px solid ${C.border};">
+    <a href="${SITE}/associations/${a.slug}" style="text-decoration:none;color:${C.dark};">
+      <p style="margin:0;font-size:13px;font-weight:600;color:${C.dark};line-height:1.4;">${a.name}</p>
+    </a>
+  </td></tr>`;
+}
+
+function statsBlock(input: ReengagementInput): string {
   const sinceWhen = input.daysSinceLastSeen !== null
     ? (input.daysSinceLastSeen < 1 ? 'today' : input.daysSinceLastSeen === 1 ? 'yesterday' : `${input.daysSinceLastSeen} days ago`)
     : null;
   const lead = sinceWhen
-    ? `Since you were last here (${sinceWhen}):`
-    : `Recently added to the platform:`;
+    ? `Since you were last here (${sinceWhen})`
+    : `Recently added to the platform`;
+
+  const hasEvents = input.newEventsCount > 0 && input.newEventNames.length > 0;
+  const hasAssocs = input.newAssociationsCount > 0 && input.newAssociationNames.length > 0;
+  if (!hasEvents && !hasAssocs) return '';
+
+  const eventSection = hasEvents ? `
+    <tr><td style="padding:14px 20px 4px;">
+      <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:${C.dark};">
+        <strong style="color:${C.blue};">${input.newEventsCount}</strong> new event${input.newEventsCount === 1 ? '' : 's'} on the calendar
+      </p>
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" role="presentation">
+        ${input.newEventNames.slice(0, 5).map(eventNameRow).join('')}
+      </table>
+      ${input.newEventsCount > input.newEventNames.length ? `<p style="margin:8px 0 0;font-size:11px;color:${C.muted};">+ ${input.newEventsCount - input.newEventNames.length} more</p>` : ''}
+    </td></tr>` : '';
+
+  const assocSection = hasAssocs ? `
+    <tr><td style="padding:14px 20px 16px;${hasEvents ? `border-top:1px solid ${C.border};` : ''}">
+      <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:${C.dark};">
+        <strong style="color:${C.purple};">${input.newAssociationsCount}</strong> new association${input.newAssociationsCount === 1 ? '' : 's'} listed
+      </p>
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" role="presentation">
+        ${input.newAssociationNames.slice(0, 5).map(assocNameRow).join('')}
+      </table>
+      ${input.newAssociationsCount > input.newAssociationNames.length ? `<p style="margin:8px 0 0;font-size:11px;color:${C.muted};">+ ${input.newAssociationsCount - input.newAssociationNames.length} more</p>` : ''}
+    </td></tr>` : '';
 
   return `
   <table cellpadding="0" cellspacing="0" border="0" width="100%" role="presentation" style="margin:16px 0;background-color:#f8fafc;border:1px solid ${C.border};border-radius:12px;">
-    <tr><td style="padding:16px 20px;text-align:left;">
-      <p style="margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:${C.muted};">
+    <tr><td style="padding:14px 20px 4px;">
+      <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:${C.muted};">
         ${lead}
       </p>
-      <p style="margin:0;font-size:15px;color:${C.body};line-height:1.5;">
-        ${parts.join(' &middot; ')} added to Investigator Events.
-      </p>
     </td></tr>
+    ${eventSection}
+    ${assocSection}
   </table>`;
 }
 
@@ -287,7 +326,8 @@ export function buildReengagementEmail(input: ReengagementInput): string {
             <a href="mailto:info@investigatorevents.com" style="color:${C.faint};text-decoration:none;">info@investigatorevents.com</a>
           </p>
           <p style="margin:4px 0 0;font-size:10px;color:${C.faint};">
-            You received this because you have an account at investigatorevents.com.
+            You received this because you opted into the Investigator Events newsletter.
+            ${input.unsubscribeToken ? `<a href="${SITE}/api/newsletter/unsubscribe?token=${input.unsubscribeToken}" style="color:${C.faint};text-decoration:underline;">Unsubscribe</a> &middot; ` : ''}
             <a href="${SITE}/profile/edit" style="color:${C.faint};text-decoration:underline;">Manage your account</a>.
           </p>
         </td></tr>

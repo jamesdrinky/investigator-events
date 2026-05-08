@@ -32,6 +32,8 @@ export interface UserSnapshot {
   isLinkedInVerified: boolean;
   isManuallyVerified: boolean;
   completionScore: number;
+  isNewsletterSubscribed: boolean;
+  unsubscribeToken: string | null;
   input: ReengagementInput;
 }
 
@@ -78,19 +80,43 @@ export async function buildReengagementSnapshot({ admin, userId }: BuildArgs): P
 
   // Stats since last sign-in (or last 30 days if never)
   const sinceISO = lastSignInAt ?? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  const [eventsResult, assocsResult] = await Promise.all([
+  const today = new Date().toISOString().slice(0, 10);
+  const [eventsResult, assocsResult, newEventsListResult, newAssocsListResult] = await Promise.all([
     admin.from('events').select('id', { count: 'exact', head: true }).eq('approved', true).gt('created_at', sinceISO),
     admin.from('association_pages').select('id', { count: 'exact', head: true }).gt('created_at', sinceISO),
+    // Up to 5 most-recent new events that are still upcoming, since last login
+    admin.from('events')
+      .select('title, slug, city, country, start_date')
+      .eq('approved', true)
+      .gt('created_at', sinceISO)
+      .gte('start_date', today)
+      .order('start_date', { ascending: true })
+      .limit(5),
+    admin.from('association_pages')
+      .select('name, slug')
+      .gt('created_at', sinceISO)
+      .order('created_at', { ascending: false })
+      .limit(5),
   ]);
   const newEventsCount = eventsResult.count ?? 0;
   const newAssociationsCount = assocsResult.count ?? 0;
+  const newEventNames = (newEventsListResult.data ?? []).map((e: any) => ({
+    title: e.title,
+    slug: e.slug ?? '',
+    city: e.city,
+    country: e.country,
+    startDate: e.start_date,
+  }));
+  const newAssociationNames = (newAssocsListResult.data ?? []).map((a: any) => ({
+    name: a.name,
+    slug: a.slug,
+  }));
 
   const daysSinceLastSeen = lastSignInAt
     ? Math.max(0, Math.round((Date.now() - new Date(lastSignInAt).getTime()) / (1000 * 60 * 60 * 24)))
     : null;
 
   // Upcoming events: prefer same country if user has one, otherwise nearest 3 globally
-  const today = new Date().toISOString().slice(0, 10);
   let upcomingQuery = admin.from('events')
     .select('title, slug, city, country, start_date')
     .eq('approved', true)
@@ -118,6 +144,20 @@ export async function buildReengagementSnapshot({ admin, userId }: BuildArgs): P
     startDate: e.start_date,
   }));
 
+  // Newsletter eligibility (GDPR): only send to opted-in active subscribers.
+  let unsubscribeToken: string | null = null;
+  let isNewsletterSubscribed = false;
+  if (email) {
+    const { data: sub } = await (admin.from('newsletter_subscribers' as any)
+      .select('status, unsubscribe_token')
+      .eq('email', email.toLowerCase())
+      .maybeSingle() as any);
+    if (sub && sub.status === 'active') {
+      isNewsletterSubscribed = true;
+      unsubscribeToken = sub.unsubscribe_token ?? null;
+    }
+  }
+
   const input: ReengagementInput = {
     fullName: p.full_name,
     username: p.username,
@@ -128,7 +168,10 @@ export async function buildReengagementSnapshot({ admin, userId }: BuildArgs): P
     daysSinceLastSeen,
     newEventsCount,
     newAssociationsCount,
+    newEventNames,
+    newAssociationNames,
     upcomingEvents,
+    unsubscribeToken,
   };
 
   return {
@@ -139,6 +182,8 @@ export async function buildReengagementSnapshot({ admin, userId }: BuildArgs): P
     isLinkedInVerified,
     isManuallyVerified,
     completionScore: completion.score,
+    isNewsletterSubscribed,
+    unsubscribeToken,
     input,
   };
 }

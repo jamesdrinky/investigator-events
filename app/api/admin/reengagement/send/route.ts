@@ -50,6 +50,7 @@ export async function POST(request: Request) {
   let sent = 0;
   let skippedNoEmail = 0;
   let skippedAlreadySent = 0;
+  let skippedNotSubscribed = 0;
   let failed = 0;
   const failures: { userId: string; error: string }[] = [];
 
@@ -65,6 +66,12 @@ export async function POST(request: Request) {
       continue;
     }
 
+    // GDPR: only send to users who opted into the newsletter at signup
+    if (!snap.isNewsletterSubscribed) {
+      skippedNotSubscribed += 1;
+      continue;
+    }
+
     const html = buildReengagementEmail(snap.input);
     const subject = pickSubject(snap.input);
     const variant = pickVariant(snap.input);
@@ -74,11 +81,18 @@ export async function POST(request: Request) {
       continue;
     }
 
+    const unsubUrl = snap.unsubscribeToken
+      ? `https://investigatorevents.com/api/newsletter/unsubscribe?token=${snap.unsubscribeToken}`
+      : null;
     const { error: sendErr } = await resend.emails.send({
       from: FROM,
       to: [snap.email],
       subject,
       html,
+      headers: unsubUrl ? {
+        'List-Unsubscribe': `<${unsubUrl}>`,
+        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+      } : undefined,
     });
 
     if (sendErr) {
@@ -117,6 +131,7 @@ export async function POST(request: Request) {
       sent,
       skippedAlreadySent,
       skippedNoEmail,
+      skippedNotSubscribed,
       failed,
     },
     failures,

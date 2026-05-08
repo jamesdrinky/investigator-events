@@ -223,7 +223,24 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
   for (const r of (reengageRows ?? []) as { user_id: string; variant: string; status: string; sent_at: string }[]) {
     if (!reengageMap[r.user_id]) reengageMap[r.user_id] = { variant: r.variant, status: r.status, sent_at: r.sent_at };
   }
-  const reengageNotSentCount = allUsers.filter((u) => !reengageMap[u.id]).length;
+
+  // Map of newsletter-subscribed user IDs (for GDPR-eligible recipients of the re-engagement campaign).
+  // We need to join auth.users.email -> newsletter_subscribers.email since profiles doesn't carry email.
+  const newsletterEligibleSet = new Set<string>();
+  try {
+    const { data: activeSubs } = await (admin.from('newsletter_subscribers' as any)
+      .select('email')
+      .eq('status', 'active') as any);
+    const activeEmails = new Set<string>(((activeSubs ?? []) as { email: string }[]).map((s) => s.email.toLowerCase()));
+    if (activeEmails.size > 0 && allUsers.length > 0) {
+      const { data: authPage } = await admin.auth.admin.listUsers({ perPage: 1000 });
+      for (const u of authPage?.users ?? []) {
+        if (u.email && activeEmails.has(u.email.toLowerCase())) newsletterEligibleSet.add(u.id);
+      }
+    }
+  } catch {}
+  const reengageEligibleCount = allUsers.filter((u) => newsletterEligibleSet.has(u.id) && !reengageMap[u.id]).length;
+  const reengageIneligibleCount = allUsers.filter((u) => !newsletterEligibleSet.has(u.id)).length;
 
   // Fetch all user_associations for the admin panel
   let userAssocMap: Record<string, { association_name: string; association_slug: string; role: string | null }[]> = {};
@@ -844,24 +861,30 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
               <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
                 <h2 className="mb-1 text-lg font-bold text-slate-900">Re-engagement Campaign</h2>
                 <p className="mb-4 text-sm text-slate-500">
-                  Personalised email per user — variant chosen from profile completeness (3 tiers) × LinkedIn-verified status. Includes "what's new since you were last here" stats.
+                  Personalised email per user — variant chosen from profile completeness (3 tiers) × LinkedIn-verified status. Includes new event titles + association names since their last login. <strong>Sends only to users who opted into the newsletter</strong> — GDPR-safe.
                 </p>
-                <div className="grid gap-3 sm:grid-cols-3">
+                <div className="grid gap-3 sm:grid-cols-4">
                   <div className="rounded-xl border border-slate-200/60 bg-slate-50 p-4">
                     <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Total users</p>
                     <p className="mt-1 text-2xl font-bold text-slate-900">{allUsers.length}</p>
+                  </div>
+                  <div className="rounded-xl border border-blue-200/60 bg-blue-50 p-4">
+                    <p className="text-xs font-bold uppercase tracking-wider text-blue-700">Eligible & pending</p>
+                    <p className="mt-1 text-2xl font-bold text-blue-900">{reengageEligibleCount}</p>
+                    <p className="mt-1 text-[10px] text-blue-600">opted-in, not yet sent</p>
                   </div>
                   <div className="rounded-xl border border-emerald-200/60 bg-emerald-50 p-4">
                     <p className="text-xs font-bold uppercase tracking-wider text-emerald-700">Already sent</p>
                     <p className="mt-1 text-2xl font-bold text-emerald-900">{Object.keys(reengageMap).length}</p>
                   </div>
-                  <div className="rounded-xl border border-blue-200/60 bg-blue-50 p-4">
-                    <p className="text-xs font-bold uppercase tracking-wider text-blue-700">Pending</p>
-                    <p className="mt-1 text-2xl font-bold text-blue-900">{reengageNotSentCount}</p>
+                  <div className="rounded-xl border border-amber-200/60 bg-amber-50 p-4">
+                    <p className="text-xs font-bold uppercase tracking-wider text-amber-700">Not opted in</p>
+                    <p className="mt-1 text-2xl font-bold text-amber-900">{reengageIneligibleCount}</p>
+                    <p className="mt-1 text-[10px] text-amber-600">will be skipped</p>
                   </div>
                 </div>
                 <div className="mt-4">
-                  <ReengageSender totalUsers={reengageNotSentCount} />
+                  <ReengageSender totalUsers={reengageEligibleCount} />
                 </div>
               </div>
 
@@ -871,6 +894,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                 <div className="divide-y divide-slate-100">
                   {allUsers.map((user) => {
                     const sent = reengageMap[user.id];
+                    const eligible = newsletterEligibleSet.has(user.id);
                     return (
                       <div key={user.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
                         <div className="min-w-0 flex-1 truncate">
@@ -882,8 +906,10 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                             <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700">
                               Sent · {sent.variant.replace('tier_', 'T').replace('_unverified', '·U').replace('_verified', '·V')}
                             </span>
+                          ) : eligible ? (
+                            <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-[10px] font-bold text-blue-700">Eligible</span>
                           ) : (
-                            <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold text-slate-500">Pending</span>
+                            <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-bold text-amber-700">Not opted in</span>
                           )}
                           <a
                             href={`/api/admin/reengagement/preview?userId=${user.id}`}

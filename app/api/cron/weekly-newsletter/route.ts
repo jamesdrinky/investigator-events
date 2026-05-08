@@ -9,15 +9,8 @@ import { verifyCronSecret } from '@/lib/security/server';
 const BATCH_SIZE = 50;
 
 export async function GET(request: Request) {
-  // Support query param auth for manual triggers
-  const { searchParams } = new URL(request.url);
-  const querySecret = searchParams.get('password');
-  if (querySecret && querySecret === process.env.CRON_SECRET) {
-    // Authenticated via query param
-  } else {
-    const authError = verifyCronSecret(request);
-    if (authError) return authError;
-  }
+  const authError = verifyCronSecret(request);
+  if (authError) return authError;
 
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) {
@@ -45,6 +38,7 @@ export async function GET(request: Request) {
     .limit(1)
     .maybeSingle() as any;
 
+  const { searchParams } = new URL(request.url);
   if (recentSend && !searchParams.get('force')) {
     return NextResponse.json({ message: 'Already sent this week', lastSent: recentSend.sent_at, sent: 0 });
   }

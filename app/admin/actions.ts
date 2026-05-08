@@ -161,8 +161,8 @@ export async function adminLoginAction(formData: FormData) {
   try {
     assertSameOriginRequest();
     enforceRateLimit('admin-login', {
-      maxRequests: 10,
-      windowMs: 15 * 60 * 1000
+      maxRequests: 3,
+      windowMs: 60 * 60 * 1000
     });
   } catch (err) {
     if (err instanceof RateLimitError) {

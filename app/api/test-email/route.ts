@@ -77,19 +77,21 @@ const TEMPLATES = {
 
 export async function GET(request: Request) {
   try {
-    enforceRateLimit('test-email', { maxRequests: 10, windowMs: 60_000 });
+    enforceRateLimit('test-email', { maxRequests: 2, windowMs: 3600_000 });
   } catch {
     return NextResponse.json({ error: 'Too many requests — slow down' }, { status: 429 });
+  }
+
+  // Require admin session via Authorization header
+  const authHeader = request.headers.get('authorization');
+  const cronSecret = process.env.CRON_SECRET;
+  if (!authHeader || !cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const { searchParams } = new URL(request.url);
   const template = searchParams.get('template') as keyof typeof TEMPLATES;
   const to = searchParams.get('to')?.trim().toLowerCase();
-  const password = searchParams.get('password');
-
-  if (password !== process.env.ADMIN_PASSWORD) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
 
   if (!to || !ALLOWED_RECIPIENTS.has(to)) {
     return NextResponse.json({

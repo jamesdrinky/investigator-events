@@ -37,7 +37,7 @@ export function createAdminSessionToken(): string {
 }
 
 export function verifyAdminSessionToken(token: string | undefined): boolean {
-  const secret = process.env.ADMIN_SESSION_SECRET ?? '';
+  const secret = process.env.ADMIN_SESSION_SECRET;
 
   if (!token || !secret) {
     return false;

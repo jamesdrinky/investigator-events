@@ -33,17 +33,15 @@ export async function POST(request: Request) {
       .single();
 
     if (!codeRow) {
-      return NextResponse.json({ error: 'Invalid or expired verification code. Contact your association for the current code.' }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid verification code. Please check and try again.' }, { status: 400 });
     }
 
     const row = codeRow as any;
 
-    // Check expiry
     if (new Date(row.expires_at) < new Date()) {
-      return NextResponse.json({ error: 'This verification code has expired. Contact your association for a new code.' }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid verification code. Please check and try again.' }, { status: 400 });
     }
 
-    // Verify the code belongs to the claimed association
     const { data: assocPage } = await admin
       .from('association_pages')
       .select('id, name, slug')
@@ -51,7 +49,7 @@ export async function POST(request: Request) {
       .single();
 
     if (!assocPage) {
-      return NextResponse.json({ error: 'Association not found' }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid verification code. Please check and try again.' }, { status: 400 });
     }
 
     // Flexible match — check if the association name matches the page name or slug

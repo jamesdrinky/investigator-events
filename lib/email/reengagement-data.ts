@@ -173,6 +173,7 @@ export async function buildReengagementSnapshot({ admin, userId }: BuildArgs): P
     associationsMode,
     associationsTotalCount,
     associations,
+    hasOwnAssociations: hasAssociations,
     unsubscribeToken,
   };
 

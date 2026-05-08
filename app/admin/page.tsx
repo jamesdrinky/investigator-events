@@ -161,7 +161,7 @@ function StatCard({ icon: Icon, label, value, color }: { icon: any; label: strin
   );
 }
 
-export default async function AdminPage({ searchParams }: { searchParams?: { error?: string; tab?: string } }) {
+export default async function AdminPage({ searchParams }: { searchParams?: { error?: string; tab?: string; filter?: string } }) {
   const isAuthed = await hasValidAdminSessionCookie();
 
   if (!isAuthed) {
@@ -636,7 +636,30 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
             );
           })()}
 
-          {activeTab === 'users' && (
+          {activeTab === 'users' && (() => {
+            const userFilter = searchParams?.filter ?? '';
+            const userHasField = (u: typeof allUsers[number], field: 'full_name' | 'avatar_url' | 'specialisation' | 'country') => !!(u as any)[field];
+            const userHasAssocs = (u: typeof allUsers[number]) => (userAssocMap[u.id]?.length ?? 0) > 0;
+            const noAssocCount = allUsers.filter((u) => !userHasAssocs(u)).length;
+            const noAvatarCount = allUsers.filter((u) => !userHasField(u, 'avatar_url')).length;
+            const noSpecCount = allUsers.filter((u) => !userHasField(u, 'specialisation')).length;
+            const notVerifiedCount = allUsers.filter((u) => u.auth_provider !== 'linkedin_oidc' && u.is_verified !== true).length;
+            const filteredUsers = allUsers.filter((u) => {
+              if (userFilter === 'no_associations') return !userHasAssocs(u);
+              if (userFilter === 'no_avatar') return !userHasField(u, 'avatar_url');
+              if (userFilter === 'no_specialisation') return !userHasField(u, 'specialisation');
+              if (userFilter === 'not_verified') return u.auth_provider !== 'linkedin_oidc' && u.is_verified !== true;
+              if (userFilter === 'private') return u.is_public === false;
+              return true;
+            });
+            const filterChips: { id: string; label: string; count: number; tone: string }[] = [
+              { id: '', label: 'All', count: allUsers.length, tone: 'slate' },
+              { id: 'no_associations', label: 'No associations', count: noAssocCount, tone: 'amber' },
+              { id: 'no_avatar', label: 'No avatar', count: noAvatarCount, tone: 'rose' },
+              { id: 'no_specialisation', label: 'No specialisation', count: noSpecCount, tone: 'sky' },
+              { id: 'not_verified', label: 'Not verified', count: notVerifiedCount, tone: 'indigo' },
+            ];
+            return (
             <div className="space-y-4">
               <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
                 <div className="flex flex-wrap items-center justify-between gap-4">
@@ -646,9 +669,31 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                   </div>
                 </div>
 
+                {/* Profile health filter bar */}
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {filterChips.map((chip) => {
+                    const active = (userFilter || '') === chip.id;
+                    return (
+                      <a
+                        key={chip.id || 'all'}
+                        href={chip.id ? `/admin?tab=users&filter=${chip.id}` : `/admin?tab=users`}
+                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                          active ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        }`}
+                      >
+                        {chip.label}
+                        <span className={`rounded-full px-1.5 py-0.5 text-[10px] ${active ? 'bg-white/20 text-white' : 'bg-white text-slate-500'}`}>{chip.count}</span>
+                      </a>
+                    );
+                  })}
+                </div>
+
                 {/* User cards */}
                 <div className="mt-6 space-y-3">
-                  {allUsers.map((user) => {
+                  {filteredUsers.length === 0 && (
+                    <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-8 text-center text-sm text-slate-400">No users match this filter.</p>
+                  )}
+                  {filteredUsers.map((user) => {
                     const assocs = userAssocMap[user.id] ?? [];
                     const isLinkedInVerified = user.auth_provider === 'linkedin_oidc';
                     const linkedinSearchName = user.linkedin_name || user.full_name || '';
@@ -840,7 +885,8 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                 </div>
               </div>
             </div>
-          )}
+            );
+          })()}
 
           {activeTab === 'moderation' && (
             <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">

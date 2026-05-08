@@ -36,6 +36,8 @@ export interface ReengagementInput {
   associationsMode: 'new_since_visit' | 'featured';
   associationsTotalCount: number;
   associations: { name: string; slug: string; logoUrl: string | null }[];
+  // True when the user has 0 associations on their own profile — surfaces a dedicated callout.
+  hasOwnAssociations: boolean;
   unsubscribeToken: string | null;
 }
 
@@ -142,6 +144,23 @@ function verifyCallout(): string {
       <p style="margin:0;font-size:13px;color:${C.blueDark};line-height:1.5;">
         <strong>Tip:</strong> verify with LinkedIn in 30 seconds — it gets you a green check on your profile and pushes you up the directory.
       </p>
+    </td></tr>
+  </table>`;
+}
+
+function noAssociationsCallout(): string {
+  return `
+  <table cellpadding="0" cellspacing="0" border="0" width="100%" role="presentation" style="margin:0 0 14px;background-color:#fef3c7;border:1px solid #fcd34d;border-radius:12px;">
+    <tr><td style="padding:14px 18px;">
+      <p style="margin:0;font-size:13px;font-weight:700;color:#92400e;">
+        You haven't added any association memberships yet
+      </p>
+      <p style="margin:4px 0 8px;font-size:13px;color:#78350f;line-height:1.5;">
+        Adding your associations gets you onto member lists and pushes you up the directory. Takes 30 seconds.
+      </p>
+      <a href="${SITE}/profile/edit" style="display:inline-block;font-size:12px;font-weight:700;color:#92400e;text-decoration:underline;">
+        Add my associations →
+      </a>
     </td></tr>
   </table>`;
 }
@@ -293,6 +312,7 @@ export function buildReengagementEmail(input: ReengagementInput): string {
   const showProgressBar = tier !== 'c';
   const showChecklist = tier !== 'c' && input.missingItems.length > 0;
   const showStats = (input.events.length + input.associations.length) > 0;
+  const showNoAssocCallout = !input.hasOwnAssociations;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -337,6 +357,8 @@ export function buildReengagementEmail(input: ReengagementInput): string {
         ${showVerifyCallout ? `<tr><td style="background-color:${C.white};padding:6px 32px 0;">${verifyCallout()}</td></tr>` : ''}
 
         ${showStats ? `<tr><td style="background-color:${C.white};padding:0 32px;">${statsBlock(input)}</td></tr>` : ''}
+
+        ${showNoAssocCallout ? `<tr><td style="background-color:${C.white};padding:0 32px;">${noAssociationsCallout()}</td></tr>` : ''}
 
         <tr><td style="background-color:${C.white};padding:18px 32px 32px;text-align:center;">
           ${ctaButton(primaryCta.href, primaryCta.label)}

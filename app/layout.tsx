@@ -58,10 +58,10 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
       <body className="font-[var(--font-sans)]">
-        <div className="relative flex min-h-screen flex-col">
+        <div data-app-shell className="relative flex min-h-screen flex-col">
           <TopLoadingBar />
           <Navbar />
-          <main className="flex-1 pb-[4.5rem] lg:pb-0"><PageTransition>{children}</PageTransition></main>
+          <main data-app-content className="flex-1 pb-[4.5rem] lg:pb-0"><PageTransition>{children}</PageTransition></main>
           <Footer className="hidden lg:block" />
         </div>
         <MobileBackButton />

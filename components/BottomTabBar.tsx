@@ -56,8 +56,6 @@ export function BottomTabBar() {
       className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200/80 bg-white lg:hidden"
       style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 8px) + 4px)' }}
     >
-      {/* Solid white block below tab bar — covers iOS overscroll bounce */}
-      <div className="absolute left-0 right-0 top-full h-[200px] bg-white" />
       <div className="flex items-center justify-around px-2">
         {tabs.map((tab) => {
           const active = isActive(tab.href);

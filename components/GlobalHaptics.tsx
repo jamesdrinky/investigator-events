@@ -32,18 +32,26 @@ export function GlobalHaptics() {
       ImpactStyle = mod.ImpactStyle;
     }).catch(() => {});
 
-    const handler = (e: PointerEvent) => {
+    // Use click (not pointerdown) so haptics only fire on actual taps, not scroll starts
+    const handler = () => {
       if (!Haptics) return;
-      const target = e.target as HTMLElement;
-      const interactive = target.closest('a, button, [role="button"], input[type="checkbox"], input[type="radio"], select, [data-haptic]');
-      if (interactive) {
-        Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
-      }
+      Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
     };
 
-    document.addEventListener('pointerdown', handler, { passive: true });
+    // Only attach to buttons and links — not inputs/selects (those have their own feedback)
+    const addListeners = () => {
+      document.querySelectorAll('a, button, [role="button"]').forEach((el) => {
+        el.addEventListener('click', handler, { passive: true });
+      });
+    };
+
+    // Initial attach + re-attach on DOM changes (new content loaded)
+    addListeners();
+    const observer = new MutationObserver(addListeners);
+    observer.observe(document.body, { childList: true, subtree: true });
+
     return () => {
-      document.removeEventListener('pointerdown', handler);
+      observer.disconnect();
       document.removeEventListener('touchstart', dismissHandler);
     };
   }, []);

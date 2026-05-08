@@ -125,7 +125,7 @@ export default async function PublicProfilePage({ params }: { params: { username
   const userEmail = user?.email;
   let isNewsletterSubscribed = false;
   if (isOwner && userEmail) {
-    const { data: sub } = await supabase.from('newsletter_subscribers' as any).select('id').eq('email', userEmail).maybeSingle();
+    const { data: sub } = await supabase.from('newsletter_subscribers' as any).select('id, status').eq('email', userEmail.toLowerCase()).maybeSingle() as any;
     isNewsletterSubscribed = !!sub;
   }
 
@@ -175,7 +175,7 @@ export default async function PublicProfilePage({ params }: { params: { username
         >
           {/* Banner */}
           {(profile as any).banner_url ? (
-            <div className="relative h-36 overflow-hidden rounded-t-2xl sm:h-44 lg:h-52">
+            <div className="relative h-28 overflow-hidden rounded-t-2xl sm:h-44 lg:h-52">
               <Image src={(profile as any).banner_url} alt="" fill className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
             </div>
@@ -277,9 +277,9 @@ export default async function PublicProfilePage({ params }: { params: { username
             {/* LinkedIn verified banner — compact */}
             {isLinkedInVerified && linkedinName && (
               <div className="mt-5 flex items-center gap-3 rounded-xl bg-[#0077B5]/8 px-4 py-3 border border-[#0077B5]/15">
-                {linkedinPicture && (
-                  <img src={linkedinPicture} alt="" className="h-9 w-9 flex-shrink-0 rounded-full border border-[#0077B5]/30 object-cover" />
-                )}
+                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#0077B5]/15">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#0077B5]" viewBox="0 0 48 48"><path fill="currentColor" d="M42 37a5 5 0 01-5 5H11a5 5 0 01-5-5V11a5 5 0 015-5h26a5 5 0 015 5v26z" /><path fill="white" d="M12 19h5v17h-5V19zm2.485-2h-.028C12.965 17 12 15.888 12 14.499 12 13.08 12.995 12 14.514 12c1.521 0 2.458 1.08 2.486 2.499C17 15.887 16.035 17 14.485 17zM36 36h-5v-9.099c0-2.198-1.225-3.698-3.192-3.698-1.501 0-2.313 1.012-2.707 1.99-.144.35-.101.858-.101 1.365V36h-5s.07-16 0-17h5v2.616C25.721 21.865 27.085 20 30.1 20c3.386 0 5.9 2.215 5.9 6.978V36z" /></svg>
+                </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-semibold text-[#0077B5]">LinkedIn Verified</p>
                   <p className="truncate text-[11px] text-slate-500">Authenticated as {linkedinName}</p>

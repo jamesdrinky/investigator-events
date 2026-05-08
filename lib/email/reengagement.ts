@@ -174,8 +174,9 @@ function eventNameRow(e: ReengagementInput['events'][number]): string {
 }
 
 function assocNameRow(a: ReengagementInput['associations'][number]): string {
-  const logo = a.logoUrl
-    ? `<img src="${a.logoUrl}" alt="" width="48" height="48" style="display:block;width:48px;height:48px;border-radius:12px;object-fit:cover;border:0;" />`
+  const logoUrl = absoluteImage(a.logoUrl);
+  const logo = logoUrl
+    ? `<img src="${logoUrl}" alt="" width="48" height="48" style="display:block;width:48px;height:48px;border-radius:12px;object-fit:contain;background-color:#ffffff;border:1px solid ${C.border};padding:4px;box-sizing:border-box;" />`
     : letterTile(a.name, 48);
   return `
   <tr><td style="padding:8px 0;">

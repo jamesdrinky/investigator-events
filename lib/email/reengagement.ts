@@ -28,10 +28,14 @@ export interface ReengagementInput {
   isLinkedInVerified: boolean;
   isManuallyVerified: boolean;
   daysSinceLastSeen: number | null;
-  newEventsCount: number;
-  newAssociationsCount: number;
-  newEventNames: { title: string; slug: string; city: string | null; country: string | null; startDate: string; imagePath: string | null }[];
-  newAssociationNames: { name: string; slug: string; logoUrl: string | null }[];
+  // Events: either "new since last visit" or fallback to "upcoming on the calendar"
+  eventsMode: 'new_since_visit' | 'upcoming';
+  eventsTotalCount: number;
+  events: { title: string; slug: string; city: string | null; country: string | null; startDate: string; imagePath: string | null }[];
+  // Associations: either "new since last visit" or fallback to "featured/all"
+  associationsMode: 'new_since_visit' | 'featured';
+  associationsTotalCount: number;
+  associations: { name: string; slug: string; logoUrl: string | null }[];
   unsubscribeToken: string | null;
 }
 
@@ -50,10 +54,10 @@ export function pickSubject(input: ReengagementInput): string {
   if (v.startsWith('tier_a')) return `Finish setting up your Investigator Events profile`;
   if (v.startsWith('tier_b')) return `You're nearly there — add the finishing touches to your profile`;
   // tier_c
-  if (input.newEventsCount > 0) {
-    return `${input.newEventsCount} new event${input.newEventsCount === 1 ? '' : 's'} on Investigator Events since you were last here`;
+  if (input.eventsMode === 'new_since_visit' && input.eventsTotalCount > 0) {
+    return `${input.eventsTotalCount} new event${input.eventsTotalCount === 1 ? '' : 's'} on Investigator Events since you were last here`;
   }
-  return `What's new on Investigator Events`;
+  return `What's coming up on Investigator Events`;
 }
 
 function formatDate(iso: string): string {
@@ -122,11 +126,11 @@ function missingChecklist(items: ReengagementInput['missingItems'], max: number 
   </table>`;
 }
 
-function verifiedBadge(): string {
+function verifiedBadge(label: string = 'Verified via LinkedIn'): string {
   return `
   <table cellpadding="0" cellspacing="0" role="presentation" style="margin:0 auto 10px;">
     <tr><td style="background-color:${C.greenSoft};border-radius:99px;padding:6px 14px;">
-      <span style="font-size:12px;font-weight:700;color:${C.green};">✓ Verified via LinkedIn</span>
+      <span style="font-size:12px;font-weight:700;color:${C.green};">✓ ${label}</span>
     </td></tr>
   </table>`;
 }
@@ -142,7 +146,7 @@ function verifyCallout(): string {
   </table>`;
 }
 
-function eventNameRow(e: ReengagementInput['newEventNames'][number]): string {
+function eventNameRow(e: ReengagementInput['events'][number]): string {
   const loc = [e.city, e.country].filter(Boolean).join(', ');
   const imgUrl = absoluteImage(e.imagePath);
   const thumb = imgUrl
@@ -169,7 +173,7 @@ function eventNameRow(e: ReengagementInput['newEventNames'][number]): string {
   </td></tr>`;
 }
 
-function assocNameRow(a: ReengagementInput['newAssociationNames'][number]): string {
+function assocNameRow(a: ReengagementInput['associations'][number]): string {
   const logo = a.logoUrl
     ? `<img src="${a.logoUrl}" alt="" width="48" height="48" style="display:block;width:48px;height:48px;border-radius:12px;object-fit:cover;border:0;" />`
     : letterTile(a.name, 48);
@@ -194,34 +198,50 @@ function statsBlock(input: ReengagementInput): string {
   const sinceWhen = input.daysSinceLastSeen !== null
     ? (input.daysSinceLastSeen < 1 ? 'today' : input.daysSinceLastSeen === 1 ? 'yesterday' : `${input.daysSinceLastSeen} days ago`)
     : null;
-  const lead = sinceWhen
-    ? `Since you were last here (${sinceWhen})`
-    : `Recently added to the platform`;
 
-  const hasEvents = input.newEventsCount > 0 && input.newEventNames.length > 0;
-  const hasAssocs = input.newAssociationsCount > 0 && input.newAssociationNames.length > 0;
+  const hasNewSinceVisit = input.eventsMode === 'new_since_visit' || input.associationsMode === 'new_since_visit';
+  const lead = hasNewSinceVisit && sinceWhen
+    ? `Since you were last here (${sinceWhen})`
+    : `What's on Investigator Events right now`;
+
+  const hasEvents = input.events.length > 0;
+  const hasAssocs = input.associations.length > 0;
   if (!hasEvents && !hasAssocs) return '';
+
+  const eventsHeading = input.eventsMode === 'new_since_visit'
+    ? `<strong style="color:${C.blue};">${input.eventsTotalCount}</strong> new event${input.eventsTotalCount === 1 ? '' : 's'} on the calendar`
+    : `Coming up on the calendar`;
+  const eventsTrailer = input.eventsMode === 'new_since_visit' && input.eventsTotalCount > input.events.length
+    ? `<p style="margin:8px 0 0;font-size:11px;color:${C.muted};">+ ${input.eventsTotalCount - input.events.length} more</p>`
+    : '';
 
   const eventSection = hasEvents ? `
     <tr><td style="padding:14px 20px 4px;">
       <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:${C.dark};">
-        <strong style="color:${C.blue};">${input.newEventsCount}</strong> new event${input.newEventsCount === 1 ? '' : 's'} on the calendar
+        ${eventsHeading}
       </p>
       <table cellpadding="0" cellspacing="0" border="0" width="100%" role="presentation">
-        ${input.newEventNames.slice(0, 5).map(eventNameRow).join('')}
+        ${input.events.slice(0, 5).map(eventNameRow).join('')}
       </table>
-      ${input.newEventsCount > input.newEventNames.length ? `<p style="margin:8px 0 0;font-size:11px;color:${C.muted};">+ ${input.newEventsCount - input.newEventNames.length} more</p>` : ''}
+      ${eventsTrailer}
     </td></tr>` : '';
+
+  const assocsHeading = input.associationsMode === 'new_since_visit'
+    ? `<strong style="color:${C.purple};">${input.associationsTotalCount}</strong> new association${input.associationsTotalCount === 1 ? '' : 's'} listed`
+    : `Featured associations`;
+  const assocsTrailer = input.associationsMode === 'new_since_visit' && input.associationsTotalCount > input.associations.length
+    ? `<p style="margin:8px 0 0;font-size:11px;color:${C.muted};">+ ${input.associationsTotalCount - input.associations.length} more</p>`
+    : '';
 
   const assocSection = hasAssocs ? `
     <tr><td style="padding:14px 20px 16px;${hasEvents ? `border-top:1px solid ${C.border};` : ''}">
       <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:${C.dark};">
-        <strong style="color:${C.purple};">${input.newAssociationsCount}</strong> new association${input.newAssociationsCount === 1 ? '' : 's'} listed
+        ${assocsHeading}
       </p>
       <table cellpadding="0" cellspacing="0" border="0" width="100%" role="presentation">
-        ${input.newAssociationNames.slice(0, 5).map(assocNameRow).join('')}
+        ${input.associations.slice(0, 5).map(assocNameRow).join('')}
       </table>
-      ${input.newAssociationsCount > input.newAssociationNames.length ? `<p style="margin:8px 0 0;font-size:11px;color:${C.muted};">+ ${input.newAssociationsCount - input.newAssociationNames.length} more</p>` : ''}
+      ${assocsTrailer}
     </td></tr>` : '';
 
   return `
@@ -267,11 +287,11 @@ export function buildReengagementEmail(input: ReengagementInput): string {
   const { headline, subline, primaryCta } = tierCopy(input);
   const profileUrl = input.username ? `${SITE}/profile/${input.username}` : `${SITE}/profile`;
 
-  const showVerifiedBadge = input.isLinkedInVerified;
-  const showVerifyCallout = !input.isLinkedInVerified;
+  const showVerifiedBadge = input.isLinkedInVerified || input.isManuallyVerified;
+  const showVerifyCallout = !input.isLinkedInVerified && !input.isManuallyVerified;
   const showProgressBar = tier !== 'c';
   const showChecklist = tier !== 'c' && input.missingItems.length > 0;
-  const showStats = (input.newEventsCount + input.newAssociationsCount) > 0;
+  const showStats = (input.events.length + input.associations.length) > 0;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -304,7 +324,7 @@ export function buildReengagementEmail(input: ReengagementInput): string {
           </p>
         </td></tr>
 
-        ${showVerifiedBadge ? `<tr><td style="background-color:${C.white};padding:14px 32px 0;text-align:center;">${verifiedBadge()}</td></tr>` : ''}
+        ${showVerifiedBadge ? `<tr><td style="background-color:${C.white};padding:14px 32px 0;text-align:center;">${verifiedBadge(input.isLinkedInVerified ? 'Verified via LinkedIn' : 'Verified by Investigator Events')}</td></tr>` : ''}
 
         ${showProgressBar ? `<tr><td style="background-color:${C.white};padding:14px 32px 0;">${progressBar(input.completionScore)}</td></tr>` : ''}
 

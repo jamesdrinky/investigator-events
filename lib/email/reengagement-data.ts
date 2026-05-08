@@ -81,7 +81,7 @@ export async function buildReengagementSnapshot({ admin, userId }: BuildArgs): P
   // Stats since last sign-in (or last 30 days if never)
   const sinceISO = lastSignInAt ?? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
   const today = new Date().toISOString().slice(0, 10);
-  const [eventsResult, assocsResult, newEventsListResult, newAssocsListResult] = await Promise.all([
+  const [eventsCountResult, assocsCountResult, newEventsListResult, newAssocsListResult] = await Promise.all([
     admin.from('events').select('id', { count: 'exact', head: true }).eq('approved', true).gt('created_at', sinceISO),
     admin.from('association_pages').select('id', { count: 'exact', head: true }).gt('created_at', sinceISO),
     // Up to 5 most-recent new events that are still upcoming, since last login
@@ -98,21 +98,48 @@ export async function buildReengagementSnapshot({ admin, userId }: BuildArgs): P
       .order('created_at', { ascending: false })
       .limit(5),
   ]);
-  const newEventsCount = eventsResult.count ?? 0;
-  const newAssociationsCount = assocsResult.count ?? 0;
-  const newEventNames = (newEventsListResult.data ?? []).map((e: any) => ({
+  const newEventsCount = eventsCountResult.count ?? 0;
+  const newAssociationsCount = assocsCountResult.count ?? 0;
+  const mapEvent = (e: any) => ({
     title: e.title,
     slug: e.slug ?? '',
     city: e.city,
     country: e.country,
     startDate: e.start_date,
     imagePath: e.image_path ?? null,
-  }));
-  const newAssociationNames = (newAssocsListResult.data ?? []).map((a: any) => ({
-    name: a.name,
-    slug: a.slug,
-    logoUrl: a.logo_url ?? null,
-  }));
+  });
+  const mapAssoc = (a: any) => ({ name: a.name, slug: a.slug, logoUrl: a.logo_url ?? null });
+
+  // Resolve events block: prefer "new since last visit"; otherwise show next 5 upcoming.
+  let events = (newEventsListResult.data ?? []).map(mapEvent);
+  let eventsMode: 'new_since_visit' | 'upcoming' = 'new_since_visit';
+  let eventsTotalCount = newEventsCount;
+  if (events.length === 0) {
+    const { data: upcoming } = await admin.from('events')
+      .select('title, slug, city, country, start_date, image_path')
+      .eq('approved', true)
+      .gte('start_date', today)
+      .order('start_date', { ascending: true })
+      .limit(5);
+    events = (upcoming ?? []).map(mapEvent);
+    eventsMode = 'upcoming';
+    eventsTotalCount = events.length;
+  }
+
+  // Resolve associations block: prefer "new since last visit"; otherwise show 5 featured/recent.
+  let associations = (newAssocsListResult.data ?? []).map(mapAssoc);
+  let associationsMode: 'new_since_visit' | 'featured' = 'new_since_visit';
+  let associationsTotalCount = newAssociationsCount;
+  if (associations.length === 0) {
+    const { data: featured } = await admin.from('association_pages')
+      .select('name, slug, logo_url')
+      .order('member_count', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false })
+      .limit(5);
+    associations = (featured ?? []).map(mapAssoc);
+    associationsMode = 'featured';
+    associationsTotalCount = associations.length;
+  }
 
   const daysSinceLastSeen = lastSignInAt
     ? Math.max(0, Math.round((Date.now() - new Date(lastSignInAt).getTime()) / (1000 * 60 * 60 * 24)))
@@ -140,10 +167,12 @@ export async function buildReengagementSnapshot({ admin, userId }: BuildArgs): P
     isLinkedInVerified,
     isManuallyVerified,
     daysSinceLastSeen,
-    newEventsCount,
-    newAssociationsCount,
-    newEventNames,
-    newAssociationNames,
+    eventsMode,
+    eventsTotalCount,
+    events,
+    associationsMode,
+    associationsTotalCount,
+    associations,
     unsubscribeToken,
   };
 

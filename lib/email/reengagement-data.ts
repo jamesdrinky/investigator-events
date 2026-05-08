@@ -86,14 +86,14 @@ export async function buildReengagementSnapshot({ admin, userId }: BuildArgs): P
     admin.from('association_pages').select('id', { count: 'exact', head: true }).gt('created_at', sinceISO),
     // Up to 5 most-recent new events that are still upcoming, since last login
     admin.from('events')
-      .select('title, slug, city, country, start_date')
+      .select('title, slug, city, country, start_date, image_path')
       .eq('approved', true)
       .gt('created_at', sinceISO)
       .gte('start_date', today)
       .order('start_date', { ascending: true })
       .limit(5),
     admin.from('association_pages')
-      .select('name, slug')
+      .select('name, slug, logo_url')
       .gt('created_at', sinceISO)
       .order('created_at', { ascending: false })
       .limit(5),
@@ -106,43 +106,17 @@ export async function buildReengagementSnapshot({ admin, userId }: BuildArgs): P
     city: e.city,
     country: e.country,
     startDate: e.start_date,
+    imagePath: e.image_path ?? null,
   }));
   const newAssociationNames = (newAssocsListResult.data ?? []).map((a: any) => ({
     name: a.name,
     slug: a.slug,
+    logoUrl: a.logo_url ?? null,
   }));
 
   const daysSinceLastSeen = lastSignInAt
     ? Math.max(0, Math.round((Date.now() - new Date(lastSignInAt).getTime()) / (1000 * 60 * 60 * 24)))
     : null;
-
-  // Upcoming events: prefer same country if user has one, otherwise nearest 3 globally
-  let upcomingQuery = admin.from('events')
-    .select('title, slug, city, country, start_date')
-    .eq('approved', true)
-    .gte('start_date', today)
-    .order('start_date', { ascending: true })
-    .limit(3);
-  if (p.country) {
-    const { data: localEvents } = await admin.from('events')
-      .select('title, slug, city, country, start_date')
-      .eq('approved', true)
-      .eq('country', p.country)
-      .gte('start_date', today)
-      .order('start_date', { ascending: true })
-      .limit(3);
-    if (localEvents && localEvents.length > 0) {
-      upcomingQuery = upcomingQuery; // keep below as global fallback fill
-    }
-  }
-  const { data: globalUpcoming } = await upcomingQuery;
-  const upcomingEvents = (globalUpcoming ?? []).map((e: any) => ({
-    title: e.title,
-    slug: e.slug ?? '',
-    city: e.city,
-    country: e.country,
-    startDate: e.start_date,
-  }));
 
   // Newsletter eligibility (GDPR): only send to opted-in active subscribers.
   let unsubscribeToken: string | null = null;
@@ -170,7 +144,6 @@ export async function buildReengagementSnapshot({ admin, userId }: BuildArgs): P
     newAssociationsCount,
     newEventNames,
     newAssociationNames,
-    upcomingEvents,
     unsubscribeToken,
   };
 

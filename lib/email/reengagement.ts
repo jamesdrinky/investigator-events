@@ -30,9 +30,8 @@ export interface ReengagementInput {
   daysSinceLastSeen: number | null;
   newEventsCount: number;
   newAssociationsCount: number;
-  newEventNames: { title: string; slug: string; city: string | null; country: string | null; startDate: string }[];
-  newAssociationNames: { name: string; slug: string }[];
-  upcomingEvents: { title: string; slug: string; city: string | null; country: string | null; startDate: string }[];
+  newEventNames: { title: string; slug: string; city: string | null; country: string | null; startDate: string; imagePath: string | null }[];
+  newAssociationNames: { name: string; slug: string; logoUrl: string | null }[];
   unsubscribeToken: string | null;
 }
 
@@ -63,22 +62,15 @@ function formatDate(iso: string): string {
   } catch { return iso; }
 }
 
-function eventCard(e: ReengagementInput['upcomingEvents'][number]): string {
-  const loc = [e.city, e.country].filter(Boolean).join(', ');
-  return `
-  <tr><td style="padding:0 0 10px;">
-    <a href="${SITE}/events/${e.slug}" style="text-decoration:none;color:${C.dark};">
-      <table cellpadding="0" cellspacing="0" border="0" width="100%" role="presentation" style="background-color:#ffffff;border:1px solid ${C.border};border-radius:10px;">
-        <tr><td style="padding:14px 16px;">
-          <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:${C.blue};">
-            ${formatDate(e.startDate)}
-          </p>
-          <p style="margin:4px 0 0;font-size:15px;font-weight:700;color:${C.dark};line-height:1.3;">${e.title}</p>
-          ${loc ? `<p style="margin:4px 0 0;font-size:12px;color:${C.muted};">${loc}</p>` : ''}
-        </td></tr>
-      </table>
-    </a>
-  </td></tr>`;
+function absoluteImage(path: string | null): string | null {
+  if (!path) return null;
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  return `${SITE}${path.startsWith('/') ? '' : '/'}${path}`;
+}
+
+function letterTile(name: string, size: number = 48): string {
+  const ch = (name.trim()[0] ?? '?').toUpperCase();
+  return `<div style="display:inline-block;width:${size}px;height:${size}px;line-height:${size}px;text-align:center;border-radius:${Math.round(size / 4)}px;background-image:linear-gradient(135deg, ${C.blue}, ${C.purple});color:#ffffff;font-size:${Math.round(size * 0.42)}px;font-weight:800;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">${ch}</div>`;
 }
 
 function ctaButton(href: string, label: string, color: string = C.dark): string {
@@ -152,20 +144,48 @@ function verifyCallout(): string {
 
 function eventNameRow(e: ReengagementInput['newEventNames'][number]): string {
   const loc = [e.city, e.country].filter(Boolean).join(', ');
+  const imgUrl = absoluteImage(e.imagePath);
+  const thumb = imgUrl
+    ? `<img src="${imgUrl}" alt="" width="64" height="64" style="display:block;width:64px;height:64px;border-radius:10px;object-fit:cover;border:0;" />`
+    : `<div style="width:64px;height:64px;border-radius:10px;background-image:linear-gradient(135deg, ${C.blue}, ${C.purple});"></div>`;
   return `
-  <tr><td style="padding:6px 0;border-top:1px solid ${C.border};">
+  <tr><td style="padding:8px 0;">
     <a href="${SITE}/events/${e.slug}" style="text-decoration:none;color:${C.dark};">
-      <p style="margin:0;font-size:13px;font-weight:600;color:${C.dark};line-height:1.4;">${e.title}</p>
-      <p style="margin:2px 0 0;font-size:11px;color:${C.muted};">${formatDate(e.startDate)}${loc ? ` · ${loc}` : ''}</p>
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" role="presentation">
+        <tr>
+          <td width="64" valign="top" style="width:64px;padding-right:14px;">
+            ${thumb}
+          </td>
+          <td valign="middle">
+            <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:${C.blue};">
+              ${formatDate(e.startDate)}
+            </p>
+            <p style="margin:3px 0 0;font-size:14px;font-weight:700;color:${C.dark};line-height:1.35;">${e.title}</p>
+            ${loc ? `<p style="margin:3px 0 0;font-size:12px;color:${C.muted};">${loc}</p>` : ''}
+          </td>
+        </tr>
+      </table>
     </a>
   </td></tr>`;
 }
 
 function assocNameRow(a: ReengagementInput['newAssociationNames'][number]): string {
+  const logo = a.logoUrl
+    ? `<img src="${a.logoUrl}" alt="" width="48" height="48" style="display:block;width:48px;height:48px;border-radius:12px;object-fit:cover;border:0;" />`
+    : letterTile(a.name, 48);
   return `
-  <tr><td style="padding:6px 0;border-top:1px solid ${C.border};">
+  <tr><td style="padding:8px 0;">
     <a href="${SITE}/associations/${a.slug}" style="text-decoration:none;color:${C.dark};">
-      <p style="margin:0;font-size:13px;font-weight:600;color:${C.dark};line-height:1.4;">${a.name}</p>
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" role="presentation">
+        <tr>
+          <td width="48" valign="middle" style="width:48px;padding-right:14px;">
+            ${logo}
+          </td>
+          <td valign="middle">
+            <p style="margin:0;font-size:14px;font-weight:700;color:${C.dark};line-height:1.35;">${a.name}</p>
+          </td>
+        </tr>
+      </table>
     </a>
   </td></tr>`;
 }
@@ -252,7 +272,6 @@ export function buildReengagementEmail(input: ReengagementInput): string {
   const showProgressBar = tier !== 'c';
   const showChecklist = tier !== 'c' && input.missingItems.length > 0;
   const showStats = (input.newEventsCount + input.newAssociationsCount) > 0;
-  const showUpcoming = tier === 'c' && input.upcomingEvents.length > 0;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -297,13 +316,6 @@ export function buildReengagementEmail(input: ReengagementInput): string {
         ${showVerifyCallout ? `<tr><td style="background-color:${C.white};padding:6px 32px 0;">${verifyCallout()}</td></tr>` : ''}
 
         ${showStats ? `<tr><td style="background-color:${C.white};padding:0 32px;">${statsBlock(input)}</td></tr>` : ''}
-
-        ${showUpcoming ? `<tr><td style="background-color:${C.white};padding:8px 32px 0;">
-          <p style="margin:0 0 12px;font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:${C.muted};text-align:left;">Coming up</p>
-          <table cellpadding="0" cellspacing="0" border="0" width="100%" role="presentation">
-            ${input.upcomingEvents.slice(0, 3).map(eventCard).join('')}
-          </table>
-        </td></tr>` : ''}
 
         <tr><td style="background-color:${C.white};padding:18px 32px 32px;text-align:center;">
           ${ctaButton(primaryCta.href, primaryCta.label)}

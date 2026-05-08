@@ -25,6 +25,7 @@ import { associationRecords } from '@/lib/data/associations';
 import { ImageDropZone } from '@/components/admin/ImageDropZone';
 import { OutreachManager } from '@/components/admin/OutreachManager';
 import { ReengageSender } from '@/components/admin/ReengageSender';
+import { getProfileCompletion } from '@/lib/utils/profile-completion';
 
 export const dynamic = 'force-dynamic';
 
@@ -161,7 +162,7 @@ function StatCard({ icon: Icon, label, value, color }: { icon: any; label: strin
   );
 }
 
-export default async function AdminPage({ searchParams }: { searchParams?: { error?: string; tab?: string; filter?: string } }) {
+export default async function AdminPage({ searchParams }: { searchParams?: { error?: string; tab?: string; filter?: string; q?: string; sort?: string } }) {
   const isAuthed = await hasValidAdminSessionCookie();
 
   if (!isAuthed) {
@@ -212,7 +213,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
 
   const newsletterSends = (newsletterSendsResult?.data ?? []) as any[];
   const recentSubscribers = (recentSubscribersResult?.data ?? []) as any[];
-  const allUsers = (allUsersResult?.data ?? []) as { id: string; full_name: string | null; username: string | null; avatar_url: string | null; country: string | null; specialisation: string | null; is_verified: boolean; is_public: boolean; created_at: string; linkedin_url: string | null; linkedin_name: string | null; linkedin_picture: string | null; auth_provider: string | null }[];
+  const allUsers = (allUsersResult?.data ?? []) as { id: string; full_name: string | null; username: string | null; avatar_url: string | null; country: string | null; specialisation: string | null; is_verified: boolean; is_public: boolean; created_at: string; linkedin_url: string | null; linkedin_name: string | null; linkedin_picture: string | null; auth_provider: string | null; headline: string | null; bio: string | null; website: string | null; banner_url: string | null }[];
 
   // Re-engagement campaign state
   const { data: reengageRows } = await (admin.from('reengagement_sends' as any)
@@ -251,6 +252,15 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
       userAssocMap[ua.user_id].push({ association_name: ua.association_name, association_slug: ua.association_slug, role: ua.role });
     });
   } catch { /* ignore — associations just won't show */ }
+
+  // Fetch work_experience counts so we can compute profile completion per user.
+  const userHasExperience: Record<string, boolean> = {};
+  try {
+    const { data: allExperiences } = await admin.from('work_experience').select('user_id') as any;
+    for (const w of ((allExperiences ?? []) as { user_id: string }[])) {
+      userHasExperience[w.user_id] = true;
+    }
+  } catch { /* ignore */ }
   const activeTab = searchParams?.tab ?? 'overview';
   const countries = new Set(events.map((e) => e.country));
   const mainEvents = events.filter((e) => e.eventScope === 'main');
@@ -638,27 +648,84 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
 
           {activeTab === 'users' && (() => {
             const userFilter = searchParams?.filter ?? '';
-            const userHasField = (u: typeof allUsers[number], field: 'full_name' | 'avatar_url' | 'specialisation' | 'country') => !!(u as any)[field];
+            const userQuery = (searchParams?.q ?? '').trim().toLowerCase();
+            const userSort = searchParams?.sort ?? 'newest';
+            const userHasField = (u: typeof allUsers[number], field: 'full_name' | 'avatar_url' | 'specialisation' | 'country' | 'headline' | 'bio') => !!((u as any)[field]?.toString().trim());
             const userHasAssocs = (u: typeof allUsers[number]) => (userAssocMap[u.id]?.length ?? 0) > 0;
+            const completionFor = (u: typeof allUsers[number]) => getProfileCompletion({
+              full_name: u.full_name,
+              avatar_url: u.avatar_url,
+              headline: u.headline,
+              country: u.country,
+              specialisation: u.specialisation,
+              bio: u.bio,
+              website: u.website,
+              banner_url: u.banner_url,
+              auth_provider: u.auth_provider,
+              hasAssociations: userHasAssocs(u),
+              hasExperience: !!userHasExperience[u.id],
+            }).score;
             const noAssocCount = allUsers.filter((u) => !userHasAssocs(u)).length;
             const noAvatarCount = allUsers.filter((u) => !userHasField(u, 'avatar_url')).length;
             const noSpecCount = allUsers.filter((u) => !userHasField(u, 'specialisation')).length;
+            const noHeadlineCount = allUsers.filter((u) => !userHasField(u, 'headline')).length;
+            const noBioCount = allUsers.filter((u) => !userHasField(u, 'bio')).length;
+            const noCountryCount = allUsers.filter((u) => !userHasField(u, 'country')).length;
             const notVerifiedCount = allUsers.filter((u) => u.auth_provider !== 'linkedin_oidc' && u.is_verified !== true).length;
-            const filteredUsers = allUsers.filter((u) => {
+            const verifiedOnlyCount = allUsers.filter((u) => u.auth_provider === 'linkedin_oidc' || u.is_verified === true).length;
+            const privateCount = allUsers.filter((u) => u.is_public === false).length;
+
+            let filteredUsers = allUsers.filter((u) => {
               if (userFilter === 'no_associations') return !userHasAssocs(u);
               if (userFilter === 'no_avatar') return !userHasField(u, 'avatar_url');
               if (userFilter === 'no_specialisation') return !userHasField(u, 'specialisation');
+              if (userFilter === 'no_headline') return !userHasField(u, 'headline');
+              if (userFilter === 'no_bio') return !userHasField(u, 'bio');
+              if (userFilter === 'no_country') return !userHasField(u, 'country');
               if (userFilter === 'not_verified') return u.auth_provider !== 'linkedin_oidc' && u.is_verified !== true;
+              if (userFilter === 'verified_only') return u.auth_provider === 'linkedin_oidc' || u.is_verified === true;
               if (userFilter === 'private') return u.is_public === false;
               return true;
             });
-            const filterChips: { id: string; label: string; count: number; tone: string }[] = [
-              { id: '', label: 'All', count: allUsers.length, tone: 'slate' },
-              { id: 'no_associations', label: 'No associations', count: noAssocCount, tone: 'amber' },
-              { id: 'no_avatar', label: 'No avatar', count: noAvatarCount, tone: 'rose' },
-              { id: 'no_specialisation', label: 'No specialisation', count: noSpecCount, tone: 'sky' },
-              { id: 'not_verified', label: 'Not verified', count: notVerifiedCount, tone: 'indigo' },
+
+            if (userQuery) {
+              filteredUsers = filteredUsers.filter((u) => {
+                const haystack = [u.full_name, u.username, u.linkedin_name, u.country, u.specialisation, u.headline].filter(Boolean).join(' ').toLowerCase();
+                return haystack.includes(userQuery);
+              });
+            }
+
+            filteredUsers = [...filteredUsers].sort((a, b) => {
+              if (userSort === 'oldest') return (a.created_at ?? '').localeCompare(b.created_at ?? '');
+              if (userSort === 'name') return (a.full_name ?? '').localeCompare(b.full_name ?? '');
+              if (userSort === 'completion_low') return completionFor(a) - completionFor(b);
+              if (userSort === 'completion_high') return completionFor(b) - completionFor(a);
+              // default: newest
+              return (b.created_at ?? '').localeCompare(a.created_at ?? '');
+            });
+
+            const filterChips: { id: string; label: string; count: number }[] = [
+              { id: '', label: 'All', count: allUsers.length },
+              { id: 'verified_only', label: 'Verified only', count: verifiedOnlyCount },
+              { id: 'not_verified', label: 'Not verified', count: notVerifiedCount },
+              { id: 'no_associations', label: 'No associations', count: noAssocCount },
+              { id: 'no_avatar', label: 'No avatar', count: noAvatarCount },
+              { id: 'no_headline', label: 'No headline', count: noHeadlineCount },
+              { id: 'no_bio', label: 'No bio', count: noBioCount },
+              { id: 'no_country', label: 'No country', count: noCountryCount },
+              { id: 'no_specialisation', label: 'No specialisation', count: noSpecCount },
+              { id: 'private', label: 'Private', count: privateCount },
             ];
+
+            const buildHref = (overrides: { filter?: string; q?: string; sort?: string }) => {
+              const params = new URLSearchParams();
+              params.set('tab', 'users');
+              const next = { filter: userFilter, q: userQuery, sort: userSort, ...overrides };
+              if (next.filter) params.set('filter', next.filter);
+              if (next.q) params.set('q', next.q);
+              if (next.sort && next.sort !== 'newest') params.set('sort', next.sort);
+              return `/admin?${params.toString()}`;
+            };
             return (
             <div className="space-y-4">
               <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
@@ -669,6 +736,45 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                   </div>
                 </div>
 
+                {/* Search + sort row */}
+                <form action="/admin" method="get" className="mt-4 flex flex-wrap items-center gap-2">
+                  <input type="hidden" name="tab" value="users" />
+                  {userFilter && <input type="hidden" name="filter" value={userFilter} />}
+                  {userSort && userSort !== 'newest' && <input type="hidden" name="sort" value={userSort} />}
+                  <input
+                    type="search"
+                    name="q"
+                    defaultValue={userQuery}
+                    placeholder="Search by name, username, country..."
+                    className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-blue-400"
+                  />
+                  <button type="submit" className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800">Search</button>
+                  {userQuery && (
+                    <a href={buildHref({ q: '' })} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">Clear</a>
+                  )}
+                  <span className="ml-auto text-xs text-slate-400">Sort:</span>
+                  {([
+                    { id: 'newest', label: 'Newest' },
+                    { id: 'oldest', label: 'Oldest' },
+                    { id: 'name', label: 'A–Z' },
+                    { id: 'completion_low', label: 'Least complete' },
+                    { id: 'completion_high', label: 'Most complete' },
+                  ] as const).map((opt) => {
+                    const active = userSort === opt.id;
+                    return (
+                      <a
+                        key={opt.id}
+                        href={buildHref({ sort: opt.id })}
+                        className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition ${
+                          active ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        }`}
+                      >
+                        {opt.label}
+                      </a>
+                    );
+                  })}
+                </form>
+
                 {/* Profile health filter bar */}
                 <div className="mt-4 flex flex-wrap gap-2">
                   {filterChips.map((chip) => {
@@ -676,7 +782,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                     return (
                       <a
                         key={chip.id || 'all'}
-                        href={chip.id ? `/admin?tab=users&filter=${chip.id}` : `/admin?tab=users`}
+                        href={buildHref({ filter: chip.id })}
                         className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition ${
                           active ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                         }`}
@@ -687,6 +793,8 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                     );
                   })}
                 </div>
+
+                <p className="mt-3 text-xs text-slate-400">Showing {filteredUsers.length} of {allUsers.length} users</p>
 
                 {/* User cards */}
                 <div className="mt-6 space-y-3">
@@ -703,6 +811,8 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                         : '');
                     const isVerified = user.is_verified === true;
                     const isPublic = user.is_public !== false;
+                    const completionScore = completionFor(user);
+                    const completionTone = completionScore >= 80 ? 'bg-emerald-500' : completionScore >= 40 ? 'bg-blue-500' : 'bg-amber-500';
 
                     return (
                       <details key={user.id} className="group rounded-xl border border-slate-200/60 bg-white transition open:shadow-sm">
@@ -736,6 +846,12 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                               {user.country ? ` · ${user.country}` : ''}
                               {user.specialisation ? ` · ${user.specialisation}` : ''}
                             </p>
+                            <div className="mt-1.5 flex items-center gap-2">
+                              <div className="h-1.5 w-24 overflow-hidden rounded-full bg-slate-100">
+                                <div className={`h-full ${completionTone}`} style={{ width: `${completionScore}%` }} />
+                              </div>
+                              <span className="text-[10px] font-semibold text-slate-500">{completionScore}%</span>
+                            </div>
                             {assocs.length > 0 && (
                               <div className="mt-1 flex flex-wrap gap-1">
                                 {assocs.map((a) => (

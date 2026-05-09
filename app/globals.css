@@ -13,7 +13,7 @@
 /* ── App-like smooth interactions ── */
 * { -webkit-tap-highlight-color: transparent; }
 html { scroll-behavior: smooth; }
-body { overscroll-behavior: none; }
+html, body { overscroll-behavior: none; overflow-x: hidden; }
 
 /* Lock viewport on mobile — only inner content scrolls, not the webview itself */
 @media (max-width: 1023px) {
@@ -27,8 +27,10 @@ body { overscroll-behavior: none; }
   [data-app-content] {
     flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: none;
+    overscroll-behavior-x: none;
   }
 }
 

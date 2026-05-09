@@ -26,8 +26,54 @@ export default async function AssociationPage({ params }: { params: { slug: stri
   const logoSrc = getAssociationBrandLogoSrc(page.name) || getAssociationBrandLogoSrc(page.slug.toUpperCase());
   const invertLogo = shouldInvertLogoOnLight(page.name) || shouldInvertLogoOnLight(page.slug.toUpperCase());
 
-  // Get ALL events for this association
-  const allEvents = await fetchAllEvents();
+  // Fire every independent query in parallel (was sequential — 7 round-trips
+  // back-to-back blew up first-load latency on slow connections).
+  const orFilter = `association_slug.eq.${page.slug},association_name.ilike.%${page.slug}%`;
+  const [
+    allEvents,
+    memberRowsRes,
+    verifiedRowsRes,
+    memberCountRes,
+    postRowsRes,
+    jobRowsRes,
+  ] = await Promise.all([
+    fetchAllEvents(),
+    supabase
+      .from('user_associations')
+      .select('user_id, role, member_since, profiles:user_id(full_name, avatar_url, username, specialisation, headline, country, profile_color)')
+      .or(orFilter)
+      .limit(50),
+    supabase
+      .from('member_verifications' as any)
+      .select('user_id, status')
+      .eq('status', 'verified')
+      .ilike('association_name', `%${page.slug}%`),
+    supabase
+      .from('user_associations')
+      .select('id', { count: 'exact', head: true })
+      .or(orFilter),
+    supabase
+      .from('association_posts' as any)
+      .select('id, title, content, image_url, link_url, is_pinned, likes_count, created_at, author_id')
+      .eq('association_page_id', page.id)
+      .order('is_pinned', { ascending: false })
+      .order('created_at', { ascending: false })
+      .limit(20),
+    supabase
+      .from('job_posts' as any)
+      .select('id, title, description, location, country, type, specialisation, created_at')
+      .eq('association_page_id', page.id)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(10),
+  ]);
+
+  const memberRows = memberRowsRes.data;
+  const verifiedRows = verifiedRowsRes.data;
+  const memberCount = memberCountRes.count;
+  const postRows = postRowsRes.data;
+  const jobRows = jobRowsRes.data;
+
   const assocEvents = allEvents.filter((e) => {
     const assocLower = (e.association ?? e.organiser ?? '').toLowerCase();
     return assocLower.includes(page.slug) || assocLower.includes(page.name.toLowerCase());
@@ -54,23 +100,7 @@ export default async function AssociationPage({ params }: { params: { slug: stri
       formattedDate: formatEventDate(e),
     }));
 
-  // Get members from user_associations
-  const { data: memberRows } = await supabase
-    .from('user_associations')
-    .select('user_id, role, member_since, profiles:user_id(full_name, avatar_url, username, specialisation, headline, country, profile_color)')
-    .or(`association_slug.eq.${page.slug},association_name.ilike.%${page.slug}%`)
-    .limit(50);
-
-  // Also get verified members from member_verifications (they might not have a user_associations row)
-  const { data: verifiedRows } = await supabase
-    .from('member_verifications' as any)
-    .select('user_id, status')
-    .eq('status', 'verified')
-    .ilike('association_name', `%${page.slug}%`);
-
   const verifiedSet = new Set((verifiedRows ?? []).map((v: any) => v.user_id));
-
-  // Merge: add any verified members who aren't already in memberRows
   const memberUserIds = new Set((memberRows ?? []).map((m: any) => m.user_id));
   const missingVerifiedIds = (verifiedRows ?? [])
     .filter((v: any) => !memberUserIds.has(v.user_id))
@@ -91,12 +121,6 @@ export default async function AssociationPage({ params }: { params: { slug: stri
   }
 
   const allMemberRows = [...(memberRows ?? []), ...extraMembers];
-
-  const { count: memberCount } = await supabase
-    .from('user_associations')
-    .select('id', { count: 'exact', head: true })
-    .or(`association_slug.eq.${page.slug},association_name.ilike.%${page.slug}%`);
-
   const totalMemberCount = (memberCount ?? 0) + missingVerifiedIds.length;
 
   const members = allMemberRows.map((m: any) => ({
@@ -118,15 +142,6 @@ export default async function AssociationPage({ params }: { params: { slug: stri
   // Sort: verified first
   members.sort((a, b) => (a.isVerified === b.isVerified ? 0 : a.isVerified ? -1 : 1));
 
-  // Get association posts
-  const { data: postRows } = await supabase
-    .from('association_posts' as any)
-    .select('id, title, content, image_url, link_url, is_pinned, likes_count, created_at, author_id')
-    .eq('association_page_id', page.id)
-    .order('is_pinned', { ascending: false })
-    .order('created_at', { ascending: false })
-    .limit(20);
-
   const posts = (postRows ?? []).map((p: any) => ({
     id: p.id, title: p.title, content: p.content,
     image_url: p.image_url, link_url: p.link_url,
@@ -134,15 +149,6 @@ export default async function AssociationPage({ params }: { params: { slug: stri
     created_at: p.created_at,
     author_name: null, author_avatar: null,
   }));
-
-  // Get jobs linked to this association
-  const { data: jobRows } = await supabase
-    .from('job_posts' as any)
-    .select('id, title, description, location, country, type, specialisation, created_at')
-    .eq('association_page_id', page.id)
-    .eq('is_active', true)
-    .order('created_at', { ascending: false })
-    .limit(10);
 
   const jobs = (jobRows ?? []).map((j: any) => ({
     id: j.id, title: j.title, description: j.description,

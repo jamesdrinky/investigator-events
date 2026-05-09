@@ -175,34 +175,34 @@ function PeoplePageInner() {
           <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:mt-3 sm:text-4xl">Forum</h1>
           <p className="mx-auto mt-2 hidden max-w-lg text-sm text-slate-500 sm:block">Share insights, promote your services, and connect with investigators worldwide.</p>
 
-          {/* Tabs */}
+          {/* Tabs — compact on mobile so all four fit without horizontal scroll */}
           <div className="mx-auto mt-6 inline-flex max-w-full overflow-x-auto rounded-full border border-slate-200/80 bg-white p-1 shadow-sm [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
             <button
               type="button"
               onClick={() => setTab('feed')}
-              className={`flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold transition sm:px-5 sm:text-sm ${tab === 'feed' ? 'bg-blue-600 text-white shadow' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1.5 text-[11px] font-semibold transition sm:gap-1.5 sm:px-5 sm:py-2 sm:text-sm ${tab === 'feed' ? 'bg-blue-600 text-white shadow' : 'text-slate-500 hover:text-slate-700'}`}
             >
-              <TrendingUp className="h-4 w-4" /> Feed
+              <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Feed
             </button>
             <button
               type="button"
               onClick={() => setTab('lfg')}
-              className={`flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold transition sm:px-5 sm:text-sm ${tab === 'lfg' ? 'bg-blue-600 text-white shadow' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1.5 text-[11px] font-semibold transition sm:gap-1.5 sm:px-5 sm:py-2 sm:text-sm ${tab === 'lfg' ? 'bg-blue-600 text-white shadow' : 'text-slate-500 hover:text-slate-700'}`}
             >
               Referrals
             </button>
             <button
               type="button"
               onClick={() => setTab('discover')}
-              className={`flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold transition sm:px-5 sm:text-sm ${tab === 'discover' ? 'bg-blue-600 text-white shadow' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1.5 text-[11px] font-semibold transition sm:gap-1.5 sm:px-5 sm:py-2 sm:text-sm ${tab === 'discover' ? 'bg-blue-600 text-white shadow' : 'text-slate-500 hover:text-slate-700'}`}
             >
-              <Users className="h-4 w-4" /> Discover
+              <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Discover
             </button>
             <Link
               href="/reviews"
-              className="flex shrink-0 items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3.5 py-2 text-xs font-semibold text-white shadow-[0_0_16px_rgba(245,158,11,0.4),0_0_6px_rgba(249,115,22,0.3)] transition hover:brightness-110 sm:px-5 sm:text-sm"
+              className="flex shrink-0 items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-2.5 py-1.5 text-[11px] font-semibold text-white shadow-[0_0_16px_rgba(245,158,11,0.4),0_0_6px_rgba(249,115,22,0.3)] transition hover:brightness-110 sm:gap-1.5 sm:px-5 sm:py-2 sm:text-sm"
             >
-              <Star className="h-4 w-4" /> Reviews
+              <Star className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Reviews
             </Link>
           </div>
 

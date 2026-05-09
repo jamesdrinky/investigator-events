@@ -150,8 +150,16 @@ export default async function PublicProfilePage({ params }: { params: { username
   if (!hasAssociations) missing.push('associations');
   if (!hasSections) missing.push('sections');
 
+  // True only when the profile is essentially blank — top card with no
+  // headline/bio/associations/experience/sections/posts/reviews. In that
+  // case lock the wrapper height so the page doesn't scroll into empty
+  // space below the card. The owner's checklist still adds height when
+  // viewing your own profile, so 'empty' only applies to non-owner views.
+  const isEffectivelyEmpty = !isOwner && !hasHeadline && !hasAbout && !hasAssociations
+    && !hasSections && !hasActivity && !hasReviews && !hasExperience;
+
   return (
-    <main className="min-h-screen bg-slate-50/80">
+    <main className={`bg-slate-50/80 ${isEffectivelyEmpty ? '' : 'min-h-screen'}`}>
       {/* Ambient page glow — uses profile accent color */}
       <div className="pointer-events-none fixed inset-x-0 top-0 h-[50vh]" style={{
         opacity: isFullyVerified ? 0.45 : 0.3,

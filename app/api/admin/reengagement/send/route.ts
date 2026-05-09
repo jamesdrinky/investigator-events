@@ -8,6 +8,24 @@ import { buildReengagementEmail, pickVariant, pickSubject } from '@/lib/email/re
 
 const CAMPAIGN = 'reengagement_v1';
 const FROM = 'Investigator Events <info@investigatorevents.com>';
+const SNAPSHOT_CONCURRENCY = 8;
+
+// Allow up to 60s on Vercel Pro (silently capped to 10s on Hobby).
+export const maxDuration = 60;
+
+async function mapInBatches<T, R>(items: T[], concurrency: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+  const out: R[] = new Array(items.length);
+  let cursor = 0;
+  const workers = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+    while (true) {
+      const idx = cursor++;
+      if (idx >= items.length) return;
+      out[idx] = await fn(items[idx]);
+    }
+  });
+  await Promise.all(workers);
+  return out;
+}
 
 export async function POST(request: Request) {
   assertSameOriginRequest();
@@ -27,56 +45,93 @@ export async function POST(request: Request) {
   const admin = createSupabaseAdminServerClient();
   const resend = new Resend(resendKey);
 
-  // Pull all profiles (or just one if userId provided)
+  // ---- Bulk pre-fetch ---------------------------------------------------
+  // 1. Profile id list (or single id when previewing)
   let profilesQuery = admin.from('profiles').select('id').order('created_at', { ascending: false });
   if (onlyUserId) profilesQuery = profilesQuery.eq('id', onlyUserId);
   const { data: profiles, error: profilesErr } = await profilesQuery;
   if (profilesErr) {
     return NextResponse.json({ error: profilesErr.message }, { status: 500 });
   }
+  const profileIds = (profiles ?? []).map((p) => p.id);
 
-  // Skip users we've already sent this campaign to (idempotent across retries)
-  const alreadySentIds = new Set<string>();
-  if (!dryRun) {
-    const { data: already } = await (admin.from('reengagement_sends' as any)
-      .select('user_id')
-      .eq('campaign', CAMPAIGN)
-      .eq('status', 'sent') as any);
-    for (const row of (already ?? []) as { user_id: string }[]) {
-      alreadySentIds.add(row.user_id);
+  // 2. Newsletter active subscribers (lower-cased emails) — single query
+  const { data: activeSubsRows } = await (admin.from('newsletter_subscribers' as any)
+    .select('email')
+    .eq('status', 'active') as any);
+  const activeSubEmails = new Set<string>(((activeSubsRows ?? []) as { email: string }[]).map((s) => s.email.toLowerCase()));
+
+  // 3. Auth users — id -> email — single page (1000 cap is fine, ~72 users today)
+  const idToEmail = new Map<string, string>();
+  try {
+    const { data: authPage } = await admin.auth.admin.listUsers({ perPage: 1000 });
+    for (const u of authPage?.users ?? []) {
+      if (u.email) idToEmail.set(u.id, u.email.toLowerCase());
     }
+  } catch {}
+
+  // 4. Already-sent ids for this campaign — single query
+  const alreadySentIds = new Set<string>();
+  const { data: already } = await (admin.from('reengagement_sends' as any)
+    .select('user_id')
+    .eq('campaign', CAMPAIGN)
+    .eq('status', 'sent') as any);
+  for (const row of (already ?? []) as { user_id: string }[]) {
+    alreadySentIds.add(row.user_id);
   }
 
-  let sent = 0;
-  let skippedNoEmail = 0;
+  // ---- Pre-filter (no per-user queries) ---------------------------------
   let skippedAlreadySent = 0;
+  let skippedNoEmail = 0;
   let skippedNotSubscribed = 0;
   let skippedTierC = 0;
+  let sent = 0;
   let failed = 0;
   const failures: { userId: string; error: string }[] = [];
 
-  for (const p of profiles ?? []) {
-    if (alreadySentIds.has(p.id)) {
+  const candidates: string[] = [];
+  for (const id of profileIds) {
+    if (alreadySentIds.has(id)) {
       skippedAlreadySent += 1;
       continue;
     }
+    const email = idToEmail.get(id) ?? null;
+    if (!email) {
+      skippedNoEmail += 1;
+      continue;
+    }
+    if (!activeSubEmails.has(email)) {
+      skippedNotSubscribed += 1;
+      continue;
+    }
+    candidates.push(id);
+  }
 
-    const snap = await buildReengagementSnapshot({ admin, userId: p.id });
+  // ---- Build snapshots in parallel for the surviving candidates ---------
+  const snaps = await mapInBatches(candidates, SNAPSHOT_CONCURRENCY, async (userId) => {
+    try {
+      return await buildReengagementSnapshot({ admin, userId });
+    } catch {
+      return null;
+    }
+  });
+
+  // ---- Decide tier eligibility + send -----------------------------------
+  // For live sends we still want to keep things parallel-ish: send via Resend
+  // is the only side-effect and Resend's API is happy with concurrent calls.
+  const toSendQueue: { userId: string; snap: NonNullable<typeof snaps[number]> }[] = [];
+  for (let i = 0; i < candidates.length; i++) {
+    const userId = candidates[i];
+    const snap = snaps[i];
     if (!snap || !snap.email) {
       skippedNoEmail += 1;
       continue;
     }
-
-    // GDPR: only send to users who opted into the newsletter at signup
     if (!snap.isNewsletterSubscribed) {
+      // Belt-and-braces (subscriber rows could have changed mid-flight)
       skippedNotSubscribed += 1;
       continue;
     }
-
-    // Targets tier A & B profiles primarily (completion < 80%). Tier C users
-    // (already-set-up) are normally skipped — but we include them when they've
-    // been away for a while AND there's substantial new content to tell them
-    // about. Threshold: 14+ days since last sign-in AND >= 5 new events since.
     if (snap.completionScore >= 80) {
       const daysAway = snap.input.daysSinceLastSeen ?? 0;
       const newEventsSinceVisit = snap.input.eventsMode === 'new_since_visit' ? snap.input.eventsTotalCount : 0;
@@ -86,63 +141,81 @@ export async function POST(request: Request) {
         continue;
       }
     }
+    toSendQueue.push({ userId, snap });
+  }
 
+  if (dryRun) {
+    return NextResponse.json({
+      ok: true,
+      dryRun: true,
+      totals: {
+        considered: profileIds.length,
+        sent: toSendQueue.length,
+        skippedAlreadySent,
+        skippedNoEmail,
+        skippedNotSubscribed,
+        skippedTierC,
+        failed: 0,
+      },
+      failures: [],
+    });
+  }
+
+  // Live send: parallelize Resend calls + insert tracking row per user.
+  await mapInBatches(toSendQueue, SNAPSHOT_CONCURRENCY, async ({ userId, snap }) => {
     const html = buildReengagementEmail(snap.input);
     const subject = pickSubject(snap.input);
     const variant = pickVariant(snap.input);
-
-    if (dryRun) {
-      sent += 1;
-      continue;
-    }
-
     const unsubUrl = snap.unsubscribeToken
       ? `https://investigatorevents.com/api/newsletter/unsubscribe?token=${snap.unsubscribeToken}`
       : null;
-    const { error: sendErr } = await resend.emails.send({
-      from: FROM,
-      to: [snap.email],
-      subject,
-      html,
-      headers: unsubUrl ? {
-        'List-Unsubscribe': `<${unsubUrl}>`,
-        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
-      } : undefined,
-    });
-
-    if (sendErr) {
-      failed += 1;
-      failures.push({ userId: p.id, error: sendErr.message ?? 'unknown' });
+    try {
+      const { error: sendErr } = await resend.emails.send({
+        from: FROM,
+        to: [snap.email!],
+        subject,
+        html,
+        headers: unsubUrl ? {
+          'List-Unsubscribe': `<${unsubUrl}>`,
+          'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+        } : undefined,
+      });
+      if (sendErr) {
+        failed += 1;
+        failures.push({ userId, error: sendErr.message ?? 'unknown' });
+        await (admin.from('reengagement_sends' as any).insert({
+          user_id: userId,
+          recipient_email: snap.email!,
+          campaign: CAMPAIGN,
+          variant,
+          completion_score: snap.completionScore,
+          is_linkedin_verified: snap.isLinkedInVerified,
+          status: 'failed',
+          error: sendErr.message ?? 'unknown',
+        } as any) as any);
+        return;
+      }
+      sent += 1;
       await (admin.from('reengagement_sends' as any).insert({
-        user_id: p.id,
-        recipient_email: snap.email,
+        user_id: userId,
+        recipient_email: snap.email!,
         campaign: CAMPAIGN,
         variant,
         completion_score: snap.completionScore,
         is_linkedin_verified: snap.isLinkedInVerified,
-        status: 'failed',
-        error: sendErr.message ?? 'unknown',
+        status: 'sent',
       } as any) as any);
-      continue;
+    } catch (e: any) {
+      failed += 1;
+      failures.push({ userId, error: e?.message ?? 'unknown' });
     }
-
-    sent += 1;
-    await (admin.from('reengagement_sends' as any).insert({
-      user_id: p.id,
-      recipient_email: snap.email,
-      campaign: CAMPAIGN,
-      variant,
-      completion_score: snap.completionScore,
-      is_linkedin_verified: snap.isLinkedInVerified,
-      status: 'sent',
-    } as any) as any);
-  }
+  });
 
   return NextResponse.json({
     ok: true,
-    dryRun,
+    dryRun: false,
     totals: {
-      considered: profiles?.length ?? 0,
+      considered: profileIds.length,
       sent,
       skippedAlreadySent,
       skippedNoEmail,

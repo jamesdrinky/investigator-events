@@ -169,7 +169,7 @@ export default async function CalendarPage({
       </div>
 
       {/* ── Calendar content ── */}
-      <div className="container-shell relative pb-8 sm:pb-12">
+      <div id="events-list" className="container-shell relative scroll-mt-24 pb-8 sm:pb-12">
         <CalendarView
           events={events}
           initialAssociation={initialAssociation}

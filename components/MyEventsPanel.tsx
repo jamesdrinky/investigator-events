@@ -161,7 +161,7 @@ export function MyEventsPanel() {
 
         {/* Browse more CTA */}
         <div className="border-t border-slate-100 px-5 py-3 sm:px-6">
-          <Link href="/calendar" className="flex items-center justify-center gap-1.5 text-xs font-semibold text-blue-600 transition hover:text-blue-700">
+          <Link href="/calendar#events-list" scroll className="flex items-center justify-center gap-1.5 text-xs font-semibold text-blue-600 transition hover:text-blue-700">
             Browse all events <ChevronRight className="h-3.5 w-3.5" />
           </Link>
         </div>

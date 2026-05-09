@@ -30,7 +30,7 @@
 	<string>Main</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
-		<string>armv7</string>
+		<string>arm64</string>
 	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
@@ -45,5 +45,18 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<!-- Privacy usage descriptions — required by Apple even if a feature is rarely used. -->
+	<key>NSCameraUsageDescription</key>
+	<string>Investigator Events uses the camera so you can take and upload a profile photo, banner image, or post image.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Investigator Events accesses your photo library so you can choose a profile photo, banner image, or post image.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Investigator Events saves images you choose to share back to your photo library.</string>
+	<!-- Tell iOS we support arbitrary HTTPS loads for our domain (Capacitor server.url). -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoadsInWebContent</key>
+		<true/>
+	</dict>
 </dict>
 </plist>

@@ -22,6 +22,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- Deep link: open https://investigatorevents.com/* inside the app.
+                 Requires a matching .well-known/assetlinks.json hosted on the
+                 site to enable autoVerify. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="investigatorevents.com" />
+                <data android:scheme="https" android:host="www.investigatorevents.com" />
+            </intent-filter>
+
         </activity>
 
         <provider
@@ -38,4 +49,17 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Push notifications. Required from Android 13 (API 33) onward. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- File uploads (avatar / banner / post images) via the WebView's file
+         chooser. CAMERA for "Take photo", READ_MEDIA_* for "Choose photo"
+         on Android 13+, READ_EXTERNAL_STORAGE for older devices. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
 </manifest>

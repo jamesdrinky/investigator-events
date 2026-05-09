@@ -240,9 +240,6 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
       }
     }
   } catch {}
-  const reengageEligibleCount = allUsers.filter((u) => newsletterEligibleSet.has(u.id) && !reengageMap[u.id]).length;
-  const reengageIneligibleCount = allUsers.filter((u) => !newsletterEligibleSet.has(u.id)).length;
-
   // Fetch all user_associations for the admin panel
   let userAssocMap: Record<string, { association_name: string; association_slug: string; role: string | null }[]> = {};
   try {
@@ -261,6 +258,29 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
       userHasExperience[w.user_id] = true;
     }
   } catch { /* ignore */ }
+
+  // Re-engagement campaign targets tier A & B (completion < 80%) only.
+  // Compute completion per user up-front so we can split eligible vs tier-C.
+  const userCompletionScore: Record<string, number> = {};
+  for (const u of allUsers) {
+    userCompletionScore[u.id] = getProfileCompletion({
+      full_name: u.full_name,
+      avatar_url: u.avatar_url,
+      headline: u.headline,
+      country: u.country,
+      specialisation: u.specialisation,
+      bio: u.bio,
+      website: u.website,
+      banner_url: u.banner_url,
+      auth_provider: u.auth_provider,
+      hasAssociations: (userAssocMap[u.id]?.length ?? 0) > 0,
+      hasExperience: !!userHasExperience[u.id],
+    }).score;
+  }
+  const isTierC = (id: string) => (userCompletionScore[id] ?? 0) >= 80;
+  const reengageEligibleCount = allUsers.filter((u) => newsletterEligibleSet.has(u.id) && !reengageMap[u.id] && !isTierC(u.id)).length;
+  const reengageTierCSkipCount = allUsers.filter((u) => newsletterEligibleSet.has(u.id) && !reengageMap[u.id] && isTierC(u.id)).length;
+  const reengageIneligibleCount = allUsers.filter((u) => !newsletterEligibleSet.has(u.id)).length;
   const activeTab = searchParams?.tab ?? 'overview';
   const countries = new Set(events.map((e) => e.country));
   const mainEvents = events.filter((e) => e.eventScope === 'main');
@@ -1243,21 +1263,26 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
               <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
                 <h2 className="mb-1 text-lg font-bold text-slate-900">Re-engagement Campaign</h2>
                 <p className="mb-4 text-sm text-slate-500">
-                  Personalised email per user — variant chosen from profile completeness (3 tiers) × LinkedIn-verified status. Includes new event titles + association names since their last login. <strong>Sends only to users who opted into the newsletter</strong> — GDPR-safe.
+                  Personalised email per user — variant chosen from profile completeness (tier A &lt;40%, tier B 40–80%) × LinkedIn-verified status. Includes new event titles + association names since their last login. <strong>Targets tier A &amp; B only</strong> — tier C users (≥80% complete) are skipped. <strong>Newsletter opt-ins only</strong> — GDPR-safe.
                 </p>
-                <div className="grid gap-3 sm:grid-cols-4">
+                <div className="grid gap-3 sm:grid-cols-5">
                   <div className="rounded-xl border border-slate-200/60 bg-slate-50 p-4">
                     <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Total users</p>
                     <p className="mt-1 text-2xl font-bold text-slate-900">{allUsers.length}</p>
                   </div>
                   <div className="rounded-xl border border-blue-200/60 bg-blue-50 p-4">
-                    <p className="text-xs font-bold uppercase tracking-wider text-blue-700">Eligible & pending</p>
+                    <p className="text-xs font-bold uppercase tracking-wider text-blue-700">A/B eligible & pending</p>
                     <p className="mt-1 text-2xl font-bold text-blue-900">{reengageEligibleCount}</p>
-                    <p className="mt-1 text-[10px] text-blue-600">opted-in, not yet sent</p>
+                    <p className="mt-1 text-[10px] text-blue-600">opted-in, &lt;80% complete, not sent</p>
                   </div>
                   <div className="rounded-xl border border-emerald-200/60 bg-emerald-50 p-4">
                     <p className="text-xs font-bold uppercase tracking-wider text-emerald-700">Already sent</p>
                     <p className="mt-1 text-2xl font-bold text-emerald-900">{Object.keys(reengageMap).length}</p>
+                  </div>
+                  <div className="rounded-xl border border-slate-200/60 bg-slate-50 p-4">
+                    <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Tier C (skip)</p>
+                    <p className="mt-1 text-2xl font-bold text-slate-700">{reengageTierCSkipCount}</p>
+                    <p className="mt-1 text-[10px] text-slate-500">already set up</p>
                   </div>
                   <div className="rounded-xl border border-amber-200/60 bg-amber-50 p-4">
                     <p className="text-xs font-bold uppercase tracking-wider text-amber-700">Not opted in</p>
@@ -1276,22 +1301,26 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                 <div className="divide-y divide-slate-100">
                   {allUsers.map((user) => {
                     const sent = reengageMap[user.id];
-                    const eligible = newsletterEligibleSet.has(user.id);
+                    const optedIn = newsletterEligibleSet.has(user.id);
+                    const tierC = isTierC(user.id);
                     return (
                       <div key={user.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
                         <div className="min-w-0 flex-1 truncate">
                           <span className="font-medium text-slate-900">{user.full_name ?? 'No name'}</span>
                           {user.username && <span className="ml-2 text-xs text-slate-400">@{user.username}</span>}
+                          <span className="ml-2 text-[10px] text-slate-400">{userCompletionScore[user.id] ?? 0}%</span>
                         </div>
                         <div className="flex items-center gap-2">
                           {sent ? (
                             <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700">
                               Sent · {sent.variant.replace('tier_', 'T').replace('_unverified', '·U').replace('_verified', '·V')}
                             </span>
-                          ) : eligible ? (
-                            <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-[10px] font-bold text-blue-700">Eligible</span>
-                          ) : (
+                          ) : !optedIn ? (
                             <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-bold text-amber-700">Not opted in</span>
+                          ) : tierC ? (
+                            <span className="rounded-full bg-slate-200 px-2.5 py-0.5 text-[10px] font-bold text-slate-600">Tier C — skip</span>
+                          ) : (
+                            <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-[10px] font-bold text-blue-700">Eligible</span>
                           )}
                           <a
                             href={`/api/admin/reengagement/preview?userId=${user.id}`}

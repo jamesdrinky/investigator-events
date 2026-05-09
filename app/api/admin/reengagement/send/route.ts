@@ -51,7 +51,7 @@ export async function POST(request: Request) {
   let skippedNoEmail = 0;
   let skippedAlreadySent = 0;
   let skippedNotSubscribed = 0;
-  let skippedNothingToSay = 0;
+  let skippedTierC = 0;
   let failed = 0;
   const failures: { userId: string; error: string }[] = [];
 
@@ -73,15 +73,11 @@ export async function POST(request: Request) {
       continue;
     }
 
-    // Don't bother engaged + complete users when there's nothing new to tell them.
-    // Skip when their profile is essentially done (>= 80%) AND there's no new
-    // content for them since last login (i.e. eventsMode/associationsMode are not
-    // 'new_since_visit'). Tier A/B users always get the email — incomplete profile
-    // is itself the reason to nudge.
-    const isComplete = snap.completionScore >= 80;
-    const hasNewContent = snap.input.eventsMode === 'new_since_visit' || snap.input.associationsMode === 'new_since_visit';
-    if (isComplete && !hasNewContent) {
-      skippedNothingToSay += 1;
+    // This campaign targets users with incomplete profiles only (tier A & B,
+    // i.e. completion < 80%). Tier C users are skipped regardless of whether
+    // there's new content since their last visit.
+    if (snap.completionScore >= 80) {
+      skippedTierC += 1;
       continue;
     }
 
@@ -145,7 +141,7 @@ export async function POST(request: Request) {
       skippedAlreadySent,
       skippedNoEmail,
       skippedNotSubscribed,
-      skippedNothingToSay,
+      skippedTierC,
       failed,
     },
     failures,

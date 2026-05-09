@@ -11,7 +11,7 @@ interface SendReport {
     skippedAlreadySent: number;
     skippedNoEmail: number;
     skippedNotSubscribed: number;
-    skippedNothingToSay: number;
+    skippedTierC: number;
     failed: number;
   };
   failures: { userId: string; error: string }[];
@@ -53,7 +53,7 @@ export function ReengageSender({ totalUsers }: { totalUsers: number }) {
     <div className="rounded-xl border border-slate-200/60 bg-white p-5">
       <p className="text-sm font-bold text-slate-900">Send re-engagement campaign</p>
       <p className="mt-1 text-sm text-slate-500">
-        Sends a personalised email <strong>only to users who opted into the newsletter</strong> (GDPR). <strong>Skips fully-set-up users (≥80% complete) when there's nothing new for them since their last visit</strong> — re-engagement, not spam. Variant chosen per user from profile completion (3 tiers) × LinkedIn-verified state. Already-sent users are skipped — running again is safe. Every email includes a one-click unsubscribe link and List-Unsubscribe headers.
+        <strong>Targets tier A &amp; B profiles only</strong> (completion &lt; 80%). Tier C users are skipped — they're already set up. <strong>Newsletter opt-ins only</strong> (GDPR). Variant chosen per user from completion tier × LinkedIn-verified state. Already-sent users are skipped — running again is safe. Every email includes a one-click unsubscribe link and List-Unsubscribe headers.
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
         <button
@@ -78,7 +78,7 @@ export function ReengageSender({ totalUsers }: { totalUsers: number }) {
         <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
           <p className="font-semibold">{report.dryRun ? 'Dry run complete' : 'Send complete'}</p>
           <p className="mt-1">
-            Considered {report.totals.considered} · Sent {report.totals.sent} · Already had it {report.totals.skippedAlreadySent} · Not opted-in {report.totals.skippedNotSubscribed} · Nothing new to say {report.totals.skippedNothingToSay} · No email {report.totals.skippedNoEmail} · Failed {report.totals.failed}
+            Considered {report.totals.considered} · Sent {report.totals.sent} · Already had it {report.totals.skippedAlreadySent} · Not opted-in {report.totals.skippedNotSubscribed} · Tier C (already set up) {report.totals.skippedTierC} · No email {report.totals.skippedNoEmail} · Failed {report.totals.failed}
           </p>
           {report.failures.length > 0 && (
             <details className="mt-2 text-xs">

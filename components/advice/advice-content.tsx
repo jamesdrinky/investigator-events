@@ -411,7 +411,7 @@ export function AdviceContent() {
       {/* ══════════════════════════════════════════
           STICKY JUMP BAR
          ══════════════════════════════════════════ */}
-      <div className="sticky top-[3.25rem] z-40 border-b border-white/[0.06] bg-[#080f1e]/95 backdrop-blur-2xl sm:top-[4rem] md:top-[4.75rem]">
+      <div className="sticky top-0 z-40 border-b border-white/[0.06] bg-[#080f1e]/95 backdrop-blur-2xl lg:top-[4.75rem]">
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent" />
         <div ref={jumpBarRef} className="no-scrollbar mx-auto flex max-w-6xl gap-0.5 overflow-x-auto px-4 sm:justify-center sm:gap-1 sm:px-6">
           {sectionLinks.map((link) => {

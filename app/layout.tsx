@@ -8,7 +8,6 @@ import { BackToTop } from '@/components/BackToTop';
 import { BottomTabBar } from '@/components/BottomTabBar';
 import { OfflineNotice } from '@/components/OfflineNotice';
 import { PageTransition } from '@/components/PageTransition';
-import { PullToRefresh } from '@/components/PullToRefresh';
 import { TopLoadingBar } from '@/components/TopLoadingBar';
 import { GlobalHaptics } from '@/components/GlobalHaptics';
 import { NativeInit } from '@/components/NativeInit';
@@ -67,7 +66,6 @@ export default function RootLayout({
         <MobileBackButton />
         <BottomTabBar />
         <OfflineNotice />
-        <PullToRefresh />
         <NewsletterBanner />
         <CookieBanner />
         <BackToTop />

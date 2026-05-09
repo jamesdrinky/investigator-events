@@ -421,7 +421,7 @@ export function LoggedInHome() {
               {pastAttended.map((event) => (
                 <Link
                   key={event.id}
-                  href={`/events/${event.slug}` as Route}
+                  href={`/events/${event.slug}#reviews` as Route}
                   className={`flex items-center gap-3 rounded-xl border p-2.5 shadow-sm transition active:scale-[0.98] ${
                     event.hasReview
                       ? 'border-emerald-200 bg-emerald-50/50'

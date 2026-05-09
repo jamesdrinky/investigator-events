@@ -16,7 +16,7 @@ export function EventCommunityTabs({ eventId, isPast }: { eventId: string; isPas
   const [active, setActive] = useState<TabId>('reviews');
 
   return (
-    <div className="mt-10 overflow-hidden rounded-2xl border border-slate-200/60 bg-white shadow-sm">
+    <div id="reviews" className="mt-10 scroll-mt-24 overflow-hidden rounded-2xl border border-slate-200/60 bg-white shadow-sm">
       {/* Tab header */}
       <div className="flex">
         {tabs.map((tab) => {

@@ -57,7 +57,7 @@ function getTimeAgo(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 }
 
-const DARK_ROUTES = ['/advice', '/about'];
+const DARK_ROUTES = ['/about'];
 
 export function Navbar() {
   const [pathname, setPathname] = useState('');

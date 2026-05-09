@@ -161,8 +161,12 @@ export async function POST(request: Request) {
     });
   }
 
-  // Live send: parallelize Resend calls + insert tracking row per user.
-  await mapInBatches(toSendQueue, SNAPSHOT_CONCURRENCY, async ({ userId, snap }) => {
+  // Live send: SEQUENTIAL with a 220ms gap between Resend calls to stay under
+  // Resend's 5 req/sec rate limit (parallel sends burst-violated this and lost
+  // 19 of the first 29 to 429s). 220ms = ~4.5/sec sustained.
+  const RESEND_GAP_MS = 220;
+  for (let i = 0; i < toSendQueue.length; i++) {
+    const { userId, snap } = toSendQueue[i];
     const html = buildReengagementEmail(snap.input);
     const subject = pickSubject(snap.input);
     const variant = pickVariant(snap.input);
@@ -193,23 +197,27 @@ export async function POST(request: Request) {
           status: 'failed',
           error: sendErr.message ?? 'unknown',
         } as any) as any);
-        return;
+      } else {
+        sent += 1;
+        await (admin.from('reengagement_sends' as any).insert({
+          user_id: userId,
+          recipient_email: snap.email!,
+          campaign: CAMPAIGN,
+          variant,
+          completion_score: snap.completionScore,
+          is_linkedin_verified: snap.isLinkedInVerified,
+          status: 'sent',
+        } as any) as any);
       }
-      sent += 1;
-      await (admin.from('reengagement_sends' as any).insert({
-        user_id: userId,
-        recipient_email: snap.email!,
-        campaign: CAMPAIGN,
-        variant,
-        completion_score: snap.completionScore,
-        is_linkedin_verified: snap.isLinkedInVerified,
-        status: 'sent',
-      } as any) as any);
     } catch (e: any) {
       failed += 1;
       failures.push({ userId, error: e?.message ?? 'unknown' });
     }
-  });
+    // Rate-limit gap before the next send (skip after the last one)
+    if (i < toSendQueue.length - 1) {
+      await new Promise((resolve) => setTimeout(resolve, RESEND_GAP_MS));
+    }
+  }
 
   return NextResponse.json({
     ok: true,

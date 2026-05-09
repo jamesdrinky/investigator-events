@@ -215,14 +215,21 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
   const recentSubscribers = (recentSubscribersResult?.data ?? []) as any[];
   const allUsers = (allUsersResult?.data ?? []) as { id: string; full_name: string | null; username: string | null; avatar_url: string | null; country: string | null; specialisation: string | null; is_verified: boolean; is_public: boolean; created_at: string; linkedin_url: string | null; linkedin_name: string | null; linkedin_picture: string | null; auth_provider: string | null; headline: string | null; bio: string | null; website: string | null; banner_url: string | null }[];
 
-  // Re-engagement campaign state
+  // Re-engagement campaign state. Only 'sent' rows count as 'already sent';
+  // 'failed' rows mean the send hit a rate limit / transient error and will
+  // be retried on the next run (the send route filters by status='sent' too).
   const { data: reengageRows } = await (admin.from('reengagement_sends' as any)
     .select('user_id, variant, status, sent_at')
     .eq('campaign', 'reengagement_v1')
     .order('sent_at', { ascending: false }) as any);
   const reengageMap: Record<string, { variant: string; status: string; sent_at: string }> = {};
+  const reengageFailedSet = new Set<string>();
   for (const r of (reengageRows ?? []) as { user_id: string; variant: string; status: string; sent_at: string }[]) {
-    if (!reengageMap[r.user_id]) reengageMap[r.user_id] = { variant: r.variant, status: r.status, sent_at: r.sent_at };
+    if (r.status === 'sent') {
+      if (!reengageMap[r.user_id]) reengageMap[r.user_id] = { variant: r.variant, status: r.status, sent_at: r.sent_at };
+    } else if (r.status === 'failed' && !reengageMap[r.user_id]) {
+      reengageFailedSet.add(r.user_id);
+    }
   }
 
   // Map of newsletter-subscribed user IDs (for GDPR-eligible recipients of the re-engagement campaign).
@@ -1273,7 +1280,10 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                   <div className="rounded-xl border border-blue-200/60 bg-blue-50 p-4">
                     <p className="text-xs font-bold uppercase tracking-wider text-blue-700">A/B eligible & pending</p>
                     <p className="mt-1 text-2xl font-bold text-blue-900">{reengageEligibleCount}</p>
-                    <p className="mt-1 text-[10px] text-blue-600">opted-in, &lt;80% complete, not sent</p>
+                    <p className="mt-1 text-[10px] text-blue-600">
+                      opted-in, &lt;80% complete, not yet sent
+                      {reengageFailedSet.size > 0 && <> · <strong>{reengageFailedSet.size} previously failed will retry</strong></>}
+                    </p>
                   </div>
                   <div className="rounded-xl border border-emerald-200/60 bg-emerald-50 p-4">
                     <p className="text-xs font-bold uppercase tracking-wider text-emerald-700">Already sent</p>
@@ -1301,6 +1311,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                 <div className="divide-y divide-slate-100">
                   {allUsers.map((user) => {
                     const sent = reengageMap[user.id];
+                    const failedRetry = !sent && reengageFailedSet.has(user.id);
                     const optedIn = newsletterEligibleSet.has(user.id);
                     const tierC = isTierC(user.id);
                     return (
@@ -1315,6 +1326,8 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                             <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700">
                               Sent · {sent.variant.replace('tier_', 'T').replace('_unverified', '·U').replace('_verified', '·V')}
                             </span>
+                          ) : failedRetry ? (
+                            <span className="rounded-full bg-rose-100 px-2.5 py-0.5 text-[10px] font-bold text-rose-700" title="Previous send hit Resend's rate limit. Will retry on next Send.">Failed — will retry</span>
                           ) : !optedIn ? (
                             <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-bold text-amber-700">Not opted in</span>
                           ) : tierC ? (

@@ -73,12 +73,18 @@ export async function POST(request: Request) {
       continue;
     }
 
-    // This campaign targets users with incomplete profiles only (tier A & B,
-    // i.e. completion < 80%). Tier C users are skipped regardless of whether
-    // there's new content since their last visit.
+    // Targets tier A & B profiles primarily (completion < 80%). Tier C users
+    // (already-set-up) are normally skipped — but we include them when they've
+    // been away for a while AND there's substantial new content to tell them
+    // about. Threshold: 14+ days since last sign-in AND >= 5 new events since.
     if (snap.completionScore >= 80) {
-      skippedTierC += 1;
-      continue;
+      const daysAway = snap.input.daysSinceLastSeen ?? 0;
+      const newEventsSinceVisit = snap.input.eventsMode === 'new_since_visit' ? snap.input.eventsTotalCount : 0;
+      const tierCWorthIncluding = daysAway >= 14 && newEventsSinceVisit >= 5;
+      if (!tierCWorthIncluding) {
+        skippedTierC += 1;
+        continue;
+      }
     }
 
     const html = buildReengagementEmail(snap.input);

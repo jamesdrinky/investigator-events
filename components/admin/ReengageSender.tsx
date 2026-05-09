@@ -53,7 +53,7 @@ export function ReengageSender({ totalUsers }: { totalUsers: number }) {
     <div className="rounded-xl border border-slate-200/60 bg-white p-5">
       <p className="text-sm font-bold text-slate-900">Send re-engagement campaign</p>
       <p className="mt-1 text-sm text-slate-500">
-        <strong>Targets tier A &amp; B profiles only</strong> (completion &lt; 80%). Tier C users are skipped — they're already set up. <strong>Newsletter opt-ins only</strong> (GDPR). Variant chosen per user from completion tier × LinkedIn-verified state. Already-sent users are skipped — running again is safe. Every email includes a one-click unsubscribe link and List-Unsubscribe headers.
+        <strong>Targets tier A &amp; B</strong> (completion &lt; 80%), plus tier C users who've been away 14+ days with 5+ new events since their last visit. <strong>Newsletter opt-ins only</strong> (GDPR). Variant chosen per user from completion tier × LinkedIn-verified state. Already-sent users are skipped — running again is safe. Every email includes a one-click unsubscribe link and List-Unsubscribe headers.
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
         <button

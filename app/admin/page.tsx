@@ -1263,7 +1263,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
               <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
                 <h2 className="mb-1 text-lg font-bold text-slate-900">Re-engagement Campaign</h2>
                 <p className="mb-4 text-sm text-slate-500">
-                  Personalised email per user — variant chosen from profile completeness (tier A &lt;40%, tier B 40–80%) × LinkedIn-verified status. Includes new event titles + association names since their last login. <strong>Targets tier A &amp; B only</strong> — tier C users (≥80% complete) are skipped. <strong>Newsletter opt-ins only</strong> — GDPR-safe.
+                  Personalised email per user — variant chosen from profile completeness (tier A &lt;40%, tier B 40–80%) × LinkedIn-verified status. Includes new event titles + association names since their last login. <strong>Targets tier A &amp; B</strong>, plus tier C users who've been away 14+ days with 5+ new events since their last visit. <strong>Newsletter opt-ins only</strong> — GDPR-safe.
                 </p>
                 <div className="grid gap-3 sm:grid-cols-5">
                   <div className="rounded-xl border border-slate-200/60 bg-slate-50 p-4">
@@ -1280,9 +1280,9 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                     <p className="mt-1 text-2xl font-bold text-emerald-900">{Object.keys(reengageMap).length}</p>
                   </div>
                   <div className="rounded-xl border border-slate-200/60 bg-slate-50 p-4">
-                    <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Tier C (skip)</p>
+                    <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Tier C</p>
                     <p className="mt-1 text-2xl font-bold text-slate-700">{reengageTierCSkipCount}</p>
-                    <p className="mt-1 text-[10px] text-slate-500">already set up</p>
+                    <p className="mt-1 text-[10px] text-slate-500">included only if 14+ days away &amp; 5+ new events</p>
                   </div>
                   <div className="rounded-xl border border-amber-200/60 bg-amber-50 p-4">
                     <p className="text-xs font-bold uppercase tracking-wider text-amber-700">Not opted in</p>
@@ -1318,7 +1318,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                           ) : !optedIn ? (
                             <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-bold text-amber-700">Not opted in</span>
                           ) : tierC ? (
-                            <span className="rounded-full bg-slate-200 px-2.5 py-0.5 text-[10px] font-bold text-slate-600">Tier C — skip</span>
+                            <span className="rounded-full bg-slate-200 px-2.5 py-0.5 text-[10px] font-bold text-slate-600" title="Tier C users only receive the email if they've been away 14+ days AND have 5+ new events since their last visit. Run Dry run to see who actually qualifies.">Tier C</span>
                           ) : (
                             <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-[10px] font-bold text-blue-700">Eligible</span>
                           )}

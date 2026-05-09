@@ -56,7 +56,6 @@ export async function buildReengagementSnapshot({ admin, userId }: BuildArgs): P
     { data: latestComment },
     { data: latestAttendance },
     { data: latestPostLike },
-    { data: latestProfileUpdate },
   ] = await Promise.all([
     admin.from('user_associations').select('id').eq('user_id', userId).limit(1),
     admin.from('work_experience').select('id').eq('user_id', userId).limit(1),
@@ -64,7 +63,6 @@ export async function buildReengagementSnapshot({ admin, userId }: BuildArgs): P
     admin.from('post_comments').select('created_at').eq('user_id', userId).order('created_at', { ascending: false }).limit(1).maybeSingle(),
     admin.from('event_attendees').select('created_at').eq('user_id', userId).order('created_at', { ascending: false }).limit(1).maybeSingle(),
     admin.from('post_likes').select('created_at').eq('user_id', userId).order('created_at', { ascending: false }).limit(1).maybeSingle(),
-    admin.from('profiles').select('updated_at').eq('id', userId).maybeSingle(),
   ]);
   const hasAssociations = (assocs ?? []).length > 0;
   const hasExperience = (experiences ?? []).length > 0;
@@ -80,7 +78,6 @@ export async function buildReengagementSnapshot({ admin, userId }: BuildArgs): P
     (latestComment as any)?.created_at,
     (latestAttendance as any)?.created_at,
     (latestPostLike as any)?.created_at,
-    (latestProfileUpdate as any)?.updated_at,
   ];
   const lastSeenAt: string | null = candidates
     .filter((v): v is string => typeof v === 'string' && v.length > 0)

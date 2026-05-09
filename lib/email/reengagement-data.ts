@@ -42,18 +42,50 @@ export async function buildReengagementSnapshot({ admin, userId }: BuildArgs): P
   const { data: profile } = await admin.from('profiles').select('*').eq('id', userId).maybeSingle();
   if (!profile) return null;
 
-  // Email + last_sign_in_at via auth admin API
+  // Email + auth timestamps via auth admin API
   const { data: authData } = await admin.auth.admin.getUserById(userId);
   const email = authData?.user?.email ?? null;
-  const lastSignInAt = authData?.user?.last_sign_in_at ?? null;
+  const lastSignInAt: string | null = authData?.user?.last_sign_in_at ?? null;
+  const authUpdatedAt: string | null = (authData?.user as any)?.updated_at ?? null;
 
-  // Associations and experience flags for completion score
-  const [{ data: assocs }, { data: experiences }] = await Promise.all([
+  // Associations + experience flags AND latest activity signals (parallel)
+  const [
+    { data: assocs },
+    { data: experiences },
+    { data: latestPost },
+    { data: latestComment },
+    { data: latestAttendance },
+    { data: latestPostLike },
+    { data: latestProfileUpdate },
+  ] = await Promise.all([
     admin.from('user_associations').select('id').eq('user_id', userId).limit(1),
     admin.from('work_experience').select('id').eq('user_id', userId).limit(1),
+    admin.from('posts').select('created_at').eq('user_id', userId).order('created_at', { ascending: false }).limit(1).maybeSingle(),
+    admin.from('post_comments').select('created_at').eq('user_id', userId).order('created_at', { ascending: false }).limit(1).maybeSingle(),
+    admin.from('event_attendees').select('created_at').eq('user_id', userId).order('created_at', { ascending: false }).limit(1).maybeSingle(),
+    admin.from('post_likes').select('created_at').eq('user_id', userId).order('created_at', { ascending: false }).limit(1).maybeSingle(),
+    admin.from('profiles').select('updated_at').eq('id', userId).maybeSingle(),
   ]);
   const hasAssociations = (assocs ?? []).length > 0;
   const hasExperience = (experiences ?? []).length > 0;
+
+  // "Last seen" — use the most recent of every signal we've got. last_sign_in_at
+  // alone is unreliable: Supabase only bumps it on a fresh sign-in, not on
+  // session refreshes, so users with persistent cookies look stale even when
+  // they're using the app daily.
+  const candidates: (string | null | undefined)[] = [
+    lastSignInAt,
+    authUpdatedAt,
+    (latestPost as any)?.created_at,
+    (latestComment as any)?.created_at,
+    (latestAttendance as any)?.created_at,
+    (latestPostLike as any)?.created_at,
+    (latestProfileUpdate as any)?.updated_at,
+  ];
+  const lastSeenAt: string | null = candidates
+    .filter((v): v is string => typeof v === 'string' && v.length > 0)
+    .sort()
+    .reverse()[0] ?? null;
 
   const p = profile as any;
   const completion = getProfileCompletion({
@@ -78,8 +110,8 @@ export async function buildReengagementSnapshot({ admin, userId }: BuildArgs): P
   const isLinkedInVerified = p.auth_provider === 'linkedin_oidc';
   const isManuallyVerified = p.is_verified === true;
 
-  // Stats since last sign-in (or last 30 days if never)
-  const sinceISO = lastSignInAt ?? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  // Stats since the user's last activity (or last 30 days if we have nothing)
+  const sinceISO = lastSeenAt ?? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
   const today = new Date().toISOString().slice(0, 10);
   const [eventsCountResult, assocsCountResult, newEventsListResult, newAssocsListResult] = await Promise.all([
     admin.from('events').select('id', { count: 'exact', head: true }).eq('approved', true).gt('created_at', sinceISO),
@@ -141,8 +173,8 @@ export async function buildReengagementSnapshot({ admin, userId }: BuildArgs): P
     associationsTotalCount = associations.length;
   }
 
-  const daysSinceLastSeen = lastSignInAt
-    ? Math.max(0, Math.round((Date.now() - new Date(lastSignInAt).getTime()) / (1000 * 60 * 60 * 24)))
+  const daysSinceLastSeen = lastSeenAt
+    ? Math.max(0, Math.round((Date.now() - new Date(lastSeenAt).getTime()) / (1000 * 60 * 60 * 24)))
     : null;
 
   // Newsletter eligibility (GDPR): only send to opted-in active subscribers.

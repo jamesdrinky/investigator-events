@@ -25,6 +25,7 @@ import { associationRecords } from '@/lib/data/associations';
 import { ImageDropZone } from '@/components/admin/ImageDropZone';
 import { OutreachManager } from '@/components/admin/OutreachManager';
 import { ReengageSender } from '@/components/admin/ReengageSender';
+import { ReengageSampleSender } from '@/components/admin/ReengageSampleSender';
 import { getProfileCompletion } from '@/lib/utils/profile-completion';
 
 export const dynamic = 'force-dynamic';
@@ -1300,8 +1301,9 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                     <p className="mt-1 text-[10px] text-amber-600">will be skipped</p>
                   </div>
                 </div>
-                <div className="mt-4">
+                <div className="mt-4 space-y-3">
                   <ReengageSender totalUsers={reengageEligibleCount} />
+                  <ReengageSampleSender />
                 </div>
               </div>
 

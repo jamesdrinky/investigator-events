@@ -300,7 +300,29 @@ function tierCopy(input: ReengagementInput): { headline: string; subline: string
   };
 }
 
-export function buildReengagementEmail(input: ReengagementInput): string {
+export interface SampleBannerInfo {
+  recipientName: string;
+  recipientEmail: string;
+  variant: ReengagementVariant;
+  completionScore: number;
+}
+
+function sampleBanner(info: SampleBannerInfo): string {
+  const tier = info.variant.startsWith('tier_a') ? 'A' : info.variant.startsWith('tier_b') ? 'B' : 'C';
+  const verified = info.variant.endsWith('_verified') ? 'verified' : 'unverified';
+  return `
+  <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#fef3c7;border-bottom:2px solid #f59e0b;">
+    <tr><td style="padding:14px 24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">
+      <p style="margin:0;font-size:11px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:#92400e;">⚠ Sample for review</p>
+      <p style="margin:4px 0 0;font-size:13px;color:#78350f;line-height:1.5;">
+        This is the exact email that was sent to <strong>${info.recipientName}</strong> &lt;${info.recipientEmail}&gt; — Tier ${tier} (${info.completionScore}% complete), ${verified}.
+      </p>
+      <p style="margin:4px 0 0;font-size:11px;color:#92400e;">For internal review only. The recipient received their own copy.</p>
+    </td></tr>
+  </table>`;
+}
+
+export function buildReengagementEmail(input: ReengagementInput, sample?: SampleBannerInfo): string {
   const variant = pickVariant(input);
   const tier = variant.startsWith('tier_a') ? 'a' : variant.startsWith('tier_b') ? 'b' : 'c';
   const greeting = input.fullName ? `Hi ${input.fullName.split(' ')[0]}` : 'Hi there';
@@ -323,6 +345,7 @@ export function buildReengagementEmail(input: ReengagementInput): string {
   <meta name="supported-color-schemes" content="light only" />
 </head>
 <body style="margin:0;padding:0;background-color:${C.bg};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+  ${sample ? sampleBanner(sample) : ''}
   <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:${C.bg};padding:24px 16px;">
     <tr><td align="center">
       <table width="560" cellpadding="0" cellspacing="0" role="presentation" style="max-width:560px;width:100%;">

@@ -35,7 +35,7 @@ export function ReengageSampleSender() {
     <div className="rounded-xl border border-slate-200/60 bg-white p-5">
       <p className="text-sm font-bold text-slate-900">Send sample emails for review</p>
       <p className="mt-1 text-sm text-slate-500">
-        Sends 3 random samples per tier (A, B, C) to <strong>james@drinky.com</strong> and <strong>m.lacorte@conflictinternational.com</strong>. Each email has a sample banner showing the recipient + tier + completion score. The actual recipients are <em>not</em> emailed — they already got their own copy.
+        Sends 1 random sample per tier (A, B, C) to <strong>james@drinky.com</strong> and <strong>m.lacorte@conflictinternational.com</strong> — 3 emails per recipient. Each has a sample banner showing the recipient + tier + completion score. The actual recipients are <em>not</em> emailed — they already got their own copy.
       </p>
       <button
         type="button"

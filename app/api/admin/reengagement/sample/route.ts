@@ -8,7 +8,7 @@ import { buildReengagementEmail, pickVariant } from '@/lib/email/reengagement';
 
 const FROM = 'Investigator Events <info@investigatorevents.com>';
 const RECIPIENTS = ['james@drinky.com', 'm.lacorte@conflictinternational.com'];
-const SAMPLES_PER_TIER = 3;
+const SAMPLES_PER_TIER = 1;
 const RESEND_GAP_MS = 220;
 
 export const maxDuration = 60;

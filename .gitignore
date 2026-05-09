@@ -14,3 +14,13 @@ ios/App/Pods
 ios/DerivedData
 ios/App/App/public
 *.xcworkspace/xcuserdata
+
+# Android build artifacts + signing material (NEVER commit keystores)
+android/app/build
+android/build
+android/.gradle
+android/local.properties
+android/keystore.properties
+*.jks
+*.keystore
+google-services.json

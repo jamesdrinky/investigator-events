@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Push notifications: production aps-environment is set automatically
+	     when archiving for App Store. Use 'development' for TestFlight builds
+	     signed with a development cert. Xcode flips this when you toggle the
+	     Push Notifications capability. -->
+	<key>aps-environment</key>
+	<string>production</string>
+
+	<!-- Universal Links: Apple fetches the apple-app-site-association
+	     manifest from these domains and routes matching URLs into the app. -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:investigatorevents.com</string>
+		<string>applinks:www.investigatorevents.com</string>
+		<string>webcredentials:investigatorevents.com</string>
+	</array>
+
+	<!-- Sign in with Apple: required to be enabled when the app offers any
+	     third-party social login (Google, LinkedIn). The button on /signin
+	     and /signup is already wired up via Supabase Auth. -->
+	<key>com.apple.developer.applesignin</key>
+	<array>
+		<string>Default</string>
+	</array>
+</dict>
+</plist>

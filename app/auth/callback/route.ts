@@ -43,7 +43,17 @@ export async function GET(request: Request) {
           // Use the best provider: prefer linkedin_oidc if it's linked
           const provider = providers.includes('linkedin_oidc') ? 'linkedin_oidc' : currentProvider;
           const meta = user.user_metadata ?? {};
-          const fullName = meta.full_name || meta.name || null;
+          // Apple returns name as { firstName, lastName } on first sign-in only
+          // and never returns it on subsequent sign-ins. Normalize to a string
+          // so downstream code can treat it uniformly.
+          let fullName: string | null = null;
+          if (typeof meta.full_name === 'string') fullName = meta.full_name;
+          else if (typeof meta.name === 'string') fullName = meta.name;
+          else if (meta.name && typeof meta.name === 'object') {
+            const n: any = meta.name;
+            const composed = [n.firstName, n.lastName].filter(Boolean).join(' ').trim();
+            if (composed) fullName = composed;
+          }
           const oauthAvatarUrl: string | null = meta.avatar_url || meta.picture || null;
 
           const admin = createSupabaseAdminServerClient();

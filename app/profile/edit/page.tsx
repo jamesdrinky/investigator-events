@@ -194,6 +194,7 @@ export default function EditProfilePage() {
   const [verifyMessage, setVerifyMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [linkedinUrl, setLinkedinUrl] = useState('');
   const [authProvider, setAuthProvider] = useState<string | null>(null);
+  const [appleLinked, setAppleLinked] = useState(false);
 
   // Work experience
   type Experience = { id?: string; company_name: string; organisation_id: string | null; job_title: string; description: string; start_year: string; end_year: string; is_current: boolean };
@@ -239,6 +240,7 @@ export default function EditProfilePage() {
         const providers: string[] = data.user?.app_metadata?.providers ?? [];
         const hasLinkedIn = providers.includes('linkedin_oidc') || storedProvider === 'linkedin_oidc';
         setAuthProvider(hasLinkedIn ? 'linkedin_oidc' : storedProvider ?? null);
+        setAppleLinked(providers.includes('apple') || storedProvider === 'apple');
       }
 
       // Load profile sections
@@ -881,6 +883,77 @@ export default function EditProfilePage() {
                   Connect LinkedIn to verify
                 </button>
                 <p className="mt-2 text-[11px] text-slate-400">You cannot manually enter a LinkedIn URL. Verification requires signing in through LinkedIn.</p>
+              </div>
+            )}
+          </div>
+
+          {/* Apple connection — secondary to LinkedIn. Lets users add Apple
+              Sign-In to their existing account so they can also log in with
+              Face ID / Touch ID. Uses linkIdentity (NOT signInWithOAuth) so
+              this never creates a duplicate auth user. */}
+          <div className="mt-6 rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm sm:p-6">
+            <div className="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+              <h2 className="text-lg font-bold text-slate-900">Apple Sign-In</h2>
+            </div>
+
+            {appleLinked ? (
+              <div className="mt-3">
+                <div className="flex items-center gap-2 rounded-xl border border-emerald-200/60 bg-emerald-50/30 px-4 py-3">
+                  <span className="flex items-center gap-1.5 rounded-full bg-slate-900/10 px-2.5 py-0.5 text-[10px] font-bold text-slate-900" style={{ border: '1px solid rgba(15,23,42,0.2)' }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+                    Apple connected
+                  </span>
+                  <span className="text-sm text-emerald-700">You can sign in with Apple</span>
+                </div>
+                <p className="mt-2 text-xs text-slate-400">
+                  {authProvider === 'linkedin_oidc'
+                    ? 'Your LinkedIn verification is your primary identity badge. Apple is a secondary login method.'
+                    : 'You can sign in to your account with Apple. Connect LinkedIn to also get a verified identity badge on your profile.'}
+                </p>
+              </div>
+            ) : (
+              <div className="mt-3">
+                <p className="text-sm text-slate-500">
+                  Add Apple Sign-In to your account so you can also log in with Face ID or Touch ID. Recommended for iPhone users — your LinkedIn verification stays primary.
+                </p>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (userId && fullName.trim()) {
+                      const sb = createSupabaseBrowserClient();
+                      const finalSpec = useCustomTitle ? customTitle.trim() : specialisation;
+                      const sanitizedWebsite = website && /^https?:\/\//i.test(website.trim()) ? website.trim() : null;
+                      await sb.from('profiles').update({
+                        full_name: (fullName || '').slice(0, 100) || null,
+                        username: existingUsername || slugifyUsername(fullName) || `user-${userId.slice(0, 8)}`,
+                        country: country || null,
+                        specialisation: (finalSpec || '').slice(0, 100) || null,
+                        headline: (headline || '').slice(0, 200) || null,
+                        bio: (bio || '').slice(0, 2000) || null,
+                        website: sanitizedWebsite,
+                        profile_color: profileColor,
+                        avatar_url: avatarUrl,
+                        banner_url: bannerUrl,
+                        badges: selectedBadges.length > 0 ? selectedBadges : null,
+                        is_public: true,
+                      } as any).eq('id', userId);
+                    }
+                    const supabase = createSupabaseBrowserClient();
+                    // Use linkIdentity to ADD Apple to the existing account
+                    // (signInWithOAuth on a logged-in user can spawn a duplicate auth row).
+                    const { error } = await supabase.auth.linkIdentity({
+                      provider: 'apple',
+                      options: { redirectTo: window.location.origin + '/auth/callback?next=/profile/edit' },
+                    });
+                    if (error) console.error('Apple link error:', error);
+                  }}
+                  className="mt-3 flex items-center gap-2 rounded-xl bg-black px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-900"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+                  Connect Apple Sign-In
+                </button>
+                <p className="mt-2 text-[11px] text-slate-400">Requires that Sign in with Apple is configured in Supabase. Once connected, you can sign in either with Apple or with whatever method you originally used.</p>
               </div>
             )}
           </div>

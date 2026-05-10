@@ -29,9 +29,9 @@ export default function SubmitEventPage({
   const formState = createSignedFormState('submit-event');
 
   return (
-    <section className="relative overflow-hidden">
+    <section className="relative overflow-hidden bg-slate-50/80">
       {/* ── Hero — compact on mobile ── */}
-      <div className="relative bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_30%,#f0e8ff_60%,#f8fbff_100%)] pb-5 pt-20 sm:pb-10 sm:pt-32">
+      <div className="relative bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_30%,#f0e8ff_60%,#f8fbff_100%)] pb-5 pt-8 sm:pb-10 sm:pt-20 lg:pt-32">
         <div className="container-shell relative">
           <Reveal>
             <div className="mx-auto max-w-2xl text-center sm:text-left sm:mx-0 sm:max-w-none">
@@ -60,9 +60,9 @@ export default function SubmitEventPage({
       </div>
 
       {/* ── Form — clean single column on mobile ── */}
-      <div className="container-shell relative -mt-2 pb-10 sm:pb-16">
+      <div className="container-shell relative -mt-2 pb-28 sm:pb-16">
         <Reveal delay={0.05}>
-          <div className="mx-auto max-w-3xl rounded-2xl border border-slate-200/60 bg-white p-5 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.08)] sm:rounded-[2rem] sm:p-8 lg:p-10">
+          <div className="mx-auto max-w-3xl rounded-2xl border border-slate-200/60 bg-white p-4 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.08)] sm:rounded-[2rem] sm:p-8 lg:p-10">
             <SubmitEventForm
               action={submitEventAction}
               issuedAt={formState.issuedAt}

@@ -158,26 +158,21 @@ export function Navbar() {
 
   const avatarUrl = profileAvatar || user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
 
-  // Lock body scroll when menu is open — position:fixed needed for iOS Safari
+  // Lock the actual mobile scroll container when the menu is open.
+  // The app shell scrolls [data-app-content], so body/window locking is
+  // unreliable on mobile pages and can make the header appear to jump.
   useEffect(() => {
+    const appContent = document.querySelector<HTMLElement>('[data-app-content]');
     if (isOpen) {
+      if (appContent) appContent.style.overflow = 'hidden';
       document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
-      document.body.style.width = '100%';
-      document.body.style.top = `-${window.scrollY}px`;
     } else {
-      const scrollY = document.body.style.top;
+      if (appContent) appContent.style.overflow = '';
       document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.top = '';
-      if (scrollY) window.scrollTo(0, parseInt(scrollY || '0', 10) * -1);
     }
     return () => {
+      if (appContent) appContent.style.overflow = '';
       document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.top = '';
     };
   }, [isOpen]);
 
@@ -188,7 +183,7 @@ export function Navbar() {
 
   return (
     <>
-      <header className={`sticky top-0 z-50 border-b backdrop-blur-md sm:backdrop-blur-xl ${isDark ? 'border-white/[0.06] bg-[#080f1e]/90' : 'border-slate-200/70 bg-white/92 sm:bg-white/88'}`} style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+      <header className={`relative z-[80] shrink-0 border-b backdrop-blur-md sm:backdrop-blur-xl ${isDark ? 'border-white/[0.06] bg-[#080f1e]/90' : 'border-slate-200/70 bg-white/92 sm:bg-white/88'}`} style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
         <div className="mx-auto flex min-h-[3.25rem] max-w-7xl items-center gap-2 px-4 py-1.5 sm:min-h-[4rem] sm:gap-2 sm:px-5 md:min-h-[4.75rem] md:gap-3 md:py-0 lg:px-6">
           {/* Logo */}
           <Link href="/" onClick={() => handleNavigation('/')} className="group flex shrink-0 items-center gap-2.5 sm:gap-3">
@@ -277,7 +272,7 @@ export function Navbar() {
                   </button>
 
                   {showNotifs && (
-                    <div className="fixed inset-x-0 z-50 rounded-b-2xl border-b border-slate-200 bg-white shadow-2xl sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80 sm:rounded-xl sm:border" style={{ top: 'calc(3.25rem + env(safe-area-inset-top, 0px))' }}>
+                    <div className="fixed inset-x-0 z-[95] rounded-b-2xl border-b border-slate-200 bg-white shadow-2xl sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80 sm:rounded-xl sm:border" style={{ top: 'calc(3.25rem + env(safe-area-inset-top, 0px))' }}>
                       <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
                         <p className="text-sm font-bold text-slate-900">Notifications</p>
                         {notifications.length > 0 && (
@@ -446,7 +441,7 @@ export function Navbar() {
               type="button"
               aria-label={isOpen ? 'Close menu' : 'Open menu'}
               onClick={() => setIsOpen((c) => !c)}
-              className={`relative z-[60] inline-flex h-9 w-9 items-center justify-center rounded-xl border transition sm:h-10 sm:w-10 lg:hidden ${
+              className={`relative z-[100] inline-flex h-9 w-9 items-center justify-center rounded-xl border transition sm:h-10 sm:w-10 lg:hidden ${
                 isDark ? 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10' : 'border-slate-200/90 bg-white text-slate-700 hover:bg-slate-50'
               }`}
             >
@@ -461,7 +456,7 @@ export function Navbar() {
 
       {/* ── Apple-style full-screen mobile menu overlay ── */}
       <div
-        className={`fixed inset-0 z-[55] bg-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:hidden ${
+        className={`fixed inset-0 z-[90] bg-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:hidden ${
           isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
         }`}
       >

@@ -22,10 +22,15 @@ export function StickyGoingBar({ eventId, eventTitle }: { eventId: string; event
       }
     });
 
-    // Show bar after scrolling past the hero (sooner on mobile)
-    const handleScroll = () => setVisible(window.scrollY > 250);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    // Show bar after scrolling past the hero (sooner on mobile).
+    // Mobile scrolls the app content container, not window.
+    const scrollTarget = document.querySelector<HTMLElement>('[data-app-content]') ?? window;
+    const getScrollTop = () => scrollTarget === window ? window.scrollY : (scrollTarget as HTMLElement).scrollTop;
+    const handleScroll = () => setVisible(getScrollTop() > 250);
+
+    handleScroll();
+    scrollTarget.addEventListener('scroll', handleScroll, { passive: true });
+    return () => scrollTarget.removeEventListener('scroll', handleScroll);
   }, [eventId]);
 
   const toggle = async () => {

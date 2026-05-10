@@ -10,7 +10,7 @@ import { getCountriesForRegion } from '@/lib/forms/event-form-options';
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <button type="submit" disabled={pending} className="btn-primary w-full px-7 py-3 text-[15px] sm:w-auto disabled:opacity-60">
+    <button type="submit" disabled={pending} className="btn-primary min-h-12 w-full px-7 py-3 text-[16px] sm:w-auto sm:text-[15px] disabled:opacity-60">
       {pending ? <><Loader2 className="mr-2 inline h-4 w-4 animate-spin" />Submitting...</> : 'Create Event'}
     </button>
   );
@@ -91,14 +91,14 @@ export function SubmitEventForm({
   };
 
   return (
-    <div className="grid items-start gap-6 lg:grid-cols-[20rem_minmax(0,1fr)] xl:grid-cols-[22rem_minmax(0,1fr)]">
+    <div className="grid min-w-0 items-start gap-5 lg:grid-cols-[20rem_minmax(0,1fr)] xl:grid-cols-[22rem_minmax(0,1fr)]">
       {/* ── Left: Cover image + Logo ── */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {/* Cover image upload */}
         <button
           type="button"
           onClick={() => coverInputRef.current?.click()}
-          className="group relative aspect-square w-full overflow-hidden rounded-[1.6rem] border border-slate-200/80 bg-gradient-to-br from-blue-50 via-indigo-50 to-violet-50 transition-all duration-300 hover:border-blue-300 hover:shadow-[0_12px_40px_-12px_rgba(99,102,241,0.2)]"
+          className="group relative aspect-[16/9] w-full overflow-hidden rounded-[1.25rem] border border-slate-200/80 bg-gradient-to-br from-blue-50 via-indigo-50 to-violet-50 transition-all duration-300 hover:border-blue-300 hover:shadow-[0_12px_40px_-12px_rgba(99,102,241,0.2)] sm:rounded-[1.6rem] lg:aspect-square"
         >
           {coverPreview ? (
             <img src={coverPreview} alt="Cover preview" className="h-full w-full object-cover" />
@@ -131,7 +131,7 @@ export function SubmitEventForm({
         </button>
 
         {/* Logo upload (smaller, bottom-right overlap like lu.ma) */}
-        <div className="-mt-10 ml-4 relative z-10">
+        <div className="relative z-10 -mt-9 ml-3 sm:ml-4">
           <button
             type="button"
             onClick={() => logoInputRef.current?.click()}
@@ -179,7 +179,7 @@ export function SubmitEventForm({
           </div>
         )}
 
-        <form action={action} className="space-y-5">
+        <form action={action} className="space-y-4 sm:space-y-5">
           <input type="text" name="companyWebsite" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
           <input type="hidden" name="issuedAt" value={issuedAt} />
           <input type="hidden" name="formToken" value={formToken} />
@@ -194,14 +194,14 @@ export function SubmitEventForm({
               maxLength={140}
               rows={1}
               placeholder="Event Name"
-              className="w-full resize-none border-0 bg-transparent text-[2rem] font-bold leading-tight tracking-[-0.04em] text-slate-950 placeholder:text-slate-300 focus:outline-none sm:text-[2.5rem]"
+              className="w-full resize-none border-0 bg-transparent text-[1.65rem] font-bold leading-tight tracking-[-0.04em] text-slate-950 placeholder:text-slate-300 focus:outline-none sm:text-[2.5rem]"
               style={{ fontFamily: 'var(--font-serif), serif' }}
             />
           </div>
 
           {/* Date/time row */}
           <div className="space-y-2">
-            <div className={`flex items-center gap-3 rounded-[1.2rem] px-4 py-3 transition-all duration-500 ${
+            <div className={`flex flex-col items-start gap-2 rounded-[1.2rem] px-4 py-3 transition-all duration-500 sm:flex-row sm:items-center sm:gap-3 ${
               clashes.length > 0
                 ? 'bg-red-50 ring-2 ring-red-400/60 shadow-[0_0_20px_-4px_rgba(239,68,68,0.3)]'
                 : 'bg-slate-50/80'
@@ -210,9 +210,9 @@ export function SubmitEventForm({
                 <Calendar className={`h-4 w-4 ${clashes.length > 0 ? 'text-red-500' : ''}`} />
                 <span className={`text-xs font-medium w-12 ${clashes.length > 0 ? 'text-red-600' : 'text-slate-500'}`}>Start</span>
               </div>
-              <input type="date" name="startDate" required value={startDate} onChange={(e) => setStartDate(e.target.value)} className="flex-1 border-0 bg-transparent text-sm font-medium text-slate-900 focus:outline-none" />
+              <input type="date" name="startDate" required value={startDate} onChange={(e) => setStartDate(e.target.value)} className="min-h-10 w-full flex-1 border-0 bg-transparent text-[16px] font-medium text-slate-900 focus:outline-none sm:text-sm" />
             </div>
-            <div className={`relative flex items-center gap-3 rounded-[1.2rem] px-4 py-3 transition-all duration-500 ${
+            <div className={`relative flex flex-col items-start gap-2 rounded-[1.2rem] px-4 py-3 transition-all duration-500 sm:flex-row sm:items-center sm:gap-3 ${
               clashes.length > 0
                 ? 'bg-red-50 ring-2 ring-red-400/60 shadow-[0_0_20px_-4px_rgba(239,68,68,0.3)]'
                 : 'bg-slate-50/80'
@@ -222,7 +222,7 @@ export function SubmitEventForm({
                 <Clock className={`h-4 w-4 ${clashes.length > 0 ? 'text-red-500' : ''}`} />
                 <span className={`text-xs font-medium w-12 ${clashes.length > 0 ? 'text-red-600' : 'text-slate-500'}`}>End</span>
               </div>
-              <input type="date" name="endDate" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="flex-1 border-0 bg-transparent text-sm font-medium text-slate-900 focus:outline-none" />
+              <input type="date" name="endDate" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="min-h-10 w-full flex-1 border-0 bg-transparent text-[16px] font-medium text-slate-900 focus:outline-none sm:text-sm" />
             </div>
 
             {/* Clash warning */}
@@ -260,7 +260,7 @@ export function SubmitEventForm({
           {/* Location — cascading: Region → Country → City */}
           <div className="flex items-start gap-3 rounded-[1.2rem] border border-slate-200/60 bg-white px-4 py-3 transition-colors hover:border-slate-300">
             <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-slate-400" />
-            <div className="flex-1 grid gap-2 sm:grid-cols-3">
+            <div className="grid min-w-0 flex-1 gap-2 sm:grid-cols-3">
               <select
                 name="region"
                 required
@@ -270,7 +270,7 @@ export function SubmitEventForm({
                   setSelectedRegion(region);
                   setFilteredCountries(getCountriesForRegion(region));
                 }}
-                className="border-0 bg-transparent text-sm text-slate-900 focus:outline-none"
+                className="min-h-10 w-full border-0 bg-transparent text-[16px] text-slate-900 focus:outline-none sm:text-sm"
               >
                 <option value="" disabled>1. Region</option>
                 {regions.map((r) => <option key={r} value={r}>{r}</option>)}
@@ -280,27 +280,27 @@ export function SubmitEventForm({
                 required
                 defaultValue=""
                 disabled={!selectedRegion}
-                className="border-0 bg-transparent text-sm text-slate-900 focus:outline-none disabled:text-slate-300"
+                className="min-h-10 w-full border-0 bg-transparent text-[16px] text-slate-900 focus:outline-none disabled:text-slate-300 sm:text-sm"
               >
                 <option value="" disabled>2. Country</option>
                 {filteredCountries.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
-              <input name="city" required maxLength={120} placeholder="3. City" disabled={!selectedRegion} className="border-0 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none disabled:text-slate-300 disabled:placeholder:text-slate-300" />
+              <input name="city" required maxLength={120} placeholder="3. City" disabled={!selectedRegion} className="min-h-10 w-full border-0 bg-transparent text-[16px] text-slate-900 placeholder:text-slate-400 focus:outline-none disabled:text-slate-300 disabled:placeholder:text-slate-300 sm:text-sm" />
             </div>
           </div>
 
           {/* Association (optional) */}
           <div className="flex items-center gap-3 rounded-[1.2rem] border border-slate-200/60 bg-white px-4 py-3 transition-colors hover:border-slate-300">
             <Building2 className="h-4 w-4 flex-shrink-0 text-slate-400" />
-            <div className="flex-1 grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <select name="association" defaultValue="" className="border-0 bg-transparent text-sm text-slate-900 focus:outline-none">
+            <div className="grid min-w-0 flex-1 grid-cols-1 gap-2 sm:grid-cols-2">
+              <select name="association" defaultValue="" className="min-h-10 w-full border-0 bg-transparent text-[16px] text-slate-900 focus:outline-none sm:text-sm">
                 <option value="">Association (optional)</option>
                 {['ABI','WAD','IKD','CII','Intellenet','FEDERPOL','BuDEG','SNARP','EURODET','NCAPI','NCISS','FALI','CALI','TALI','FEWA','NFES','PSLD','LIDEPPE','ANDR','HDA','IBPI','DAF','SYL','FDDE','CKDS','FAPI','FSPD','SFPP','APDPE','APDU','CODPCAT','IAIACE','DeZRS','SAD','ARD','PDPR','ALDONYS','NALI','ODV','WAPI','SPI'].sort().map((a) => (
                   <option key={a} value={a}>{a}</option>
                 ))}
                 <option value="other">Other (specify in notes)</option>
               </select>
-              <select name="co_association" defaultValue="" className="border-0 bg-transparent text-sm text-slate-900 focus:outline-none">
+              <select name="co_association" defaultValue="" className="min-h-10 w-full border-0 bg-transparent text-[16px] text-slate-900 focus:outline-none sm:text-sm">
                 <option value="">Co-host (optional)</option>
                 {['ABI','WAD','IKD','CII','Intellenet','FEDERPOL','BuDEG','SNARP','EURODET','NCAPI','NCISS','FALI','CALI','TALI','FEWA','NFES','PSLD','LIDEPPE','ANDR','HDA','IBPI','DAF','SYL','FDDE','CKDS','FAPI','FSPD','SFPP','APDPE','APDU','CODPCAT','IAIACE','DeZRS','SAD','ARD','PDPR','ALDONYS','NALI','ODV','WAPI','SPI'].sort().map((a) => (
                   <option key={a} value={a}>{a}</option>
@@ -313,11 +313,11 @@ export function SubmitEventForm({
           {/* Organiser + Contact */}
           <div className="flex items-start gap-3 rounded-[1.2rem] border border-slate-200/60 bg-white px-4 py-3 transition-colors hover:border-slate-300">
             <User className="mt-0.5 h-4 w-4 flex-shrink-0 text-slate-400" />
-            <div className="flex-1 grid gap-2 sm:grid-cols-2">
-              <input name="organiser" required maxLength={140} placeholder="Organiser name" className="border-0 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none" />
+            <div className="grid min-w-0 flex-1 gap-2 sm:grid-cols-2">
+              <input name="organiser" required maxLength={140} placeholder="Organiser name" className="min-h-10 w-full border-0 bg-transparent text-[16px] text-slate-900 placeholder:text-slate-400 focus:outline-none sm:text-sm" />
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 flex-shrink-0 text-slate-400" />
-                <input type="email" name="contactEmail" required maxLength={160} placeholder="Contact email" className="flex-1 border-0 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none" />
+                <input type="email" name="contactEmail" required maxLength={160} placeholder="Contact email" className="min-h-10 min-w-0 flex-1 border-0 bg-transparent text-[16px] text-slate-900 placeholder:text-slate-400 focus:outline-none sm:text-sm" />
               </div>
             </div>
           </div>
@@ -325,19 +325,19 @@ export function SubmitEventForm({
           {/* Website */}
           <div className="flex items-center gap-3 rounded-[1.2rem] border border-slate-200/60 bg-white px-4 py-3 transition-colors hover:border-slate-300">
             <Globe className="h-4 w-4 flex-shrink-0 text-slate-400" />
-            <input type="text" name="website" required inputMode="url" placeholder="Event website (e.g. example.com)" className="flex-1 border-0 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none" />
+            <input type="text" name="website" required inputMode="url" placeholder="Event website (e.g. example.com)" className="min-h-10 min-w-0 flex-1 border-0 bg-transparent text-[16px] text-slate-900 placeholder:text-slate-400 focus:outline-none sm:text-sm" />
           </div>
 
           {/* Video URL (optional) */}
           <div className="flex items-center gap-3 rounded-[1.2rem] border border-slate-200/60 bg-white px-4 py-3 transition-colors hover:border-slate-300">
             <svg className="h-4 w-4 flex-shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
-            <input type="text" name="videoUrl" inputMode="url" maxLength={500} placeholder="Video URL — YouTube or direct link (optional)" className="flex-1 border-0 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none" />
+            <input type="text" name="videoUrl" inputMode="url" maxLength={500} placeholder="Video URL — YouTube or direct link (optional)" className="min-h-10 min-w-0 flex-1 border-0 bg-transparent text-[16px] text-slate-900 placeholder:text-slate-400 focus:outline-none sm:text-sm" />
           </div>
 
           {/* Description / Notes */}
           <div className="flex items-start gap-3 rounded-[1.2rem] border border-slate-200/60 bg-white px-4 py-3 transition-colors hover:border-slate-300">
             <FileText className="mt-0.5 h-4 w-4 flex-shrink-0 text-slate-400" />
-            <textarea name="notes" rows={3} maxLength={2000} placeholder="Description or notes for the review team" className="flex-1 resize-none border-0 bg-transparent text-sm leading-relaxed text-slate-900 placeholder:text-slate-400 focus:outline-none" />
+            <textarea name="notes" rows={4} maxLength={2000} placeholder="Description or notes for the review team" className="min-w-0 flex-1 resize-none border-0 bg-transparent text-[16px] leading-relaxed text-slate-900 placeholder:text-slate-400 focus:outline-none sm:text-sm" />
           </div>
 
           {/* Event options (lu.ma style settings rows) */}
@@ -347,20 +347,20 @@ export function SubmitEventForm({
             </p>
 
             {/* Category */}
-            <div className="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
+            <div className="flex flex-col items-start gap-2 border-b border-slate-100 px-4 py-3 sm:flex-row sm:items-center sm:gap-3">
               <Tag className="h-4 w-4 text-slate-400" />
               <span className="w-24 text-xs font-medium text-slate-500">Category</span>
-              <select name="category" required defaultValue="" className="flex-1 border-0 bg-transparent text-sm font-medium text-slate-900 focus:outline-none">
+              <select name="category" required defaultValue="" className="min-h-10 w-full flex-1 border-0 bg-transparent text-[16px] font-medium text-slate-900 focus:outline-none sm:text-sm">
                 <option value="" disabled>Select</option>
                 {categories.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
 
             {/* Scope */}
-            <div className="flex items-center gap-3 px-4 py-3">
+            <div className="flex flex-col items-start gap-2 px-4 py-3 sm:flex-row sm:items-center sm:gap-3">
               <Layers className="h-4 w-4 text-slate-400" />
               <span className="w-24 text-xs font-medium text-slate-500">Listing type</span>
-              <select name="eventScope" defaultValue="main" className="flex-1 border-0 bg-transparent text-sm font-medium text-slate-900 focus:outline-none">
+              <select name="eventScope" defaultValue="main" className="min-h-10 w-full flex-1 border-0 bg-transparent text-[16px] font-medium text-slate-900 focus:outline-none sm:text-sm">
                 {scopes.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
               </select>
             </div>

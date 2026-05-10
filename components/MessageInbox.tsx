@@ -239,15 +239,19 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
     return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
   };
 
-  if (!userId) return <div className="flex min-h-[60vh] items-center justify-center"><p className="text-sm text-slate-400">Please sign in to use messaging.</p></div>;
+  if (!userId) return (
+    <div className="flex min-h-full items-center justify-center px-6 pb-24 text-center">
+      <p className="text-sm text-slate-400">Please sign in to use messaging.</p>
+    </div>
+  );
 
   return (
-    <div className="relative mx-auto flex h-full w-full max-w-5xl overflow-hidden bg-slate-950 sm:rounded-2xl sm:border sm:border-white/10 sm:shadow-2xl sm:shadow-black/40">
+    <div className="relative mx-auto flex h-full min-h-0 w-full max-w-5xl overflow-hidden bg-slate-950 sm:rounded-2xl sm:border sm:border-white/10 sm:shadow-2xl sm:shadow-black/40">
 
 
       {/* Left: conversation list */}
-      <div className={`relative flex w-full flex-shrink-0 flex-col border-r border-white/5 sm:w-80 ${activeChat ? 'hidden sm:flex' : ''}`}>
-        <div className="border-b border-white/5 p-4">
+      <div className={`relative flex min-h-0 w-full flex-shrink-0 flex-col border-r border-white/5 sm:w-80 ${activeChat ? 'hidden sm:flex' : ''}`}>
+        <div className="shrink-0 border-b border-white/5 p-4">
           <h2 className="text-lg font-bold text-white">Messages</h2>
           <div className="relative mt-3">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
@@ -270,7 +274,7 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="min-h-0 flex-1 overflow-y-auto pb-24 sm:pb-0">
           {conversations.length === 0 ? (
             <p className="p-6 text-center text-sm text-slate-500">No conversations yet. Search for someone to message.</p>
           ) : (
@@ -299,16 +303,16 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
       </div>
 
       {/* Right: chat */}
-      <div className={`relative flex flex-1 flex-col ${!activeChat ? 'hidden sm:flex' : 'flex'}`}>
+      <div className={`relative min-h-0 flex-1 flex-col ${!activeChat ? 'hidden sm:flex' : 'flex'}`}>
         {activeChat && activePerson ? (
           <>
             {/* Chat header */}
-            <div className="flex items-center gap-3 border-b border-white/5 bg-slate-950/80 px-4 py-3 backdrop-blur-sm">
-              <button type="button" onClick={() => setActiveChat(null)} className="sm:hidden"><ArrowLeft className="h-5 w-5 text-slate-400" /></button>
-              <a href={activePerson.username ? `/profile/${activePerson.username}` : '#'} className="flex items-center gap-3 transition hover:opacity-80">
+            <div className="shrink-0 flex items-center gap-3 border-b border-white/5 bg-slate-950/95 px-4 py-3 backdrop-blur-sm">
+              <button type="button" onClick={() => setActiveChat(null)} className="-ml-1 flex h-9 w-9 items-center justify-center rounded-full text-slate-400 transition hover:bg-white/5 sm:hidden"><ArrowLeft className="h-5 w-5" /></button>
+              <a href={activePerson.username ? `/profile/${activePerson.username}` : '#'} className="flex min-w-0 items-center gap-3 transition hover:opacity-80">
                 <UserAvatar src={activePerson.avatar_url} name={activePerson.full_name} size={36} />
-                <div>
-                  <p className="text-sm font-semibold text-white">{activePerson.full_name}</p>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-white">{activePerson.full_name}</p>
                 </div>
               </a>
             </div>
@@ -316,7 +320,7 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
             {/* Messages */}
             <div
               ref={messagesContainerRef}
-              className="relative flex-1 overflow-y-auto px-4 py-4"
+              className="relative min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-4"
               style={{
                 maskImage: 'linear-gradient(to bottom, transparent, black 24px, black calc(100% - 24px), transparent)',
               }}
@@ -334,7 +338,7 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
                           {showAvatar && <UserAvatar src={activePerson.avatar_url} name={activePerson.full_name} size={28} />}
                         </div>
                       )}
-                      <div className={`max-w-[70%] ${isMine ? 'order-1' : ''}`}>
+                      <div className={`max-w-[84%] sm:max-w-[70%] ${isMine ? 'order-1' : ''}`}>
                         {m.image_url && (
                           <img
                             src={m.image_url}
@@ -383,7 +387,7 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
             </div>
 
             {/* Input */}
-            <div className="flex-shrink-0 border-t border-white/5 bg-slate-950 p-3" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom, 0.75rem))' }}>
+            <div className="shrink-0 border-t border-white/5 bg-slate-950 p-2.5 sm:p-3" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom, 0.75rem))' }}>
               <div className="flex items-center gap-2">
                 <input
                   ref={fileInputRef}
@@ -396,7 +400,7 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadingImage}
-                  className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-slate-500 transition hover:bg-white/5 hover:text-slate-300 disabled:opacity-40"
+                  className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl text-slate-500 transition hover:bg-white/5 hover:text-slate-300 disabled:opacity-40 sm:h-10 sm:w-10"
                 >
                   <ImagePlus className="h-5 w-5" />
                 </button>
@@ -405,12 +409,12 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
                   <button
                     type="button"
                     onClick={() => setShowEventPicker(!showEventPicker)}
-                    className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl transition ${showEventPicker ? 'bg-indigo-500/20 text-indigo-400' : 'text-slate-500 hover:bg-white/5 hover:text-slate-300'}`}
+                    className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl transition sm:h-10 sm:w-10 ${showEventPicker ? 'bg-indigo-500/20 text-indigo-400' : 'text-slate-500 hover:bg-white/5 hover:text-slate-300'}`}
                   >
                     <Calendar className="h-5 w-5" />
                   </button>
                   {showEventPicker && (
-                    <div className="absolute bottom-full left-0 z-20 mb-2 w-72 overflow-hidden rounded-xl border border-white/10 bg-slate-900/95 shadow-xl backdrop-blur-lg">
+                    <div className="fixed inset-x-3 bottom-[5.25rem] z-[70] max-h-[55vh] overflow-hidden rounded-xl border border-white/10 bg-slate-900/95 shadow-xl backdrop-blur-lg sm:absolute sm:bottom-full sm:left-0 sm:right-auto sm:mb-2 sm:w-72">
                       <div className="p-3">
                         <p className="text-xs font-semibold text-slate-400">Share an event</p>
                         <input
@@ -442,7 +446,7 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
                   )}
                 </div>
                 <input
-                  className="flex-1 rounded-xl border border-white/5 bg-white/5 px-4 py-2.5 text-[16px] text-white placeholder-slate-500 outline-none transition focus:border-indigo-500/40 focus:bg-white/8"
+                  className="min-h-11 min-w-0 flex-1 rounded-xl border border-white/5 bg-white/5 px-4 py-2.5 text-[16px] text-white placeholder-slate-500 outline-none transition focus:border-indigo-500/40 focus:bg-white/8 sm:min-h-10"
                   value={newMsg}
                   onChange={(e) => setNewMsg(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
@@ -454,7 +458,7 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
                   type="button"
                   onClick={() => sendMessage()}
                   disabled={sending || !newMsg.trim()}
-                  className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white transition hover:from-indigo-400 hover:to-purple-500 disabled:opacity-30"
+                  className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white transition hover:from-indigo-400 hover:to-purple-500 disabled:opacity-30 sm:h-10 sm:w-10"
                 >
                   <Send className="h-4 w-4" />
                 </button>
@@ -462,8 +466,8 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
             </div>
           </>
         ) : (
-          <div className="flex flex-1 flex-col items-center justify-center text-center">
-            <div className="relative rounded-2xl border border-white/5 bg-white/[0.03] p-8 backdrop-blur-sm">
+          <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-6 pb-24 text-center sm:pb-0">
+            <div className="relative rounded-2xl border border-white/5 bg-white/[0.03] p-6 backdrop-blur-sm sm:p-8">
               <div className="pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-br from-indigo-500/10 via-transparent to-purple-500/10" />
               <p className="relative text-lg font-bold text-white">Your messages</p>
               <p className="relative mt-1 text-sm text-slate-500">Select a conversation or search for someone to message.</p>

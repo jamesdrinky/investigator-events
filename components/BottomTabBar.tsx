@@ -70,7 +70,9 @@ export function BottomTabBar() {
               onClick={() => {
                 hapticTap();
                 if (active) {
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  const appContent = document.querySelector<HTMLElement>('[data-app-content]');
+                  if (appContent) appContent.scrollTo({ top: 0, behavior: 'smooth' });
+                  else window.scrollTo({ top: 0, behavior: 'smooth' });
                 } else {
                   router.push(href as any);
                 }

@@ -30,7 +30,7 @@ export function CookieBanner() {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[55] p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-6 sm:pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+    <div className="fixed bottom-[4.75rem] left-0 right-0 z-[55] p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-6 sm:pb-[max(1.5rem,env(safe-area-inset-bottom))] lg:bottom-0">
       <div className="mx-auto flex max-w-4xl flex-col gap-4 rounded-[1.8rem] border border-white/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(239,246,255,0.96))] p-5 shadow-[0_24px_64px_-24px_rgba(15,23,42,0.28)] sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:p-6">
         <p className="text-sm leading-relaxed text-slate-700">
           We use a cookie to remember your consent preference. No tracking or advertising cookies are used.{' '}

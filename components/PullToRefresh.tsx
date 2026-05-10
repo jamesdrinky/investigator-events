@@ -18,15 +18,17 @@ export function PullToRefresh() {
     if (typeof window === 'undefined') return;
     const isMobile = window.innerWidth < 1024;
     if (!isMobile && !isNativeApp) return;
+    const scrollTarget = document.querySelector<HTMLElement>('[data-app-content]');
+    const getScrollTop = () => scrollTarget ? scrollTarget.scrollTop : window.scrollY;
 
     const handleTouchStart = (e: TouchEvent) => {
-      if (window.scrollY > 5) return; // Only when at top
+      if (getScrollTop() > 5) return; // Only when at top
       startY.current = e.touches[0].clientY;
       isPulling.current = true;
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (!isPulling.current || window.scrollY > 5) return;
+      if (!isPulling.current || getScrollTop() > 5) return;
       const diff = e.touches[0].clientY - startY.current;
       if (diff < 0) return;
 

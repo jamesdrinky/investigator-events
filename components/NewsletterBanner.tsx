@@ -87,7 +87,7 @@ export function NewsletterBanner() {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[60] animate-in slide-in-from-bottom duration-500">
+    <div className="fixed bottom-[4.75rem] left-0 right-0 z-[60] animate-in slide-in-from-bottom duration-500 lg:bottom-0">
       <div className="mx-auto max-w-2xl px-4 pb-4">
         <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-slate-950 shadow-2xl shadow-black/40">
           {/* Ambient glow */}

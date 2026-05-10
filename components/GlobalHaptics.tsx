@@ -37,10 +37,13 @@ export function GlobalHaptics() {
       if (!Haptics) return;
       Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
     };
+    const wiredElements = new WeakSet<Element>();
 
     // Only attach to buttons and links — not inputs/selects (those have their own feedback)
     const addListeners = () => {
       document.querySelectorAll('a, button, [role="button"]').forEach((el) => {
+        if (wiredElements.has(el)) return;
+        wiredElements.add(el);
         el.addEventListener('click', handler, { passive: true });
       });
     };

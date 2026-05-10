@@ -247,7 +247,8 @@ export function FilterBar({
           <motion.div className="fixed inset-0 z-50 lg:hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <button type="button" className="absolute inset-0 bg-slate-950/35" onClick={() => setDrawerOpen(false)} />
             <motion.div
-              className="absolute inset-x-0 bottom-0 rounded-t-[1.75rem] border border-slate-200 bg-white p-5 shadow-[0_-24px_60px_-34px_rgba(15,23,42,0.24)]"
+              className="absolute inset-x-0 bottom-0 max-h-[min(86vh,42rem)] overflow-y-auto rounded-t-[1.75rem] border border-slate-200 bg-white p-5 shadow-[0_-24px_60px_-34px_rgba(15,23,42,0.24)]"
+              style={{ paddingBottom: 'max(1.25rem, calc(env(safe-area-inset-bottom, 0px) + 1rem))' }}
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}

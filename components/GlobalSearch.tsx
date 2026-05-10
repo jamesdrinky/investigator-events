@@ -60,6 +60,21 @@ export function GlobalSearch({ isDark }: { isDark?: boolean }) {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
+  useEffect(() => {
+    const appContent = document.querySelector<HTMLElement>('[data-app-content]');
+    if (mobileOpen) {
+      if (appContent) appContent.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+    } else {
+      if (appContent) appContent.style.overflow = '';
+      document.body.style.overflow = '';
+    }
+    return () => {
+      if (appContent) appContent.style.overflow = '';
+      document.body.style.overflow = '';
+    };
+  }, [mobileOpen]);
+
   const navigate = (path: string) => {
     setOpen(false);
     setMobileOpen(false);
@@ -170,8 +185,8 @@ export function GlobalSearch({ isDark }: { isDark?: boolean }) {
   );
 
   const mobileOverlay = mobileOpen && (
-    <div className="fixed inset-0 z-[200] flex min-h-screen flex-col overflow-hidden bg-white lg:hidden" ref={wrapperRef} style={{ top: 0, left: 0, right: 0, bottom: 0, position: 'fixed' }}>
-      <div className="flex flex-shrink-0 items-center gap-3 border-b border-slate-100 px-4 py-3">
+    <div className="fixed inset-0 z-[200] flex min-h-screen flex-col overflow-hidden bg-white lg:hidden" ref={wrapperRef}>
+      <div className="flex flex-shrink-0 items-center gap-3 border-b border-slate-100 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <Search className="h-5 w-5 text-slate-400" />
         <input
           type="text"
@@ -187,7 +202,7 @@ export function GlobalSearch({ isDark }: { isDark?: boolean }) {
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto bg-white p-4">
+      <div className="flex-1 overflow-y-auto bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
         {loading && <p className="py-8 text-center text-sm text-slate-400">Searching...</p>}
         {!loading && query.length >= 2 && totalResults === 0 && <p className="py-8 text-center text-sm text-slate-400">No results found</p>}
 

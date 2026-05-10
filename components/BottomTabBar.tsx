@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Home, Calendar, Users, User, MessageCircle } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
@@ -14,9 +14,19 @@ const tabs = [
   { href: '/profile', icon: User, label: 'Profile', badge: true },
 ];
 
+function scrollAppContentToTop(behavior: ScrollBehavior = 'auto') {
+  const appContent = document.querySelector<HTMLElement>('[data-app-content]');
+  if (appContent) {
+    appContent.scrollTo({ top: 0, behavior });
+  } else {
+    window.scrollTo({ top: 0, behavior });
+  }
+}
+
 export function BottomTabBar() {
   const router = useRouter();
   const currentPathname = usePathname();
+  const lastPathnameRef = useRef(currentPathname);
   const [profilePath, setProfilePath] = useState('/signin');
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -24,6 +34,12 @@ export function BottomTabBar() {
   useEffect(() => {
     tabs.forEach((tab) => router.prefetch(tab.href as any));
   }, [router]);
+
+  useEffect(() => {
+    if (lastPathnameRef.current === currentPathname) return;
+    lastPathnameRef.current = currentPathname;
+    requestAnimationFrame(() => scrollAppContentToTop('auto'));
+  }, [currentPathname]);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -70,11 +86,11 @@ export function BottomTabBar() {
               onClick={() => {
                 hapticTap();
                 if (active) {
-                  const appContent = document.querySelector<HTMLElement>('[data-app-content]');
-                  if (appContent) appContent.scrollTo({ top: 0, behavior: 'smooth' });
-                  else window.scrollTo({ top: 0, behavior: 'smooth' });
+                  scrollAppContentToTop('smooth');
                 } else {
+                  scrollAppContentToTop('auto');
                   router.push(href as any);
+                  requestAnimationFrame(() => scrollAppContentToTop('auto'));
                 }
               }}
               className={`flex flex-1 flex-col items-center gap-0.5 py-2 transition-colors ${

@@ -1,8 +1,8 @@
 'use client';
 
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useFormStatus } from 'react-dom';
-import { Camera, MapPin, Calendar, Clock, Globe, FileText, Mail, User, Building2, Tag, Layers, ImageIcon, AlertTriangle, Loader2 } from 'lucide-react';
+import { CheckCircle2, MapPin, Calendar, Clock, Globe, FileText, Mail, User, Building2, Tag, Layers, AlertTriangle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { getCountriesForRegion } from '@/lib/forms/event-form-options';
@@ -39,12 +39,8 @@ export function SubmitEventForm({
   isSuccess,
   isError,
 }: SubmitEventFormProps) {
-  const [coverPreview, setCoverPreview] = useState<string | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [selectedRegion, setSelectedRegion] = useState('');
   const [filteredCountries, setFilteredCountries] = useState<string[]>([...countries]);
-  const coverInputRef = useRef<HTMLInputElement>(null);
-  const logoInputRef = useRef<HTMLInputElement>(null);
 
   // Clash detection
   type ClashEvent = { id: string; title: string; slug: string; start_date: string; end_date: string | null; city: string; country: string; association: string | null };
@@ -78,81 +74,26 @@ export function SubmitEventForm({
     return () => clearTimeout(timeout);
   }, [startDate, endDate, checkClashes]);
 
-  const handleImageChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    setter: (url: string | null) => void,
-  ) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setter(reader.result as string);
-      reader.readAsDataURL(file);
-    }
-  };
-
   return (
     <div className="grid min-w-0 items-start gap-5 lg:grid-cols-[20rem_minmax(0,1fr)] xl:grid-cols-[22rem_minmax(0,1fr)]">
-      {/* ── Left: Cover image + Logo ── */}
-      <div className="space-y-3">
-        {/* Cover image upload */}
-        <button
-          type="button"
-          onClick={() => coverInputRef.current?.click()}
-          className="group relative aspect-[16/9] w-full overflow-hidden rounded-[1.25rem] border border-slate-200/80 bg-gradient-to-br from-blue-50 via-indigo-50 to-violet-50 transition-all duration-300 hover:border-blue-300 hover:shadow-[0_12px_40px_-12px_rgba(99,102,241,0.2)] sm:rounded-[1.6rem] lg:aspect-square"
-        >
-          {coverPreview ? (
-            <img src={coverPreview} alt="Cover preview" className="h-full w-full object-cover" />
-          ) : (
-            <div className="flex h-full w-full flex-col items-center justify-center gap-3">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-[0_4px_20px_-6px_rgba(99,102,241,0.2)]">
-                <ImageIcon className="h-6 w-6 text-blue-500" />
-              </div>
-              <div className="text-center">
-                <p className="text-sm font-semibold text-slate-700">Upload Cover Image</p>
-                <p className="mt-0.5 text-xs text-slate-400">Click to choose a photo</p>
-              </div>
-            </div>
-          )}
-          {/* Hover overlay on existing image */}
-          {coverPreview && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-lg">
-                <Camera className="h-5 w-5 text-slate-700" />
-              </div>
-            </div>
-          )}
-          <input
-            ref={coverInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            className="hidden"
-            onChange={(e) => handleImageChange(e, setCoverPreview)}
-          />
-        </button>
-
-        {/* Logo upload (smaller, bottom-right overlap like lu.ma) */}
-        <div className="relative z-10 -mt-9 ml-3 sm:ml-4">
-          <button
-            type="button"
-            onClick={() => logoInputRef.current?.click()}
-            className="group flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border-[3px] border-white bg-gradient-to-br from-blue-50 to-indigo-50 shadow-[0_4px_16px_-4px_rgba(15,23,42,0.12)] transition-all duration-200 hover:shadow-[0_8px_24px_-6px_rgba(99,102,241,0.25)]"
-          >
-            {logoPreview ? (
-              <img src={logoPreview} alt="Logo preview" className="h-full w-full object-cover" />
-            ) : (
-              <Building2 className="h-6 w-6 text-blue-400 transition-colors group-hover:text-blue-600" />
-            )}
-            <input
-              ref={logoInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/svg+xml"
-              className="hidden"
-              onChange={(e) => handleImageChange(e, setLogoPreview)}
-            />
-          </button>
-          <p className="mt-1.5 text-[10px] text-slate-400">Organiser logo</p>
+      {/* ── Left: Submission guidance ── */}
+      <aside className="rounded-[1.25rem] border border-slate-200/80 bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-4 sm:rounded-[1.6rem] sm:p-5">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-[0_4px_20px_-6px_rgba(37,99,235,0.24)]">
+          <Building2 className="h-5 w-5 text-blue-500" />
         </div>
-      </div>
+        <h2 className="mt-4 text-base font-bold text-slate-950">What helps approval</h2>
+        <p className="mt-1 text-sm leading-relaxed text-slate-500">
+          Add the public event page, confirmed date, organiser details, and any extra context in the notes field.
+        </p>
+        <div className="mt-4 space-y-2.5">
+          {['Confirmed dates', 'Official website', 'Organiser contact', 'Association context'].map((item) => (
+            <div key={item} className="flex items-center gap-2 text-sm text-slate-600">
+              <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-emerald-500" />
+              <span>{item}</span>
+            </div>
+          ))}
+        </div>
+      </aside>
 
       {/* ── Right: Form fields ── */}
       <div>

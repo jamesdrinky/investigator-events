@@ -38,15 +38,22 @@ export function Reveal({ children, className, delay = 0, y = 24, x = 0 }: Reveal
     return () => observer.disconnect();
   }, []);
 
+  // On mobile, drop the y-translate — the slide-up animation makes
+  // scrolling feel like the page is 'pulling upwards' as each section
+  // crosses the IntersectionObserver threshold. Keep the opacity fade
+  // for a gentle reveal that doesn't move pixels around.
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
+  const restingTransform = isMobile ? 'none' : `translate3d(${x}px, ${y}px, 0)`;
+
   return (
     <div
       ref={ref}
       className={className}
       style={{
         opacity: isVisible ? 1 : 0,
-        transform: isVisible ? 'none' : `translate3d(${x}px, ${y}px, 0)`,
-        transition: `opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1) ${delay}s, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1) ${delay}s`,
-        willChange: isVisible ? 'auto' : 'opacity, transform',
+        transform: isVisible ? 'none' : restingTransform,
+        transition: `opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1) ${delay}s, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1) ${delay}s`,
+        willChange: isVisible ? 'auto' : 'opacity',
       }}
     >
       {children}

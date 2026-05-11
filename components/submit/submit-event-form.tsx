@@ -6,6 +6,7 @@ import { CheckCircle2, MapPin, Calendar, Clock, Globe, FileText, Mail, User, Bui
 import Link from 'next/link';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { getCountriesForRegion } from '@/lib/forms/event-form-options';
+import { associationRecords } from '@/lib/data/associations';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -236,14 +237,14 @@ export function SubmitEventForm({
             <div className="grid min-w-0 flex-1 grid-cols-1 gap-2 sm:grid-cols-2">
               <select name="association" defaultValue="" className="min-h-10 w-full border-0 bg-transparent text-[16px] text-slate-900 focus:outline-none sm:text-sm">
                 <option value="">Association (optional)</option>
-                {['ABI','WAD','IKD','CII','Intellenet','FEDERPOL','BuDEG','SNARP','EURODET','NCAPI','NCISS','FALI','CALI','TALI','FEWA','NFES','PSLD','LIDEPPE','ANDR','HDA','IBPI','DAF','SYL','FDDE','CKDS','FAPI','FSPD','SFPP','APDPE','APDU','CODPCAT','IAIACE','DeZRS','SAD','ARD','PDPR','ALDONYS','NALI','ODV','WAPI','SPI'].sort().map((a) => (
+                {associationRecords.map((r) => r.shortName).sort().map((a) => (
                   <option key={a} value={a}>{a}</option>
                 ))}
                 <option value="other">Other (specify in notes)</option>
               </select>
               <select name="co_association" defaultValue="" className="min-h-10 w-full border-0 bg-transparent text-[16px] text-slate-900 focus:outline-none sm:text-sm">
                 <option value="">Co-host (optional)</option>
-                {['ABI','WAD','IKD','CII','Intellenet','FEDERPOL','BuDEG','SNARP','EURODET','NCAPI','NCISS','FALI','CALI','TALI','FEWA','NFES','PSLD','LIDEPPE','ANDR','HDA','IBPI','DAF','SYL','FDDE','CKDS','FAPI','FSPD','SFPP','APDPE','APDU','CODPCAT','IAIACE','DeZRS','SAD','ARD','PDPR','ALDONYS','NALI','ODV','WAPI','SPI'].sort().map((a) => (
+                {associationRecords.map((r) => r.shortName).sort().map((a) => (
                   <option key={a} value={a}>{a}</option>
                 ))}
                 <option value="other">Other (specify in notes)</option>

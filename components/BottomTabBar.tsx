@@ -27,8 +27,30 @@ export function BottomTabBar() {
   const router = useRouter();
   const currentPathname = usePathname();
   const lastPathnameRef = useRef(currentPathname);
+  const navRef = useRef<HTMLElement>(null);
   const [profilePath, setProfilePath] = useState('/signin');
   const [unreadCount, setUnreadCount] = useState(0);
+
+  // Sync the actual rendered tab bar height into a CSS variable so the
+  // main scroll container's bottom padding always matches reality
+  // (instead of guessing at 4.75rem and getting clipped on notched
+  // iPhones where the safe-area inset is larger).
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    const setVar = () => {
+      const h = nav.getBoundingClientRect().height;
+      document.documentElement.style.setProperty('--app-bottom-nav-height', `${Math.ceil(h)}px`);
+    };
+    setVar();
+    const ro = new ResizeObserver(setVar);
+    ro.observe(nav);
+    window.addEventListener('orientationchange', setVar);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('orientationchange', setVar);
+    };
+  }, []);
 
   // Prefetch all tab routes on mount for instant navigation
   useEffect(() => {
@@ -69,6 +91,7 @@ export function BottomTabBar() {
 
   return (
     <nav
+      ref={navRef}
       className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200/80 bg-white lg:hidden"
       style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 8px) + 4px)' }}
     >

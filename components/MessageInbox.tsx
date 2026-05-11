@@ -246,7 +246,7 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
   );
 
   return (
-    <div className="relative mx-auto flex h-full min-h-0 w-full max-w-5xl overflow-hidden bg-slate-950 sm:rounded-2xl sm:border sm:border-white/10 sm:shadow-2xl sm:shadow-black/40">
+    <div className="relative mx-auto flex min-h-0 w-full max-w-5xl flex-1 overflow-hidden bg-slate-950 sm:rounded-2xl sm:border sm:border-white/10 sm:shadow-2xl sm:shadow-black/40">
 
 
       {/* Left: conversation list */}

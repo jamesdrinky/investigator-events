@@ -26,11 +26,26 @@ html, body { overscroll-behavior: none; overflow-x: hidden; }
   }
   [data-app-content] {
     flex: 1;
+    display: flex;
+    flex-direction: column;
     overflow-y: auto;
     overflow-x: hidden;
+    padding-top: calc(3.25rem + env(safe-area-inset-top, 0px));
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: none;
     overscroll-behavior-x: none;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 767px) {
+  [data-app-content] {
+    padding-top: calc(4rem + env(safe-area-inset-top, 0px));
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  [data-app-content] {
+    padding-top: calc(4.75rem + env(safe-area-inset-top, 0px));
   }
 }
 

@@ -183,7 +183,7 @@ export function Navbar() {
 
   return (
     <>
-      <header className={`sticky top-0 z-[80] shrink-0 border-b backdrop-blur-md sm:backdrop-blur-xl ${isDark ? 'border-white/[0.06] bg-[#080f1e]/90' : 'border-slate-200/70 bg-white/92 sm:bg-white/88'}`} style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+      <header data-mobile-header className={`fixed inset-x-0 top-0 z-[110] shrink-0 border-b backdrop-blur-md sm:backdrop-blur-xl lg:sticky ${isDark ? 'border-white/[0.06] bg-[#080f1e]/90' : 'border-slate-200/70 bg-white/92 sm:bg-white/88'}`} style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
         <div className="mx-auto flex min-h-[3.25rem] max-w-7xl items-center gap-2 px-4 py-1.5 sm:min-h-[4rem] sm:gap-2 sm:px-5 md:min-h-[4.75rem] md:gap-3 md:py-0 lg:px-6">
           {/* Logo */}
           <Link href="/" onClick={() => handleNavigation('/')} className="group flex shrink-0 items-center gap-2.5 sm:gap-3">

@@ -92,8 +92,8 @@ function MonthEventStrip({ events, label, countryCount }: { events: EventItem[];
         </div>
       </div>
 
-      {/* Scrolling strip */}
-      <div ref={scrollRef} className="flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
+      {/* Mobile uses a normal vertical list so page scrolling does not fight horizontal gestures. */}
+      <div ref={scrollRef} className="grid gap-3 pb-2 sm:flex sm:overflow-x-auto sm:[-webkit-overflow-scrolling:touch] sm:[scrollbar-width:none] sm:[&::-webkit-scrollbar]:hidden">
         {events.map((event) => {
           const logoSrc = getAssociationBrandLogoSrc(event.association ?? event.organiser);
           const invertLogo = shouldInvertLogoOnLight(event.association ?? event.organiser);
@@ -103,7 +103,7 @@ function MonthEventStrip({ events, label, countryCount }: { events: EventItem[];
             <Link
               key={event.id}
               href={`/events/${getEventSlug(event)}`}
-              className="group w-[15rem] flex-shrink-0 overflow-hidden rounded-2xl border border-slate-200/60 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_-12px_rgba(59,130,246,0.15)] sm:w-[19rem]"
+              className="group w-full overflow-hidden rounded-2xl border border-slate-200/60 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_-12px_rgba(59,130,246,0.15)] sm:w-[19rem] sm:flex-shrink-0"
             >
               {/* Image with logo */}
               <div className="relative h-40 w-full overflow-hidden sm:h-44">

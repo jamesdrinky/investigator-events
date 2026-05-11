@@ -12,7 +12,6 @@ export function PageTransition({ children }: { children: ReactNode }) {
 
   return (
     <div
-      className="flex min-h-full flex-1 flex-col"
       style={{
         opacity: mounted ? 1 : 0,
         transform: mounted ? 'none' : 'translateY(8px)',

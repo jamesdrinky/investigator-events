@@ -92,8 +92,15 @@ function MonthEventStrip({ events, label, countryCount }: { events: EventItem[];
         </div>
       </div>
 
-      {/* Mobile uses a normal vertical list so page scrolling does not fight horizontal gestures. */}
-      <div ref={scrollRef} className="grid gap-3 pb-2 sm:flex sm:overflow-x-auto sm:[-webkit-overflow-scrolling:touch] sm:[scrollbar-width:none] sm:[&::-webkit-scrollbar]:hidden">
+      {/* Horizontal scroll per month on every viewport. snap-x to give a
+          tactile 'swipe-to-next-card' feel and stop scroll fighting the
+          page's vertical scroll — touch-action:pan-x tells the browser
+          this row owns horizontal gestures, page owns vertical. */}
+      <div
+        ref={scrollRef}
+        className="flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden"
+        style={{ scrollSnapType: 'x mandatory', touchAction: 'pan-x pan-y' }}
+      >
         {events.map((event) => {
           const logoSrc = getAssociationBrandLogoSrc(event.association ?? event.organiser);
           const invertLogo = shouldInvertLogoOnLight(event.association ?? event.organiser);
@@ -103,7 +110,8 @@ function MonthEventStrip({ events, label, countryCount }: { events: EventItem[];
             <Link
               key={event.id}
               href={`/events/${getEventSlug(event)}`}
-              className="group w-full overflow-hidden rounded-2xl border border-slate-200/60 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_-12px_rgba(59,130,246,0.15)] sm:w-[19rem] sm:flex-shrink-0"
+              className="group flex-shrink-0 w-[17rem] overflow-hidden rounded-2xl border border-slate-200/60 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_-12px_rgba(59,130,246,0.15)] sm:w-[19rem]"
+              style={{ scrollSnapAlign: 'start' }}
             >
               {/* Image with logo */}
               <div className="relative h-40 w-full overflow-hidden sm:h-44">

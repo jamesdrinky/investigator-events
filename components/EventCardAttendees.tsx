@@ -4,17 +4,20 @@ import { useEffect, useRef, useState, MouseEvent } from 'react';
 import { Check, Plus } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { UserAvatar } from '@/components/UserAvatar';
+import { useCurrentUser } from '@/lib/hooks/use-current-user';
 
 type MiniAttendee = { user_id: string | null; avatar_url: string | null; full_name: string | null };
 
 export function EventCardAttendees({ eventId }: { eventId: string }) {
   const [attendees, setAttendees] = useState<MiniAttendee[]>([]);
   const [total, setTotal] = useState(0);
-  const [userId, setUserId] = useState<string | null>(null);
   const [isGoing, setIsGoing] = useState(false);
   const [toggling, setToggling] = useState(false);
-  const [userAvatar, setUserAvatar] = useState<string | null>(null);
-  const [userName, setUserName] = useState<string | null>(null);
+
+  // Cached at the module level — every event card shares the same fetched
+  // user, so the 'Going?' button renders immediately on first paint
+  // instead of waiting for a per-card auth.getUser round-trip.
+  const { id: userId, avatarUrl: userAvatar, fullName: userName } = useCurrentUser();
 
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [hasFetched, setHasFetched] = useState(false);
@@ -46,15 +49,6 @@ export function EventCardAttendees({ eventId }: { eventId: string }) {
   useEffect(() => {
     if (!hasFetched) return;
     const supabase = createSupabaseBrowserClient();
-
-    supabase.auth.getUser().then(({ data }) => {
-      const uid = data.user?.id ?? null;
-      setUserId(uid);
-      if (uid) {
-        supabase.from('profiles').select('avatar_url, full_name').eq('id', uid).single()
-          .then(({ data: p }) => { setUserAvatar(p?.avatar_url ?? null); setUserName(p?.full_name ?? null); });
-      }
-    });
 
     supabase
       .from('event_attendees')

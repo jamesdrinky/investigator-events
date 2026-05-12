@@ -335,17 +335,21 @@ function EventCard({ event: e, muted }: { event: AssocEvent; muted?: boolean }) 
 }
 
 function MemberCard({ member: m }: { member: AssocMember }) {
-  if (!m.profile) return null;
-  const color = m.profile.profile_color ?? '#3b82f6';
+  // Used to early-return null when m.profile was missing, which silently
+  // hid members whose embedded profile join didn't resolve. Now we
+  // always render the member; if profile data is missing we just show
+  // a placeholder card instead of disappearing them.
+  const p = m.profile;
+  const color = p?.profile_color ?? '#3b82f6';
   return (
     <Link
-      href={m.profile.username ? `/profile/${m.profile.username}` : '#'}
+      href={p?.username ? `/profile/${p.username}` : '#'}
       className={`group flex items-center gap-4 overflow-hidden rounded-[1.2rem] border bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md ${
         m.isVerified ? 'border-emerald-200/60' : 'border-slate-200/60'
       }`}
     >
       <div className="relative flex-shrink-0">
-        <UserAvatar src={m.profile.avatar_url} name={m.profile.full_name} size={48} color={color} />
+        <UserAvatar src={p?.avatar_url ?? null} name={p?.full_name ?? null} size={48} color={color} />
         {m.isVerified && (
           <div className="absolute -bottom-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 ring-2 ring-white">
             <ShieldCheck className="h-3 w-3 text-white" />
@@ -354,11 +358,11 @@ function MemberCard({ member: m }: { member: AssocMember }) {
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <p className="truncate text-sm font-bold text-slate-900 group-hover:text-blue-600">{m.profile.full_name ?? 'Member'}</p>
+          <p className="truncate text-sm font-bold text-slate-900 group-hover:text-blue-600">{p?.full_name ?? 'Member'}</p>
           {m.isVerified && <span className="flex-shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-[8px] font-bold text-emerald-700">VERIFIED</span>}
         </div>
-        <p className="truncate text-xs text-slate-400">{m.role || m.profile.headline || m.profile.specialisation || ''}</p>
-        {m.profile.country && <p className="mt-0.5 text-[11px] text-slate-300">{m.profile.country}</p>}
+        <p className="truncate text-xs text-slate-400">{m.role || p?.headline || p?.specialisation || ''}</p>
+        {p?.country && <p className="mt-0.5 text-[11px] text-slate-300">{p.country}</p>}
       </div>
     </Link>
   );

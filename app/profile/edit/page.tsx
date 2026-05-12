@@ -715,43 +715,25 @@ export default function EditProfilePage() {
           {/* Associations */}
           <div className="mt-10 rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm sm:p-6">
             <h2 className="text-lg font-bold text-slate-900">Professional memberships</h2>
-            <p className="text-sm text-slate-400">Add your association memberships and verify them with your association's code</p>
+            <p className="text-sm text-slate-400">Add the associations you belong to. You&apos;ll appear on each association&apos;s member page automatically.</p>
 
             {associations.length > 0 && (
               <div className="mt-4 space-y-2">
-                {associations.map((a, i) => {
-                  const v = verifications[a.association_name];
-                  const status = v?.status;
-                  const expiresAt = v?.expires_at;
-                  const expiryDate = expiresAt ? new Date(expiresAt).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }) : null;
-                  return (
-                    <div key={i} className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${status === 'verified' ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-100 bg-slate-50/50'}`}>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold text-slate-900">{a.association_name}</span>
-                          {status === 'verified' && (
-                            <span className="flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
-                              <ShieldCheck className="h-3 w-3" /> Verified
-                            </span>
-                          )}
-                          {status === 'expired' && (
-                            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-600">Expired — re-verify below</span>
-                          )}
-                          {status === 'pending' && (
-                            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-600">Pending</span>
-                          )}
-                        </div>
-                        <p className="text-xs text-slate-400">
-                          {a.role}{a.role && a.member_since ? ' · ' : ''}{a.member_since ? `Since ${a.member_since}` : ''}
-                          {status === 'verified' && expiryDate && <span className="ml-1"> · Renews {expiryDate}</span>}
-                        </p>
+                {associations.map((a, i) => (
+                  <div key={i} className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/50 px-4 py-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-slate-900">{a.association_name}</span>
                       </div>
-                      <button type="button" onClick={() => removeAssociation(i)} className="flex-shrink-0 text-slate-300 hover:text-red-500">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      <p className="text-xs text-slate-400">
+                        {a.role}{a.role && a.member_since ? ' · ' : ''}{a.member_since ? `Since ${a.member_since}` : ''}
+                      </p>
                     </div>
-                  );
-                })}
+                    <button type="button" onClick={() => removeAssociation(i)} className="flex-shrink-0 text-slate-300 hover:text-red-500">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
 
@@ -772,52 +754,6 @@ export default function EditProfilePage() {
 
             {/* Submit unlisted association */}
             <SuggestAssociation />
-
-            {/* Verify with code */}
-            <div className="mt-6 rounded-xl border border-blue-200/60 bg-blue-50/30 p-4">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="h-5 w-5 text-blue-600" />
-                <h3 className="text-sm font-bold text-slate-900">Verify your membership</h3>
-              </div>
-              <p className="mt-1 text-xs text-slate-500">
-                We&apos;re rolling out verification codes with associations — your association will share a code with members when it&apos;s ready. If you already have a code, enter it below. Verification lasts 12 months.
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <select
-                  className="field-input flex-1 min-w-[140px]"
-                  value={verifyAssoc}
-                  onChange={(e) => setVerifyAssoc(e.target.value)}
-                >
-                  <option value="">Select association</option>
-                  {ALL_ASSOCIATIONS
-                    .filter((name) => verifications[name]?.status !== 'verified')
-                    .map((name) => (
-                      <option key={name} value={name}>{name}</option>
-                    ))}
-                </select>
-                <input
-                  className="field-input flex-1 min-w-[160px] font-mono uppercase tracking-wider"
-                  value={verifyCode}
-                  onChange={(e) => setVerifyCode(e.target.value)}
-                  placeholder="Enter code"
-                  maxLength={20}
-                />
-                <button
-                  type="button"
-                  onClick={verifyWithCode}
-                  disabled={verifyLoading || !verifyCode.trim() || !verifyAssoc}
-                  className="flex items-center gap-1.5 rounded-2xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-40"
-                >
-                  <ShieldCheck className="h-4 w-4" />
-                  {verifyLoading ? 'Verifying...' : 'Verify'}
-                </button>
-              </div>
-              {verifyMessage && (
-                <p className={`mt-2 rounded-lg border p-2 text-xs ${verifyMessage.type === 'success' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-red-200 bg-red-50 text-red-700'}`}>
-                  {verifyMessage.text}
-                </p>
-              )}
-            </div>
           </div>
 
           {/* LinkedIn verification */}

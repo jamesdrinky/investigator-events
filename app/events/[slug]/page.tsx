@@ -119,9 +119,9 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
         <Image src={imageSrc} alt={title} fill className="object-cover" priority />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
 
-        {/* Association logo — top-left, below navbar */}
+        {/* Association logo — top-right, below navbar */}
         {logoSrc && (
-          <div className="absolute left-3 top-16 flex h-10 w-10 items-center justify-center rounded-xl border border-white/30 bg-white/90 p-1.5 shadow-xl sm:left-8 sm:top-24 sm:h-16 sm:w-16 sm:rounded-2xl sm:p-2">
+          <div className="absolute right-3 top-16 flex h-10 w-10 items-center justify-center rounded-xl border border-white/30 bg-white/90 p-1.5 shadow-xl sm:right-8 sm:top-24 sm:h-16 sm:w-16 sm:rounded-2xl sm:p-2">
             <Image src={logoSrc} alt={organiser} width={48} height={48} className={`h-auto max-h-10 w-auto max-w-10 object-contain sm:max-h-12 sm:max-w-12 ${invertLogo ? 'brightness-0' : ''}`} />
           </div>
         )}
@@ -137,9 +137,12 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
             <h1 className="mt-4 max-w-3xl text-[2rem] font-bold leading-[0.95] tracking-[-0.04em] text-white sm:text-[3rem] lg:text-[4rem]">
               {title}
             </h1>
-            {/* Mobile: Who's going overlay */}
+            {/* Mobile: Who's going overlay. inline-block (not inline-flex)
+                so the dark card shrink-wraps to its content height; the
+                empty-state placeholder is gone so the card is now just
+                the button (and avatars row, when there are attendees). */}
             <div className="mt-4 lg:hidden">
-              <div className="inline-flex items-center gap-3 rounded-2xl border border-white/20 bg-black/40 px-4 py-3 backdrop-blur-md">
+              <div className="inline-block rounded-2xl bg-black/35 px-4 py-3 backdrop-blur-md">
                 <AttendeeAvatars eventId={event.id} />
               </div>
             </div>

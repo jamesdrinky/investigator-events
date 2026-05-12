@@ -139,15 +139,9 @@ export function AttendeeAvatars({ eventId }: { eventId: string }) {
         </div>
       )}
 
-      {shown.length === 0 && !isGoing && (
-        <div className="mt-3 flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
-          <div className="flex -space-x-1">
-            <div className="h-6 w-6 rounded-full border-2 border-white bg-slate-200" />
-            <div className="h-6 w-6 rounded-full border-2 border-white bg-slate-200" />
-          </div>
-          <p className="text-xs text-slate-500">Mark yourself as going to see who else is attending</p>
-        </div>
-      )}
+      {/* Empty-state placeholder removed — the 'I'm going' button is the
+          call to action. The grey-circles + repeat-the-button-copy
+          placeholder felt redundant and noisy. */}
 
       {/* Expanded attendee list */}
       {showAll && attendees.length > 0 && (

@@ -71,6 +71,28 @@ export function Navbar() {
   const [loadingNotifs, setLoadingNotifs] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
+
+  // Measure the navbar's actual rendered height and write to the CSS var
+  // so [data-app-content]'s padding-top tracks the navbar exactly. The
+  // static 3.25rem guess wasn't enough on Dynamic Island devices where
+  // the safe-area inset + logo + icon row totals more.
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const setVar = () => {
+      const h = el.getBoundingClientRect().height;
+      document.documentElement.style.setProperty('--app-header-height', `${Math.ceil(h)}px`);
+    };
+    setVar();
+    const ro = new ResizeObserver(setVar);
+    ro.observe(el);
+    window.addEventListener('orientationchange', setVar);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('orientationchange', setVar);
+    };
+  }, []);
   const isDark = DARK_ROUTES.includes(pathname);
 
   useEffect(() => {
@@ -183,7 +205,7 @@ export function Navbar() {
 
   return (
     <>
-      <header data-mobile-header className={`fixed inset-x-0 top-0 z-[110] shrink-0 border-b backdrop-blur-md sm:backdrop-blur-xl lg:sticky ${isDark ? 'border-white/[0.06] bg-[#080f1e]/90' : 'border-slate-200/70 bg-white/92 sm:bg-white/88'}`} style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+      <header ref={headerRef} data-mobile-header className={`fixed inset-x-0 top-0 z-[110] shrink-0 border-b backdrop-blur-md sm:backdrop-blur-xl lg:sticky ${isDark ? 'border-white/[0.06] bg-[#080f1e]/90' : 'border-slate-200/70 bg-white/92 sm:bg-white/88'}`} style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
         <div className="mx-auto flex min-h-[3.25rem] max-w-7xl items-center gap-2 px-4 py-1.5 sm:min-h-[4rem] sm:gap-2 sm:px-5 md:min-h-[4.75rem] md:gap-3 md:py-0 lg:px-6">
           {/* Logo */}
           <Link href="/" onClick={() => handleNavigation('/')} className="group flex shrink-0 items-center gap-2.5 sm:gap-3">

@@ -34,7 +34,10 @@ html, body { overscroll-behavior: none; overflow-x: hidden; }
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding-top: var(--app-header-height);
+    /* +8px breathing room so content starts just below the navbar, not
+       flush against it. The variable is overridden at runtime by the
+       Navbar's ResizeObserver to match the navbar's actual height. */
+    padding-top: calc(var(--app-header-height) + 8px);
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: none;
     overscroll-behavior-x: none;

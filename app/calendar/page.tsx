@@ -52,10 +52,13 @@ export default async function CalendarPage({
           <div className="sm:hidden">
             <div className="flex items-center justify-between">
               <h1 className="text-xl font-bold text-slate-950">Events</h1>
-              <div className="flex items-center gap-3 text-xs text-slate-500">
-                <span className="font-bold text-blue-600">{upcomingCount}</span> upcoming
-                <span className="font-bold text-violet-600">{coverage.totalCountries}</span> countries
-              </div>
+              <a href="/submit-event" className="inline-flex items-center gap-1 rounded-full bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm transition active:scale-95">
+                + Submit
+              </a>
+            </div>
+            <div className="mt-2 flex items-center gap-3 text-xs text-slate-500">
+              <span><span className="font-bold text-blue-600">{upcomingCount}</span> upcoming</span>
+              <span><span className="font-bold text-violet-600">{coverage.totalCountries}</span> countries</span>
             </div>
           </div>
 

@@ -3,10 +3,12 @@ import { SubmitEventForm } from '@/components/submit/submit-event-form';
 import { submitEventAction } from '@/app/submit-event/actions';
 import { eventCountries, eventRegions } from '@/lib/forms/event-form-options';
 import { createSignedFormState } from '@/lib/security/server';
+import { associationRecords } from '@/lib/data/associations';
 
 export const dynamic = 'force-dynamic';
 
 const categories = ['Conference', 'Training', 'Association Meeting', 'Seminar', 'Expo', 'Summit'];
+const associationShortNames = associationRecords.map((r) => r.shortName).sort();
 const scopes = [
   { value: 'main', label: 'Major Event' },
   { value: 'secondary', label: 'Additional Listing' }
@@ -71,6 +73,7 @@ export default function SubmitEventPage({
               scopes={scopes}
               regions={eventRegions}
               countries={eventCountries}
+              associations={associationShortNames}
               isSuccess={isSuccess}
               isError={isError}
             />

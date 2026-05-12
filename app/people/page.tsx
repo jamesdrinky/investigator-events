@@ -186,13 +186,6 @@ function PeoplePageInner() {
             </button>
             <button
               type="button"
-              onClick={() => setTab('lfg')}
-              className={`flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1.5 text-[11px] font-semibold transition sm:gap-1.5 sm:px-5 sm:py-2 sm:text-sm ${tab === 'lfg' ? 'bg-blue-600 text-white shadow' : 'text-slate-500 hover:text-slate-700'}`}
-            >
-              Referrals
-            </button>
-            <button
-              type="button"
               onClick={() => setTab('discover')}
               className={`flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1.5 text-[11px] font-semibold transition sm:gap-1.5 sm:px-5 sm:py-2 sm:text-sm ${tab === 'discover' ? 'bg-blue-600 text-white shadow' : 'text-slate-500 hover:text-slate-700'}`}
             >

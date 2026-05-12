@@ -41,9 +41,21 @@ export function ConnectionButton({ targetUserId }: { targetUserId: string }) {
     const supabase = createSupabaseBrowserClient();
 
     if (status === 'none') {
-      const { error: insertErr } = await supabase.from('connections').insert({ requester_id: userId, addressee_id: targetUserId, status: 'pending' });
+      // If the target already follows me (i.e., they reached out first),
+      // a 'connect back' should land as an immediate connection — not a
+      // fresh pending request the other side has to accept a second time.
+      const { data: theyFollowMe } = await supabase
+        .from('followers')
+        .select('id')
+        .eq('follower_id', targetUserId)
+        .eq('following_id', userId)
+        .maybeSingle();
+      const initialStatus = theyFollowMe ? 'accepted' : 'pending';
+
+      const { error: insertErr } = await supabase.from('connections').insert({ requester_id: userId, addressee_id: targetUserId, status: initialStatus });
       if (!insertErr) {
-        setStatus('pending-sent');
+        setStatus(initialStatus === 'accepted' ? 'connected' : 'pending-sent');
+        if (initialStatus === 'accepted') setShowMessagePrompt(true);
         const { data: myProfile } = await supabase.from('profiles').select('full_name, username').eq('id', userId).single();
         fetch('/api/notifications', {
           method: 'POST',
@@ -51,9 +63,11 @@ export function ConnectionButton({ targetUserId }: { targetUserId: string }) {
           body: JSON.stringify({
             userId: targetUserId,
             actorId: userId,
-            type: 'connection_request',
-            title: `${myProfile?.full_name ?? 'Someone'} wants to connect`,
-            body: 'You have a new connection request.',
+            type: initialStatus === 'accepted' ? 'connection_accepted' : 'connection_request',
+            title: initialStatus === 'accepted'
+              ? `${myProfile?.full_name ?? 'Someone'} connected with you`
+              : `${myProfile?.full_name ?? 'Someone'} wants to connect`,
+            body: initialStatus === 'accepted' ? undefined : 'You have a new connection request.',
             link: myProfile?.username ? `/profile/${myProfile.username}` : '/people?tab=discover',
           }),
         }).catch(() => {});

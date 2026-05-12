@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Home, Calendar, Users, User, MessageCircle } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { hapticTap } from '@/lib/capacitor';
+import { useCurrentUser } from '@/lib/hooks/use-current-user';
 
 const tabs = [
   { href: '/', icon: Home, label: 'Home', badge: false },
@@ -31,6 +32,11 @@ export function BottomTabBar() {
   const navRef = useRef<HTMLElement>(null);
   const [profilePath, setProfilePath] = useState('/signin');
   const [unreadCount, setUnreadCount] = useState(0);
+
+  // Prime the module-level user cache as early as possible — BottomTabBar
+  // mounts at the layout level, so by the time /calendar's event cards
+  // mount their 'Going?' buttons can read from cache synchronously.
+  useCurrentUser();
 
   // Sync the actual rendered tab bar height into a CSS variable so the
   // main scroll container's bottom padding always matches reality

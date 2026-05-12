@@ -220,7 +220,7 @@ export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past,
         <div className="container-shell py-12 sm:py-16">
           <p className="eyebrow">Directory</p>
           <h2 className="section-title !mt-3">Members on Investigator Events</h2>
-          <p className="section-copy max-w-xl">Investigators who have added {page.name} to their profile. Verified members have confirmed their membership with a code.</p>
+          <p className="section-copy max-w-xl">Investigators who have added {page.name} to their profile. The green verified badge means the user has confirmed their identity (via LinkedIn or platform admin).</p>
 
           {members.length > 0 ? (
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

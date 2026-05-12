@@ -7,7 +7,7 @@ import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import type { EventSubmissionInsert } from '@/lib/data/event-submissions';
 import { eventRegions } from '@/lib/forms/event-form-options';
 import { assertSameOriginRequest, enforceRateLimit, verifySignedFormState } from '@/lib/security/server';
-import { normalizeRequiredUrl } from '@/lib/utils/url';
+import { normalizeRequiredUrl, normalizeOptionalUrl } from '@/lib/utils/url';
 import { buildSubmissionConfirmationEmail } from '@/lib/email/submission-confirmation';
 
 const categories = new Set(['Conference', 'Training', 'Association Meeting', 'Seminar', 'Expo', 'Summit']);
@@ -86,7 +86,7 @@ function parseSubmissionData(formData: FormData): Omit<EventSubmissionInsert, 'i
   const country = parseRequired(formData, 'country', 120);
   const startDate = parseDateValue(formData, 'startDate');
   const category = parseRequired(formData, 'category', 60);
-  const website = normalizeRequiredUrl(parseRequired(formData, 'website', 300));
+  const website = normalizeOptionalUrl(parseOptional(formData, 'website', 300)) ?? '';
   const contactEmail = parseEmail(formData, 'contactEmail');
   const eventScopeRaw = parseRequired(formData, 'eventScope', 20);
   const endDate = parseDateValue(formData, 'endDate', false);

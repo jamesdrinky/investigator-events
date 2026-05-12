@@ -38,20 +38,28 @@ const sections = [
     ]
   },
   {
-    heading: '5. Verified Association Badges',
+    heading: '5. Verification badges and association memberships',
     body: null,
     subsections: [
       {
-        title: 'What badges mean',
-        text: 'Verified Association Member badges indicate that a professional association has confirmed the user as a current member. Badges are granted exclusively through our association partnerships and are controlled by the relevant association. We do not sell badges to individuals.'
+        title: 'What "verified" means on the Platform',
+        text: 'A verified badge on a user\'s profile indicates one of two things: (a) the user signed in via LinkedIn OAuth, which confirms control of the LinkedIn account associated with the name and photo shown, or (b) an Investigator Events administrator has manually confirmed the user\'s identity through a documentary check. It does NOT confirm that the user is licensed, insured, qualified, or in good standing with any professional body.'
       },
       {
-        title: 'What badges do not mean',
-        text: 'A verified badge confirms association membership only. It is not an endorsement by Investigator Events of the user\'s competence, integrity, or suitability for any particular engagement. The absence of a badge does not indicate that a user is unqualified or untrustworthy.'
+        title: 'Association memberships are self-reported',
+        text: 'Users add their own association memberships to their profile. Investigator Events does not independently verify these claims with the associations themselves. A user displayed as a member of an association, whether marked as "verified" or not, has self-declared that membership. You must not rely on a displayed association membership as proof of current standing — confirm directly with the association if it matters to you.'
       },
       {
-        title: 'Badge accuracy',
-        text: 'We rely on information provided by partner associations to issue and revoke badges. While we make reasonable efforts to keep badge status current, we do not independently verify the standing of individual members and accept no liability for inaccurate or outdated badge status.'
+        title: 'Optional formal association verification',
+        text: 'Where an association partners with Investigator Events to issue verification codes, those formally verified members may carry an additional indicator. The presence or absence of formal verification does not change the user\'s right to claim membership on their profile, and we make no representation that any displayed claim has been corroborated by the association.'
+      },
+      {
+        title: 'What badges do NOT mean',
+        text: 'No badge on the Platform is an endorsement by Investigator Events of any user\'s competence, integrity, ethics, fitness for any specific engagement, professional licensing, or current standing with any regulator. The absence of a badge does not indicate that a user is unqualified or untrustworthy. Users acting on information found on a profile do so entirely at their own risk and must conduct independent due diligence.'
+      },
+      {
+        title: 'No liability for badge or membership accuracy',
+        text: 'To the maximum extent permitted by law, Investigator Events and Conflict International accept no liability whatsoever for any inaccuracy, omission, or misrepresentation in a user\'s profile, claimed association memberships, badges, or any other displayed credential — whether self-reported, derived from third-party OAuth (e.g. LinkedIn), or administratively assigned. Your reliance on any such information is solely at your own risk.'
       }
     ]
   },

@@ -40,7 +40,7 @@ export default async function AssociationPage({ params }: { params: { slug: stri
     fetchAllEvents(),
     supabase
       .from('user_associations')
-      .select('user_id, role, member_since, profiles:user_id(full_name, avatar_url, username, specialisation, headline, country, profile_color)')
+      .select('user_id, role, member_since, profiles:user_id(full_name, avatar_url, username, specialisation, headline, country, profile_color, auth_provider, is_verified)')
       .or(orFilter)
       .limit(50),
     supabase
@@ -100,7 +100,17 @@ export default async function AssociationPage({ params }: { params: { slug: stri
       formattedDate: formatEventDate(e),
     }));
 
-  const verifiedSet = new Set((verifiedRows ?? []).map((v: any) => v.user_id));
+  // Profile-level verified users (LinkedIn OAuth OR admin-toggled) are
+  // auto-verified for every association they've claimed. Code-based
+  // member verifications still count too, so the table stays as a
+  // legacy / formal-verification option.
+  const legacyVerifiedIds = new Set((verifiedRows ?? []).map((v: any) => v.user_id));
+  const profileLevelVerifiedIds = new Set(
+    (memberRows ?? [])
+      .filter((m: any) => m.profiles?.auth_provider === 'linkedin_oidc' || m.profiles?.is_verified === true)
+      .map((m: any) => m.user_id)
+  );
+  const verifiedSet = new Set([...legacyVerifiedIds, ...profileLevelVerifiedIds]);
   const memberUserIds = new Set((memberRows ?? []).map((m: any) => m.user_id));
   const missingVerifiedIds = (verifiedRows ?? [])
     .filter((v: any) => !memberUserIds.has(v.user_id))

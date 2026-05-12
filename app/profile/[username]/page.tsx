@@ -83,7 +83,16 @@ export default async function PublicProfilePage({ params }: { params: { username
   const { data: assocs } = await supabase.from('user_associations').select('*').eq('user_id', profile.id);
   const { data: verifs } = await supabase.from('member_verifications').select('association_name, status, expires_at').eq('user_id', profile.id);
   const activeVerifications = (verifs ?? []).filter((v: any) => v.status === 'verified' && (!v.expires_at || new Date(v.expires_at) > new Date()));
-  const verifiedSet = new Set(activeVerifications.map((v: any) => v.association_name));
+  // Profile-level verification (LinkedIn OAuth OR admin-toggled is_verified)
+  // grants automatic association-verified status for every association
+  // the user has claimed. The legacy code-based verification system stays
+  // intact for users who want to formally verify with an association.
+  const profileLevelVerified = (profile as any).auth_provider === 'linkedin_oidc' || (profile as any).is_verified === true;
+  const verifiedSet = new Set<string>(
+    profileLevelVerified
+      ? (assocs ?? []).map((a: any) => a.association_name)
+      : activeVerifications.map((v: any) => v.association_name)
+  );
   const linkedinName = (profile as any).linkedin_name as string | null;
   const linkedinPicture = (profile as any).linkedin_picture as string | null;
   const linkedinUrl = (profile as any).linkedin_url as string | null;

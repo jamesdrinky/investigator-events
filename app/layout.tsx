@@ -63,7 +63,7 @@ export default function RootLayout({
           <main
             data-app-content
             className="flex-1"
-            style={{ paddingBottom: 'var(--app-bottom-nav-height, 0px)' }}
+            style={{ paddingBottom: 'calc(var(--app-bottom-nav-height, 0px) + 24px)' }}
           ><PageTransition>{children}</PageTransition></main>
           <Footer className="hidden lg:block" />
         </div>

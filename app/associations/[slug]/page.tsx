@@ -40,9 +40,9 @@ export default async function AssociationPage({ params }: { params: { slug: stri
     fetchAllEvents(),
     supabase
       .from('user_associations')
-      .select('user_id, role, member_since, profiles:user_id(full_name, avatar_url, username, specialisation, headline, country, profile_color, auth_provider, is_verified)')
+      .select('user_id, role, member_since')
       .or(orFilter)
-      .limit(50),
+      .limit(100),
     supabase
       .from('member_verifications' as any)
       .select('user_id, status')
@@ -152,12 +152,10 @@ export default async function AssociationPage({ params }: { params: { slug: stri
   const totalMemberCount = (memberCount ?? 0) + missingVerifiedIds.length;
 
   const members = allMemberRows.map((m: any) => {
-    // Use the separately-fetched profileFlagsMap as the source of truth
-    // for profile data — the embedded m.profiles join is unreliable
-    // because of the missing FK. extraMembers (verified-only with no
-    // user_associations row) already carry their profile inline.
-    const flagProfile = profileFlagsMap.get(m.user_id);
-    const p = flagProfile ?? m.profiles ?? null;
+    // Source of truth: separately-fetched profileFlagsMap. extraMembers
+    // (verified-only with no user_associations row) carry their profile
+    // inline via m.profiles.
+    const p = profileFlagsMap.get(m.user_id) ?? m.profiles ?? null;
     return {
     user_id: m.user_id,
     role: m.role,

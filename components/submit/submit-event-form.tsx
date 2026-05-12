@@ -268,7 +268,7 @@ export function SubmitEventForm({
           {/* Website */}
           <div className="flex items-center gap-3 rounded-[1.2rem] border border-slate-200/60 bg-white px-4 py-3 transition-colors hover:border-slate-300">
             <Globe className="h-4 w-4 flex-shrink-0 text-slate-400" />
-            <input type="text" name="website" inputMode="url" placeholder="Event website (optional, e.g. example.com)" className="min-h-10 min-w-0 flex-1 border-0 bg-transparent text-[16px] text-slate-900 placeholder:text-slate-400 focus:outline-none sm:text-sm" />
+            <input type="text" name="website" required inputMode="url" placeholder="Event website (e.g. example.com)" className="min-h-10 min-w-0 flex-1 border-0 bg-transparent text-[16px] text-slate-900 placeholder:text-slate-400 focus:outline-none sm:text-sm" />
           </div>
 
           {/* Video URL (optional) */}

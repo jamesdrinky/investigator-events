@@ -12,6 +12,9 @@ export interface ProfileCompletionFields {
   hasExperience?: boolean;
 }
 
+// Profile completion items. Weights sum to 100 so the percentage maps
+// cleanly. Website intentionally not in the list — it's available on
+// /profile/edit as an optional field but doesn't count toward 100%.
 export const PROFILE_COMPLETION_ITEMS = [
   { key: 'full_name', label: 'Full name', weight: 15 },
   { key: 'avatar_url', label: 'Profile photo', weight: 15 },
@@ -19,8 +22,7 @@ export const PROFILE_COMPLETION_ITEMS = [
   { key: 'country', label: 'Country', weight: 10 },
   { key: 'specialisation', label: 'Specialisation', weight: 10 },
   { key: 'bio', label: 'About / Bio', weight: 10 },
-  { key: 'website', label: 'Website', weight: 5 },
-  { key: 'banner_url', label: 'Banner image', weight: 5 },
+  { key: 'banner_url', label: 'Banner image', weight: 10 },
   { key: 'auth_provider', label: 'LinkedIn verified', weight: 5 },
   { key: 'hasAssociations', label: 'Association membership', weight: 5 },
   { key: 'hasExperience', label: 'Work experience', weight: 5 },
@@ -38,7 +40,6 @@ export function getProfileCompletion(fields: ProfileCompletionFields) {
       case 'country': completed = !!fields.country?.trim(); break;
       case 'specialisation': completed = !!fields.specialisation?.trim(); break;
       case 'bio': completed = !!fields.bio?.trim(); break;
-      case 'website': completed = !!fields.website?.trim(); break;
       case 'banner_url': completed = !!fields.banner_url; break;
       case 'auth_provider': completed = fields.auth_provider === 'linkedin_oidc'; break;
       case 'hasAssociations': completed = !!fields.hasAssociations; break;

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { Home, Calendar, Users, User, MessageCircle } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { hapticTap } from '@/lib/capacitor';
@@ -103,15 +104,16 @@ export function BottomTabBar() {
           const showBadge = tab.badge && unreadCount > 0;
 
           return (
-            <button
+            <Link
               key={tab.label}
-              type="button"
-              onClick={() => {
+              href={href as any}
+              prefetch
+              onClick={(e) => {
                 hapticTap();
                 if (active) {
+                  // Same-tab tap: scroll to top instead of re-navigating
+                  e.preventDefault();
                   scrollAppContentToTop('smooth');
-                } else {
-                  router.push(href as any);
                 }
               }}
               style={{ touchAction: 'manipulation' }}
@@ -134,7 +136,7 @@ export function BottomTabBar() {
               }`}>
                 {tab.label}
               </span>
-            </button>
+            </Link>
           );
         })}
       </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, MouseEvent } from 'react';
+import { useEffect, useRef, useState, MouseEvent } from 'react';
 import { Check, Plus } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { UserAvatar } from '@/components/UserAvatar';
@@ -16,7 +16,31 @@ export function EventCardAttendees({ eventId }: { eventId: string }) {
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
 
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const [hasFetched, setHasFetched] = useState(false);
+
+  // Lazy fetch — only run the 4 queries when this card scrolls into view.
+  // Was 4x queries x ~45 cards = ~180 Supabase round-trips on every
+  // calendar page load, which made the page feel choppy.
   useEffect(() => {
+    if (hasFetched) return;
+    const el = rootRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setHasFetched(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: '200px' } // start fetching slightly before they hit the viewport
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hasFetched]);
+
+  useEffect(() => {
+    if (!hasFetched) return;
     const supabase = createSupabaseBrowserClient();
 
     supabase.auth.getUser().then(({ data }) => {
@@ -43,14 +67,14 @@ export function EventCardAttendees({ eventId }: { eventId: string }) {
         setAttendees(rows);
         setTotal(count ?? rows.length);
       });
-  }, [eventId]);
+  }, [eventId, hasFetched]);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || !hasFetched) return;
     const supabase = createSupabaseBrowserClient();
     supabase.from('event_attendees').select('id').eq('event_id', eventId).eq('user_id', userId).eq('is_going', true).maybeSingle()
       .then(({ data }) => setIsGoing(!!data));
-  }, [userId, eventId]);
+  }, [userId, eventId, hasFetched]);
 
   const toggle = async (e: MouseEvent) => {
     e.preventDefault(); // Don't navigate to event page
@@ -74,7 +98,7 @@ export function EventCardAttendees({ eventId }: { eventId: string }) {
   };
 
   return (
-    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+    <div ref={rootRef} className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
       {/* Attendee avatars */}
       {total > 0 && (
         <div className="flex items-center gap-1">

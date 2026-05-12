@@ -111,11 +111,10 @@ export function BottomTabBar() {
                 if (active) {
                   scrollAppContentToTop('smooth');
                 } else {
-                  scrollAppContentToTop('auto');
                   router.push(href as any);
-                  requestAnimationFrame(() => scrollAppContentToTop('auto'));
                 }
               }}
+              style={{ touchAction: 'manipulation' }}
               className={`flex flex-1 flex-col items-center gap-0.5 py-2 transition-colors ${
                 active ? 'text-blue-600' : 'text-slate-400'
               }`}

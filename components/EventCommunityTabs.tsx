@@ -43,8 +43,9 @@ export function EventCommunityTabs({ eventId, isPast }: { eventId: string; isPas
         })}
       </div>
 
-      {/* Tab content */}
-      <div>
+      {/* Tab content — reserve min height so chat/reviews loading
+          doesn't shift the rest of the page upwards as you scroll past. */}
+      <div className="min-h-[420px]">
         {active === 'discussion' && <EventChat eventId={eventId} />}
         {active === 'reviews' && (
           <div className="p-4 sm:p-6">

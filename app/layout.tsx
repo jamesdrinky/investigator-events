@@ -60,7 +60,11 @@ export default function RootLayout({
         <div data-app-shell className="relative flex min-h-screen flex-col">
           <TopLoadingBar />
           <Navbar />
-          <main data-app-content className="flex-1 pb-[var(--app-bottom-nav-height,0px)]"><PageTransition>{children}</PageTransition></main>
+          <main
+            data-app-content
+            className="flex-1"
+            style={{ paddingBottom: 'var(--app-bottom-nav-height, 0px)' }}
+          ><PageTransition>{children}</PageTransition></main>
           <Footer className="hidden lg:block" />
         </div>
         <MobileBackButton />

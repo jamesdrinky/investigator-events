@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Calendar, MapPin, ShieldCheck, Star, Globe, ExternalLink, Users, Pencil, ArrowRight, MessageCircle, Briefcase } from 'lucide-react';
 import { createSupabaseSSRServerClient } from '@/lib/supabase/ssr-server';
+import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { getCountryFlag } from '@/lib/utils/location';
 import { UserAvatar } from '@/components/UserAvatar';
 import { ExpandableText } from '@/components/ExpandableText';
@@ -121,11 +122,21 @@ export default async function PublicProfilePage({ params }: { params: { username
   const hasReviews = (reviewRows ?? []).length > 0;
   const hasExperience = (experienceRows ?? []).length > 0;
 
-  // Check newsletter subscription (for profile completion)
+  // Check newsletter subscription (for profile completion).
+  // Use the admin client so RLS can never silently hide the row — this is
+  // a self-check on the user's own subscription, no privacy risk. Also use
+  // ilike for case-insensitive match in case auth and newsletter rows
+  // disagree on email casing.
   const userEmail = user?.email;
   let isNewsletterSubscribed = false;
   if (isOwner && userEmail) {
-    const { data: sub } = await supabase.from('newsletter_subscribers' as any).select('id, status').eq('email', userEmail.toLowerCase()).maybeSingle() as any;
+    const adminClient = createSupabaseAdminServerClient();
+    const { data: sub } = await (adminClient
+      .from('newsletter_subscribers' as any)
+      .select('id, status')
+      .ilike('email', userEmail.trim())
+      .in('status', ['active', 'pending'])
+      .maybeSingle() as any);
     isNewsletterSubscribed = !!sub;
   }
 

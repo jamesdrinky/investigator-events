@@ -36,12 +36,11 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
-	<key>UISupportedInterfaceOrientations~ipad</key>
+	<!-- iPhone only (UIDeviceFamily = 1). iPad is not supported in v1; we'll
+	     add proper iPad layouts in a later release. -->
+	<key>UIDeviceFamily</key>
 	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
+		<integer>1</integer>
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>

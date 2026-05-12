@@ -100,16 +100,34 @@ export default async function AssociationPage({ params }: { params: { slug: stri
       formattedDate: formatEventDate(e),
     }));
 
+  // PostgREST can't reliably resolve the user_associations -> profiles
+  // embedded join (the FK on user_associations.user_id points at
+  // auth.users.id, not profiles.id). Fetch the auth_provider /
+  // is_verified flags as a separate query keyed by user id, then merge.
+  const allMemberIds = (memberRows ?? []).map((m: any) => m.user_id);
+  const profileFlagsMap = new Map<string, { auth_provider: string | null; is_verified: boolean | null; full_name: string | null; avatar_url: string | null; username: string | null; specialisation: string | null; headline: string | null; country: string | null; profile_color: string | null }>();
+  if (allMemberIds.length > 0) {
+    const { data: profileFlags } = await supabase
+      .from('profiles')
+      .select('id, full_name, avatar_url, username, specialisation, headline, country, profile_color, auth_provider, is_verified')
+      .in('id', allMemberIds);
+    for (const p of (profileFlags ?? []) as any[]) {
+      profileFlagsMap.set(p.id, p);
+    }
+  }
+
   // Profile-level verified users (LinkedIn OAuth OR admin-toggled) are
   // auto-verified for every association they've claimed. Code-based
   // member verifications still count too, so the table stays as a
   // legacy / formal-verification option.
   const legacyVerifiedIds = new Set((verifiedRows ?? []).map((v: any) => v.user_id));
-  const profileLevelVerifiedIds = new Set(
-    (memberRows ?? [])
-      .filter((m: any) => m.profiles?.auth_provider === 'linkedin_oidc' || m.profiles?.is_verified === true)
-      .map((m: any) => m.user_id)
-  );
+  const profileLevelVerifiedIds = new Set<string>();
+  for (const m of (memberRows ?? []) as any[]) {
+    const p = profileFlagsMap.get(m.user_id);
+    if (p && (p.auth_provider === 'linkedin_oidc' || p.is_verified === true)) {
+      profileLevelVerifiedIds.add(m.user_id);
+    }
+  }
   const verifiedSet = new Set([...legacyVerifiedIds, ...profileLevelVerifiedIds]);
   const memberUserIds = new Set((memberRows ?? []).map((m: any) => m.user_id));
   const missingVerifiedIds = (verifiedRows ?? [])
@@ -133,21 +151,29 @@ export default async function AssociationPage({ params }: { params: { slug: stri
   const allMemberRows = [...(memberRows ?? []), ...extraMembers];
   const totalMemberCount = (memberCount ?? 0) + missingVerifiedIds.length;
 
-  const members = allMemberRows.map((m: any) => ({
+  const members = allMemberRows.map((m: any) => {
+    // Use the separately-fetched profileFlagsMap as the source of truth
+    // for profile data — the embedded m.profiles join is unreliable
+    // because of the missing FK. extraMembers (verified-only with no
+    // user_associations row) already carry their profile inline.
+    const flagProfile = profileFlagsMap.get(m.user_id);
+    const p = flagProfile ?? m.profiles ?? null;
+    return {
     user_id: m.user_id,
     role: m.role,
     member_since: m.member_since,
-    profile: m.profiles ? {
-      full_name: m.profiles.full_name,
-      avatar_url: m.profiles.avatar_url,
-      username: m.profiles.username,
-      specialisation: m.profiles.specialisation,
-      headline: m.profiles.headline,
-      country: m.profiles.country,
-      profile_color: m.profiles.profile_color,
+    profile: p ? {
+      full_name: p.full_name,
+      avatar_url: p.avatar_url,
+      username: p.username,
+      specialisation: p.specialisation,
+      headline: p.headline,
+      country: p.country,
+      profile_color: p.profile_color,
     } : null,
     isVerified: verifiedSet.has(m.user_id),
-  }));
+    };
+  });
 
   // Sort: verified first
   members.sort((a, b) => (a.isVerified === b.isVerified ? 0 : a.isVerified ? -1 : 1));

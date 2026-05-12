@@ -113,9 +113,10 @@ function MonthEventStrip({ events, label, countryCount }: { events: EventItem[];
               className="group flex-shrink-0 w-[17rem] overflow-hidden rounded-2xl border border-slate-200/60 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_-12px_rgba(59,130,246,0.15)] sm:w-[19rem]"
               style={{ scrollSnapAlign: 'start' }}
             >
-              {/* Image with logo */}
-              <div className="relative h-40 w-full overflow-hidden sm:h-44">
-                <Image src={imageSrc} alt={event.title} fill className="object-cover transition-transform duration-500 group-hover:scale-105" />
+              {/* Image with logo. bg-slate-100 placeholder removes the
+                  white flash before the Next/Image lazy-loads. */}
+              <div className="relative h-40 w-full overflow-hidden bg-slate-100 sm:h-44">
+                <Image src={imageSrc} alt={event.title} fill sizes="(max-width: 768px) 80vw, 19rem" className="object-cover transition-transform duration-500 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
                 {/* Association logo — top-left */}

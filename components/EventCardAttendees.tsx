@@ -33,7 +33,11 @@ export function EventCardAttendees({ eventId }: { eventId: string }) {
           io.disconnect();
         }
       },
-      { rootMargin: '200px' } // start fetching slightly before they hit the viewport
+      // Load attendee data well ahead of the viewport so the row is
+      // populated by the time a fast scroller reaches it (was 200px;
+      // that wasn't enough to outrun a flick scroll on a calendar
+      // with 45+ cards).
+      { rootMargin: '1500px 0px' }
     );
     io.observe(el);
     return () => io.disconnect();
@@ -98,7 +102,9 @@ export function EventCardAttendees({ eventId }: { eventId: string }) {
   };
 
   return (
-    <div ref={rootRef} className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+    // min-h reserves the row height so the card layout doesn't shift
+    // when attendee data + going button populate after the lazy fetch.
+    <div ref={rootRef} className="flex min-h-[32px] items-center gap-2" onClick={(e) => e.stopPropagation()}>
       {/* Attendee avatars */}
       {total > 0 && (
         <div className="flex items-center gap-1">

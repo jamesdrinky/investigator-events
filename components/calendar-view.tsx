@@ -96,14 +96,15 @@ function MonthEventStrip({ events, label, countryCount }: { events: EventItem[];
         </div>
       </div>
 
-      {/* Horizontal scroll per month on every viewport. snap-x to give a
-          tactile 'swipe-to-next-card' feel and stop scroll fighting the
-          page's vertical scroll — touch-action:pan-x tells the browser
-          this row owns horizontal gestures, page owns vertical. */}
+      {/* Horizontal scroll per month on every viewport. touch-action:
+          pan-x pan-y lets ambiguous gestures default to page-vertical
+          (what users want) instead of being trapped horizontally.
+          Snap is 'proximity' not 'mandatory' so the strip doesn't fight
+          a near-vertical scroll by committing to the horizontal axis. */}
       <div
         ref={scrollRef}
         className="flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden"
-        style={{ scrollSnapType: 'x mandatory', touchAction: 'pan-x' }}
+        style={{ scrollSnapType: 'x proximity', touchAction: 'pan-x pan-y' }}
       >
         {events.map((event) => {
           const logoSrc = getAssociationBrandLogoSrc(event.association ?? event.organiser);
@@ -176,7 +177,9 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
   });
   const calRef = useRef<HTMLElement | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
-  const [visibleMonths, setVisibleMonths] = useState(3);
+  // Render a year of months upfront so the user can scroll smoothly without
+  // hitting an obvious roadblock at month 3. Lazy load kicks in past 12.
+  const [visibleMonths, setVisibleMonths] = useState(12);
 
   const regions = useMemo(() => {
     const f = filters.country === 'All' ? sorted : sorted.filter((e) => e.country === filters.country);
@@ -222,19 +225,21 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
   const empty = filtered.length === 0;
 
   // Reset visible months when month groups change (e.g. filters change)
-  useEffect(() => { setVisibleMonths(3); }, [monthGroups]);
+  useEffect(() => { setVisibleMonths(12); }, [monthGroups]);
 
-  // IntersectionObserver to load more month groups on scroll
+  // IntersectionObserver to load more month groups on scroll. Generous
+  // rootMargin so the next batch is already in the DOM by the time the user
+  // reaches the apparent bottom — no visible roadblock.
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) {
-          setVisibleMonths((prev) => prev + 3);
+          setVisibleMonths((prev) => prev + 6);
         }
       },
-      { rootMargin: '200px' },
+      { rootMargin: '1200px' },
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -289,7 +294,13 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
               </div>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {featured.map((e, i) => (
-                  <motion.div key={e.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2, delay: i * 0.05 }}>
+                  <motion.div
+                    key={e.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.2, delay: i * 0.05 }}
+                    className={i === 2 ? 'hidden sm:block' : ''}
+                  >
                     <EventCard event={e} priority={i === 0 ? 'hero' : 'featured'} />
                   </motion.div>
                 ))}

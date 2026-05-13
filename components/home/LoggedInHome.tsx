@@ -512,7 +512,7 @@ export function LoggedInHome() {
 
         {/* ── Bottom finisher — gives the page a visual close instead of
               trailing off into the tab bar after the last list section. ── */}
-        <div className="mx-auto max-w-6xl px-4 pt-8 pb-4 lg:px-6 lg:pt-12">
+        <div className="mx-auto max-w-6xl px-4 pt-8 pb-10 lg:px-6 lg:pt-12 lg:pb-12">
           <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 px-5 py-6 shadow-[0_20px_60px_-30px_rgba(15,23,42,0.6)] lg:rounded-3xl lg:px-8 lg:py-8">
             <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-blue-500/20 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-16 -left-8 h-44 w-44 rounded-full bg-violet-500/15 blur-3xl" />

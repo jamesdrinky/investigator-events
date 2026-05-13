@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { MessageCircle, Star } from 'lucide-react';
 import { EventChat } from '@/components/EventChat';
 import { EventReview } from '@/components/EventReview';
@@ -14,6 +14,25 @@ type TabId = (typeof tabs)[number]['id'];
 
 export function EventCommunityTabs({ eventId, isPast }: { eventId: string; isPast: boolean }) {
   const [active, setActive] = useState<TabId>('reviews');
+
+  // Native hash anchors don't work because mobile scrolls inside
+  // [data-app-content], not window. Manually scroll the container when the
+  // page loads with #reviews (the "Review past events" home card links here).
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (window.location.hash !== '#reviews') return;
+    const el = document.getElementById('reviews');
+    if (!el) return;
+    const container = document.querySelector<HTMLElement>('[data-app-content]');
+    requestAnimationFrame(() => {
+      if (container) {
+        const top = el.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop - 80;
+        container.scrollTo({ top, behavior: 'smooth' });
+      } else {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  }, []);
 
   return (
     <div id="reviews" className="mt-10 scroll-mt-24 overflow-hidden rounded-2xl border border-slate-200/60 bg-white shadow-sm">

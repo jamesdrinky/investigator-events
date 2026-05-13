@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Calendar, Users, Star, Bell, ChevronRight, MapPin, Bookmark, Search, MessageCircle, Globe, Send, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import type { Route } from 'next';
@@ -82,18 +82,47 @@ function HeroEventCard({ event }: { event: QuickEvent }) {
   const d = new Date(event.start_date);
   const countdown = getCountdown(event.start_date);
   const imageSrc = resolveEventImage(event.image_path, event.slug, event.city);
+  const wrapRef = useRef<HTMLAnchorElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  // Scroll-driven parallax — same pattern as /calendar's FeaturedHero.
+  // Listens to [data-app-content] scroll on mobile, window scroll on desktop.
+  useEffect(() => {
+    const container: HTMLElement | Window = document.querySelector<HTMLElement>('[data-app-content]') ?? window;
+    const update = () => {
+      if (!wrapRef.current || !imgRef.current) return;
+      const rect = wrapRef.current.getBoundingClientRect();
+      const containerHeight = container === window ? window.innerHeight : (container as HTMLElement).clientHeight;
+      const progress = (containerHeight - rect.top) / (containerHeight + rect.height);
+      const clamped = Math.max(0, Math.min(1, progress));
+      const yPercent = -8 + clamped * 16;
+      imgRef.current.style.transform = `translate3d(0, ${yPercent}%, 0) scale(1.18)`;
+    };
+    update();
+    container.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    return () => {
+      container.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+    };
+  }, []);
+
   return (
     <Link
+      ref={wrapRef}
       href={`/events/${event.slug}` as Route}
       className="group relative block overflow-hidden rounded-2xl border border-slate-200/60 bg-gradient-to-br from-slate-100 to-slate-200 shadow-[0_10px_30px_-12px_rgba(15,23,42,0.18)] transition active:scale-[0.99] lg:rounded-3xl"
       style={{ aspectRatio: '16/10' }}
     >
-      <img
-        src={imageSrc}
-        alt=""
-        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
-        onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/cities/fallback.jpg'; }}
-      />
+      <div className="absolute inset-0 overflow-hidden">
+        <img
+          ref={imgRef}
+          src={imageSrc}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover will-change-transform"
+          onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/cities/fallback.jpg'; }}
+        />
+      </div>
       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/35 to-transparent" />
       <div className="absolute inset-0 flex flex-col justify-end p-4 lg:p-5">
         <div className="flex items-center gap-2">
@@ -179,122 +208,104 @@ export function LoggedInHome() {
       setIsLoggedIn(true);
       const uid = data.user.id;
 
-      const [profileRes, goingRes, savedRes, notifRes, msgRes, connRes, eventsRes, assocRes] = await Promise.all([
+      // ONE round-trip for everything we can fetch up-front. Previously this
+      // was three sequential Promise.all batches (8 + 3 + 1 queries) which
+      // serialised three network round-trips on the homepage. Now it's one
+      // round-trip for ten queries, then a single conditional follow-up for
+      // suggested people (which needs assoc names from this batch).
+      // Also: a single event_attendees query — was hit twice before, once
+      // without image_path (so the upcoming hero showed blank for events
+      // missing image_path) and once with — split client-side by date.
+      const todayStr = new Date().toISOString().split('T')[0];
+      const [profileRes, attendeesRes, savedRes, notifRes, msgRes, connRes, eventsRes, userAssocsRes, userReviewsRes] = await Promise.all([
         supabase.from('profiles').select('full_name, avatar_url, username, specialisation, country, bio').eq('id', uid).single(),
         supabase
           .from('event_attendees')
-          .select('event_id, events:event_id(id, title, city, country, start_date, slug, association)')
+          .select('event_id, events:event_id(id, title, city, country, start_date, slug, association, image_path)')
           .eq('user_id', uid)
           .eq('is_going', true)
-          .order('created_at', { ascending: false })
-          .limit(5) as any,
+          .order('created_at', { ascending: false }) as any,
         supabase
           .from('saved_events')
-          .select('event_id, events:event_id(id, title, city, country, start_date, slug, association)')
+          .select('event_id, events:event_id(id, title, city, country, start_date, slug, association, image_path)')
           .eq('user_id', uid)
           .order('created_at', { ascending: false })
           .limit(5) as any,
-        supabase
-          .from('notifications')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', uid)
-          .eq('is_read', false),
-        supabase
-          .from('messages' as any)
-          .select('id', { count: 'exact', head: true })
-          .eq('receiver_id', uid)
-          .eq('is_read', false),
-        supabase
-          .from('connections')
-          .select('id', { count: 'exact', head: true })
-          .or(`requester_id.eq.${uid},addressee_id.eq.${uid}`)
-          .eq('status', 'accepted'),
+        supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', uid).eq('is_read', false),
+        supabase.from('messages' as any).select('id', { count: 'exact', head: true }).eq('receiver_id', uid).eq('is_read', false),
+        supabase.from('connections').select('id', { count: 'exact', head: true }).or(`requester_id.eq.${uid},addressee_id.eq.${uid}`).eq('status', 'accepted'),
         supabase
           .from('events')
           .select('id, title, city, country, start_date, slug, association, image_path')
           .eq('approved', true)
           .eq('event_scope', 'main')
-          .gte('start_date', new Date().toISOString().split('T')[0])
+          .gte('start_date', todayStr)
           .order('start_date', { ascending: true })
           .limit(6),
-        supabase
-          .from('user_associations')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', uid),
+        supabase.from('user_associations').select('association_name, association_slug').eq('user_id', uid),
+        supabase.from('event_reviews').select('event_id').eq('user_id', uid),
       ]);
 
+      // Profile + counts
       setProfile(profileRes.data);
+      setUnreadNotifs(notifRes.count ?? 0);
+      setUnreadMessages(msgRes.count ?? 0);
+      setConnectionCount(connRes.count ?? 0);
+      const userAssocs = (userAssocsRes.data ?? []) as UserAssociation[];
+      setUserAssociations(userAssocs);
+      setAssociationCount(userAssocs.length);
 
-      const goingEvents = (goingRes.data ?? [])
-        .map((r: any) => r.events)
-        .filter(Boolean)
-        .filter((e: any) => new Date(e.start_date) >= new Date());
-      setUpcomingGoing(goingEvents);
+      // Split attendees by date — single query, two derivations
+      const todayMs = Date.now();
+      const allAttending = (attendeesRes.data ?? []).map((r: any) => r.events).filter(Boolean);
+      setUpcomingGoing(allAttending.filter((e: any) => new Date(e.start_date).getTime() >= todayMs).slice(0, 5));
+      const reviewedEventIds = new Set((userReviewsRes.data ?? []).map((r: any) => r.event_id));
+      setPastAttended(
+        allAttending
+          .filter((e: any) => new Date(e.start_date).getTime() < todayMs)
+          .map((e: any) => ({ ...e, hasReview: reviewedEventIds.has(e.id) }))
+          .slice(0, 3),
+      );
 
-      const saved = (savedRes.data ?? [])
-        .map((r: any) => r.events)
-        .filter(Boolean);
-      setSavedEvents(saved);
+      setSavedEvents((savedRes.data ?? []).map((r: any) => r.events).filter(Boolean));
 
+      // Upcoming events — fall back without scope filter only if main returns 0
       const upcoming = (eventsRes.data ?? []) as QuickEvent[];
       if (upcoming.length === 0 && !eventsRes.error) {
-        // Fallback: try without event_scope filter
         const { data: fallback } = await supabase
           .from('events')
           .select('id, title, city, country, start_date, slug, association, image_path')
           .eq('approved', true)
-          .gte('start_date', new Date().toISOString().split('T')[0])
+          .gte('start_date', todayStr)
           .order('start_date', { ascending: true })
           .limit(6);
         setUpcomingAll((fallback ?? []) as QuickEvent[]);
       } else {
         setUpcomingAll(upcoming);
       }
-      setUnreadNotifs(notifRes.count ?? 0);
-      setUnreadMessages(msgRes.count ?? 0);
-      setConnectionCount(connRes.count ?? 0);
-      setAssociationCount(assocRes.count ?? 0);
 
-      // Fetch user associations + past attended events (for review prompts)
-      const [userAssocsRes, pastGoingRes, userReviewsRes] = await Promise.all([
-        supabase.from('user_associations').select('association_name, association_slug').eq('user_id', uid),
-        supabase
-          .from('event_attendees')
-          .select('event_id, events:event_id(id, title, city, country, start_date, slug, association, image_path)')
-          .eq('user_id', uid)
-          .eq('is_going', true) as any,
-        supabase.from('event_reviews').select('event_id').eq('user_id', uid),
-      ]);
+      setLoading(false);
 
-      setUserAssociations((userAssocsRes.data ?? []) as UserAssociation[]);
-
-      const reviewedEventIds = new Set((userReviewsRes.data ?? []).map((r: any) => r.event_id));
-      const pastEvents = (pastGoingRes.data ?? [])
-        .map((r: any) => r.events)
-        .filter(Boolean)
-        .filter((e: any) => new Date(e.start_date) < new Date())
-        .map((e: any) => ({ ...e, hasReview: reviewedEventIds.has(e.id) }))
-        .slice(0, 3);
-      setPastAttended(pastEvents);
-
-      // Suggested people — same associations
-      const assocNames = (userAssocsRes.data ?? []).map((a: any) => a.association_name);
+      // Conditional follow-up: suggested people from user's associations.
+      // Deferred AFTER setLoading(false) so the page renders immediately and
+      // this section pops in once it arrives — doesn't block first paint.
+      const assocNames = userAssocs.map((a) => a.association_name);
       if (assocNames.length > 0) {
-        const { data: assocMembers } = await supabase
+        supabase
           .from('user_associations')
           .select('user_id, profiles:user_id(id, full_name, avatar_url, username, specialisation)')
           .in('association_name', assocNames)
           .neq('user_id', uid)
-          .limit(20) as any;
-        const seen = new Set<string>();
-        const people = (assocMembers ?? [])
-          .map((r: any) => r.profiles)
-          .filter((p: any) => p && p.full_name && !seen.has(p.id) && (seen.add(p.id), true))
-          .slice(0, 4);
-        setSuggestedPeople(people);
+          .limit(20)
+          .then(({ data: assocMembers }: any) => {
+            const seen = new Set<string>();
+            const people = (assocMembers ?? [])
+              .map((r: any) => r.profiles)
+              .filter((p: any) => p && p.full_name && !seen.has(p.id) && (seen.add(p.id), true))
+              .slice(0, 4);
+            setSuggestedPeople(people);
+          });
       }
-
-      setLoading(false);
     });
   }, []);
 

@@ -64,29 +64,58 @@ export async function generateMetadata({ params }: { params: { username: string 
 
 export default async function PublicProfilePage({ params }: { params: { username: string } }) {
   const supabase = await createSupabaseSSRServerClient();
-  const { data: profile } = await supabase.from('profiles').select('*').eq('username', params.username).single();
+  // Step 1: profile + auth in parallel — both needed before anything else.
+  const [{ data: profile }, { data: { user } }] = await Promise.all([
+    supabase.from('profiles').select('*').eq('username', params.username).single(),
+    supabase.auth.getUser(),
+  ]);
   if (!profile || !profile.is_public) notFound();
 
-  const { data: { user } } = await supabase.auth.getUser();
   const isOwner = user?.id === profile.id;
   const accentColor = profile.profile_color ?? '#3b82f6';
   const flag = profile.country ? getCountryFlag(profile.country) : '';
   const badges = (profile.badges as string[] | null) ?? [];
 
-  // Determine auth provider — check DB field, but also check live auth for the profile owner
   const dbAuthProvider = (profile as any).auth_provider as string | null;
   const liveProviders: string[] = (isOwner && user?.app_metadata?.providers) || [];
   const authProvider = (liveProviders.includes('linkedin_oidc') || dbAuthProvider === 'linkedin_oidc')
     ? 'linkedin_oidc'
     : dbAuthProvider;
 
-  const { data: assocs } = await supabase.from('user_associations').select('*').eq('user_id', profile.id);
-  const { data: verifs } = await supabase.from('member_verifications').select('association_name, status, expires_at').eq('user_id', profile.id);
+  // Step 2: every secondary query that only depends on profile.id (and
+  // isOwner) fired in one round-trip instead of nine sequential awaits.
+  // Profile pages used to do 10+ serial round-trips (~500ms+ on slow
+  // networks) — this collapses it to one batch + a small follow-up.
+  const userEmail = user?.email;
+  const adminClient = isOwner && userEmail ? createSupabaseAdminServerClient() : null;
+  const [
+    assocsRes, verifsRes, connRes, sectionsRes, attendingRowsRes,
+    experienceRes, recentPostsRes, reviewRowsRes, newsletterRes,
+  ] = await Promise.all([
+    supabase.from('user_associations').select('*').eq('user_id', profile.id),
+    supabase.from('member_verifications').select('association_name, status, expires_at').eq('user_id', profile.id),
+    supabase.from('connections').select('id', { count: 'exact', head: true }).or(`requester_id.eq.${profile.id},addressee_id.eq.${profile.id}`).eq('status', 'accepted'),
+    supabase.from('profile_sections').select('*').eq('user_id', profile.id).eq('visible', true).order('sort_order'),
+    supabase.from('event_attendees').select('event_id').eq('user_id', profile.id).eq('is_going', true),
+    supabase.from('work_experience').select('*').eq('user_id', profile.id).order('sort_order'),
+    supabase.from('posts').select('id, content, image_url, likes_count, comments_count, created_at').eq('user_id', profile.id).order('created_at', { ascending: false }).limit(3),
+    supabase.from('event_reviews').select('id, event_id, rating, review_text, created_at').eq('user_id', profile.id).order('created_at', { ascending: false }).limit(4),
+    adminClient
+      ? (adminClient.from('newsletter_subscribers' as any).select('id, status').ilike('email', userEmail!.trim()).in('status', ['active', 'pending']).maybeSingle() as any)
+      : Promise.resolve({ data: null }),
+  ]);
+
+  const assocs = assocsRes.data;
+  const verifs = verifsRes.data;
+  const connectionCount = connRes.count;
+  const sections = sectionsRes.data;
+  const attendingRows = attendingRowsRes.data;
+  const experienceRows = experienceRes.data;
+  const recentPosts = recentPostsRes.data;
+  const reviewRows = reviewRowsRes.data;
+  const isNewsletterSubscribed = !!(newsletterRes as any)?.data;
+
   const activeVerifications = (verifs ?? []).filter((v: any) => v.status === 'verified' && (!v.expires_at || new Date(v.expires_at) > new Date()));
-  // Profile-level verification (LinkedIn OAuth OR admin-toggled is_verified)
-  // grants automatic association-verified status for every association
-  // the user has claimed. The legacy code-based verification system stays
-  // intact for users who want to formally verify with an association.
   const profileLevelVerified = (profile as any).auth_provider === 'linkedin_oidc' || (profile as any).is_verified === true;
   const verifiedSet = new Set<string>(
     profileLevelVerified
@@ -97,29 +126,23 @@ export default async function PublicProfilePage({ params }: { params: { username
   const linkedinPicture = (profile as any).linkedin_picture as string | null;
   const linkedinUrl = (profile as any).linkedin_url as string | null;
 
-  const { count: connectionCount } = await supabase
-    .from('connections').select('id', { count: 'exact', head: true })
-    .or(`requester_id.eq.${profile.id},addressee_id.eq.${profile.id}`).eq('status', 'accepted');
-
-  const { data: sections } = await supabase.from('profile_sections').select('*').eq('user_id', profile.id).eq('visible', true).order('sort_order');
-
-  const { data: attendingRows } = await supabase.from('event_attendees').select('event_id').eq('user_id', profile.id).eq('is_going', true);
-  const attendingIds = (attendingRows ?? []).map((r) => r.event_id).filter((id): id is string => id !== null);
+  // Step 3: dependent secondary fetches (events for attended + reviewed)
+  // — also parallel to each other.
+  const attendingIds = (attendingRows ?? []).map((r: any) => r.event_id).filter((id: any): id is string => id !== null);
+  const reviewEventIds = (reviewRows ?? []).map((r: any) => r.event_id).filter((id: any): id is string => id !== null);
   const today = new Date().toISOString().slice(0, 10);
-  const { data: allAttendedEvents } = attendingIds.length > 0
-    ? await supabase.from('events').select('id, title, slug, city, country, start_date, image_path').in('id', attendingIds).order('start_date', { ascending: false }).limit(20)
-    : { data: [] };
-  const attendanceEvents = (allAttendedEvents ?? []).map((e) => ({ ...e, slug: e.slug ?? '', start_date: e.start_date ?? '', is_past: (e.start_date ?? '') < today }));
-
-  const { data: experienceRows } = await supabase.from('work_experience').select('*').eq('user_id', profile.id).order('sort_order');
-
-  const { data: recentPosts } = await supabase.from('posts').select('id, content, image_url, likes_count, comments_count, created_at').eq('user_id', profile.id).order('created_at', { ascending: false }).limit(3);
-
-  const { data: reviewRows } = await supabase.from('event_reviews').select('id, event_id, rating, review_text, created_at').eq('user_id', profile.id).order('created_at', { ascending: false }).limit(4);
-  const reviewEventIds = (reviewRows ?? []).map((r) => r.event_id).filter((id): id is string => id !== null);
-  const { data: reviewedEvents } = reviewEventIds.length > 0
-    ? await supabase.from('events').select('id, title, slug, city, country').in('id', reviewEventIds) : { data: [] };
-  const eventMap = new Map((reviewedEvents ?? []).map((e) => [e.id, e]));
+  const [allAttendedRes, reviewedEventsRes] = await Promise.all([
+    attendingIds.length > 0
+      ? supabase.from('events').select('id, title, slug, city, country, start_date, image_path').in('id', attendingIds).order('start_date', { ascending: false }).limit(20)
+      : Promise.resolve({ data: [] as any[] }),
+    reviewEventIds.length > 0
+      ? supabase.from('events').select('id, title, slug, city, country').in('id', reviewEventIds)
+      : Promise.resolve({ data: [] as any[] }),
+  ]);
+  const allAttendedEvents = allAttendedRes.data;
+  const reviewedEvents = reviewedEventsRes.data;
+  const attendanceEvents = (allAttendedEvents ?? []).map((e: any) => ({ ...e, slug: e.slug ?? '', start_date: e.start_date ?? '', is_past: (e.start_date ?? '') < today }));
+  const eventMap = new Map((reviewedEvents ?? []).map((e: any) => [e.id, e]));
 
   const isLinkedInVerified = authProvider === 'linkedin_oidc';
   const isFullyVerified = isLinkedInVerified || activeVerifications.length > 0;
@@ -131,23 +154,7 @@ export default async function PublicProfilePage({ params }: { params: { username
   const hasReviews = (reviewRows ?? []).length > 0;
   const hasExperience = (experienceRows ?? []).length > 0;
 
-  // Check newsletter subscription (for profile completion).
-  // Use the admin client so RLS can never silently hide the row — this is
-  // a self-check on the user's own subscription, no privacy risk. Also use
-  // ilike for case-insensitive match in case auth and newsletter rows
-  // disagree on email casing.
-  const userEmail = user?.email;
-  let isNewsletterSubscribed = false;
-  if (isOwner && userEmail) {
-    const adminClient = createSupabaseAdminServerClient();
-    const { data: sub } = await (adminClient
-      .from('newsletter_subscribers' as any)
-      .select('id, status')
-      .ilike('email', userEmail.trim())
-      .in('status', ['active', 'pending'])
-      .maybeSingle() as any);
-    isNewsletterSubscribed = !!sub;
-  }
+  // Newsletter subscription is in isNewsletterSubscribed (Step 2 above).
 
   const hasAvatar = !!profile.avatar_url;
   const hasCountry = !!profile.country;

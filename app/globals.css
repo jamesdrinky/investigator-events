@@ -62,9 +62,13 @@ html, body { overscroll-behavior: none; overflow-x: hidden; }
   }
 }
 
+/* When the iOS keyboard is open, --keyboard-height exceeds the bottom-nav
+   height (since the tab bar is hidden behind the keyboard). Subtracting the
+   greater of the two keeps the input bar above the keyboard fold instead of
+   below it. MessageInbox sets --keyboard-height via visualViewport. */
 .messages-page-shell {
-  min-height: calc(100dvh - var(--app-header-height) - var(--app-bottom-nav-height));
-  height: calc(100dvh - var(--app-header-height) - var(--app-bottom-nav-height));
+  min-height: calc(100dvh - var(--app-header-height) - max(var(--app-bottom-nav-height), var(--keyboard-height, 0px)));
+  height: calc(100dvh - var(--app-header-height) - max(var(--app-bottom-nav-height), var(--keyboard-height, 0px)));
 }
 
 

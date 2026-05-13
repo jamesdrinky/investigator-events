@@ -51,6 +51,31 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
   }, []);
 
+  // Track iOS keyboard height via visualViewport so .messages-page-shell can
+  // shrink to the visible viewport when the keyboard opens — otherwise on
+  // iOS PWA the input bar (and what you're typing) sits below the keyboard
+  // fold. Also snap the message list to the bottom each time the viewport
+  // resizes so the latest message stays in view.
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.visualViewport) return;
+    const vv = window.visualViewport;
+    const update = () => {
+      const offset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      document.documentElement.style.setProperty('--keyboard-height', `${offset}px`);
+      requestAnimationFrame(() => {
+        messagesEndRef.current?.scrollIntoView({ block: 'end' });
+      });
+    };
+    vv.addEventListener('resize', update);
+    vv.addEventListener('scroll', update);
+    update();
+    return () => {
+      vv.removeEventListener('resize', update);
+      vv.removeEventListener('scroll', update);
+      document.documentElement.style.removeProperty('--keyboard-height');
+    };
+  }, []);
+
   const loadConversations = useCallback(async () => {
     if (!userId) return;
     const { data: sent } = await supabase.from('messages' as any).select('receiver_id, content, created_at, is_read').eq('sender_id', userId).order('created_at', { ascending: false });

@@ -31,6 +31,15 @@ export default async function CalendarPage({
   // private relay emails won't match newsletter_subscribers anyway.
   const supabase = await createSupabaseSSRServerClient();
   const { data: { user } } = await supabase.auth.getUser();
+
+  // Auto-include the user's associations' secondary events when filtering by
+  // 'Main' — so if you're a FEDERPOL member you see FEDERPOL secondaries
+  // alongside global mains, without having to flip to 'All'.
+  const userAssociations = user
+    ? ((await supabase.from('user_associations').select('association_name').eq('user_id', user.id)).data ?? [])
+        .map((r) => r.association_name)
+        .filter((n): n is string => typeof n === 'string' && n.length > 0)
+    : [];
   const now = new Date();
   const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   const upcomingMain = mainEvents.filter((e) => parseDate(e.date).getTime() >= today.getTime());
@@ -169,6 +178,7 @@ export default async function CalendarPage({
           initialRegion={initialRegion}
           initialMonth={initialMonth}
           initialView={searchParams?.view === 'calendar' ? 'calendar' : undefined}
+          userAssociations={userAssociations}
         />
       </div>
     </section>

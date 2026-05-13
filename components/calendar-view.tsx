@@ -22,6 +22,10 @@ interface CalendarViewProps {
   initialRegion?: string;
   initialMonth?: string;
   initialView?: 'list' | 'calendar';
+  // Associations the logged-in user is a member of — secondary events from
+  // these associations are auto-included when the user has the 'Main' scope
+  // selected, so members see their orgs' minor events without flipping to 'All'.
+  userAssociations?: string[];
 }
 
 function getCurrentMonthKey() { return new Date().toISOString().slice(0, 7); }
@@ -152,7 +156,8 @@ function MonthEventStrip({ events, label, countryCount }: { events: EventItem[];
   );
 }
 
-export function CalendarView({ events, initialAssociation, initialSearch, initialRegion, initialMonth, initialView }: CalendarViewProps) {
+export function CalendarView({ events, initialAssociation, initialSearch, initialRegion, initialMonth, initialView, userAssociations }: CalendarViewProps) {
+  const userAssocSet = useMemo(() => new Set(userAssociations ?? []), [userAssociations]);
   const sorted = useMemo(() => sortEventsByDate(events), [events]);
   const countries = useMemo(() => [...new Set(sorted.map((e) => e.country))].sort(), [sorted]);
   const categories = useMemo(() => [...new Set(sorted.map((e) => e.category))].sort(), [sorted]);
@@ -179,7 +184,10 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
   }, [filters.country, sorted]);
 
   const baseFiltered = useMemo(() => sorted.filter((e) => {
-    const s = scope === 'all' || e.eventScope === 'main';
+    // 'all' → everything. 'main' → main events PLUS secondary events from
+    // associations the logged-in user is a member of (auto-personalisation).
+    const inUserAssoc = userAssocSet.has(e.association ?? '') || userAssocSet.has(e.organiser);
+    const s = scope === 'all' || e.eventScope === 'main' || (e.eventScope === 'secondary' && inUserAssoc);
     const c = filters.country === 'All' || e.country === filters.country;
     const r = filters.region === 'All' || e.region === filters.region;
     const cat = filters.category === 'All' || e.category === filters.category;
@@ -187,7 +195,7 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
     const q = filters.search.trim().toLowerCase();
     const m = q.length === 0 || [e.title, e.city, e.country, e.region, e.category, e.association ?? '', e.organiser].join(' ').toLowerCase().includes(q);
     return s && c && r && cat && a && m;
-  }), [filters, scope, sorted]);
+  }), [filters, scope, sorted, userAssocSet]);
 
   const filtered = useMemo(() => filters.month === 'All' ? baseFiltered : baseFiltered.filter((e) => formatMonthLabel(getMonthKey(e.date)) === filters.month), [baseFiltered, filters.month]);
   const prioritized = useMemo(() => getPriorityEvents(filtered), [filtered]);

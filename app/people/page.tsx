@@ -170,9 +170,15 @@ function PeoplePageInner() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-white">
       <div className="relative overflow-hidden bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_25%,#f0e8ff_50%,#f4f0ff_75%,#f8fbff_100%)] pb-5 pt-8 sm:pb-10 sm:pt-32">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(99,102,241,0.08),transparent_40%),radial-gradient(circle_at_80%_20%,rgba(59,130,246,0.06),transparent_35%)]" />
         <div className="container-shell relative text-center">
-          <p className="hidden text-[10px] font-semibold uppercase tracking-[0.34em] text-blue-600 sm:block sm:text-xs">Community</p>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:mt-3 sm:text-4xl">Forum</h1>
+          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-blue-600/75 sm:tracking-[0.34em] sm:text-xs sm:font-semibold sm:text-blue-600">Community</p>
+          <h1
+            className="mt-1.5 bg-[linear-gradient(92deg,#0f172a_0%,#1d4ed8_55%,#0f172a_100%)] bg-[length:200%_100%] bg-clip-text text-[2.25rem] font-bold leading-[0.95] tracking-[-0.04em] text-transparent sm:mt-3 sm:text-4xl"
+            style={{ animation: 'gradient-text-cycle 6s ease-in-out infinite' }}
+          >
+            Forum
+          </h1>
           <p className="mx-auto mt-2 hidden max-w-lg text-sm text-slate-500 sm:block">Share insights, promote your services, and connect with investigators worldwide.</p>
 
           {/* Tabs — compact on mobile so all four fit without horizontal scroll */}
@@ -262,22 +268,18 @@ function PeoplePageInner() {
         ) : (
           /* Discover tab */
           <div>
-            {/* Stats bar */}
-            <div className="mx-auto mb-6 flex max-w-2xl items-center justify-center gap-6 sm:gap-10">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-slate-900">{totalPeople}</p>
-                <p className="text-xs text-slate-500">Investigators</p>
-              </div>
-              <div className="h-8 w-px bg-slate-200" />
-              <div className="text-center">
-                <p className="text-2xl font-bold text-slate-900">{totalCountries}</p>
-                <p className="text-xs text-slate-500">Countries</p>
-              </div>
-              <div className="h-8 w-px bg-slate-200" />
-              <div className="text-center">
-                <p className="text-2xl font-bold text-slate-900">{specialisations.length}</p>
-                <p className="text-xs text-slate-500">Specialisations</p>
-              </div>
+            {/* Stats bar — glassmorphism tiles for a more dashboard feel */}
+            <div className="mx-auto mb-6 grid max-w-2xl grid-cols-3 gap-2 sm:gap-4">
+              {[
+                { label: 'Investigators', value: totalPeople, color: 'from-blue-500 to-cyan-400' },
+                { label: 'Countries', value: totalCountries, color: 'from-violet-500 to-fuchsia-400' },
+                { label: 'Specialisations', value: specialisations.length, color: 'from-emerald-500 to-teal-400' },
+              ].map((s) => (
+                <div key={s.label} className="rounded-2xl border border-slate-200/70 bg-white/85 px-3 py-3 text-center shadow-[0_4px_20px_-12px_rgba(15,23,42,0.1)] backdrop-blur-sm sm:px-4 sm:py-4">
+                  <p className={`bg-gradient-to-r ${s.color} bg-clip-text text-2xl font-bold tracking-[-0.03em] text-transparent sm:text-[2rem]`}>{s.value}</p>
+                  <p className="mt-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-slate-400 sm:text-[11px]">{s.label}</p>
+                </div>
+              ))}
             </div>
 
             {/* Search */}

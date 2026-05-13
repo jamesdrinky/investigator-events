@@ -44,12 +44,19 @@ export default async function AssociationsPage() {
           <div className="grid items-center gap-8 lg:grid-cols-[1.1fr_0.9fr]">
             <Reveal>
               <div>
-                <p className="eyebrow">Associations</p>
-                <h1 className="mt-4 text-[2.5rem] font-bold leading-[0.9] tracking-[-0.06em] text-slate-950 sm:text-[3.5rem] lg:text-[5rem]">
-                  The investigator associations behind the calendar.
+                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-blue-600/75 sm:text-xs sm:tracking-[0.3em] sm:font-semibold sm:text-blue-600">Network</p>
+                <h1 className="mt-2 text-[2.25rem] font-bold leading-[0.92] tracking-[-0.05em] text-slate-950 sm:mt-4 sm:text-[3.5rem] lg:text-[5rem]">
+                  The{' '}
+                  <span
+                    className="inline-block bg-[linear-gradient(92deg,#3b82f6_0%,#22d3ee_30%,#a855f7_65%,#ec4899_100%)] bg-[length:200%_100%] bg-clip-text text-transparent"
+                    style={{ animation: 'gradient-text-cycle 5s ease-in-out infinite' }}
+                  >
+                    associations
+                  </span>{' '}
+                  behind the calendar.
                 </h1>
-                <p className="mt-5 max-w-xl text-base leading-relaxed text-slate-600 sm:mt-6 sm:text-lg">
-                  Browse associations by region and country, then open the calendar view for the events each organisation is linked to.
+                <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate-600 sm:mt-6 sm:text-lg">
+                  Browse by region and country, then open the calendar view for the events each organisation is linked to.
                 </p>
               </div>
             </Reveal>
@@ -58,18 +65,18 @@ export default async function AssociationsPage() {
             <AssociationLogoMarquee items={marqueeItems} />
           </div>
 
-          {/* Stats row */}
+          {/* Stats row — gradient values for a more dashboard feel */}
           <Reveal delay={0.06}>
             <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-12 sm:grid-cols-4 sm:gap-4">
               {[
-                { label: 'Associations', value: stats.associationCount, color: 'text-blue-600' },
-                { label: 'Countries', value: stats.countryCount, color: 'text-violet-600' },
-                { label: 'Regions', value: stats.regionCount, color: 'text-cyan-600' },
-                { label: 'Linked Live', value: stats.liveCoverageAssociations, color: 'text-emerald-600' },
+                { label: 'Associations', value: stats.associationCount, color: 'from-blue-600 to-cyan-500' },
+                { label: 'Countries', value: stats.countryCount, color: 'from-violet-600 to-fuchsia-500' },
+                { label: 'Regions', value: stats.regionCount, color: 'from-cyan-600 to-teal-500' },
+                { label: 'Linked Live', value: stats.liveCoverageAssociations, color: 'from-emerald-600 to-green-500' },
               ].map((item) => (
-                <div key={item.label} className="rounded-2xl border border-white/80 bg-white/90 px-4 py-5 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.08)] sm:px-5 sm:py-6">
+                <div key={item.label} className="rounded-2xl border border-white/80 bg-white/90 px-4 py-5 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.08)] backdrop-blur-sm transition hover:border-white hover:shadow-[0_12px_40px_-12px_rgba(15,23,42,0.12)] sm:px-5 sm:py-6">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 sm:text-[11px]">{item.label}</p>
-                  <p className={`mt-2 text-[2.2rem] font-bold tracking-[-0.04em] sm:text-[3rem] ${item.color}`}>{item.value}</p>
+                  <p className={`mt-2 bg-gradient-to-r ${item.color} bg-clip-text text-[2.2rem] font-bold tracking-[-0.04em] text-transparent sm:text-[3rem]`}>{item.value}</p>
                 </div>
               ))}
             </div>

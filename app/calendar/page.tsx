@@ -8,6 +8,7 @@ import { fetchAllEvents } from '@/lib/data/events';
 import { getCoverageMetrics } from '@/lib/utils/coverage';
 import { formatEventDate, parseDate, sortEventsByDate } from '@/lib/utils/date';
 import { getEventSlug } from '@/lib/utils/event-slugs';
+import { createSupabaseSSRServerClient } from '@/lib/supabase/ssr-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,6 +25,12 @@ export default async function CalendarPage({
   const events = await fetchAllEvents();
   const mainEvents = sortEventsByDate(events.filter((e) => e.eventScope === 'main'));
   const coverage = getCoverageMetrics(mainEvents);
+
+  // Hide newsletter CTA for signed-in users — same rationale as
+  // NewsletterBanner: they can subscribe from profile/footer, and Apple
+  // private relay emails won't match newsletter_subscribers anyway.
+  const supabase = await createSupabaseSSRServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
   const now = new Date();
   const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   const upcomingMain = mainEvents.filter((e) => parseDate(e.date).getTime() >= today.getTime());
@@ -112,42 +119,6 @@ export default async function CalendarPage({
             </Reveal>
           )}
 
-          {/* Mobile: event cards with images */}
-          {expandingItems.length > 0 && (
-            <div className="mt-4 space-y-2 sm:hidden">
-              {expandingItems.slice(0, 5).map((item) => {
-                const hasImg = item.coverImage && /^(\/(cities|events|images)\/|https?:\/\/)/.test(item.coverImage);
-                const startPart = item.date.split(/\s*[-–]\s/)[0].trim();
-                const match = startPart.match(/^(\d+)\s+(\w+)\s+(\d+)$/);
-                const d = match ? new Date(`${match[2]} ${match[1]}, ${match[3]}`) : new Date(startPart);
-                const month = isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-GB', { month: 'short' });
-                const day = isNaN(d.getTime()) ? '' : String(d.getDate());
-                return (
-                  <a key={item.slug} href={`/events/${item.slug}`} className="flex items-center gap-3 rounded-xl border border-slate-200/60 bg-white p-2.5 shadow-sm transition active:scale-[0.98]">
-                    {hasImg ? (
-                      <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg">
-                        <img src={item.coverImage} alt="" className="h-full w-full object-cover" />
-                        {month && day && (
-                          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-1 pb-0.5 pt-2">
-                            <span className="text-[8px] font-bold uppercase text-white">{day} {month}</span>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="flex h-14 w-14 flex-shrink-0 flex-col items-center justify-center rounded-lg bg-blue-50">
-                        <span className="text-[9px] font-bold uppercase text-blue-500">{month}</span>
-                        <span className="text-base font-bold leading-none text-blue-700">{day}</span>
-                      </div>
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-slate-900">{item.title}</p>
-                      <p className="mt-0.5 truncate text-xs text-slate-400">{item.city}, {item.country}</p>
-                    </div>
-                  </a>
-                );
-              })}
-            </div>
-          )}
         </div>
       </div>
 
@@ -156,20 +127,22 @@ export default async function CalendarPage({
         <MyEventsPanel />
       </div>
 
-      {/* ── Newsletter CTA ── */}
-      <div className="container-shell relative">
-        <div className="mx-auto max-w-3xl rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 to-violet-50 px-6 py-5 sm:px-8">
-          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-bold text-slate-900">Never miss an event</p>
-              <p className="mt-0.5 text-xs text-slate-500">Get a free weekly briefing with new events, featured conferences, and community updates.</p>
+      {/* ── Newsletter CTA (anon only) ── */}
+      {!user && (
+        <div className="container-shell relative">
+          <div className="mx-auto max-w-3xl rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 to-violet-50 px-6 py-5 sm:px-8">
+            <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-bold text-slate-900">Never miss an event</p>
+                <p className="mt-0.5 text-xs text-slate-500">Get a free weekly briefing with new events, featured conferences, and community updates.</p>
+              </div>
+              <a href="/weekly" className="flex-shrink-0 rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800">
+                Subscribe free
+              </a>
             </div>
-            <a href="/weekly" className="flex-shrink-0 rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800">
-              Subscribe free
-            </a>
           </div>
         </div>
-      </div>
+      )}
 
       {/* ── Calendar content ── */}
       <div id="events-list" className="container-shell relative scroll-mt-24 pb-8 sm:pb-12">

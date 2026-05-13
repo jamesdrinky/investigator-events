@@ -160,7 +160,7 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
   const associations = useMemo(() => [...new Set(sorted.map((e) => e.association ?? e.organiser))].sort(), [sorted]);
 
   const [filters, setFilters] = useState({ search: initialSearch ?? '', country: 'All', region: initialRegion ?? 'All', month: initialMonth ?? 'All', category: 'All', association: initialAssociation ?? 'All' });
-  const [scope, setScope] = useState<'main' | 'all'>('main');
+  const [scope, setScope] = useState<'main' | 'secondary'>('main');
   const [view, setView] = useState<'list' | 'calendar'>(initialView ?? 'list');
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
   const [previewDate, setPreviewDate] = useState<string | null>(null);
@@ -178,7 +178,7 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
   }, [filters.country, sorted]);
 
   const baseFiltered = useMemo(() => sorted.filter((e) => {
-    const s = scope === 'all' || e.eventScope === 'main';
+    const s = scope === 'main' ? e.eventScope === 'main' : e.eventScope === 'secondary';
     const c = filters.country === 'All' || e.country === filters.country;
     const r = filters.region === 'All' || e.region === filters.region;
     const cat = filters.category === 'All' || e.category === filters.category;

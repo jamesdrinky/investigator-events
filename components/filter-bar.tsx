@@ -9,7 +9,7 @@ interface FilterBarProps {
   months: string[];
   categories: string[];
   associations: string[];
-  scope: 'main' | 'secondary';
+  scope: 'main' | 'all';
   view: 'calendar' | 'list';
   values: {
     search: string;
@@ -23,7 +23,7 @@ interface FilterBarProps {
   upcomingCount: number;
   hasActiveFilters: boolean;
   onChange: (next: FilterBarProps['values']) => void;
-  onChangeScope: (scope: 'main' | 'secondary') => void;
+  onChangeScope: (scope: 'main' | 'all') => void;
   onChangeView: (view: 'calendar' | 'list') => void;
   onReset: () => void;
 }
@@ -150,10 +150,10 @@ export function FilterBar({
             <div className="hidden items-center gap-2 lg:flex">
               <Segmented
                 value={scope}
-                onChange={(next) => onChangeScope(next as 'main' | 'secondary')}
+                onChange={(next) => onChangeScope(next as 'main' | 'all')}
                 options={[
                   { value: 'main', label: 'Main events' },
-                  { value: 'secondary', label: 'Secondary' }
+                  { value: 'all', label: 'All' }
                 ]}
               />
               <Segmented
@@ -179,10 +179,10 @@ export function FilterBar({
               <div className="min-w-0 overflow-hidden">
                 <Segmented
                   value={scope}
-                  onChange={(next) => onChangeScope(next as 'main' | 'secondary')}
+                  onChange={(next) => onChangeScope(next as 'main' | 'all')}
                   options={[
                     { value: 'main', label: 'Main' },
-                    { value: 'secondary', label: 'Secondary' }
+                    { value: 'all', label: 'All' }
                   ]}
                 />
               </div>
@@ -265,10 +265,10 @@ export function FilterBar({
               <div className="mb-3">
                 <Segmented
                     value={scope}
-                    onChange={(next) => onChangeScope(next as 'main' | 'secondary')}
+                    onChange={(next) => onChangeScope(next as 'main' | 'all')}
                     options={[
                       { value: 'main', label: 'Main events' },
-                      { value: 'secondary', label: 'Secondary' }
+                      { value: 'all', label: 'All' }
                     ]}
                   />
               </div>

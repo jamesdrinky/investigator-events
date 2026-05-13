@@ -160,7 +160,7 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
   const associations = useMemo(() => [...new Set(sorted.map((e) => e.association ?? e.organiser))].sort(), [sorted]);
 
   const [filters, setFilters] = useState({ search: initialSearch ?? '', country: 'All', region: initialRegion ?? 'All', month: initialMonth ?? 'All', category: 'All', association: initialAssociation ?? 'All' });
-  const [scope, setScope] = useState<'main' | 'secondary'>('main');
+  const [scope, setScope] = useState<'main' | 'all'>('main');
   const [view, setView] = useState<'list' | 'calendar'>(initialView ?? 'list');
   const [showPast, setShowPast] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
@@ -179,7 +179,7 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
   }, [filters.country, sorted]);
 
   const baseFiltered = useMemo(() => sorted.filter((e) => {
-    const s = scope === 'main' ? e.eventScope === 'main' : e.eventScope === 'secondary';
+    const s = scope === 'all' || e.eventScope === 'main';
     const c = filters.country === 'All' || e.country === filters.country;
     const r = filters.region === 'All' || e.region === filters.region;
     const cat = filters.category === 'All' || e.category === filters.category;
@@ -274,7 +274,11 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
           {/* Featured — grid cards */}
           {!empty && featured.length > 0 && (
             <section className="space-y-4">
-              <h2 className="text-lg font-bold text-slate-950 sm:text-xl">Featured</h2>
+              <div className="flex items-center gap-3">
+                <span aria-hidden className="inline-block h-2 w-2 rounded-full bg-gradient-to-br from-amber-400 to-rose-500 shadow-[0_0_0_4px_rgba(251,191,36,0.15)]" />
+                <h2 className="text-2xl font-bold tracking-[-0.03em] text-slate-950 sm:text-3xl">Featured</h2>
+                <div className="h-px flex-1 bg-gradient-to-r from-slate-200 to-transparent" />
+              </div>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {featured.map((e, i) => (
                   <motion.div key={e.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2, delay: i * 0.05 }}>

@@ -57,15 +57,31 @@ export default async function CalendarPage({
         <div className="container-shell relative">
           {/* Mobile: compact inline header */}
           <div className="sm:hidden">
-            <div className="flex items-center justify-between">
-              <h1 className="text-xl font-bold text-slate-950">Events</h1>
-              <a href="/submit-event" className="inline-flex items-center gap-1 rounded-full bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm transition active:scale-95">
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-blue-600/70">Live calendar</p>
+            <div className="mt-1.5 flex items-end justify-between gap-3">
+              <h1
+                className="bg-[linear-gradient(92deg,#0f172a_0%,#1d4ed8_55%,#0f172a_100%)] bg-[length:200%_100%] bg-clip-text text-[2rem] font-bold leading-[0.95] tracking-[-0.04em] text-transparent"
+                style={{ animation: 'gradient-text-cycle 6s ease-in-out infinite' }}
+              >
+                Events
+              </h1>
+              <a
+                href="/submit-event"
+                className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-blue-600 to-blue-700 px-3.5 py-2 text-xs font-bold text-white shadow-[0_8px_20px_-8px_rgba(37,99,235,0.55)] transition active:scale-95"
+              >
                 + Submit
               </a>
             </div>
-            <div className="mt-2 flex items-center gap-3 text-xs text-slate-500">
-              <span><span className="font-bold text-blue-600">{upcomingCount}</span> upcoming</span>
-              <span><span className="font-bold text-violet-600">{coverage.totalCountries}</span> countries</span>
+            <div className="mt-3 inline-flex items-center gap-3 rounded-full border border-slate-200/80 bg-white/85 px-4 py-2 backdrop-blur-sm shadow-[0_4px_14px_-8px_rgba(15,23,42,0.12)]">
+              <span className="flex items-baseline gap-1.5">
+                <span className="text-sm font-bold text-blue-600">{upcomingCount}</span>
+                <span className="text-[11px] font-medium text-slate-500">upcoming</span>
+              </span>
+              <span className="h-3 w-px bg-slate-200" />
+              <span className="flex items-baseline gap-1.5">
+                <span className="text-sm font-bold text-violet-600">{coverage.totalCountries}</span>
+                <span className="text-[11px] font-medium text-slate-500">countries</span>
+              </span>
             </div>
           </div>
 

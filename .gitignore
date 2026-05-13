@@ -6,6 +6,12 @@ dist
 build
 .vercel
 
+# Claude / Cursor / IDE-local settings — these can contain shell-exported
+# secrets (env vars used in Bash tool calls) and must never be committed.
+.claude/
+.cursor/
+.vscode/settings.json
+
 # Original uncompressed video (166MB — too large for git)
 public/conference/ie reel.mp4
 

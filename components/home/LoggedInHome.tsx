@@ -77,6 +77,60 @@ function EventRow({ event, accent = 'blue', showCountdown = false }: { event: Qu
   );
 }
 
+function HeroEventCard({ event }: { event: QuickEvent }) {
+  const d = new Date(event.start_date);
+  const hasImage = !!(event.image_path && /^(\/(cities|events|images)\/|https?:\/\/)/.test(event.image_path));
+  const countdown = getCountdown(event.start_date);
+  return (
+    <Link
+      href={`/events/${event.slug}` as Route}
+      className="group relative block overflow-hidden rounded-2xl border border-slate-200/60 bg-gradient-to-br from-slate-100 to-slate-200 shadow-[0_10px_30px_-12px_rgba(15,23,42,0.18)] transition active:scale-[0.99] lg:rounded-3xl"
+      style={{ aspectRatio: '16/10' }}
+    >
+      {hasImage && (
+        <>
+          <img src={event.image_path!} alt="" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/35 to-transparent" />
+        </>
+      )}
+      <div className="absolute inset-0 flex flex-col justify-end p-4 lg:p-5">
+        <div className="flex items-center gap-2">
+          <span className="rounded-full bg-blue-500/95 px-2.5 py-1 text-[10px] font-bold text-white shadow-sm backdrop-blur-sm">{countdown}</span>
+          <span className="rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-medium text-white/95 backdrop-blur-sm">{d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
+        </div>
+        <h4 className="mt-2 line-clamp-2 text-lg font-bold leading-tight text-white drop-shadow-md lg:text-2xl">{event.title}</h4>
+        <div className="mt-1 flex items-center gap-1.5 text-xs text-white/85">
+          <MapPin className="h-3 w-3" /> {event.city}, {event.country}
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function SectionHeader({ eyebrow, title, accent = 'blue', cta }: { eyebrow: string; title: string; accent?: 'blue' | 'amber' | 'indigo' | 'emerald' | 'cyan' | 'purple'; cta?: { href: string; label: string } }) {
+  const accentText = {
+    blue: 'text-blue-600/75',
+    amber: 'text-amber-600/80',
+    indigo: 'text-indigo-600/75',
+    emerald: 'text-emerald-600/80',
+    cyan: 'text-cyan-600/80',
+    purple: 'text-purple-600/80',
+  }[accent];
+  return (
+    <div>
+      <p className={`text-[10px] font-bold uppercase tracking-[0.22em] ${accentText}`}>{eyebrow}</p>
+      <div className="mt-0.5 flex items-center justify-between gap-3">
+        <h3 className="text-lg font-bold tracking-[-0.02em] text-slate-900 lg:text-xl">{title}</h3>
+        {cta && (
+          <Link href={cta.href as Route} className="text-xs font-semibold text-blue-600 transition active:scale-95">
+            {cta.label} →
+          </Link>
+        )}
+      </div>
+    </div>
+  );
+}
+
 interface UserAssociation {
   association_name: string;
   association_slug: string;
@@ -303,24 +357,24 @@ export function LoggedInHome() {
             )}
           </div>
 
-          {/* Quick stats row */}
+          {/* Quick stats row — glassmorphism tiles with inset highlight + soft border */}
           <div className="mt-4 grid grid-cols-4 gap-1.5 lg:mt-6 lg:gap-3">
-            <Link href={"/my-events" as Route} className="flex flex-col items-center gap-0.5 rounded-xl bg-white/[0.07] px-2 py-2.5 transition hover:bg-white/[0.12] lg:flex-row lg:gap-3 lg:rounded-2xl lg:px-5 lg:py-4">
+            <Link href={"/my-events" as Route} className="group relative flex flex-col items-center gap-0.5 overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.12] to-white/[0.04] px-2 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md transition active:scale-95 lg:flex-row lg:gap-3 lg:rounded-2xl lg:px-5 lg:py-4 lg:hover:border-white/20">
               <Calendar className="h-4 w-4 text-blue-400 lg:h-5 lg:w-5" />
               <span className="text-sm font-bold text-white lg:text-lg">{upcomingGoing.length}</span>
               <span className="text-[9px] text-slate-400 lg:text-xs">Going</span>
             </Link>
-            <Link href={"/my-connections" as Route} className="flex flex-col items-center gap-0.5 rounded-xl bg-white/[0.07] px-2 py-2.5 transition hover:bg-white/[0.12] lg:flex-row lg:gap-3 lg:rounded-2xl lg:px-5 lg:py-4">
+            <Link href={"/my-connections" as Route} className="group relative flex flex-col items-center gap-0.5 overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.12] to-white/[0.04] px-2 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md transition active:scale-95 lg:flex-row lg:gap-3 lg:rounded-2xl lg:px-5 lg:py-4 lg:hover:border-white/20">
               <Users className="h-4 w-4 text-purple-400 lg:h-5 lg:w-5" />
               <span className="text-sm font-bold text-white lg:text-lg">{connectionCount}</span>
               <span className="text-[9px] text-slate-400 lg:text-xs">Connections</span>
             </Link>
-            <Link href={"/messages" as Route} className="relative flex flex-col items-center gap-0.5 rounded-xl bg-white/[0.07] px-2 py-2.5 transition hover:bg-white/[0.12] lg:flex-row lg:gap-3 lg:rounded-2xl lg:px-5 lg:py-4">
+            <Link href={"/messages" as Route} className="group relative flex flex-col items-center gap-0.5 overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.12] to-white/[0.04] px-2 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md transition active:scale-95 lg:flex-row lg:gap-3 lg:rounded-2xl lg:px-5 lg:py-4 lg:hover:border-white/20">
               <MessageCircle className="h-4 w-4 text-cyan-400 lg:h-5 lg:w-5" />
               <span className="text-sm font-bold text-white lg:text-lg">{unreadMessages}</span>
               <span className="text-[9px] text-slate-400 lg:text-xs">Messages</span>
             </Link>
-            <Link href={"/my-associations" as Route} className="flex flex-col items-center gap-0.5 rounded-xl bg-white/[0.07] px-2 py-2.5 transition hover:bg-white/[0.12] lg:flex-row lg:gap-3 lg:rounded-2xl lg:px-5 lg:py-4">
+            <Link href={"/my-associations" as Route} className="group relative flex flex-col items-center gap-0.5 overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.12] to-white/[0.04] px-2 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md transition active:scale-95 lg:flex-row lg:gap-3 lg:rounded-2xl lg:px-5 lg:py-4 lg:hover:border-white/20">
               <Globe className="h-4 w-4 text-amber-400 lg:h-5 lg:w-5" />
               <span className="text-sm font-bold text-white lg:text-lg">{associationCount}</span>
               <span className="text-[9px] text-slate-400 lg:text-xs">Assocs</span>
@@ -359,15 +413,18 @@ export function LoggedInHome() {
         <div className="mx-auto max-w-6xl lg:grid lg:grid-cols-[1fr_22rem] lg:gap-10 lg:px-6 lg:py-8">
         <div>{/* Left column */}
 
-        {/* ── Your events ── */}
+        {/* ── Your events — first one is a hero card, rest are rows ── */}
         {upcomingGoing.length > 0 && (
-          <div className="px-4 pt-4 lg:px-0">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-slate-900 lg:text-base">Your events</h3>
-              <Link href="/calendar" className="text-xs font-medium text-blue-600">See all</Link>
-            </div>
-            <div className="mt-2.5 space-y-2">
-              {upcomingGoing.map((event) => (
+          <div className="px-4 pt-5 lg:px-0">
+            <SectionHeader
+              eyebrow="Up next"
+              title="Your events"
+              accent="blue"
+              cta={{ href: '/calendar', label: 'See all' }}
+            />
+            <div className="mt-3 space-y-2">
+              <HeroEventCard event={upcomingGoing[0]} />
+              {upcomingGoing.slice(1).map((event) => (
                 <EventRow key={event.id} event={event} showCountdown />
               ))}
             </div>
@@ -376,13 +433,9 @@ export function LoggedInHome() {
 
         {/* ── Saved events ── */}
         {savedEvents.length > 0 && (
-          <div className="px-4 pt-5 lg:px-0">
-            <div className="flex items-center justify-between">
-              <h3 className="flex items-center gap-1.5 text-sm font-bold text-slate-900">
-                <Bookmark className="h-3.5 w-3.5 text-amber-500" /> Saved
-              </h3>
-            </div>
-            <div className="mt-2.5 space-y-2">
+          <div className="px-4 pt-6 lg:px-0">
+            <SectionHeader eyebrow="Bookmarked" title="Saved" accent="amber" />
+            <div className="mt-3 space-y-2">
               {savedEvents.map((event) => (
                 <EventRow key={event.id} event={event} accent="amber" />
               ))}
@@ -392,14 +445,14 @@ export function LoggedInHome() {
 
         {/* ── Upcoming on the platform ── */}
         {upcomingAll.length > 0 && (
-          <div className="px-4 pt-5 lg:px-0">
-            <div className="flex items-center justify-between">
-              <h3 className="flex items-center gap-1.5 text-sm font-bold text-slate-900">
-                <TrendingUp className="h-3.5 w-3.5 text-blue-500" /> Coming up
-              </h3>
-              <Link href="/calendar" className="text-xs font-medium text-blue-600">View all</Link>
-            </div>
-            <div className="mt-2.5 space-y-2">
+          <div className="px-4 pt-6 lg:px-0">
+            <SectionHeader
+              eyebrow="Coming up"
+              title="On the platform"
+              accent="indigo"
+              cta={{ href: '/calendar', label: 'View all' }}
+            />
+            <div className="mt-3 space-y-2">
               {upcomingAll.map((event) => (
                 <EventRow key={event.id} event={event} />
               ))}
@@ -410,14 +463,26 @@ export function LoggedInHome() {
         </div>{/* close left column */}
 
         <div>{/* Right column */}
+        {/* ── Mobile-only divider between left and right columns so the
+              transition from "your stuff" to "for you" reads as a section
+              break, not a continuation of the same list. ── */}
+        <div className="mt-6 px-4 lg:hidden">
+          <div className="flex items-center gap-3">
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-violet-600/75">More for you</p>
+            <div className="h-px flex-1 bg-gradient-to-r from-slate-200 to-transparent" />
+          </div>
+        </div>
+
         {/* ── Past events — review prompts ── */}
         {pastAttended.length > 0 && (
-          <div className="px-4 pt-5 lg:px-0">
-            <h3 className="flex items-center gap-1.5 text-sm font-bold text-slate-900">
-              <Star className="h-3.5 w-3.5 text-amber-500" /> Review past events
-            </h3>
-            <p className="mt-0.5 text-[11px] text-slate-400">Help the community — share your experience</p>
-            <div className="mt-2.5 space-y-2">
+          <div className="px-4 pt-4 lg:px-0 lg:pt-0">
+            <SectionHeader
+              eyebrow="Your past"
+              title="Leave a review"
+              accent="emerald"
+            />
+            <p className="mt-1 text-[11px] text-slate-400">Help the community — share your experience</p>
+            <div className="mt-3 space-y-2">
               {pastAttended.map((event) => (
                 <Link
                   key={event.id}
@@ -452,14 +517,14 @@ export function LoggedInHome() {
 
         {/* ── Your associations ── */}
         {userAssociations.length > 0 && (
-          <div className="px-4 pt-5 lg:px-0">
-            <div className="flex items-center justify-between">
-              <h3 className="flex items-center gap-1.5 text-sm font-bold text-slate-900">
-                <Globe className="h-3.5 w-3.5 text-cyan-500" /> Your associations
-              </h3>
-              <Link href="/associations" className="text-xs font-medium text-blue-600">Browse all</Link>
-            </div>
-            <div className="mt-2.5 flex flex-wrap gap-2">
+          <div className="px-4 pt-6 lg:px-0">
+            <SectionHeader
+              eyebrow="Memberships"
+              title="Your associations"
+              accent="cyan"
+              cta={{ href: '/associations', label: 'Browse all' }}
+            />
+            <div className="mt-3 flex flex-wrap gap-2">
               {userAssociations.map((assoc) => (
                 <Link
                   key={assoc.association_slug}
@@ -481,14 +546,14 @@ export function LoggedInHome() {
 
         {/* ── People you may know ── */}
         {suggestedPeople.length > 0 && (
-          <div className="px-4 pt-5 lg:px-0">
-            <div className="flex items-center justify-between">
-              <h3 className="flex items-center gap-1.5 text-sm font-bold text-slate-900">
-                <Users className="h-3.5 w-3.5 text-purple-500" /> People you may know
-              </h3>
-              <Link href={"/people?tab=discover" as Route} className="text-xs font-medium text-blue-600">See all</Link>
-            </div>
-            <div className="mt-2.5 space-y-2">
+          <div className="px-4 pt-6 lg:px-0">
+            <SectionHeader
+              eyebrow="Suggested"
+              title="People you may know"
+              accent="purple"
+              cta={{ href: '/people?tab=discover', label: 'See all' }}
+            />
+            <div className="mt-3 space-y-2">
               {suggestedPeople.map((person) => (
                 <Link
                   key={person.id}

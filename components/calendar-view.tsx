@@ -48,6 +48,91 @@ function getMonthFeedGroups(events: EventItem[]) {
   }));
 }
 
+/* ── Full-bleed Featured hero card with scroll-driven parallax ── */
+function FeaturedHero({ event }: { event: EventItem }) {
+  const wrapRef = useRef<HTMLAnchorElement>(null);
+  const imgWrapRef = useRef<HTMLDivElement>(null);
+  const logoSrc = getAssociationBrandLogoSrc(event.association ?? event.organiser);
+  const invertLogo = shouldInvertLogoOnLight(event.association ?? event.organiser);
+  const imageSrc = (event.image_path && /^(\/(cities|events|images)\/|https?:\/\/)/.test(event.image_path) ? event.image_path : event.coverImage) ?? '/cities/fallback.jpg';
+
+  // Parallax on the cover image — drives off [data-app-content]'s scroll
+  // (mobile) or window scroll (desktop), shifting the image -8% to +8%
+  // vertically as the card crosses the viewport. Pure transform on a wrapper
+  // div so next/image stays happy with its own ref handling.
+  useEffect(() => {
+    const container: HTMLElement | Window = document.querySelector<HTMLElement>('[data-app-content]') ?? window;
+    const update = () => {
+      if (!wrapRef.current || !imgWrapRef.current) return;
+      const rect = wrapRef.current.getBoundingClientRect();
+      const containerHeight = container === window ? window.innerHeight : (container as HTMLElement).clientHeight;
+      const progress = (containerHeight - rect.top) / (containerHeight + rect.height);
+      const clamped = Math.max(0, Math.min(1, progress));
+      const yPercent = -8 + clamped * 16;
+      imgWrapRef.current.style.transform = `translate3d(0, ${yPercent}%, 0) scale(1.18)`;
+    };
+    update();
+    container.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    return () => {
+      container.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+    };
+  }, []);
+
+  return (
+    <Link
+      ref={wrapRef}
+      href={`/events/${getEventSlug(event)}`}
+      className="group relative block overflow-hidden rounded-2xl border border-slate-200/60 bg-slate-100 shadow-[0_16px_50px_-20px_rgba(15,23,42,0.25)] transition active:scale-[0.99] sm:rounded-3xl"
+      style={{ aspectRatio: '16/10' }}
+    >
+      <div className="absolute inset-0 overflow-hidden">
+        <div ref={imgWrapRef} className="absolute inset-0 will-change-transform">
+          <Image
+            src={imageSrc}
+            alt={event.title}
+            fill
+            priority
+            sizes="(max-width: 1024px) 100vw, 60vw"
+            className="object-cover"
+          />
+        </div>
+      </div>
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/40 to-transparent" />
+      <div className="absolute inset-x-0 top-0 flex items-start justify-between p-4 sm:p-5">
+        <div className="flex items-center gap-2">
+          {logoSrc ? (
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/40 bg-white/95 p-2 shadow-md sm:h-12 sm:w-12">
+              <Image src={logoSrc} alt="" width={40} height={40} className={`h-auto max-h-7 w-auto max-w-7 object-contain sm:max-h-8 sm:max-w-8 ${invertLogo ? 'brightness-0' : ''}`} />
+            </div>
+          ) : null}
+          <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-rose-500 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white shadow-[0_4px_12px_-2px_rgba(244,63,94,0.45)]">
+            ★ Featured
+          </span>
+        </div>
+        <span className="rounded-full bg-white/95 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-blue-600 shadow-md sm:text-[11px]">
+          {formatEventDate(event)}
+        </span>
+      </div>
+      <div className="absolute inset-x-0 bottom-0 p-4 sm:p-6">
+        <h3 className="line-clamp-2 text-xl font-bold leading-tight tracking-[-0.02em] text-white drop-shadow-md sm:text-3xl lg:text-4xl">
+          {event.title}
+        </h3>
+        <div className="mt-2.5 flex items-center gap-2.5 text-xs text-white/90 sm:text-sm">
+          <span className="flex items-center gap-1.5">
+            <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            {event.city}, {event.country}
+          </span>
+          <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-[10px] font-medium backdrop-blur-sm sm:text-xs">
+            {event.category}
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 /* ── Horizontal scrolling event strip per month ── */
 function MonthEventStrip({ events, label, countryCount }: { events: EventItem[]; label: string; countryCount: number }) {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -284,7 +369,7 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
       {/* ── LIST VIEW ── */}
       {view === 'list' && (
         <>
-          {/* Featured — grid cards */}
+          {/* Featured — first is a full-bleed parallax hero, rest as cards */}
           {!empty && featured.length > 0 && (
             <section className="space-y-4">
               <div className="flex items-center gap-3">
@@ -292,35 +377,67 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
                 <h2 className="text-2xl font-bold tracking-[-0.03em] text-slate-950 sm:text-3xl">Featured</h2>
                 <div className="h-px flex-1 bg-gradient-to-r from-slate-200 to-transparent" />
               </div>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {featured.map((e, i) => (
-                  <motion.div
-                    key={e.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.2, delay: i * 0.05 }}
-                    className={i === 2 ? 'hidden sm:block' : ''}
-                  >
-                    <EventCard event={e} priority={i === 0 ? 'hero' : 'featured'} />
-                  </motion.div>
-                ))}
-              </div>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+                <FeaturedHero event={featured[0]} />
+              </motion.div>
+              {featured.length > 1 && (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {featured.slice(1).map((e, i) => (
+                    <motion.div
+                      key={e.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.2, delay: 0.05 + i * 0.05 }}
+                      className={i === 1 ? 'hidden sm:block' : ''}
+                    >
+                      <EventCard event={e} priority="featured" />
+                    </motion.div>
+                  ))}
+                </div>
+              )}
             </section>
           )}
 
-          {/* Month-by-month horizontal scrolling strips */}
+          {/* Month-by-month horizontal scrolling strips — subtle fade-in
+              as each enters viewport, opacity-only to avoid the scroll
+              rubber-band that y-translates cause on iOS. */}
           {!empty ? (
             <div className="space-y-8">
               {monthGroups.slice(0, visibleMonths).map((g) => (
-                <MonthEventStrip key={g.monthKey} events={g.events} label={g.label} countryCount={g.countryCount} />
+                <motion.div
+                  key={g.monthKey}
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true, margin: '-40px' }}
+                  transition={{ duration: 0.35, ease: 'easeOut' }}
+                >
+                  <MonthEventStrip events={g.events} label={g.label} countryCount={g.countryCount} />
+                </motion.div>
               ))}
               {visibleMonths < monthGroups.length && (
                 <div ref={sentinelRef} className="h-px" />
               )}
             </div>
           ) : (
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-600">
-              No events match this view. Broaden your filters to see more.
+            <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50/50 to-blue-50/30 p-8 text-center shadow-sm sm:p-12">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-100 to-violet-100 text-blue-500">
+                <Calendar className="h-6 w-6" />
+              </div>
+              <p className="text-base font-bold text-slate-900 sm:text-lg">
+                {showPast ? 'No past events match' : hasFilters ? 'Nothing matches these filters' : 'No upcoming events yet'}
+              </p>
+              <p className="mt-1 text-sm text-slate-500">
+                {hasFilters ? 'Try broadening your search or resetting filters.' : 'Check back soon — new conferences are added every week.'}
+              </p>
+              {hasFilters && (
+                <button
+                  type="button"
+                  onClick={() => setFilters({ search: '', country: 'All', region: 'All', month: 'All', category: 'All', association: 'All' })}
+                  className="mt-4 inline-flex items-center rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold text-white shadow-sm transition active:scale-95 hover:bg-slate-800"
+                >
+                  Reset filters
+                </button>
+              )}
             </div>
           )}
         </>

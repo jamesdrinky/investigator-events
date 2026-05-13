@@ -131,7 +131,7 @@ export function FilterBar({
 
   return (
     <>
-      <section className="relative z-20 overflow-hidden rounded-[1.15rem] border border-slate-200 bg-white/96 p-3.5 shadow-[0_18px_50px_-38px_rgba(15,23,42,0.16)] backdrop-blur sm:rounded-[1.35rem] sm:p-5 lg:sticky lg:top-[5.2rem]">
+      <section className="sticky top-[calc(var(--app-header-height,3.5rem)+0.25rem)] z-20 overflow-hidden rounded-[1.15rem] border border-slate-200 bg-white/96 p-3.5 shadow-[0_18px_50px_-38px_rgba(15,23,42,0.16)] backdrop-blur sm:rounded-[1.35rem] sm:p-5 lg:top-[5.2rem]">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_0%,rgba(34,211,238,0.08),transparent_22%),radial-gradient(circle_at_90%_0%,rgba(37,99,235,0.08),transparent_20%)]" />
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">

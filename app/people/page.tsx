@@ -25,7 +25,7 @@ type Tab = 'feed' | 'discover' | 'lfg' | 'reviews';
 function PeoplePageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialTab = (searchParams.get('tab') as Tab) || 'feed';
+  const initialTab = (searchParams.get('tab') as Tab) || 'discover';
 
   const [suggested, setSuggested] = useState<Person[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
@@ -179,17 +179,17 @@ function PeoplePageInner() {
           <div className="mx-auto mt-6 inline-flex max-w-full overflow-x-auto rounded-full border border-slate-200/80 bg-white p-1 shadow-sm [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
             <button
               type="button"
-              onClick={() => setTab('feed')}
-              className={`flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1.5 text-[11px] font-semibold transition sm:gap-1.5 sm:px-5 sm:py-2 sm:text-sm ${tab === 'feed' ? 'bg-blue-600 text-white shadow' : 'text-slate-500 hover:text-slate-700'}`}
-            >
-              <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Feed
-            </button>
-            <button
-              type="button"
               onClick={() => setTab('discover')}
               className={`flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1.5 text-[11px] font-semibold transition sm:gap-1.5 sm:px-5 sm:py-2 sm:text-sm ${tab === 'discover' ? 'bg-blue-600 text-white shadow' : 'text-slate-500 hover:text-slate-700'}`}
             >
               <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Discover
+            </button>
+            <button
+              type="button"
+              onClick={() => setTab('feed')}
+              className={`flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1.5 text-[11px] font-semibold transition sm:gap-1.5 sm:px-5 sm:py-2 sm:text-sm ${tab === 'feed' ? 'bg-blue-600 text-white shadow' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Feed
             </button>
             <Link
               href="/reviews"

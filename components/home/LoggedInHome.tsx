@@ -6,6 +6,16 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { UserAvatar } from '@/components/UserAvatar';
+import { getCityHeroImageUrl, getEventImage } from '@/lib/utils/city-media';
+
+// Resolve an image for an event without showing a blank gradient when
+// image_path is missing / non-matching. Falls back through: event-slug
+// lookup → city image → generic city fallback.
+function resolveEventImage(image_path: string | null | undefined, slug: string | null | undefined, city: string | null | undefined): string {
+  if (image_path && /^(\/(cities|events|images)\/|https?:\/\/)/.test(image_path)) return image_path;
+  if (image_path) return image_path; // try whatever we have; <img onError> falls back below
+  return getEventImage(slug ?? '') ?? getCityHeroImageUrl(city ?? '') ?? '/cities/fallback.jpg';
+}
 
 interface QuickEvent {
   id: string;
@@ -31,36 +41,27 @@ function getCountdown(dateStr: string): string {
 
 function EventRow({ event, accent = 'blue', showCountdown = false }: { event: QuickEvent; accent?: 'blue' | 'amber'; showCountdown?: boolean }) {
   const d = new Date(event.start_date);
-  const bgClass = accent === 'amber' ? 'bg-amber-50' : 'bg-blue-50';
-  const monthClass = accent === 'amber' ? 'text-amber-600' : 'text-blue-600';
-  const dayClass = accent === 'amber' ? 'text-amber-700' : 'text-blue-700';
-  const hasImage = event.image_path && /^(\/(cities|events|images)\/|https?:\/\/)/.test(event.image_path);
   const countdown = showCountdown ? getCountdown(event.start_date) : null;
+  const imageSrc = resolveEventImage(event.image_path, event.slug, event.city);
 
   return (
     <Link
       href={`/events/${event.slug}` as Route}
       className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white p-2.5 shadow-sm transition active:scale-[0.98] lg:rounded-2xl lg:p-3.5 lg:hover:shadow-md lg:hover:border-blue-200"
     >
-      {hasImage ? (
-        <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg">
-          <img src={event.image_path!} alt="" className="h-full w-full object-cover" />
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-1 pb-0.5 pt-2">
-            <span className={`text-[8px] font-bold uppercase text-white`}>
-              {d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-            </span>
-          </div>
-        </div>
-      ) : (
-        <div className={`flex h-14 w-14 flex-shrink-0 flex-col items-center justify-center rounded-lg ${bgClass}`}>
-          <span className={`text-[9px] font-bold uppercase ${monthClass}`}>
-            {d.toLocaleDateString('en-GB', { month: 'short' })}
-          </span>
-          <span className={`text-base font-bold leading-none ${dayClass}`}>
-            {d.getDate()}
+      <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg">
+        <img
+          src={imageSrc}
+          alt=""
+          className="h-full w-full object-cover"
+          onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/cities/fallback.jpg'; }}
+        />
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-1 pb-0.5 pt-2">
+          <span className={`text-[8px] font-bold uppercase text-white`}>
+            {d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
           </span>
         </div>
-      )}
+      </div>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold text-slate-900">{event.title}</p>
         <div className="flex items-center gap-2">
@@ -79,20 +80,21 @@ function EventRow({ event, accent = 'blue', showCountdown = false }: { event: Qu
 
 function HeroEventCard({ event }: { event: QuickEvent }) {
   const d = new Date(event.start_date);
-  const hasImage = !!(event.image_path && /^(\/(cities|events|images)\/|https?:\/\/)/.test(event.image_path));
   const countdown = getCountdown(event.start_date);
+  const imageSrc = resolveEventImage(event.image_path, event.slug, event.city);
   return (
     <Link
       href={`/events/${event.slug}` as Route}
       className="group relative block overflow-hidden rounded-2xl border border-slate-200/60 bg-gradient-to-br from-slate-100 to-slate-200 shadow-[0_10px_30px_-12px_rgba(15,23,42,0.18)] transition active:scale-[0.99] lg:rounded-3xl"
       style={{ aspectRatio: '16/10' }}
     >
-      {hasImage && (
-        <>
-          <img src={event.image_path!} alt="" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]" />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/35 to-transparent" />
-        </>
-      )}
+      <img
+        src={imageSrc}
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+        onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/cities/fallback.jpg'; }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/35 to-transparent" />
       <div className="absolute inset-0 flex flex-col justify-end p-4 lg:p-5">
         <div className="flex items-center gap-2">
           <span className="rounded-full bg-blue-500/95 px-2.5 py-1 text-[10px] font-bold text-white shadow-sm backdrop-blur-sm">{countdown}</span>

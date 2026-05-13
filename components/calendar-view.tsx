@@ -262,9 +262,10 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
   });
   const calRef = useRef<HTMLElement | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
-  // Render a year of months upfront so the user can scroll smoothly without
-  // hitting an obvious roadblock at month 3. Lazy load kicks in past 12.
-  const [visibleMonths, setVisibleMonths] = useState(12);
+  // 6 months upfront balances "smooth scroll, no obvious roadblock" with
+  // "fast first paint on mobile". Lazy load kicks in past 6 with generous
+  // rootMargin so the next batch is preloaded long before the apparent end.
+  const [visibleMonths, setVisibleMonths] = useState(6);
 
   const regions = useMemo(() => {
     const f = filters.country === 'All' ? sorted : sorted.filter((e) => e.country === filters.country);
@@ -310,7 +311,7 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
   const empty = filtered.length === 0;
 
   // Reset visible months when month groups change (e.g. filters change)
-  useEffect(() => { setVisibleMonths(12); }, [monthGroups]);
+  useEffect(() => { setVisibleMonths(6); }, [monthGroups]);
 
   // IntersectionObserver to load more month groups on scroll. Generous
   // rootMargin so the next batch is already in the DOM by the time the user

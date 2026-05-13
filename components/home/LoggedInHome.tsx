@@ -510,8 +510,30 @@ export function LoggedInHome() {
         </div>{/* close right column */}
         </div>{/* close grid */}
 
-        {/* ── Bottom padding ── */}
-        <div className="h-6" />
+        {/* ── Bottom finisher — gives the page a visual close instead of
+              trailing off into the tab bar after the last list section. ── */}
+        <div className="mx-auto max-w-6xl px-4 pt-8 pb-4 lg:px-6 lg:pt-12">
+          <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 px-5 py-6 shadow-[0_20px_60px_-30px_rgba(15,23,42,0.6)] lg:rounded-3xl lg:px-8 lg:py-8">
+            <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-blue-500/20 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-16 -left-8 h-44 w-44 rounded-full bg-violet-500/15 blur-3xl" />
+            <div className="relative">
+              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-blue-300/80">Keep exploring</p>
+              <h3 className="mt-2 text-xl font-bold leading-tight text-white lg:text-2xl">Find your next conference.</h3>
+              <p className="mt-1.5 text-[13px] leading-relaxed text-slate-300/90 lg:text-sm">Browse the full PI calendar, submit a new event, or grow your network.</p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Link href="/calendar" className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-xs font-bold text-slate-950 shadow-[0_8px_20px_-8px_rgba(255,255,255,0.4)] transition active:scale-95">
+                  <Calendar className="h-3.5 w-3.5" /> Browse calendar
+                </Link>
+                <Link href={"/submit-event" as Route} className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/[0.06] px-4 py-2 text-xs font-semibold text-white backdrop-blur-sm transition active:scale-95">
+                  + Submit event
+                </Link>
+                <Link href={"/people?tab=discover" as Route} className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/[0.06] px-4 py-2 text-xs font-semibold text-white backdrop-blur-sm transition active:scale-95">
+                  <Users className="h-3.5 w-3.5" /> Find PIs
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Hide the marketing homepage sections when logged in — inject immediately */}

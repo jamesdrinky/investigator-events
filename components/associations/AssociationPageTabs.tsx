@@ -26,6 +26,70 @@ interface Props {
   verifiedCount: number;
 }
 
+// Logos for the "Part of the global network" mobile strip — same set as
+// the homepage's AssociationLoopSection, combined into one row. Filtered to
+// exclude the current association so users don't see themselves in the loop.
+const NETWORK_LOGOS: Array<{ src: string; name: string }> = [
+  { src: '/associations/cii.png', name: 'CII' },
+  { src: '/associations/wad.png', name: 'WAD' },
+  { src: '/associations/budeg.png', name: 'BuDEG' },
+  { src: '/associations/cali.png', name: 'CALI' },
+  { src: '/associations/fali.png', name: 'FALI' },
+  { src: '/associations/federpol.png', name: 'Federpol' },
+  { src: '/associations/intellenet.png', name: 'Intellenet' },
+  { src: '/associations/ikd.png', name: 'IKD' },
+  { src: '/associations/nciss.png', name: 'NCISS' },
+  { src: '/associations/tali.png', name: 'TALI' },
+  { src: '/associations/eurodet.png', name: 'Eurodet' },
+  { src: '/associations/snarp.png', name: 'SNARP' },
+  { src: '/associations/hda.png', name: 'HDA' },
+  { src: '/associations/nfes.png', name: 'NFES' },
+  { src: '/associations/psld.png', name: 'PSLD' },
+  { src: '/associations/lideppe.png', name: 'LIDEPPE' },
+  { src: '/associations/andr.png', name: 'ANDR' },
+  { src: '/associations/ncapi.png', name: 'NCAPI' },
+  { src: '/associations/fewa.png', name: 'FEWA' },
+  { src: '/associations/oedv.png', name: 'ODV' },
+  { src: '/associations/nali.webp', name: 'NALI' },
+  { src: '/associations/aldonys.png', name: 'ALDONYS' },
+  { src: '/associations/wapi.webp', name: 'WAPI' },
+  { src: '/associations/spi.png', name: 'SPI' },
+];
+
+function NetworkLogoStrip({ excludeName, excludeSlug }: { excludeName: string; excludeSlug: string }) {
+  const norm = (s: string) => s.toLowerCase().replace(/\s+/g, '');
+  const filtered = NETWORK_LOGOS.filter(
+    (a) => norm(a.name) !== norm(excludeName) && norm(a.name) !== norm(excludeSlug),
+  );
+  // Tripled so the animation loops seamlessly across any width.
+  const tripled = [...filtered, ...filtered, ...filtered];
+  return (
+    <div className="mt-10 sm:mt-12">
+      <p className="text-center text-[10px] font-bold uppercase tracking-[0.22em] text-white/40">
+        Part of the global network
+      </p>
+      <div
+        className="relative mt-4 w-screen left-1/2 -translate-x-1/2"
+        style={{
+          maskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
+          WebkitMaskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
+        }}
+      >
+        <div className="flex w-max gap-3 animate-loop-left" style={{ touchAction: 'pan-y' }}>
+          {tripled.map((logo, i) => (
+            <div
+              key={`${logo.name}-${i}`}
+              className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-white p-2 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.45),0_0_0_1px_rgba(255,255,255,0.1)] sm:h-16 sm:w-16"
+            >
+              <img src={logo.src} alt={logo.name} className="h-full w-full object-contain" loading="lazy" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
@@ -135,20 +199,30 @@ export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past,
             </div>
           </div>
 
-          {/* Stats bar */}
+          {/* Stats bar — glassmorphism (inset highlight + backdrop-blur) on
+              top of the gradient tints for a premium dashboard feel. */}
           <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
             {[
-              { value: upcoming.length, label: 'Upcoming events', color: 'from-blue-500/20 to-blue-600/10 border-blue-400/15 text-blue-300' },
-              { value: past.length, label: 'Past events', color: 'from-white/5 to-white/[0.02] border-white/10 text-white/60' },
-              { value: platformMembers, label: 'On platform', color: 'from-violet-500/20 to-violet-600/10 border-violet-400/15 text-violet-300' },
-              { value: verifiedCount, label: 'Verified members', color: 'from-emerald-500/20 to-emerald-600/10 border-emerald-400/15 text-emerald-300' },
+              { value: upcoming.length, label: 'Upcoming events', color: 'from-blue-500/25 to-blue-600/10 border-blue-400/20 text-blue-200' },
+              { value: past.length, label: 'Past events', color: 'from-white/10 to-white/[0.03] border-white/15 text-white/70' },
+              { value: platformMembers, label: 'On platform', color: 'from-violet-500/25 to-violet-600/10 border-violet-400/20 text-violet-200' },
+              { value: verifiedCount, label: 'Verified members', color: 'from-emerald-500/25 to-emerald-600/10 border-emerald-400/20 text-emerald-200' },
             ].map((s) => (
-              <div key={s.label} className={`rounded-2xl border bg-gradient-to-br p-4 sm:p-5 ${s.color}`}>
-                <p className="text-2xl font-bold sm:text-3xl">{s.value}</p>
+              <div
+                key={s.label}
+                className={`relative overflow-hidden rounded-2xl border bg-gradient-to-br p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-sm sm:p-5 ${s.color}`}
+              >
+                <p className="text-2xl font-bold tracking-[-0.02em] sm:text-3xl">{s.value}</p>
                 <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider opacity-60">{s.label}</p>
               </div>
             ))}
           </div>
+
+          {/* Global network logo loop — slim, animated, edge-faded. Sits at
+              the bottom of the dark hero so it transitions naturally into the
+              next section. Filters out the current association so users
+              don't see their own logo in the loop. */}
+          <NetworkLogoStrip excludeName={page.name} excludeSlug={page.slug} />
         </div>
       </div>
 

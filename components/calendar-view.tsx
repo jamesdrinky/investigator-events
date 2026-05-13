@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, Calendar, List, X, MapPin } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, List, X, MapPin, History } from 'lucide-react';
 import { CalendarGrid } from '@/components/calendar-grid';
 import { EventCard } from '@/components/event-card';
 import { EventModal } from '@/components/event-modal';
@@ -99,7 +99,7 @@ function MonthEventStrip({ events, label, countryCount }: { events: EventItem[];
       <div
         ref={scrollRef}
         className="flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden"
-        style={{ scrollSnapType: 'x mandatory', touchAction: 'pan-x pan-y' }}
+        style={{ scrollSnapType: 'x mandatory', touchAction: 'pan-x' }}
       >
         {events.map((event) => {
           const logoSrc = getAssociationBrandLogoSrc(event.association ?? event.organiser);
@@ -162,6 +162,7 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
   const [filters, setFilters] = useState({ search: initialSearch ?? '', country: 'All', region: initialRegion ?? 'All', month: initialMonth ?? 'All', category: 'All', association: initialAssociation ?? 'All' });
   const [scope, setScope] = useState<'main' | 'secondary'>('main');
   const [view, setView] = useState<'list' | 'calendar'>(initialView ?? 'list');
+  const [showPast, setShowPast] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
   const [previewDate, setPreviewDate] = useState<string | null>(null);
   const [calendarMK, setCalendarMK] = useState(() => {
@@ -191,10 +192,17 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
   const filtered = useMemo(() => filters.month === 'All' ? baseFiltered : baseFiltered.filter((e) => formatMonthLabel(getMonthKey(e.date)) === filters.month), [baseFiltered, filters.month]);
   const prioritized = useMemo(() => getPriorityEvents(filtered), [filtered]);
   const upcoming = useMemo(() => prioritized.filter(isUpcoming), [prioritized]);
-  const visible = useMemo(() => upcoming.length > 0 ? upcoming : prioritized, [prioritized, upcoming]);
-  const featured = useMemo(() => visible.slice(0, 3), [visible]);
-  const feed = useMemo(() => visible.slice(Math.min(featured.length, 3)), [featured.length, visible]);
-  const monthGroups = useMemo(() => getMonthFeedGroups(feed.length > 0 ? feed : visible), [feed, visible]);
+  const past = useMemo(() => prioritized.filter((e) => !isUpcoming(e)).reverse(), [prioritized]);
+  const visible = useMemo(() => {
+    if (showPast) return past;
+    return upcoming.length > 0 ? upcoming : prioritized;
+  }, [showPast, past, upcoming, prioritized]);
+  const featured = useMemo(() => (showPast ? [] : visible.slice(0, 3)), [visible, showPast]);
+  const feed = useMemo(() => visible.slice(featured.length), [featured.length, visible]);
+  const monthGroups = useMemo(() => {
+    const groups = getMonthFeedGroups(feed.length > 0 ? feed : visible);
+    return showPast ? [...groups].reverse() : groups;
+  }, [feed, visible, showPast]);
   const calendarEvents = useMemo(() => baseFiltered.filter((e) => getMonthKey(e.date) === calendarMK), [baseFiltered, calendarMK]);
   const previewEvents = useMemo(() => {
     if (!previewDate) return [];
@@ -252,7 +260,10 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
           <button onClick={() => setView('calendar')} className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition ${view === 'calendar' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
             <Calendar className="h-4 w-4" /> Calendar
           </button>
-          <div className="ml-auto text-sm text-slate-400">{filtered.length} events</div>
+          <button onClick={() => setShowPast((s) => !s)} className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition ${showPast ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+            <History className="h-4 w-4" /> Past
+          </button>
+          <div className="ml-auto text-sm text-slate-400">{visible.length} {showPast ? 'past ' : ''}events</div>
         </div>
         <FilterBar countries={countries} regions={regions} months={monthOpts} categories={categories} associations={associations} scope={scope} view={view} values={filters} resultCount={filtered.length} upcomingCount={upcoming.length} hasActiveFilters={hasFilters} onChange={setFilters} onChangeScope={setScope} onChangeView={setView} onReset={() => setFilters({ search: '', country: 'All', region: 'All', month: 'All', category: 'All', association: 'All' })} />
       </div>
@@ -266,7 +277,7 @@ export function CalendarView({ events, initialAssociation, initialSearch, initia
               <h2 className="text-lg font-bold text-slate-950 sm:text-xl">Featured</h2>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {featured.map((e, i) => (
-                  <motion.div key={e.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: i * 0.05 }}>
+                  <motion.div key={e.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2, delay: i * 0.05 }}>
                     <EventCard event={e} priority={i === 0 ? 'hero' : 'featured'} />
                   </motion.div>
                 ))}

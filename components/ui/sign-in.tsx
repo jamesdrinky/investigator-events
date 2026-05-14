@@ -258,6 +258,30 @@ export function AuthPage({
                     {resetStatus.kind === 'error' && (
                       <p className="text-[11px] text-rose-600">{resetStatus.message}</p>
                     )}
+                    {/* Fallback path: if the reset email flow doesn't work for
+                        any reason (Supabase config, deliverability, etc.) users
+                        can always get back in via Apple/LinkedIn. Shown after
+                        attempting reset OR if user clicks the help link. */}
+                    {(resetStatus.kind === 'sent' || resetStatus.kind === 'error') && (
+                      <p className="text-[10px] text-slate-400 text-right">
+                        Still stuck? Try{' '}
+                        {onAppleSignIn && (
+                          <button type="button" onClick={onAppleSignIn} className="font-semibold text-slate-600 underline">
+                            Sign in with Apple
+                          </button>
+                        )}
+                        {onAppleSignIn && onLinkedInSignIn && ' or '}
+                        {onLinkedInSignIn && (
+                          <button type="button" onClick={onLinkedInSignIn} className="font-semibold text-slate-600 underline">
+                            LinkedIn
+                          </button>
+                        )}
+                        {', or email '}
+                        <a href="mailto:support@investigatorevents.com" className="font-semibold text-slate-600 underline">
+                          support
+                        </a>.
+                      </p>
+                    )}
                   </div>
                 )}
               </div>

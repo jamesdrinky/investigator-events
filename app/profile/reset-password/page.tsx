@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Lock, ShieldCheck } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
@@ -10,8 +10,64 @@ export default function ResetPasswordPage() {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [status, setStatus] = useState<'verifying' | 'idle' | 'submitting' | 'success' | 'error' | 'invalid_token'>('verifying');
   const [error, setError] = useState<string | null>(null);
+
+  // On mount: pick up the recovery token from the URL and exchange it for a
+  // session. This page can be reached three ways and we handle all of them:
+  // 1. ?token_hash=...&type=recovery  (custom email template — preferred)
+  // 2. ?code=...                       (PKCE redirect from Supabase verify)
+  // 3. already-signed-in via PASSWORD_RECOVERY listener (no params needed)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const supabase = createSupabaseBrowserClient();
+    const url = new URL(window.location.href);
+    const tokenHash = url.searchParams.get('token_hash');
+    const type = url.searchParams.get('type');
+    const code = url.searchParams.get('code');
+
+    const cleanUrl = () => window.history.replaceState({}, '', '/profile/reset-password');
+
+    const handle = async () => {
+      // Custom email-template path: verify the token hash directly.
+      if (tokenHash && type === 'recovery') {
+        const { error: verifyErr } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: 'recovery' });
+        cleanUrl();
+        if (verifyErr) {
+          setStatus('invalid_token');
+          setError(verifyErr.message || 'This reset link is invalid or has expired. Request a new one.');
+          return;
+        }
+        setStatus('idle');
+        return;
+      }
+
+      // PKCE path: exchange the code for a session.
+      if (code) {
+        const { error: exchangeErr } = await supabase.auth.exchangeCodeForSession(code);
+        cleanUrl();
+        if (exchangeErr) {
+          setStatus('invalid_token');
+          setError(exchangeErr.message || 'This reset link is invalid or has expired. Request a new one.');
+          return;
+        }
+        setStatus('idle');
+        return;
+      }
+
+      // No params: either already in a recovery session via global handler,
+      // or the user navigated here directly. Check for an active session.
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setStatus('idle');
+      } else {
+        setStatus('invalid_token');
+        setError('No active reset session. Request a new password reset email from the sign-in page.');
+      }
+    };
+
+    handle();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +105,20 @@ export default function ResetPasswordPage() {
           You're signed in via the password reset link. Choose a new password and you're back in.
         </p>
 
-        {status === 'success' ? (
+        {status === 'verifying' ? (
+          <div className="mt-6 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div className="h-5 w-5 flex-shrink-0 animate-spin rounded-full border-2 border-slate-300 border-t-blue-600" />
+            <p className="text-sm font-medium text-slate-600">Verifying your reset link…</p>
+          </div>
+        ) : status === 'invalid_token' ? (
+          <div className="mt-6 space-y-3 rounded-2xl border border-rose-200 bg-rose-50 p-4">
+            <p className="text-sm font-semibold text-rose-700">Reset link expired or invalid</p>
+            <p className="text-xs text-rose-600/80">{error}</p>
+            <a href="/signin" className="inline-block rounded-full bg-rose-600 px-4 py-2 text-xs font-semibold text-white">
+              Back to sign in
+            </a>
+          </div>
+        ) : status === 'success' ? (
           <div className="mt-6 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
             <ShieldCheck className="h-5 w-5 flex-shrink-0 text-emerald-600" />
             <p className="text-sm font-medium text-emerald-700">Password updated. Redirecting…</p>

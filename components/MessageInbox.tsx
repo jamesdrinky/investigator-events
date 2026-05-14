@@ -38,6 +38,7 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
   const [search, setSearch] = useState('');
   const [searchResults, setSearchResults] = useState<Array<{ id: string; full_name: string | null; avatar_url: string | null; username: string | null }>>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [attachError, setAttachError] = useState<string | null>(null);
   const [showEventPicker, setShowEventPicker] = useState(false);
   const [eventSearch, setEventSearch] = useState('');
   const [eventResults, setEventResults] = useState<Array<{ id: string; title: string; slug: string; city: string; country: string; image_path: string | null }>>([]);
@@ -226,27 +227,50 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
       return;
     }
     if (!userId || !activeChat) return;
+    setAttachError(null);
+
+    let dataUrl: string;
+    let format: string;
     try {
       const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera');
       const photo = await Camera.getPhoto({
         quality: 80,
         allowEditing: false,
-        resultType: CameraResultType.Base64,
+        // DataUrl returns a ready-to-use data:image/jpeg;base64,... string.
+        // Uri would be more memory-efficient but its webPath needs
+        // Capacitor.convertFileSrc gymnastics and was failing silently.
+        resultType: CameraResultType.DataUrl,
         source: CameraSource.Prompt,
       });
-      if (!photo.base64String) return;
-      setUploadingImage(true);
-      const format = photo.format ?? 'jpeg';
-      const path = `messages/${userId}/${Date.now()}.${format === 'jpeg' ? 'jpg' : format}`;
-      const dataUrl = `data:image/${format};base64,${photo.base64String}`;
-      const blob = await (await fetch(dataUrl)).blob();
-      const { error } = await supabase.storage.from('avatars').upload(path, blob, { contentType: blob.type });
-      if (!error) {
-        const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path);
-        if (urlData?.publicUrl) await sendMessage(urlData.publicUrl);
+      if (!photo.dataUrl) {
+        setAttachError('No image returned from camera');
+        return;
       }
-    } catch {
-      // User cancelled the picker or denied permission — silent.
+      dataUrl = photo.dataUrl;
+      format = photo.format ?? 'jpeg';
+    } catch (e) {
+      // Picker was cancelled or permission denied — silent (user knows they cancelled).
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const ext = format === 'jpeg' ? 'jpg' : format;
+      const path = `messages/${userId}/${Date.now()}.${ext}`;
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      const { error: upErr } = await supabase.storage.from('avatars').upload(path, blob, {
+        contentType: blob.type || `image/${format}`,
+        upsert: false,
+      });
+      if (upErr) throw new Error(upErr.message);
+      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path);
+      if (!urlData?.publicUrl) throw new Error('Could not get public URL for uploaded photo');
+      await sendMessage(urlData.publicUrl);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to send photo';
+      console.error('[camera] send failure', err);
+      setAttachError(message);
     } finally {
       setUploadingImage(false);
     }
@@ -455,6 +479,14 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
             </div>
 
             {/* Input */}
+            {/* Surface camera/upload errors so silent failures don't look
+                like "tapped Use Photo and nothing happened". */}
+            {attachError && (
+              <div className="shrink-0 bg-rose-500/10 border-t border-rose-500/30 px-3 py-2 text-[12px] text-rose-300 flex items-center justify-between gap-3">
+                <span className="truncate">⚠ {attachError}</span>
+                <button type="button" onClick={() => setAttachError(null)} className="text-rose-200 underline">Dismiss</button>
+              </div>
+            )}
             <div className="shrink-0 border-t border-white/5 bg-slate-950 p-2.5 sm:p-3" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom, 0.75rem))' }}>
               <div className="flex items-center gap-2">
                 <input

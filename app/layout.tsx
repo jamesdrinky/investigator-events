@@ -12,6 +12,7 @@ import { TopLoadingBar } from '@/components/TopLoadingBar';
 import { GlobalHaptics } from '@/components/GlobalHaptics';
 import { NativeInit } from '@/components/NativeInit';
 import { MobileBackButton } from '@/components/MobileBackButton';
+import { PasswordRecoveryHandler } from '@/components/PasswordRecoveryHandler';
 import './globals.css';
 
 const sans = Plus_Jakarta_Sans({
@@ -69,6 +70,7 @@ export default function RootLayout({
         </div>
         <MobileBackButton />
         <BottomTabBar />
+        <PasswordRecoveryHandler />
         <OfflineNotice />
         <NewsletterBanner />
         <CookieBanner />

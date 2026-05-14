@@ -124,12 +124,19 @@ export function assertSameOriginRequest() {
   const headerStore = headers();
   const origin = headerStore.get('origin');
   const host = headerStore.get('x-forwarded-host') ?? headerStore.get('host');
+  const userAgent = headerStore.get('user-agent') ?? '';
+
+  // iOS Capacitor's WKWebView often omits the Origin header on same-origin
+  // POSTs (browser-spec optional). Detect via UA so the native app isn't
+  // locked out of endpoints like /api/delete-account. The endpoint's own
+  // auth check is the real protection; this header check is defense-in-depth.
+  const isNativeApp = /CapacitorWebView|InvestigatorEvents|Capacitor/i.test(userAgent);
 
   if (!origin) {
+    if (isNativeApp) return;
     if (process.env.NODE_ENV === 'production') {
       throw new Error('Missing origin');
     }
-
     return;
   }
 

@@ -24,6 +24,19 @@ export function NewsletterBanner() {
       if (Date.now() - dismissedAt < 24 * 60 * 60 * 1000) return;
     }
 
+    // SYNCHRONOUS auth-cookie check first. Previously the only auth check
+    // was an async supabase.auth.getUser() — during the 50-200ms it takes
+    // to resolve on a fresh page load, the 4s timer would already be set,
+    // and any error in getUser() (network blip, race) meant the banner
+    // popped up even for logged-in users. Cookie presence proves there's
+    // a session in flight; skip the banner immediately.
+    const hasAuthCookie = typeof document !== 'undefined' &&
+      /(^|;\s*)sb-[^=]+-auth-token=/.test(document.cookie);
+    if (hasAuthCookie) {
+      localStorage.setItem(STORAGE_KEY, 'subscribed');
+      return;
+    }
+
     let timer: ReturnType<typeof setTimeout> | null = null;
 
     const check = async () => {

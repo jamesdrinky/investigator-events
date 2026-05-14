@@ -134,16 +134,21 @@ export function AuthPage({
               </div>
             )}
 
-            {/* Google — secondary */}
-            <button
-              type="button"
-              onClick={onGoogleSignIn}
-              className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white py-3 text-sm font-medium text-slate-600 shadow-sm transition hover:bg-slate-50"
-              style={{ opacity: 0, animation: 'fadeSlideIn 0.5s ease forwards 0.35s' }}
-            >
-              <GoogleIcon />
-              Continue with Google
-            </button>
+            {/* Google — disabled in WebView/Capacitor. Google blocks OAuth in
+                non-system browsers (error 403 disallowed_useragent), so the
+                button is hidden unless explicitly opted in. Re-enable post-
+                launch with @capacitor-community/google-signin native plugin. */}
+            {onGoogleSignIn && (
+              <button
+                type="button"
+                onClick={onGoogleSignIn}
+                className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white py-3 text-sm font-medium text-slate-600 shadow-sm transition hover:bg-slate-50"
+                style={{ opacity: 0, animation: 'fadeSlideIn 0.5s ease forwards 0.35s' }}
+              >
+                <GoogleIcon />
+                Continue with Google
+              </button>
+            )}
 
             {/* Apple — required for App Store compliance */}
             {onAppleSignIn && (

@@ -106,7 +106,6 @@ function SignUpPageInner() {
       heroImageSrc="https://images.unsplash.com/photo-1497366216548-37526070297c?w=1600&q=80"
       testimonials={testimonials}
       onSubmit={handleSignUp}
-      onGoogleSignIn={handleGoogle}
       onLinkedInSignIn={handleLinkedIn}
       onAppleSignIn={handleApple}
       onSwitchMode={() => router.push('/signin')}

@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { Send, ArrowLeft, Search, ImagePlus, Calendar } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { UserAvatar } from '@/components/UserAvatar';
+import { isNativeApp } from '@/lib/capacitor';
 
 type Conversation = {
   user_id: string;
@@ -215,6 +216,42 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
+  // Native Camera attach for iOS — uses Capacitor's Camera plugin so the
+  // user gets the real native iOS picker (Camera / Photo Library) instead
+  // of the HTML <input type="file"> route which crashes the WebView on iOS
+  // after the camera returns the photo. Web stays on the file input.
+  const handleAttachImage = async () => {
+    if (!isNativeApp) {
+      fileInputRef.current?.click();
+      return;
+    }
+    if (!userId || !activeChat) return;
+    try {
+      const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera');
+      const photo = await Camera.getPhoto({
+        quality: 80,
+        allowEditing: false,
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Prompt,
+      });
+      if (!photo.base64String) return;
+      setUploadingImage(true);
+      const format = photo.format ?? 'jpeg';
+      const path = `messages/${userId}/${Date.now()}.${format === 'jpeg' ? 'jpg' : format}`;
+      const dataUrl = `data:image/${format};base64,${photo.base64String}`;
+      const blob = await (await fetch(dataUrl)).blob();
+      const { error } = await supabase.storage.from('avatars').upload(path, blob, { contentType: blob.type });
+      if (!error) {
+        const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path);
+        if (urlData?.publicUrl) await sendMessage(urlData.publicUrl);
+      }
+    } catch {
+      // User cancelled the picker or denied permission — silent.
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   const searchEvents = async (q: string) => {
     setEventSearch(q);
     if (q.length < 2) { setEventResults([]); return; }
@@ -299,7 +336,10 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto pb-24 sm:pb-0">
+        <div
+          className="min-h-0 flex-1 overflow-y-auto pb-24 sm:pb-0 [-webkit-overflow-scrolling:touch] [overscroll-behavior:contain]"
+          style={{ touchAction: 'pan-y' }}
+        >
           {conversations.length === 0 ? (
             <p className="p-6 text-center text-sm text-slate-500">No conversations yet. Search for someone to message.</p>
           ) : (
@@ -342,13 +382,14 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
               </a>
             </div>
 
-            {/* Messages */}
+            {/* Messages — momentum scroll + contained overscroll so the
+                inner list doesn't fight the page scroll. Removed the
+                top/bottom maskImage (was causing iOS repaint jank that
+                made every scroll feel scuffed). */}
             <div
               ref={messagesContainerRef}
-              className="relative min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-4"
-              style={{
-                maskImage: 'linear-gradient(to bottom, transparent, black 24px, black calc(100% - 24px), transparent)',
-              }}
+              className="relative min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-4 [-webkit-overflow-scrolling:touch] [overscroll-behavior:contain]"
+              style={{ touchAction: 'pan-y' }}
             >
               <div className="space-y-2">
                 {messages.map((m, i) => {
@@ -423,7 +464,7 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
                 />
                 <button
                   type="button"
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={handleAttachImage}
                   disabled={uploadingImage}
                   className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl text-slate-500 transition hover:bg-white/5 hover:text-slate-300 disabled:opacity-40 sm:h-10 sm:w-10"
                 >

@@ -88,17 +88,22 @@ export default async function HomePage() {
 
       <div data-homepage-section className="order-5 sm:order-none">
         <div className="container-shell py-6 sm:py-10">
-          <div className="flex flex-col items-center gap-4 rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50/80 via-white to-purple-50/80 px-6 py-8 text-center sm:flex-row sm:justify-between sm:px-10 sm:text-left">
-            <div>
-              <p className="text-base font-bold text-slate-900 sm:text-lg">Run conferences or training events?</p>
-              <p className="mt-1 text-sm text-slate-500">List your event for free — it takes 2 minutes and reaches investigators worldwide.</p>
+          <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 px-6 py-8 shadow-[0_20px_60px_-30px_rgba(15,23,42,0.6)] sm:rounded-3xl sm:px-10 sm:py-10">
+            <div className="pointer-events-none absolute -right-12 -top-12 h-44 w-44 rounded-full bg-blue-500/20 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-16 -left-8 h-44 w-44 rounded-full bg-violet-500/15 blur-3xl" />
+            <div className="relative flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="max-w-xl">
+                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-blue-300/80">For organisers</p>
+                <p className="mt-2 text-lg font-bold leading-tight text-white sm:text-xl">Run conferences or training events?</p>
+                <p className="mt-1.5 text-sm leading-relaxed text-slate-300/85">List your event for free — it takes 2 minutes and reaches investigators worldwide.</p>
+              </div>
+              <Link
+                href="/submit-event"
+                className="inline-flex flex-shrink-0 items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-slate-950 shadow-[0_8px_20px_-8px_rgba(255,255,255,0.4)] transition active:scale-95"
+              >
+                Submit your event →
+              </Link>
             </div>
-            <Link
-              href="/submit-event"
-              className="inline-flex flex-shrink-0 items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
-            >
-              Submit your event →
-            </Link>
           </div>
         </div>
       </div>

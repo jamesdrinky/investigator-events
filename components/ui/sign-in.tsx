@@ -85,6 +85,7 @@ export function AuthPage({
   const [password, setPassword] = useState('');
   const [tosAccepted, setTosAccepted] = useState(false);
   const [newsletterOptIn, setNewsletterOptIn] = useState(true);
+  const [resetStatus, setResetStatus] = useState<{ kind: 'idle' | 'sending' | 'sent' | 'error'; message?: string }>({ kind: 'idle' });
 
   const isSignUp = mode === 'signup';
 
@@ -219,18 +220,41 @@ export function AuthPage({
                   </div>
                 </GlassInput>
                 {!isSignUp && (
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      if (!email) { alert('Enter your email first'); return; }
-                      const supabase = (await import('@/lib/supabase/browser')).createSupabaseBrowserClient();
-                      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/profile/edit' });
-                      if (error) { alert(error.message); } else { alert('Password reset link sent to your email'); }
-                    }}
-                    className="mt-1 self-end text-xs font-medium text-blue-600 hover:underline"
-                  >
-                    Forgot password?
-                  </button>
+                  <div className="mt-1 flex flex-col items-end gap-1">
+                    <button
+                      type="button"
+                      disabled={resetStatus.kind === 'sending'}
+                      onClick={async () => {
+                        if (!email) {
+                          setResetStatus({ kind: 'error', message: 'Enter your email above first' });
+                          return;
+                        }
+                        setResetStatus({ kind: 'sending' });
+                        try {
+                          const supabase = (await import('@/lib/supabase/browser')).createSupabaseBrowserClient();
+                          const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                            redirectTo: window.location.origin + '/profile/edit',
+                          });
+                          if (error) {
+                            setResetStatus({ kind: 'error', message: error.message });
+                          } else {
+                            setResetStatus({ kind: 'sent', message: 'Reset link sent — check your inbox.' });
+                          }
+                        } catch (e) {
+                          setResetStatus({ kind: 'error', message: e instanceof Error ? e.message : 'Something went wrong' });
+                        }
+                      }}
+                      className="text-xs font-medium text-blue-600 hover:underline disabled:opacity-50"
+                    >
+                      {resetStatus.kind === 'sending' ? 'Sending…' : 'Forgot password?'}
+                    </button>
+                    {resetStatus.kind === 'sent' && (
+                      <p className="text-[11px] text-emerald-600">{resetStatus.message}</p>
+                    )}
+                    {resetStatus.kind === 'error' && (
+                      <p className="text-[11px] text-rose-600">{resetStatus.message}</p>
+                    )}
+                  </div>
                 )}
               </div>
 

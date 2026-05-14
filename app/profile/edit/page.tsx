@@ -189,6 +189,10 @@ export default function EditProfilePage() {
   const [newYear, setNewYear] = useState('');
   const [verifications, setVerifications] = useState<Record<string, { status: string; expires_at?: string }>>({});
   const [verifyCode, setVerifyCode] = useState('');
+  // Inline two-step confirm for account deletion. confirm()/alert() are
+  // unreliable in iOS Capacitor WebView so we render the confirm UI in-page.
+  const [deleteStage, setDeleteStage] = useState<'idle' | 'confirming' | 'final' | 'deleting' | 'error'>('idle');
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [verifyAssoc, setVerifyAssoc] = useState('');
   const [verifyLoading, setVerifyLoading] = useState(false);
   const [verifyMessage, setVerifyMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -1007,28 +1011,102 @@ export default function EditProfilePage() {
               </span>
             )}
           </div>
-          {/* Danger zone */}
+          {/* Danger zone — inline two-step confirm (no native confirm/alert
+              because they're unreliable in iOS WebView). */}
           <div className="mt-16 rounded-2xl border border-red-200/60 bg-red-50/30 p-5 sm:p-6">
             <h2 className="text-base font-bold text-red-700">Delete account</h2>
             <p className="mt-1 text-sm text-red-600/70">Permanently delete your account, profile, posts, and all associated data. This cannot be undone.</p>
-            <button
-              type="button"
-              onClick={async () => {
-                if (!confirm('Are you sure you want to delete your account? This permanently removes your profile, posts, connections, and all data. This cannot be undone.')) return;
-                if (!confirm('This is your last chance — are you absolutely sure?')) return;
-                const res = await fetch('/api/delete-account', { method: 'POST' });
-                if (res.ok) {
-                  const supabase = createSupabaseBrowserClient();
-                  await supabase.auth.signOut();
-                  window.location.href = '/';
-                } else {
-                  alert('Failed to delete account. Please try again or contact support.');
-                }
-              }}
-              className="mt-4 rounded-full border border-red-300 bg-white px-5 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
-            >
-              Delete my account
-            </button>
+
+            {deleteStage === 'idle' && (
+              <button
+                type="button"
+                onClick={() => setDeleteStage('confirming')}
+                className="mt-4 rounded-full border border-red-300 bg-white px-5 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+              >
+                Delete my account
+              </button>
+            )}
+
+            {(deleteStage === 'confirming' || deleteStage === 'final') && (
+              <div className="mt-4 space-y-3 rounded-xl border border-red-300 bg-white p-4">
+                <p className="text-sm font-semibold text-red-700">
+                  {deleteStage === 'confirming'
+                    ? 'Are you sure? This permanently removes your profile, posts, connections, messages, and all data.'
+                    : 'Last chance. Tap "Yes, delete forever" to confirm. This cannot be undone.'}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => { setDeleteStage('idle'); setDeleteError(null); }}
+                    className="rounded-full border border-slate-300 bg-white px-5 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                  >
+                    Cancel
+                  </button>
+                  {deleteStage === 'confirming' ? (
+                    <button
+                      type="button"
+                      onClick={() => setDeleteStage('final')}
+                      className="rounded-full bg-red-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
+                    >
+                      Yes, continue
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        setDeleteStage('deleting');
+                        setDeleteError(null);
+                        try {
+                          const res = await fetch('/api/delete-account', { method: 'POST' });
+                          if (res.ok) {
+                            const supabase = createSupabaseBrowserClient();
+                            await supabase.auth.signOut();
+                            window.location.href = '/';
+                          } else {
+                            const body = await res.json().catch(() => ({}));
+                            setDeleteStage('error');
+                            setDeleteError(body?.detail || body?.error || `Server responded ${res.status}`);
+                          }
+                        } catch (e) {
+                          setDeleteStage('error');
+                          setDeleteError(e instanceof Error ? e.message : 'Network error');
+                        }
+                      }}
+                      className="rounded-full bg-red-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
+                    >
+                      Yes, delete forever
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {deleteStage === 'deleting' && (
+              <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4 text-sm font-medium text-slate-700">
+                Deleting your account…
+              </div>
+            )}
+
+            {deleteStage === 'error' && (
+              <div className="mt-4 space-y-3 rounded-xl border border-red-300 bg-red-50 p-4">
+                <p className="text-sm font-semibold text-red-700">Failed to delete account.</p>
+                {deleteError && <p className="text-xs text-red-600/80">{deleteError}</p>}
+                <p className="text-xs text-red-600/70">
+                  Email{' '}
+                  <a href="mailto:support@investigatorevents.com" className="font-semibold underline">
+                    support@investigatorevents.com
+                  </a>{' '}
+                  and we&apos;ll remove it for you.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => { setDeleteStage('idle'); setDeleteError(null); }}
+                  className="rounded-full border border-slate-300 bg-white px-4 py-1.5 text-xs font-medium text-slate-700"
+                >
+                  Close
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

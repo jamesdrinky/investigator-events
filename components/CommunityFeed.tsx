@@ -56,6 +56,8 @@ export function CommunityFeed() {
   const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
   const [comments, setComments] = useState<Record<string, Comment[]>>({});
   const [commentText, setCommentText] = useState<Record<string, string>>({});
+  // Inline moderation error (replaces alert() which is unreliable in iOS WebView)
+  const [moderationError, setModerationError] = useState<string | null>(null);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -106,9 +108,10 @@ export function CommunityFeed() {
     // Basic content filter — block slurs/hate speech
     const blocked = /\b(nigger|nigga|faggot|retard|kike|spic|chink|wetback|coon|darkie|gook|tranny)\b/i;
     if (blocked.test(postText)) {
-      alert('Your post contains language that violates our community guidelines. Please edit and try again.');
+      setModerationError('Your post contains language that violates our community guidelines. Please edit and try again.');
       return;
     }
+    setModerationError(null);
 
     setPosting(true);
     const supabase = createSupabaseBrowserClient();
@@ -216,9 +219,10 @@ export function CommunityFeed() {
     if (!userId || !commentText[postId]?.trim()) return;
     const blocked = /\b(nigger|nigga|faggot|retard|kike|spic|chink|wetback|coon|darkie|gook|tranny)\b/i;
     if (blocked.test(commentText[postId])) {
-      alert('Your comment contains language that violates our community guidelines.');
+      setModerationError('Your comment contains language that violates our community guidelines.');
       return;
     }
+    setModerationError(null);
     const supabase = createSupabaseBrowserClient();
     const { data } = await supabase
       .from('post_comments')
@@ -273,6 +277,13 @@ export function CommunityFeed() {
 
   return (
     <div className="mx-auto max-w-2xl">
+      {/* Inline moderation error (replaces alert()) */}
+      {moderationError && (
+        <div className="mb-3 flex items-start justify-between gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          <span>⚠ {moderationError}</span>
+          <button type="button" onClick={() => setModerationError(null)} className="font-semibold underline">Dismiss</button>
+        </div>
+      )}
       {/* Compose box */}
       {userId && (
         <div className="rounded-2xl border border-slate-200/60 bg-white p-4 shadow-sm sm:p-5">

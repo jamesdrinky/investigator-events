@@ -232,8 +232,12 @@ export function AuthPage({
                         setResetStatus({ kind: 'sending' });
                         try {
                           const supabase = (await import('@/lib/supabase/browser')).createSupabaseBrowserClient();
+                          // Route through /auth/callback (which is in the Supabase
+                          // Redirect URLs allow list) and then ?next= into the
+                          // dedicated reset-password page so the user lands on a
+                          // form that lets them set a new password.
                           const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                            redirectTo: window.location.origin + '/profile/edit',
+                            redirectTo: window.location.origin + '/auth/callback?next=/profile/reset-password',
                           });
                           if (error) {
                             setResetStatus({ kind: 'error', message: error.message });

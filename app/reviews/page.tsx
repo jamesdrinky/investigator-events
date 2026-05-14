@@ -32,7 +32,7 @@ function fmtDate(d: string) {
 function FeaturedReviewCard({ event }: { event: ReviewedEvent }) {
   return (
     <Link
-      href={`/events/${event.slug}`}
+      href={`/events/${event.slug}#reviews`}
       className="group relative block overflow-hidden rounded-3xl shadow-xl transition-all hover:shadow-2xl"
     >
       <div className="relative h-64 sm:h-80">
@@ -65,7 +65,7 @@ function FeaturedReviewCard({ event }: { event: ReviewedEvent }) {
 function ReviewedCard({ event, rank }: { event: ReviewedEvent; rank: number }) {
   return (
     <Link
-      href={`/events/${event.slug}`}
+      href={`/events/${event.slug}#reviews`}
       className="group block overflow-hidden rounded-2xl border border-slate-200/60 bg-white shadow-sm transition-all hover:shadow-lg hover:border-slate-300/60"
     >
       <div className="relative h-44 overflow-hidden bg-slate-100 sm:h-48">
@@ -93,7 +93,7 @@ function ReviewedCard({ event, rank }: { event: ReviewedEvent; rank: number }) {
 function UnreviewedCard({ event, isLoggedIn }: { event: ReviewedEvent; isLoggedIn: boolean }) {
   return (
     <Link
-      href={`/events/${event.slug}`}
+      href={`/events/${event.slug}#reviews`}
       className="group relative block overflow-hidden rounded-2xl border border-slate-200/60 bg-white transition-all hover:shadow-md hover:border-amber-200/60"
     >
       <div className="flex">

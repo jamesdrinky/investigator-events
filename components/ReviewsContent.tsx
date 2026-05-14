@@ -96,7 +96,7 @@ export default function ReviewsContent() {
           </div>
           <div className="mt-4 space-y-3">
             {reviewed.map((event, i) => (
-              <Link key={event.id} href={`/events/${event.slug}`} className="group flex items-center gap-4 rounded-2xl border border-slate-200/60 bg-white p-3 shadow-sm transition hover:shadow-md">
+              <Link key={event.id} href={`/events/${event.slug}#reviews`} className="group flex items-center gap-4 rounded-2xl border border-slate-200/60 bg-white p-3 shadow-sm transition hover:shadow-md">
                 <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-slate-100">
                   <Image src={event.image_path || FALLBACK} alt={event.title} fill className="object-cover" />
                   <div className="absolute bottom-0 left-0 rounded-tr-lg bg-slate-900/80 px-1.5 py-0.5 text-[10px] font-bold text-white">#{i + 1}</div>
@@ -127,7 +127,7 @@ export default function ReviewsContent() {
           <p className="mt-1 text-xs text-slate-400">Attended any of these? Your feedback helps everyone.</p>
           <div className="mt-4 space-y-2">
             {unreviewed.slice(0, 10).map((event) => (
-              <Link key={event.id} href={`/events/${event.slug}`} className="group flex items-center gap-3 rounded-xl border border-slate-100 bg-white p-3 transition hover:border-amber-200/60 hover:shadow-sm">
+              <Link key={event.id} href={`/events/${event.slug}#reviews`} className="group flex items-center gap-3 rounded-xl border border-slate-100 bg-white p-3 transition hover:border-amber-200/60 hover:shadow-sm">
                 <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100">
                   <Image src={event.image_path || FALLBACK} alt={event.title} fill className="object-cover" />
                 </div>

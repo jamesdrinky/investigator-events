@@ -367,8 +367,10 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
         </div>
       </div>
 
-      {/* Right: chat */}
-      <div className={`relative min-h-0 flex-1 flex-col ${!activeChat ? 'hidden sm:flex' : 'flex'}`}>
+      {/* Right: chat — explicit bg-slate-950 so the column never shows the
+          underlying [data-app-content] white through during keyboard-open
+          layout shifts on iOS. */}
+      <div className={`relative min-h-0 flex-1 flex-col bg-slate-950 ${!activeChat ? 'hidden sm:flex' : 'flex'}`}>
         {activeChat && activePerson ? (
           <>
             {/* Chat header */}
@@ -382,13 +384,13 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
               </a>
             </div>
 
-            {/* Messages — momentum scroll + contained overscroll so the
-                inner list doesn't fight the page scroll. Removed the
-                top/bottom maskImage (was causing iOS repaint jank that
-                made every scroll feel scuffed). */}
+            {/* Messages — explicit bg-slate-950, momentum scroll, contained
+                overscroll. Mask removed earlier (was causing iOS repaint
+                jank). The bg matters: without it the column briefly shows
+                white during the keyboard-open layout shift on iOS. */}
             <div
               ref={messagesContainerRef}
-              className="relative min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-4 [-webkit-overflow-scrolling:touch] [overscroll-behavior:contain]"
+              className="relative min-h-0 flex-1 overflow-y-auto bg-slate-950 px-3 py-4 sm:px-4 [-webkit-overflow-scrolling:touch] [overscroll-behavior:contain]"
               style={{ touchAction: 'pan-y' }}
             >
               <div className="space-y-2">

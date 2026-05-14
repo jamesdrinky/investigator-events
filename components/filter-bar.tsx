@@ -232,9 +232,10 @@ export function FilterBar({
                 <button
                   type="button"
                   onClick={onReset}
-                  className="inline-flex h-9 items-center rounded-2xl border border-slate-200 px-3 text-sm font-medium text-slate-600"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-full bg-rose-50 px-3.5 text-sm font-semibold text-rose-600 ring-1 ring-rose-200 transition active:scale-95"
                 >
-                  Reset
+                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                  Clear filters
                 </button>
               ) : null}
             </div>

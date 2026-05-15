@@ -1093,8 +1093,8 @@ export default function EditProfilePage() {
                 {deleteError && <p className="text-xs text-red-600/80">{deleteError}</p>}
                 <p className="text-xs text-red-600/70">
                   Email{' '}
-                  <a href="mailto:support@investigatorevents.com" className="font-semibold underline">
-                    support@investigatorevents.com
+                  <a href="mailto:info@investigatorevents.com" className="font-semibold underline">
+                    info@investigatorevents.com
                   </a>{' '}
                   and we&apos;ll remove it for you.
                 </p>

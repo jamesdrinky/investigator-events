@@ -231,16 +231,19 @@ export function AuthPage({
                         }
                         setResetStatus({ kind: 'sending' });
                         try {
-                          const supabase = (await import('@/lib/supabase/browser')).createSupabaseBrowserClient();
-                          // Route through /auth/callback (which is in the Supabase
-                          // Redirect URLs allow list) and then ?next= into the
-                          // dedicated reset-password page so the user lands on a
-                          // form that lets them set a new password.
-                          const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                            redirectTo: window.location.origin + '/auth/callback?next=/profile/reset-password',
+                          // Use our own API route, NOT supabase.auth.resetPasswordForEmail.
+                          // Our route generates the recovery token via admin API and
+                          // sends a custom email via Resend that links directly to
+                          // /profile/reset-password — bypasses Supabase's verify
+                          // endpoint + redirect chain entirely.
+                          const res = await fetch('/api/auth/reset-password', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email }),
                           });
-                          if (error) {
-                            setResetStatus({ kind: 'error', message: error.message });
+                          const body = await res.json().catch(() => ({}));
+                          if (!res.ok) {
+                            setResetStatus({ kind: 'error', message: body?.error || 'Could not send reset email' });
                           } else {
                             setResetStatus({ kind: 'sent', message: 'Reset link sent — check your inbox.' });
                           }
@@ -277,7 +280,7 @@ export function AuthPage({
                           </button>
                         )}
                         {', or email '}
-                        <a href="mailto:support@investigatorevents.com" className="font-semibold text-slate-600 underline">
+                        <a href="mailto:info@investigatorevents.com" className="font-semibold text-slate-600 underline">
                           support
                         </a>.
                       </p>

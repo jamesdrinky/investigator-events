@@ -63,26 +63,26 @@ export default function SupportPage() {
         {/* ── Contact cards ── */}
         <div className="mt-8 grid gap-3 sm:mt-12 sm:grid-cols-2 sm:gap-4">
           <a
-            href="mailto:support@investigatorevents.com"
+            href="mailto:info@investigatorevents.com"
             className="group relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white p-5 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.08)] transition active:scale-[0.99] hover:shadow-[0_12px_40px_-12px_rgba(15,23,42,0.12)] sm:p-6"
           >
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-[0_8px_20px_-8px_rgba(59,130,246,0.4)]">
               <Mail className="h-5 w-5" />
             </div>
             <p className="mt-4 text-base font-bold text-slate-950">Email support</p>
-            <p className="mt-1 text-sm text-slate-500">support@investigatorevents.com</p>
+            <p className="mt-1 text-sm text-slate-500">info@investigatorevents.com</p>
             <p className="mt-2 text-xs text-slate-400">Typical reply within 24 hours, Monday–Friday.</p>
           </a>
 
           <a
-            href="mailto:bugs@investigatorevents.com?subject=Bug%20report"
+            href="mailto:info@investigatorevents.com?subject=Bug%20report"
             className="group relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white p-5 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.08)] transition active:scale-[0.99] hover:shadow-[0_12px_40px_-12px_rgba(15,23,42,0.12)] sm:p-6"
           >
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-orange-500 text-white shadow-[0_8px_20px_-8px_rgba(244,63,94,0.4)]">
               <AlertCircle className="h-5 w-5" />
             </div>
             <p className="mt-4 text-base font-bold text-slate-950">Report a bug</p>
-            <p className="mt-1 text-sm text-slate-500">bugs@investigatorevents.com</p>
+            <p className="mt-1 text-sm text-slate-500">info@investigatorevents.com</p>
             <p className="mt-2 text-xs text-slate-400">Include your device, iOS version, and steps to reproduce.</p>
           </a>
         </div>

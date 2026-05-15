@@ -39,7 +39,14 @@ function SignInPageInner() {
           body: JSON.stringify({ email }),
         }).catch(() => {});
       }
-      router.push(nextUrl as any);
+      // Hard reload, not router.push. router.push is client-side nav and
+      // doesn't re-evaluate SSR auth — that left email-signin users with
+      // dashboard/messages working (client cookies) but /profile and other
+      // SSR routes still showing the sign-in page (cookie not yet read by
+      // the server). OAuth flows go through /auth/callback which is a real
+      // server redirect so they don't have this problem; email needs the
+      // hard reload to match.
+      window.location.href = nextUrl;
     }
   };
 

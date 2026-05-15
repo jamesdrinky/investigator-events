@@ -69,7 +69,8 @@ function SignUpPageInner() {
         return;
       }
 
-      router.push('/profile/setup');
+      // Hard reload (not router.push) so SSR re-reads the new auth cookie.
+      window.location.href = '/profile/setup';
     } catch {
       setLoading(false);
       setError('Something went wrong. Please try again.');

@@ -90,8 +90,22 @@ export default function ResetPasswordPage() {
       setError(updateError.message);
       return;
     }
+    // Force a token refresh to sync the new session into cookies, then do a
+    // HARD reload (window.location, not router.push). router.push is
+    // client-side nav and doesn't re-evaluate SSR auth — that left users in
+    // a state where /messages and the dashboard saw them logged in (client
+    // cookies present), but /profile and other SSR pages didn't (cookie not
+    // yet written from the recovery session). Hard reload guarantees every
+    // page sees the same auth state.
+    try {
+      await supabase.auth.refreshSession();
+    } catch {
+      // refreshSession can fail on a recovery-only session; continue anyway.
+    }
     setStatus('success');
-    setTimeout(() => router.push('/profile'), 1500);
+    setTimeout(() => {
+      window.location.href = '/profile';
+    }, 1200);
   };
 
   return (

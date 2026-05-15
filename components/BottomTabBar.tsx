@@ -30,7 +30,13 @@ export function BottomTabBar() {
   const currentPathname = usePathname();
   const lastPathnameRef = useRef(currentPathname);
   const navRef = useRef<HTMLElement>(null);
-  const [profilePath, setProfilePath] = useState('/signin');
+  // Default to /profile (NOT /signin) so the Profile tab always works — even
+  // before the async username lookup completes or for users with no username.
+  // The SSR /profile route handles all branches: signed-out → /signin,
+  // signed-in no-profile → /profile/setup, signed-in → /profile/[username].
+  // Was previously /signin, which sent freshly-signed-in users to the
+  // sign-in screen if they tapped Profile before the async resolved.
+  const [profilePath, setProfilePath] = useState('/profile');
   const [unreadCount, setUnreadCount] = useState(0);
 
   // Prime the module-level user cache as early as possible — BottomTabBar

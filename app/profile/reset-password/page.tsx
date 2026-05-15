@@ -84,26 +84,42 @@ export default function ResetPasswordPage() {
 
     setStatus('submitting');
     const supabase = createSupabaseBrowserClient();
+
+    // Capture the email FIRST while we still have the recovery session.
+    const { data: { user: recoveryUser } } = await supabase.auth.getUser();
+    const userEmail = recoveryUser?.email;
+
     const { error: updateError } = await supabase.auth.updateUser({ password });
     if (updateError) {
       setStatus('error');
       setError(updateError.message);
       return;
     }
-    // Force a token refresh to sync the new session into cookies, then do a
-    // HARD reload (window.location, not router.push). router.push is
-    // client-side nav and doesn't re-evaluate SSR auth — that left users in
-    // a state where /messages and the dashboard saw them logged in (client
-    // cookies present), but /profile and other SSR pages didn't (cookie not
-    // yet written from the recovery session). Hard reload guarantees every
-    // page sees the same auth state.
-    try {
-      await supabase.auth.refreshSession();
-    } catch {
-      // refreshSession can fail on a recovery-only session; continue anyway.
+
+    // The recovery session is valid for client-side ops but is flagged as
+    // 'recovery' which some SSR routes don't accept as a fully-authenticated
+    // session — that's why /profile was still showing 'sign in' after a
+    // successful reset. Fix: sign out the recovery session, then sign in
+    // fresh with the new password. Now both client + server see a normal
+    // authenticated session.
+    if (userEmail) {
+      try {
+        await supabase.auth.signOut();
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email: userEmail, password });
+        if (signInError) {
+          // Sign-in with the brand-new password failed — fall through to
+          // success state anyway since the password DID update; user just
+          // has to sign in manually.
+          console.warn('[reset-password] re-signin failed', signInError.message);
+        }
+      } catch (e) {
+        console.warn('[reset-password] re-signin threw', e);
+      }
     }
+
     setStatus('success');
     setTimeout(() => {
+      // Hard reload so SSR re-evaluates with the fresh auth cookie.
       window.location.href = '/profile';
     }, 1200);
   };

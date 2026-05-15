@@ -9,6 +9,7 @@ import { getCountryFlag } from '@/lib/utils/location';
 import { UserAvatar } from '@/components/UserAvatar';
 import { CommunityFeed } from '@/components/CommunityFeed';
 import { CaseReferralBoard } from '@/components/CaseReferralBoard';
+import { looksLikeBotProfile } from '@/lib/utils/bot-filter';
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 
@@ -66,7 +67,7 @@ function PeoplePageInner() {
             q = q.or(filters.join(','));
           }
           const { data: sugg } = await q;
-          setSuggested((sugg ?? []).filter((p) => p.full_name?.trim()));
+          setSuggested((sugg ?? []).filter((p) => p.full_name?.trim() && !looksLikeBotProfile(p)));
         }
       }
     });
@@ -82,7 +83,7 @@ function PeoplePageInner() {
   useEffect(() => {
     if (tab !== 'discover' || allPeople.length > 0) return;
     const supabase = createSupabaseBrowserClient();
-    supabase.from('profiles').select('id, full_name, avatar_url, country, specialisation, profile_color, username').eq('is_public', true).not('full_name', 'is', null).order('created_at', { ascending: false }).limit(200).then(({ data }) => setAllPeople(data ?? []));
+    supabase.from('profiles').select('id, full_name, avatar_url, country, specialisation, profile_color, username').eq('is_public', true).not('full_name', 'is', null).order('created_at', { ascending: false }).limit(200).then(({ data }) => setAllPeople((data ?? []).filter((p) => !looksLikeBotProfile(p))));
   }, [tab, allPeople.length]);
 
   const toggleFollow = async (targetId: string) => {

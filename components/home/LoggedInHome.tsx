@@ -7,6 +7,7 @@ import type { Route } from 'next';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { UserAvatar } from '@/components/UserAvatar';
 import { getCityHeroImageUrl, getEventImage } from '@/lib/utils/city-media';
+import { looksLikeBotProfile } from '@/lib/utils/bot-filter';
 
 // Resolve an image for an event without showing a blank gradient when
 // image_path is missing / non-matching. Falls back through: event-slug
@@ -301,7 +302,7 @@ export function LoggedInHome() {
             const seen = new Set<string>();
             const people = (assocMembers ?? [])
               .map((r: any) => r.profiles)
-              .filter((p: any) => p && p.full_name && !seen.has(p.id) && (seen.add(p.id), true))
+              .filter((p: any) => p && p.full_name && !looksLikeBotProfile(p) && !seen.has(p.id) && (seen.add(p.id), true))
               .slice(0, 4);
             setSuggestedPeople(people);
           });

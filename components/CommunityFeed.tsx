@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import { Heart, MessageCircle, Send, ImagePlus, LinkIcon, X, Trash2, Pin, Share2 } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
+import { looksLikeBotProfile } from '@/lib/utils/bot-filter';
 import { UserAvatar } from '@/components/UserAvatar';
 import { WelcomeBanner } from '@/components/WelcomeBanner';
 
@@ -90,13 +91,19 @@ export function CommunityFeed() {
           setLoading(false);
           return;
         }
-        const rows = (data ?? []).map((r: any) => ({
-          id: r.id, user_id: r.user_id, title: r.title ?? null, content: r.content, image_url: r.image_url,
-          link_url: r.link_url, likes_count: r.likes_count ?? 0, comments_count: r.comments_count ?? 0,
-          is_pinned: r.is_pinned ?? false, created_at: r.created_at,
-          full_name: r.profiles?.full_name ?? null, avatar_url: r.profiles?.avatar_url ?? null,
-          specialisation: r.profiles?.specialisation ?? null, country: r.profiles?.country ?? null, username: r.profiles?.username ?? null,
-        }));
+        const rows = (data ?? [])
+          // Hide posts from likely-bot authors so spam signups don't pollute
+          // the feed. Real signups (with avatar OR specialisation OR country)
+          // pass through; random alphanumeric names with empty profiles are
+          // filtered out client-side.
+          .filter((r: any) => r.profiles && !looksLikeBotProfile(r.profiles))
+          .map((r: any) => ({
+            id: r.id, user_id: r.user_id, title: r.title ?? null, content: r.content, image_url: r.image_url,
+            link_url: r.link_url, likes_count: r.likes_count ?? 0, comments_count: r.comments_count ?? 0,
+            is_pinned: r.is_pinned ?? false, created_at: r.created_at,
+            full_name: r.profiles?.full_name ?? null, avatar_url: r.profiles?.avatar_url ?? null,
+            specialisation: r.profiles?.specialisation ?? null, country: r.profiles?.country ?? null, username: r.profiles?.username ?? null,
+          }));
         setPosts(rows);
         setLoading(false);
       });

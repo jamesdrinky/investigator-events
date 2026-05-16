@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 const sections = [
   {
     heading: 'Who we are',
-    body: 'Investigator Events is operated by Conflict International. Our contact address for data matters is partners@investigatorevents.com.'
+    body: 'Investigator Events is operated by Conflict International. This policy applies to our website (investigatorevents.com) and our iOS mobile application. Our contact address for data matters is info@investigatorevents.com.'
   },
   {
     heading: 'What data we collect and why',
@@ -50,6 +50,18 @@ const sections = [
       {
         title: 'Terms of Service acceptance',
         text: 'We record the date and time you accepted our Terms of Service and Community Guidelines. This is retained for legal compliance purposes.'
+      },
+      {
+        title: 'iOS app: camera and photo library access',
+        text: 'Our iOS app uses the device camera and photo library so you can attach photos to private messages. Photos you capture or select are uploaded to our secure storage and shared only with the recipient of the message. We never access your camera or photos without your explicit action. iOS will prompt you for permission the first time. You can revoke permission at any time in iOS Settings → Privacy & Security → Camera (or Photos) → Investigator Events.'
+      },
+      {
+        title: 'iOS app: push notifications',
+        text: 'If you grant permission for notifications on iOS, we register a device token with Apple\'s Push Notification service and store it against your account so we can deliver alerts (e.g. new messages, connection requests, events from associations you follow). The token does not identify you to Apple and is not shared with any third party. You can revoke permission at any time in iOS Settings → Notifications → Investigator Events, and we delete your tokens when you sign out or delete your account.'
+      },
+      {
+        title: 'Sign in with Apple',
+        text: 'If you sign in with Apple, we receive only your name (which you can edit on first sign-in) and either your real email or a private Apple relay email of your choosing. We never receive your Apple ID or password. The lawful basis is contract performance.'
       }
     ]
   },
@@ -89,15 +101,27 @@ const sections = [
   },
   {
     heading: 'Your rights',
-    body: 'Under UK GDPR you have the right to access the personal data we hold about you, to correct inaccurate data, to request deletion, to restrict or object to processing, and to data portability where applicable. To exercise any of these rights contact us at partners@investigatorevents.com. You also have the right to lodge a complaint with the Information Commissioner\'s Office (ICO) at ico.org.uk.'
+    body: 'Under UK GDPR you have the right to access the personal data we hold about you, to correct inaccurate data, to request deletion, to restrict or object to processing, and to data portability where applicable. To exercise any of these rights contact us at info@investigatorevents.com. You also have the right to lodge a complaint with the Information Commissioner\'s Office (ICO) at ico.org.uk.'
+  },
+  {
+    heading: 'Deleting your account',
+    body: 'You can permanently delete your account at any time from within the iOS app (Profile → Edit → Delete Account) or via the website (Profile → Edit → Delete Account). When you confirm deletion, your account is removed immediately, your profile and personal data are deleted from our active database within 24 hours, and any backups containing your data are purged on the next backup rotation (within 30 days). Anonymised content you have contributed to public areas (e.g. forum posts, event submissions credited to your account) may be retained in anonymised form. To request account deletion via email instead, contact info@investigatorevents.com.'
+  },
+  {
+    heading: 'Children\'s privacy',
+    body: 'Investigator Events is intended for adult professionals working in investigation, fraud examination, corporate security, and related fields. The iOS app is rated 17+ and the platform is not directed at children. We do not knowingly collect personal data from anyone under the age of 16. If you believe a child has provided us with personal data, contact info@investigatorevents.com and we will delete the account.'
+  },
+  {
+    heading: 'California users (CCPA)',
+    body: 'If you are a California resident, you have additional rights under the California Consumer Privacy Act, including the right to know what categories of personal information we collect, the right to request deletion, and the right to opt out of any sale of personal information. We do not sell personal information. To exercise any CCPA right contact info@investigatorevents.com.'
   },
   {
     heading: 'Changes to this policy',
-    body: 'We may update this policy from time to time. Material changes will be noted at the top of this page with a revised date. Continued use of the site after changes are posted constitutes acceptance of the updated policy.'
+    body: 'We may update this policy from time to time. Material changes will be noted at the top of this page with a revised date. Continued use of the site or app after changes are posted constitutes acceptance of the updated policy.'
   },
   {
     heading: 'Contact',
-    body: 'For any questions about this policy or how we handle your data, email partners@investigatorevents.com.'
+    body: 'For any questions about this policy or how we handle your data, email info@investigatorevents.com.'
   }
 ];
 
@@ -113,7 +137,7 @@ export default function PrivacyPage() {
               <p className="eyebrow">Legal</p>
               <h1 className="section-title">Privacy Policy</h1>
               <p className="section-copy max-w-3xl">
-                Last updated: April 2026. This policy applies to data collected through investigatorevents.com.
+                Last updated: May 2026. This policy applies to data collected through investigatorevents.com and the Investigator Events iOS app.
               </p>
             </div>
           </header>

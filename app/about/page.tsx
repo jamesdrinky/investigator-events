@@ -40,15 +40,29 @@ export default async function AboutPage() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-950/30" />
 
+        {/* Coloured glow blobs at the bottom for futuristic depth */}
+        <div aria-hidden className="pointer-events-none absolute -bottom-16 left-1/4 h-64 w-[40rem] rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.30),transparent_70%)] blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-20 right-1/4 h-64 w-[32rem] rounded-full bg-[radial-gradient(circle,rgba(168,85,247,0.20),transparent_70%)] blur-3xl" />
         <div className="container-shell relative z-10 pb-14 pt-32 sm:pb-20">
           <Reveal>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-blue-400 sm:text-xs">About Investigator Events</p>
-            <h1 className="mt-4 max-w-2xl text-[2.2rem] font-bold leading-[0.92] tracking-[-0.05em] text-white sm:text-[3.5rem] lg:text-[4.5rem]">
-              What this is, and why it exists.
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-white/80 backdrop-blur-md sm:tracking-[0.28em]">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-400 shadow-[0_0_0_3px_rgba(59,130,246,0.25)] animate-pulse" />
+              About Investigator Events
+            </span>
+            <h1 className="mt-4 max-w-2xl text-[2.2rem] font-bold leading-[0.92] tracking-[-0.05em] text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.5)] sm:text-[3.5rem] lg:text-[4.5rem]">
+              What this is, and{' '}
+              <span
+                className="inline-block bg-[linear-gradient(92deg,#3b82f6_0%,#22d3ee_30%,#a855f7_65%,#ec4899_100%)] bg-[length:200%_100%] bg-clip-text text-transparent"
+                style={{ animation: 'gradient-text-cycle 5s ease-in-out infinite' }}
+              >
+                why
+              </span>{' '}
+              it exists.
             </h1>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-slate-300 sm:text-lg">
               A practical calendar for the private investigations sector — bringing conferences, training, and association events into one place.
             </p>
+            <div aria-hidden className="mt-5 h-px w-24 bg-gradient-to-r from-blue-400/80 via-purple-400/60 to-transparent" />
           </Reveal>
         </div>
       </section>

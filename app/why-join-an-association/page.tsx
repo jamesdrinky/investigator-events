@@ -46,9 +46,19 @@ export default async function WhyJoinPage() {
         <div className="container-shell relative">
           <div className="grid items-center gap-8 lg:grid-cols-[1.1fr_0.9fr]">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-blue-400/60">For Investigators</p>
-              <h1 className="mt-4 text-[2.2rem] font-bold leading-[0.9] tracking-[-0.06em] text-white sm:text-[3.5rem] lg:text-[4.5rem]">
-                Why join a professional association?
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-white/80 backdrop-blur-md sm:tracking-[0.28em]">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-400 shadow-[0_0_0_3px_rgba(59,130,246,0.25)] animate-pulse" />
+                For Investigators
+              </span>
+              <h1 className="mt-4 text-[2.2rem] font-bold leading-[0.9] tracking-[-0.06em] text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.5)] sm:text-[3.5rem] lg:text-[4.5rem]">
+                Why{' '}
+                <span
+                  className="inline-block bg-[linear-gradient(92deg,#3b82f6_0%,#22d3ee_30%,#a855f7_65%,#ec4899_100%)] bg-[length:200%_100%] bg-clip-text text-transparent"
+                  style={{ animation: 'gradient-text-cycle 5s ease-in-out infinite' }}
+                >
+                  join
+                </span>{' '}
+                a professional association?
               </h1>
               <p className="mt-5 max-w-xl text-base leading-relaxed text-white/50 sm:mt-6 sm:text-lg">
                 Investigator Events connects the profession. But connection alone is not enough. The profession needs standards, accountability, and trust. That is what associations provide — and no open platform, including this one, can replace it.

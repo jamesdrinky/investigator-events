@@ -183,7 +183,7 @@ export default function MyEventsPage() {
               {goingEvents.map(event => {
                 const countdown = getCountdown(event.start_date);
                 return (
-                  <div key={event.id} className="flex items-center gap-3 rounded-xl border border-slate-200/60 bg-white p-3 shadow-sm">
+                  <div key={event.id} className="flex items-center gap-3 overflow-hidden rounded-xl border border-slate-200/60 bg-white p-3 shadow-sm">
                     <Link href={`/events/${event.slug}` as Route} className="flex flex-1 items-center gap-3">
                       {hasImage(event) ? (
                         <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg">
@@ -227,7 +227,7 @@ export default function MyEventsPage() {
             <p className="mt-1 text-xs text-slate-400">Based on your associations</p>
             <div className="mt-3 space-y-2">
               {recommended.slice(0, 6).map(event => (
-                <div key={event.id} className="flex items-center gap-3 rounded-xl border border-slate-200/60 bg-white p-3 shadow-sm">
+                <div key={event.id} className="flex items-center gap-3 overflow-hidden rounded-xl border border-slate-200/60 bg-white p-3 shadow-sm">
                   <Link href={`/events/${event.slug}` as Route} className="flex flex-1 items-center gap-3">
                     {hasImage(event) ? (
                       <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg">

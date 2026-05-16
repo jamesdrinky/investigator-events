@@ -6,6 +6,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { UserAvatar } from '@/components/UserAvatar';
+import { looksLikeBotProfile } from '@/lib/utils/bot-filter';
 
 interface Person {
   id: string;
@@ -114,12 +115,27 @@ export default function MyConnectionsPage() {
         suggestedPeople.push(...fromCountry);
       }
 
-      // Deduplicate
+      // Fallback: if we still have fewer than 4, pull recent public profiles
+      // so the Suggested section is never empty. Users without associations
+      // or country were getting no recommendations at all before this.
+      if (suggestedPeople.length < 4) {
+        const { data: anyPeople } = await supabase
+          .from('profiles')
+          .select('id, full_name, avatar_url, username, specialisation, country')
+          .eq('is_public', true)
+          .not('full_name', 'is', null)
+          .order('created_at', { ascending: false })
+          .limit(30);
+        const fromAny = (anyPeople ?? []).filter((p: any) => p.full_name && !allKnownIds.has(p.id));
+        suggestedPeople.push(...fromAny);
+      }
+
+      // Deduplicate, filter bots, slice
       const seen = new Set<string>();
       suggestedPeople = suggestedPeople.filter(p => {
         if (seen.has(p.id)) return false;
         seen.add(p.id);
-        return true;
+        return !looksLikeBotProfile(p as any);
       }).slice(0, 8);
 
       setSuggested(suggestedPeople);

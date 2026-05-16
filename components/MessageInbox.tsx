@@ -437,6 +437,16 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
                             alt="Shared image"
                             className="max-h-64 rounded-2xl object-cover"
                             loading="lazy"
+                            // Swap to a graceful placeholder if Supabase returns
+                            // 404 (RLS, deleted file, etc.). Suppresses the
+                            // iOS WebView's native "Load failed" toast banner
+                            // that was appearing on broken images.
+                            onError={(e) => {
+                              const target = e.currentTarget as HTMLImageElement;
+                              target.onerror = null; // prevent infinite loop
+                              target.src = '/cities/fallback.jpg';
+                              target.classList.add('opacity-40');
+                            }}
                           />
                         )}
                         {m.content && (() => {

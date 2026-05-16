@@ -5,7 +5,11 @@ const config: CapacitorConfig = {
   appName: 'Investigator Events',
   webDir: 'out',
   server: {
-    url: 'https://investigatorevents.com',
+    // Canonical www host so Vercel doesn't 308-redirect every request to
+    // www.* — iOS WKWebView silently fails POST fetches on cross-host
+    // redirects with "Load failed", which is what was breaking message
+    // image uploads end-to-end (presign POST never reached the server).
+    url: 'https://www.investigatorevents.com',
     cleartext: false,
     allowNavigation: [
       'investigatorevents.com',

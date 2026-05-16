@@ -114,14 +114,17 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
-      {/* ── Hero — full-width cover image ── */}
+      {/* ── Hero — full-width cover image with futuristic accents ── */}
       <div className="relative h-[22rem] w-full overflow-hidden sm:h-[36rem] lg:h-[40rem]">
         <Image src={imageSrc} alt={title} fill className="object-cover" priority />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/15" />
+        {/* Coloured glow at the bottom for depth */}
+        <div aria-hidden className="pointer-events-none absolute -bottom-16 left-1/4 h-64 w-[40rem] rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.30),transparent_70%)] blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-20 right-1/4 h-64 w-[32rem] rounded-full bg-[radial-gradient(circle,rgba(168,85,247,0.20),transparent_70%)] blur-3xl" />
 
         {/* Association logo — top-right, below navbar */}
         {logoSrc && (
-          <div className="absolute right-3 top-16 flex h-10 w-10 items-center justify-center rounded-xl border border-white/30 bg-white/90 p-1.5 shadow-xl sm:right-8 sm:top-24 sm:h-16 sm:w-16 sm:rounded-2xl sm:p-2">
+          <div className="absolute right-3 top-16 flex h-10 w-10 items-center justify-center rounded-xl border border-white/30 bg-white/90 p-1.5 shadow-[0_8px_30px_-10px_rgba(0,0,0,0.5)] backdrop-blur-sm sm:right-8 sm:top-24 sm:h-16 sm:w-16 sm:rounded-2xl sm:p-2">
             <Image src={logoSrc} alt={organiser} width={48} height={48} className={`h-auto max-h-10 w-auto max-w-10 object-contain sm:max-h-12 sm:max-w-12 ${invertLogo ? 'brightness-0' : ''}`} />
           </div>
         )}
@@ -130,13 +133,14 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
         <div className="absolute inset-x-0 bottom-0 pb-6 sm:pb-12">
           <div className="container-shell">
             <div className="flex flex-wrap gap-2">
-              <span className="rounded-full bg-blue-500/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-blue-200">{category}</span>
-              <span className="rounded-full bg-white/15 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-white/80">{region}</span>
-              <span className="rounded-full bg-white/15 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-white/80">{getCountryFlag(country)} {country}</span>
+              <span className="rounded-full border border-blue-300/30 bg-blue-500/25 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-blue-100 backdrop-blur-md shadow-[0_4px_12px_-2px_rgba(59,130,246,0.35)]">{category}</span>
+              <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white/85 backdrop-blur-md">{region}</span>
+              <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white/85 backdrop-blur-md">{getCountryFlag(country)} {country}</span>
             </div>
-            <h1 className="mt-4 max-w-3xl text-[2rem] font-bold leading-[0.95] tracking-[-0.04em] text-white sm:text-[3rem] lg:text-[4rem]">
+            <h1 className="mt-4 max-w-3xl text-[2rem] font-bold leading-[0.95] tracking-[-0.04em] text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.5)] sm:text-[3rem] lg:text-[4rem]">
               {title}
             </h1>
+            <div aria-hidden className="mt-3 h-px w-24 bg-gradient-to-r from-blue-400/80 via-purple-400/60 to-transparent" />
             {/* Mobile: Who's going overlay. inline-block (not inline-flex)
                 so the dark card shrink-wraps to its content height; the
                 empty-state placeholder is gone so the card is now just

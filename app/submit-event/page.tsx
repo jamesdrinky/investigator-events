@@ -32,14 +32,29 @@ export default function SubmitEventPage({
 
   return (
     <section className="relative overflow-hidden bg-slate-50/80">
-      {/* ── Hero — compact on mobile ── */}
-      <div className="relative bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_30%,#f0e8ff_60%,#f8fbff_100%)] pb-5 pt-8 sm:pb-10 sm:pt-20 lg:pt-32">
+      {/* ── Hero — futuristic gradient orbs + dot grid + animated headline ── */}
+      <div className="relative overflow-hidden bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_30%,#f0e8ff_60%,#f8fbff_100%)] pb-7 pt-8 sm:pb-12 sm:pt-20 lg:pt-32">
+        <div aria-hidden className="pointer-events-none absolute -top-32 -left-24 h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.18),transparent_65%)] blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute top-10 -right-24 h-[24rem] w-[24rem] rounded-full bg-[radial-gradient(circle,rgba(168,85,247,0.14),transparent_65%)] blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-12 left-1/3 h-[20rem] w-[20rem] rounded-full bg-[radial-gradient(circle,rgba(20,184,166,0.10),transparent_65%)] blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.035]" style={{ backgroundImage: 'radial-gradient(circle, #0f172a 1px, transparent 1px)', backgroundSize: '22px 22px' }} />
+
         <div className="container-shell relative">
           <Reveal>
             <div className="mx-auto max-w-2xl text-center sm:text-left sm:mx-0 sm:max-w-none">
-              <p className="eyebrow">Submit Event</p>
-              <h1 className="mt-3 text-[1.8rem] font-bold leading-[0.95] tracking-[-0.05em] text-slate-950 sm:mt-4 sm:text-[3rem] lg:text-[4rem]">
-                List an investigator event for free.
+              <span className="inline-flex items-center gap-2 rounded-full border border-blue-200/60 bg-white/80 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-blue-600 backdrop-blur-sm">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-500 shadow-[0_0_0_3px_rgba(59,130,246,0.2)] animate-pulse" />
+                Submit event
+              </span>
+              <h1 className="mt-3 text-[1.9rem] font-bold leading-[0.95] tracking-[-0.05em] text-slate-950 sm:mt-4 sm:text-[3rem] lg:text-[4rem]">
+                List an investigator event for{' '}
+                <span
+                  className="inline-block bg-[linear-gradient(92deg,#3b82f6_0%,#22d3ee_30%,#a855f7_65%,#ec4899_100%)] bg-[length:200%_100%] bg-clip-text text-transparent"
+                  style={{ animation: 'gradient-text-cycle 5s ease-in-out infinite' }}
+                >
+                  free
+                </span>
+                .
               </h1>
               <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:mt-4 sm:max-w-xl sm:text-base">
                 Create a page for your event in under a minute. Every submission is reviewed before it goes live.
@@ -47,11 +62,11 @@ export default function SubmitEventPage({
               {/* Feature pills — inline on mobile */}
               <div className="mt-4 flex flex-wrap justify-center gap-2 sm:justify-start sm:mt-6">
                 {[
-                  { label: 'Free listing', color: 'text-blue-600 bg-blue-50 border-blue-100' },
-                  { label: 'Reviewed', color: 'text-cyan-600 bg-cyan-50 border-cyan-100' },
-                  { label: '48hr turnaround', color: 'text-violet-600 bg-violet-50 border-violet-100' },
+                  { label: 'Free listing', color: 'text-blue-600 bg-blue-50/80 border-blue-100' },
+                  { label: 'Reviewed', color: 'text-cyan-600 bg-cyan-50/80 border-cyan-100' },
+                  { label: '48hr turnaround', color: 'text-violet-600 bg-violet-50/80 border-violet-100' },
                 ].map((p) => (
-                  <span key={p.label} className={`rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] sm:text-[11px] ${p.color}`}>
+                  <span key={p.label} className={`rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] backdrop-blur-sm sm:text-[11px] ${p.color}`}>
                     {p.label}
                   </span>
                 ))}

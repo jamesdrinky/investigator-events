@@ -35,16 +35,22 @@ export default async function AssociationsPage() {
 
   return (
     <section className="relative overflow-hidden">
-      {/* ── Hero ── */}
+      {/* ── Hero — gradient orbs + dot grid for the futuristic vocabulary ── */}
       <div className="relative overflow-hidden bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_25%,#f0e8ff_50%,#f4f0ff_75%,#f8fbff_100%)] pb-12 pt-28 sm:pb-20 sm:pt-32">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(99,102,241,0.08),transparent_40%),radial-gradient(circle_at_80%_20%,rgba(59,130,246,0.06),transparent_35%)]" />
+        <div aria-hidden className="pointer-events-none absolute -top-32 -left-24 h-[32rem] w-[32rem] rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.20),transparent_65%)] blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute top-1/4 -right-24 h-[26rem] w-[26rem] rounded-full bg-[radial-gradient(circle,rgba(168,85,247,0.16),transparent_65%)] blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-24 left-1/4 h-[20rem] w-[20rem] rounded-full bg-[radial-gradient(circle,rgba(20,184,166,0.10),transparent_65%)] blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle, #0f172a 1px, transparent 1px)', backgroundSize: '22px 22px' }} />
 
         <div className="container-shell relative">
           {/* Split: headline left, 3D marquee right */}
           <div className="grid items-center gap-8 lg:grid-cols-[1.1fr_0.9fr]">
             <Reveal>
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-blue-600/75 sm:text-xs sm:tracking-[0.3em] sm:font-semibold sm:text-blue-600">Network</p>
+                <span className="inline-flex items-center gap-2 rounded-full border border-blue-200/60 bg-white/80 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-blue-600 backdrop-blur-sm sm:tracking-[0.3em]">
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-500 shadow-[0_0_0_3px_rgba(59,130,246,0.2)] animate-pulse" />
+                  Network
+                </span>
                 <h1 className="mt-2 text-[2.25rem] font-bold leading-[0.92] tracking-[-0.05em] text-slate-950 sm:mt-4 sm:text-[3.5rem] lg:text-[5rem]">
                   The{' '}
                   <span
@@ -84,17 +90,22 @@ export default async function AssociationsPage() {
         </div>
       </div>
 
-      {/* ── Why join banner ── */}
+      {/* ── Why join banner — dashboard-finisher styled ── */}
       <div className="container-shell relative pt-4">
-        <div className="mx-auto max-w-3xl rounded-2xl border border-emerald-100 bg-gradient-to-r from-emerald-50 to-cyan-50 px-6 py-5 sm:px-8">
-          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-bold text-slate-900">Not a member of an association?</p>
-              <p className="mt-0.5 text-xs text-slate-500">Discover why joining a professional investigation association can transform your career and credibility.</p>
+        <div className="mx-auto max-w-3xl">
+          <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-gradient-to-br from-slate-950 via-emerald-950 to-slate-900 px-6 py-6 shadow-[0_20px_60px_-30px_rgba(15,23,42,0.55)] sm:rounded-3xl sm:px-8 sm:py-7">
+            <div aria-hidden className="pointer-events-none absolute -right-12 -top-12 h-44 w-44 rounded-full bg-emerald-500/20 blur-3xl" />
+            <div aria-hidden className="pointer-events-none absolute -bottom-16 -left-8 h-44 w-44 rounded-full bg-cyan-500/15 blur-3xl" />
+            <div className="relative flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="max-w-xl">
+                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-emerald-300/80">Not a member yet?</p>
+                <p className="mt-2 text-base font-bold leading-tight text-white sm:text-lg">Why joining an association matters.</p>
+                <p className="mt-1.5 text-sm leading-relaxed text-slate-300/85">Credibility, premium pricing, referrals, and access to networks no open platform can replicate.</p>
+              </div>
+              <a href="/why-join-an-association" className="inline-flex flex-shrink-0 items-center gap-2 rounded-full bg-white px-5 py-2.5 text-xs font-bold text-slate-950 shadow-[0_8px_20px_-8px_rgba(255,255,255,0.4)] transition active:scale-95">
+                Learn why →
+              </a>
             </div>
-            <a href="/why-join-an-association" className="flex-shrink-0 rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800">
-              Learn why
-            </a>
           </div>
         </div>
       </div>

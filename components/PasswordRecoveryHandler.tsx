@@ -32,43 +32,52 @@ export function PasswordRecoveryHandler() {
     if (pathname === '/profile/reset-password' || pathname?.startsWith('/auth/')) return;
     if (typeof window === 'undefined') return;
 
-    const supabase = createSupabaseBrowserClient();
-    const url = new URL(window.location.href);
+    let unsub: (() => void) | undefined;
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const url = new URL(window.location.href);
 
-    const goToReset = () => {
-      // Clear the URL params so a refresh doesn't re-trigger the flow.
-      window.history.replaceState({}, '', window.location.pathname);
-      router.push('/profile/reset-password');
-    };
+      const goToReset = () => {
+        try {
+          window.history.replaceState({}, '', window.location.pathname);
+          router.push('/profile/reset-password');
+        } catch (e) {
+          console.warn('[PasswordRecoveryHandler] navigation failed', e);
+        }
+      };
 
-    // PKCE flow: ?code=... in the query string.
-    const code = url.searchParams.get('code');
-    if (code) {
-      supabase.auth.exchangeCodeForSession(code).then(({ data, error }) => {
-        if (!error && data.session) goToReset();
-      });
-    }
-
-    // Implicit flow: #access_token=...&refresh_token=...&type=recovery in the hash.
-    if (window.location.hash && window.location.hash.includes('access_token=')) {
-      const hashParams = new URLSearchParams(window.location.hash.slice(1));
-      const accessToken = hashParams.get('access_token');
-      const refreshToken = hashParams.get('refresh_token');
-      const type = hashParams.get('type');
-      if (accessToken && refreshToken && type === 'recovery') {
-        supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken }).then(({ error }) => {
-          if (!error) goToReset();
-        });
+      // PKCE flow: ?code=... in the query string.
+      const code = url.searchParams.get('code');
+      if (code) {
+        supabase.auth.exchangeCodeForSession(code)
+          .then(({ data, error }) => {
+            if (!error && data.session) goToReset();
+          })
+          .catch((e) => console.warn('[PasswordRecoveryHandler] exchange failed', e));
       }
+
+      // Implicit flow: #access_token=...&refresh_token=...&type=recovery in the hash.
+      if (window.location.hash && window.location.hash.includes('access_token=')) {
+        const hashParams = new URLSearchParams(window.location.hash.slice(1));
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+        const type = hashParams.get('type');
+        if (accessToken && refreshToken && type === 'recovery') {
+          supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
+            .then(({ error }) => { if (!error) goToReset(); })
+            .catch((e) => console.warn('[PasswordRecoveryHandler] setSession failed', e));
+        }
+      }
+
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+        if (event === 'PASSWORD_RECOVERY') goToReset();
+      });
+      unsub = () => subscription.unsubscribe();
+    } catch (e) {
+      console.warn('[PasswordRecoveryHandler] mount failed', e);
     }
 
-    // Backstop: also listen for the native event in case Supabase fires it.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') goToReset();
-    });
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => { unsub?.(); };
   }, [pathname, router]);
 
   return null;

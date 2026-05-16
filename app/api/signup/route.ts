@@ -29,6 +29,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'You must accept the Terms of Service' }, { status: 400 });
     }
 
+    // Block known bot-source domains. korper.com was identified as the source
+    // of the random-name signups polluting /people. Generic 'enter a real
+    // email' message — don't tip off the bot operator that we're filtering.
+    const blockedDomains = ['korper.com'];
+    const emailDomain = email.split('@')[1] ?? '';
+    if (blockedDomains.includes(emailDomain)) {
+      return NextResponse.json({ error: 'Please use a real professional email address.' }, { status: 400 });
+    }
+
     const admin = createSupabaseAdminServerClient();
 
     // Create user with admin client — auto-confirms email

@@ -82,7 +82,10 @@ export default async function HomePage() {
         <UpcomingEventsGallery events={upcomingEvents} />
       </div>
 
-      <div data-homepage-section className="order-4 sm:order-none">
+      {/* WhyUseSection — heavy marketing block, hidden on mobile to keep the
+          homepage feeling like an app, not a landing page. Still shown on
+          desktop where vertical scroll budget is generous. */}
+      <div data-homepage-section className="order-4 hidden sm:order-none sm:block">
         <WhyUseSection />
       </div>
 
@@ -108,7 +111,8 @@ export default async function HomePage() {
         </div>
       </div>
 
-      <div data-homepage-section className="order-6 sm:order-none">
+      {/* Founder quote — long marketing copy, desktop only on mobile. */}
+      <div data-homepage-section className="order-6 hidden sm:order-none sm:block">
         <FounderQuoteSection />
       </div>
 
@@ -116,7 +120,9 @@ export default async function HomePage() {
         <FeaturedEventsSection events={featuredCarouselEvents} />
       </div>
 
-      <div data-homepage-section className="order-8 sm:order-none">
+      {/* "Get discovered" CTA — also a long marketing block. Mobile gets the
+          sticky bottom sign-up CTA instead, so this is desktop-only. */}
+      <div data-homepage-section className="order-8 hidden sm:order-none sm:block">
         <div className="container-shell py-14 sm:py-20">
           <Reveal>
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 px-6 py-14 text-center sm:px-12 sm:py-20">
@@ -149,6 +155,26 @@ export default async function HomePage() {
           </Reveal>
         </div>
       </div>
+
+      {/* ── Sticky sign-up CTA — mobile + anonymous only. Sits above the
+            BottomTabBar so it's always tappable while scrolling marketing. */}
+      {!hasAuthCookie && (
+        <div
+          data-homepage-section
+          className="fixed inset-x-0 z-40 px-3 pb-2 sm:hidden"
+          style={{ bottom: 'calc(var(--app-bottom-nav-height, 4.75rem) + env(safe-area-inset-bottom, 0px) - 0.5rem)' }}
+        >
+          <Link
+            href="/signup"
+            className="relative flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-blue-600 to-violet-600 py-3.5 px-6 text-sm font-bold text-white shadow-[0_12px_30px_-8px_rgba(59,130,246,0.55)] transition active:scale-[0.98]"
+          >
+            <span className="absolute -top-px left-1/2 h-px w-1/2 -translate-x-1/2 bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+            Create free profile
+            <span className="text-white/70">·</span>
+            <span className="text-[11px] font-medium text-white/80">2 mins</span>
+          </Link>
+        </div>
+      )}
 
       <div data-homepage-section className="order-9 sm:order-none">
         <div className="container-shell py-14 sm:py-20">

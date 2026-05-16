@@ -11,6 +11,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         window?.backgroundColor = .white
 
+        // Clear WKWebView disk + memory cache on every launch. Without this,
+        // iOS aggressively caches index.html which references hashed JS bundle
+        // filenames — meaning the app keeps loading OLD JS even after the live
+        // site has been deployed many times. The cache hit savings aren't
+        // worth the deploy reliability cost.
+        let cacheTypes: Set<String> = [
+            WKWebsiteDataTypeDiskCache,
+            WKWebsiteDataTypeMemoryCache,
+            WKWebsiteDataTypeOfflineWebApplicationCache,
+        ]
+        WKWebsiteDataStore.default().removeData(
+            ofTypes: cacheTypes,
+            modifiedSince: Date(timeIntervalSince1970: 0),
+            completionHandler: {}
+        )
+        URLCache.shared.removeAllCachedResponses()
+
         // Keep trying to disable bounce — webview may not be ready immediately
         bounceTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] timer in
             if self?.disableBounce() == true {

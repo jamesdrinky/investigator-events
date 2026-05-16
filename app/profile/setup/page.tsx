@@ -40,6 +40,7 @@ export default function ProfileSetupPage() {
   const [fullName, setFullName] = useState('');
   const [country, setCountry] = useState('');
   const [specialisation, setSpecialisation] = useState('');
+  const [canPublishProfile, setCanPublishProfile] = useState(false);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -47,9 +48,9 @@ export default function ProfileSetupPage() {
       if (!data.user) { router.push('/signin'); return; }
 
       // Load existing profile data so refresh doesn't lose progress
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('username, full_name, avatar_url, country, specialisation')
+      const { data: profile } = await (supabase
+        .from('profiles') as any)
+        .select('username, full_name, avatar_url, country, specialisation, auth_provider, email_verified_for_public')
         .eq('id', data.user.id)
         .maybeSingle();
 
@@ -66,6 +67,13 @@ export default function ProfileSetupPage() {
       setAvatarUrl(profile?.avatar_url || meta?.avatar_url || meta?.picture || null);
       setCountry(profile?.country || '');
       setSpecialisation((profile as any)?.specialisation || '');
+      const providers: string[] = data.user.app_metadata?.providers ?? [];
+      const provider = providers.includes('linkedin_oidc')
+        ? 'linkedin_oidc'
+        : providers.includes('apple')
+          ? 'apple'
+          : ((profile as any)?.auth_provider ?? data.user.app_metadata?.provider ?? 'email');
+      setCanPublishProfile(provider !== 'email' || (profile as any)?.email_verified_for_public === true);
 
       // If they already have a name + avatar, skip to step 3 (country)
       if ((profile?.full_name || meta?.full_name) && profile?.avatar_url) {
@@ -150,8 +158,8 @@ export default function ProfileSetupPage() {
       username,
       country,
       specialisation: specialisation || null,
-      is_public: true,
-    });
+      is_public: canPublishProfile,
+    } as any);
 
     setSaving(false);
     router.push('/calendar');

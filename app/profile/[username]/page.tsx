@@ -69,9 +69,10 @@ export default async function PublicProfilePage({ params }: { params: { username
     supabase.from('profiles').select('*').eq('username', params.username).single(),
     supabase.auth.getUser(),
   ]);
-  if (!profile || !profile.is_public) notFound();
-
+  if (!profile) notFound();
   const isOwner = user?.id === profile.id;
+  if (!profile.is_public && !isOwner) notFound();
+
   const accentColor = profile.profile_color ?? '#3b82f6';
   const flag = profile.country ? getCountryFlag(profile.country) : '';
   const badges = (profile.badges as string[] | null) ?? [];

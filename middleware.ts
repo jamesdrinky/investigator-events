@@ -24,7 +24,21 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // If a logged-in user lands on /signin or /signup, send them straight to
+  // their profile. Prevents the brief "login page flash" some users were
+  // hitting when navigation raced ahead of the client-side auth state
+  // (e.g. tapping the Profile tab before BottomTabBar's async resolved).
+  if (user) {
+    const path = request.nextUrl.pathname;
+    if (path === '/signin' || path === '/signup') {
+      const url = request.nextUrl.clone();
+      url.pathname = '/profile';
+      url.search = '';
+      return NextResponse.redirect(url);
+    }
+  }
 
   return response;
 }

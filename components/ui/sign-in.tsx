@@ -95,21 +95,41 @@ export function AuthPage({
   };
 
   return (
-    <div className="flex min-h-screen w-full bg-white">
+    <div className="relative flex min-h-screen w-full bg-white">
+      {/* Mobile-only ambient gradient orbs for the futuristic feel.
+          Hidden on lg+ where the right pane already provides the nebula. */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden lg:hidden">
+        <div className="absolute -top-40 -left-32 h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.22),transparent_65%)] blur-3xl" />
+        <div className="absolute top-1/4 -right-32 h-[24rem] w-[24rem] rounded-full bg-[radial-gradient(circle,rgba(168,85,247,0.18),transparent_65%)] blur-3xl" />
+        <div className="absolute bottom-0 left-1/3 h-[20rem] w-[20rem] rounded-full bg-[radial-gradient(circle,rgba(20,184,166,0.14),transparent_65%)] blur-3xl" />
+        <div className="absolute inset-0 opacity-[0.035]" style={{ backgroundImage: 'radial-gradient(circle, #0f172a 1px, transparent 1px)', backgroundSize: '22px 22px' }} />
+      </div>
+
       {/* Left — form */}
-      <section className="flex flex-1 items-center justify-center px-6 py-12 sm:px-12">
+      <section className="relative flex flex-1 items-center justify-center px-6 py-12 sm:px-12">
         <div className="w-full max-w-md">
           <div className="flex flex-col gap-5">
-            {/* Logo */}
+            {/* Eyebrow */}
             <div className="mb-2">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-blue-600">Investigator Events</p>
+              <span className="inline-flex items-center gap-2 rounded-full border border-blue-200/60 bg-white/80 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-blue-600 backdrop-blur-sm">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-500 shadow-[0_0_0_3px_rgba(59,130,246,0.2)]" />
+                Investigator Events
+              </span>
             </div>
 
             <h1
-              className="text-4xl font-bold leading-tight tracking-tight text-slate-900 sm:text-5xl"
+              className="text-4xl font-bold leading-[0.95] tracking-[-0.03em] text-slate-900 sm:text-5xl"
               style={{ opacity: 0, animation: 'fadeSlideIn 0.5s ease forwards 0.1s' }}
             >
-              {isSignUp ? 'Create an account' : 'Welcome back'}
+              {isSignUp ? (
+                <>Create your{' '}
+                  <span className="inline-block bg-[linear-gradient(92deg,#3b82f6_0%,#22d3ee_30%,#a855f7_65%,#ec4899_100%)] bg-[length:200%_100%] bg-clip-text text-transparent" style={{ animation: 'gradient-text-cycle 5s ease-in-out infinite' }}>account</span>
+                </>
+              ) : (
+                <>Welcome{' '}
+                  <span className="inline-block bg-[linear-gradient(92deg,#3b82f6_0%,#22d3ee_30%,#a855f7_65%,#ec4899_100%)] bg-[length:200%_100%] bg-clip-text text-transparent" style={{ animation: 'gradient-text-cycle 5s ease-in-out infinite' }}>back</span>
+                </>
+              )}
             </h1>
             <p
               className="text-slate-500"

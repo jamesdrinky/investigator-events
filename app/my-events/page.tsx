@@ -183,8 +183,8 @@ export default function MyEventsPage() {
               {goingEvents.map(event => {
                 const countdown = getCountdown(event.start_date);
                 return (
-                  <div key={event.id} className="flex items-center gap-3 overflow-hidden rounded-xl border border-slate-200/60 bg-white p-3 shadow-sm">
-                    <Link href={`/events/${event.slug}` as Route} className="flex flex-1 items-center gap-3">
+                  <div key={event.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-xl border border-slate-200/60 bg-white p-3 shadow-sm">
+                    <Link href={`/events/${event.slug}` as Route} className="flex min-w-0 items-center gap-3">
                       {hasImage(event) ? (
                         <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg">
                           <img src={event.image_path!} alt="" className="h-full w-full object-cover" />
@@ -227,8 +227,8 @@ export default function MyEventsPage() {
             <p className="mt-1 text-xs text-slate-400">Based on your associations</p>
             <div className="mt-3 space-y-2">
               {recommended.slice(0, 6).map(event => (
-                <div key={event.id} className="flex items-center gap-3 overflow-hidden rounded-xl border border-slate-200/60 bg-white p-3 shadow-sm">
-                  <Link href={`/events/${event.slug}` as Route} className="flex flex-1 items-center gap-3">
+                <div key={event.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-xl border border-slate-200/60 bg-white p-3 shadow-sm">
+                  <Link href={`/events/${event.slug}` as Route} className="flex min-w-0 items-center gap-3">
                     {hasImage(event) ? (
                       <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg">
                         <img src={event.image_path!} alt="" className="h-full w-full object-cover" />
@@ -247,7 +247,7 @@ export default function MyEventsPage() {
                   </Link>
                   <button
                     onClick={() => addEvent(event.id)}
-                    className="flex h-8 flex-shrink-0 items-center gap-1 rounded-full bg-blue-600 px-3 text-xs font-semibold text-white transition hover:bg-blue-700"
+                    className="flex h-8 w-[4.75rem] flex-shrink-0 items-center justify-center gap-1 rounded-full bg-blue-600 text-xs font-semibold text-white transition hover:bg-blue-700"
                   >
                     <Plus className="h-3 w-3" /> Going
                   </button>

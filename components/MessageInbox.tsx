@@ -49,6 +49,22 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
 
   const supabase = createSupabaseBrowserClient();
 
+  const uploadMessageImage = async (file: Blob, filename: string) => {
+    const formData = new FormData();
+    formData.append('file', file, filename);
+
+    const response = await fetch('/api/upload-message-image', {
+      method: 'POST',
+      body: formData,
+    });
+    const payload = await response.json().catch(() => null) as { url?: string; error?: string } | null;
+    if (!response.ok || !payload?.url) {
+      throw new Error(payload?.error ?? 'Failed to upload image');
+    }
+
+    return payload.url;
+  };
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
   }, []);
@@ -186,7 +202,12 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
     setSending(true);
     const payload: any = { sender_id: userId, receiver_id: activeChat, content: imageUrl ? '' : newMsg.trim() };
     if (imageUrl) payload.image_url = imageUrl;
-    const { data } = await supabase.from('messages' as any).insert(payload).select('*').single();
+    const { data, error } = await supabase.from('messages' as any).insert(payload).select('*').single();
+    if (error) {
+      setSending(false);
+      setAttachError(error.message || 'Failed to send message');
+      return;
+    }
     if (data) {
       setMessages((prev) => [...prev, data as unknown as Message]);
       setNewMsg('');
@@ -203,18 +224,19 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !userId || !activeChat) return;
+    setAttachError(null);
     setUploadingImage(true);
-    const ext = file.name.split('.').pop();
-    const path = `messages/${userId}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from('avatars').upload(path, file);
-    if (!error) {
-      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path);
-      if (urlData?.publicUrl) {
-        await sendMessage(urlData.publicUrl);
-      }
+    try {
+      const imageUrl = await uploadMessageImage(file, file.name || 'message-image.jpg');
+      await sendMessage(imageUrl);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to send photo';
+      console.error('[message-image] upload failure', err);
+      setAttachError(message);
+    } finally {
+      setUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
-    setUploadingImage(false);
-    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   // Native Camera attach for iOS — uses Capacitor's Camera plugin so the
@@ -255,18 +277,13 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
 
     setUploadingImage(true);
     try {
-      const ext = format === 'jpeg' ? 'jpg' : format;
-      const path = `messages/${userId}/${Date.now()}.${ext}`;
       const res = await fetch(dataUrl);
       const blob = await res.blob();
-      const { error: upErr } = await supabase.storage.from('avatars').upload(path, blob, {
-        contentType: blob.type || `image/${format}`,
-        upsert: false,
-      });
-      if (upErr) throw new Error(upErr.message);
-      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path);
-      if (!urlData?.publicUrl) throw new Error('Could not get public URL for uploaded photo');
-      await sendMessage(urlData.publicUrl);
+      const ext = format === 'jpeg' ? 'jpg' : format;
+      const type = blob.type || `image/${format}`;
+      const imageBlob = blob.type ? blob : new Blob([blob], { type });
+      const imageUrl = await uploadMessageImage(imageBlob, `message-photo.${ext}`);
+      await sendMessage(imageUrl);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to send photo';
       console.error('[camera] send failure', err);

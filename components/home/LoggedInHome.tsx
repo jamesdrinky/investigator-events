@@ -349,50 +349,69 @@ export function LoggedInHome() {
   return (
     <>
       <div>
-        {/* ── Dark header ── */}
-        <div className="bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800 px-4 pb-5 pt-20 lg:pb-8 lg:pt-24">
-          <div className="mx-auto max-w-5xl">
-          {/* Greeting */}
+        {/* ── Dark header — animated gradient orbs + dot grid for depth.
+              Greeting is bigger and uses a subtle gradient on the name. ── */}
+        <div className="relative overflow-hidden bg-[linear-gradient(165deg,#020617_0%,#0a1228_35%,#0d1840_60%,#0a1228_85%,#020617_100%)] px-4 pb-7 pt-20 lg:pb-10 lg:pt-24">
+          {/* Floating gradient orbs */}
+          <div aria-hidden className="pointer-events-none absolute -top-24 -left-16 h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.45),transparent_70%)] blur-3xl" />
+          <div aria-hidden className="pointer-events-none absolute top-1/3 -right-20 h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(168,85,247,0.35),transparent_70%)] blur-3xl" />
+          <div aria-hidden className="pointer-events-none absolute -bottom-24 left-1/3 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgba(20,184,166,0.25),transparent_70%)] blur-3xl" />
+          {/* Subtle dot grid for tactile feel */}
+          <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
+
+          <div className="relative mx-auto max-w-5xl">
+          {/* Today chip + unread bell */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Link href={profile?.username ? `/profile/${profile.username}` as Route : '/profile/setup' as Route}>
-                <UserAvatar src={profile?.avatar_url} name={profile?.full_name} size={44} className="ring-2 ring-white/20 lg:h-14 lg:w-14" />
-              </Link>
-              <div>
-                <p className="text-base font-bold text-white lg:text-xl">{greeting}, {firstName}</p>
-                <p className="text-[11px] text-slate-400 lg:text-sm">Welcome back to Investigator Events</p>
-              </div>
-            </div>
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white/70 backdrop-blur-sm">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_0_3px_rgba(16,185,129,0.25)] animate-pulse" />
+              {new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' })}
+            </span>
             {totalUnread > 0 && (
-              <Link href="/messages" className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5">
-                <Bell className="h-4 w-4 text-amber-400" />
-                <span className="text-xs font-bold text-white">{totalUnread}</span>
+              <Link href="/messages" className="flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1.5 backdrop-blur-sm transition active:scale-95">
+                <Bell className="h-3.5 w-3.5 text-amber-300" />
+                <span className="text-[11px] font-bold text-amber-200">{totalUnread} new</span>
               </Link>
             )}
           </div>
 
-          {/* Quick stats row — glassmorphism tiles with inset highlight + soft border */}
-          <div className="mt-4 grid grid-cols-4 gap-1.5 lg:mt-6 lg:gap-3">
-            <Link href={"/my-events" as Route} className="group relative flex flex-col items-center gap-0.5 overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.12] to-white/[0.04] px-2 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md transition active:scale-95 lg:flex-row lg:gap-3 lg:rounded-2xl lg:px-5 lg:py-4 lg:hover:border-white/20">
-              <Calendar className="h-4 w-4 text-blue-400 lg:h-5 lg:w-5" />
-              <span className="text-sm font-bold text-white lg:text-lg">{upcomingGoing.length}</span>
-              <span className="text-[9px] text-slate-400 lg:text-xs">Going</span>
+          {/* Greeting + avatar */}
+          <div className="mt-5 flex items-center gap-4">
+            <Link href={profile?.username ? `/profile/${profile.username}` as Route : '/profile/setup' as Route} className="relative">
+              <div aria-hidden className="absolute -inset-1 rounded-full bg-gradient-to-br from-blue-400 via-purple-400 to-rose-400 opacity-50 blur-md" />
+              <UserAvatar src={profile?.avatar_url} name={profile?.full_name} size={56} className="relative ring-2 ring-white/30 lg:h-16 lg:w-16" />
             </Link>
-            <Link href={"/my-connections" as Route} className="group relative flex flex-col items-center gap-0.5 overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.12] to-white/[0.04] px-2 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md transition active:scale-95 lg:flex-row lg:gap-3 lg:rounded-2xl lg:px-5 lg:py-4 lg:hover:border-white/20">
-              <Users className="h-4 w-4 text-purple-400 lg:h-5 lg:w-5" />
-              <span className="text-sm font-bold text-white lg:text-lg">{connectionCount}</span>
-              <span className="text-[9px] text-slate-400 lg:text-xs">Connections</span>
-            </Link>
-            <Link href={"/messages" as Route} className="group relative flex flex-col items-center gap-0.5 overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.12] to-white/[0.04] px-2 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md transition active:scale-95 lg:flex-row lg:gap-3 lg:rounded-2xl lg:px-5 lg:py-4 lg:hover:border-white/20">
-              <MessageCircle className="h-4 w-4 text-cyan-400 lg:h-5 lg:w-5" />
-              <span className="text-sm font-bold text-white lg:text-lg">{unreadMessages}</span>
-              <span className="text-[9px] text-slate-400 lg:text-xs">Messages</span>
-            </Link>
-            <Link href={"/my-associations" as Route} className="group relative flex flex-col items-center gap-0.5 overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.12] to-white/[0.04] px-2 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md transition active:scale-95 lg:flex-row lg:gap-3 lg:rounded-2xl lg:px-5 lg:py-4 lg:hover:border-white/20">
-              <Globe className="h-4 w-4 text-amber-400 lg:h-5 lg:w-5" />
-              <span className="text-sm font-bold text-white lg:text-lg">{associationCount}</span>
-              <span className="text-[9px] text-slate-400 lg:text-xs">Assocs</span>
-            </Link>
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-white/45 lg:text-xs">{greeting}</p>
+              <h1
+                className="mt-0.5 truncate bg-[linear-gradient(92deg,#ffffff_0%,#cbd5e1_50%,#ffffff_100%)] bg-[length:200%_100%] bg-clip-text text-2xl font-bold tracking-[-0.02em] text-transparent lg:text-3xl"
+                style={{ animation: 'gradient-text-cycle 6s ease-in-out infinite' }}
+              >
+                {firstName}
+              </h1>
+            </div>
+          </div>
+
+          {/* Quick stats row — bigger, individually accent-glowed glass tiles */}
+          <div className="mt-6 grid grid-cols-4 gap-2 lg:mt-7 lg:gap-3">
+            {[
+              { href: '/my-events', icon: Calendar, value: upcomingGoing.length, label: 'Going', accent: 'from-blue-400/40 to-blue-500/0', iconColor: 'text-blue-300' },
+              { href: '/my-connections', icon: Users, value: connectionCount, label: 'Network', accent: 'from-purple-400/40 to-purple-500/0', iconColor: 'text-purple-300' },
+              { href: '/messages', icon: MessageCircle, value: unreadMessages, label: 'Messages', accent: 'from-cyan-400/40 to-cyan-500/0', iconColor: 'text-cyan-300' },
+              { href: '/my-associations', icon: Globe, value: associationCount, label: 'Assocs', accent: 'from-amber-400/40 to-amber-500/0', iconColor: 'text-amber-300' },
+            ].map((s) => {
+              const Icon = s.icon;
+              return (
+                <Link key={s.label} href={s.href as Route} className="group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.10] to-white/[0.02] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.10)] backdrop-blur-md transition active:scale-[0.96] lg:p-4 lg:hover:border-white/20">
+                  {/* per-tile colour glow inside the tile */}
+                  <div aria-hidden className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${s.accent} opacity-60`} />
+                  <div className="relative flex flex-col items-center gap-0.5 lg:items-start lg:gap-1">
+                    <Icon className={`h-4 w-4 ${s.iconColor} lg:h-5 lg:w-5`} />
+                    <span className="text-lg font-bold leading-none text-white lg:text-2xl">{s.value}</span>
+                    <span className="text-[10px] font-medium uppercase tracking-[0.08em] text-white/55 lg:text-[11px] lg:tracking-[0.12em]">{s.label}</span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
           </div>{/* close max-w-5xl */}
         </div>

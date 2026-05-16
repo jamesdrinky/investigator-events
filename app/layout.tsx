@@ -56,6 +56,16 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        {/* Preconnect to Supabase (auth + DB + storage all live here) — saves
+            ~200ms per page load by pre-warming DNS + TLS handshake before the
+            first query fires. crossOrigin set so storage image fetches reuse
+            the same connection. */}
+        <link rel="preconnect" href="https://dbeyznsxcetpwfcicimz.supabase.co" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://dbeyznsxcetpwfcicimz.supabase.co" />
+        {/* Resend (used for transactional emails — though those happen
+            server-side, the preconnect is harmless and helps any client-side
+            ping). */}
+        <link rel="dns-prefetch" href="https://api.resend.com" />
       </head>
       <body className="font-[var(--font-sans)]">
         <div data-app-shell className="relative flex min-h-screen flex-col">

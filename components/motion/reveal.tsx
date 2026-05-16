@@ -24,6 +24,15 @@ export function Reveal({ children, className, delay = 0, y = 24, x = 0 }: Reveal
       return;
     }
 
+    // Above-fold content (within first 80% of viewport when component mounts)
+    // skips the observer entirely — show immediately. Eliminates the awkward
+    // "wait for 15% in view" delay on hero sections that are already visible.
+    const initialRect = el.getBoundingClientRect();
+    if (initialRect.top < window.innerHeight * 0.8) {
+      setIsVisible(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -31,7 +40,9 @@ export function Reveal({ children, className, delay = 0, y = 24, x = 0 }: Reveal
           observer.unobserve(el);
         }
       },
-      { threshold: 0.15 }
+      // Trigger 200px BEFORE entering viewport so content is already faded in
+      // by the time the user scrolls to it — no visible pop-in.
+      { rootMargin: '200px 0px', threshold: 0.01 }
     );
 
     observer.observe(el);

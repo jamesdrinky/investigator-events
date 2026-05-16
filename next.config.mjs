@@ -27,6 +27,12 @@ const nextConfig = {
       { protocol: 'https', hostname: 'cdn1.iconfinder.com' },
       { protocol: 'https', hostname: 'dbeyznsxcetpwfcicimz.supabase.co' },
     ],
+    // Default cache TTL is 60s — far too aggressive re-optimisation. Bump to
+    // 24h so association logos, city images, avatars, and event covers don't
+    // get re-processed by Next on every render.
+    minimumCacheTTL: 60 * 60 * 24,
+    // AVIF first (smaller), WebP fallback. Cuts image payload 30-50%.
+    formats: ['image/avif', 'image/webp'],
   },
   async headers() {
     return [

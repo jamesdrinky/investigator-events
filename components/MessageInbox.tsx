@@ -236,16 +236,24 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
     }
 
     setSending(true);
-    const payload: any = { sender_id: userId, receiver_id: activeChat, content: trimmed };
-    if (imageUrl) payload.image_url = imageUrl;
-    const { data, error } = await supabase.from('messages' as any).insert(payload).select('*').single();
-    if (error) {
-      setSending(false);
-      setAttachError(error.message || 'Failed to send message');
-      return;
-    }
-    if (data) {
-      setMessages((prev) => [...prev, data as unknown as Message]);
+    // Route through /api/send-message rather than direct supabase.insert so
+    // the server (SSR client) does the auth check + admin client does the
+    // insert. The client-side insert was silently failing on iOS WebView
+    // because the auth cookie sometimes got out of sync with what RLS saw
+    // — uploads succeeded but message rows never landed in the DB.
+    try {
+      const res = await fetch('/api/send-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ receiverId: activeChat, content: trimmed, imageUrl }),
+      });
+      const json = await res.json().catch(() => null) as { message?: Message; error?: string } | null;
+      if (!res.ok || !json?.message) {
+        setSending(false);
+        setAttachError(json?.error || 'Failed to send message');
+        return;
+      }
+      setMessages((prev) => [...prev, json.message as Message]);
       setNewMsg('');
       setPendingAttachment(null);
       loadConversations();
@@ -253,6 +261,9 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
         const container = messagesContainerRef.current;
         if (container) container.scrollTop = container.scrollHeight;
       }, 50);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to send message';
+      setAttachError(message);
     }
     setSending(false);
   };
@@ -336,10 +347,24 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
     if (!userId || !activeChat) return;
     const url = `${window.location.origin}/events/${event.slug}`;
     setSending(true);
-    const { data } = await supabase.from('messages' as any).insert({ sender_id: userId, receiver_id: activeChat, content: `Check out ${event.title}\n${url}` } as any).select('*').single();
-    if (data) {
-      setMessages((prev) => [...prev, data as unknown as Message]);
-      loadConversations();
+    try {
+      const res = await fetch('/api/send-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          receiverId: activeChat,
+          content: `Check out ${event.title}\n${url}`,
+        }),
+      });
+      const json = await res.json().catch(() => null) as { message?: Message; error?: string } | null;
+      if (res.ok && json?.message) {
+        setMessages((prev) => [...prev, json.message as Message]);
+        loadConversations();
+      } else {
+        setAttachError(json?.error || 'Failed to share event');
+      }
+    } catch {
+      setAttachError('Failed to share event');
     }
     setSending(false);
     setShowEventPicker(false);

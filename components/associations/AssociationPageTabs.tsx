@@ -180,13 +180,6 @@ export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past,
                 {page.name}
               </h1>
 
-              {/* Verified Partner badge — only when actually a partner */}
-              {page.is_verified && (
-                <span className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-blue-400/30 bg-gradient-to-r from-blue-500/25 to-cyan-500/15 px-3.5 py-1.5 text-[11px] font-bold text-blue-200 shadow-[0_4px_14px_-4px_rgba(59,130,246,0.4)] backdrop-blur-sm">
-                  <ShieldCheck className="h-3.5 w-3.5" /> Investigator Events Partner
-                </span>
-              )}
-
               {/* Gradient accent line */}
               <div aria-hidden className="mt-4 h-px w-24 bg-gradient-to-r from-blue-400/80 via-purple-400/60 to-transparent" />
 

@@ -39,6 +39,8 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
   const [searchResults, setSearchResults] = useState<Array<{ id: string; full_name: string | null; avatar_url: string | null; username: string | null }>>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [attachError, setAttachError] = useState<string | null>(null);
+  const [pendingAttachment, setPendingAttachment] = useState<{ dataUrl: string; blob: Blob; filename: string } | null>(null);
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
   const [showEventPicker, setShowEventPicker] = useState(false);
   const [eventSearch, setEventSearch] = useState('');
   const [eventResults, setEventResults] = useState<Array<{ id: string; title: string; slug: string; city: string; country: string; image_path: string | null }>>([]);
@@ -64,6 +66,23 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
 
     return payload.url;
   };
+
+  const fileToDataUrl = (file: Blob) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error('Could not read file'));
+      reader.readAsDataURL(file);
+    });
+
+  const handleImageLoadFailed = useCallback((url: string) => {
+    setFailedImages((prev) => {
+      if (prev.has(url)) return prev;
+      const next = new Set(prev);
+      next.add(url);
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
@@ -196,11 +215,28 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
     }
   }, [activeChat, conversations]);
 
-  const sendMessage = async (imageUrl?: string) => {
-    if (!userId || !activeChat || sending) return;
-    if (!imageUrl && !newMsg.trim()) return;
+  const sendMessage = async () => {
+    if (!userId || !activeChat || sending || uploadingImage) return;
+    const trimmed = newMsg.trim();
+    if (!pendingAttachment && !trimmed) return;
+
+    let imageUrl: string | undefined;
+    if (pendingAttachment) {
+      setUploadingImage(true);
+      try {
+        imageUrl = await uploadMessageImage(pendingAttachment.blob, pendingAttachment.filename);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to upload photo';
+        console.error('[message-image] upload failure', err);
+        setAttachError(message);
+        setUploadingImage(false);
+        return;
+      }
+      setUploadingImage(false);
+    }
+
     setSending(true);
-    const payload: any = { sender_id: userId, receiver_id: activeChat, content: imageUrl ? '' : newMsg.trim() };
+    const payload: any = { sender_id: userId, receiver_id: activeChat, content: trimmed };
     if (imageUrl) payload.image_url = imageUrl;
     const { data, error } = await supabase.from('messages' as any).insert(payload).select('*').single();
     if (error) {
@@ -211,8 +247,8 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
     if (data) {
       setMessages((prev) => [...prev, data as unknown as Message]);
       setNewMsg('');
+      setPendingAttachment(null);
       loadConversations();
-      // Scroll message container to bottom after sending
       setTimeout(() => {
         const container = messagesContainerRef.current;
         if (container) container.scrollTop = container.scrollHeight;
@@ -221,20 +257,20 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
     setSending(false);
   };
 
+  // Stage the photo from the file input — preview shows above the input bar
+  // and the user taps send to actually upload + post. Avoids the "did it send
+  // or not?" ambiguity of auto-send.
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !userId || !activeChat) return;
     setAttachError(null);
-    setUploadingImage(true);
     try {
-      const imageUrl = await uploadMessageImage(file, file.name || 'message-image.jpg');
-      await sendMessage(imageUrl);
+      const dataUrl = await fileToDataUrl(file);
+      setPendingAttachment({ dataUrl, blob: file, filename: file.name || 'message-image.jpg' });
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to send photo';
-      console.error('[message-image] upload failure', err);
+      const message = err instanceof Error ? err.message : 'Failed to attach photo';
       setAttachError(message);
     } finally {
-      setUploadingImage(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
@@ -243,6 +279,7 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
   // user gets the real native iOS picker (Camera / Photo Library) instead
   // of the HTML <input type="file"> route which crashes the WebView on iOS
   // after the camera returns the photo. Web stays on the file input.
+  // Stages the photo for preview — does NOT auto-send.
   const handleAttachImage = async () => {
     if (!isNativeApp) {
       fileInputRef.current?.click();
@@ -258,9 +295,6 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
       const photo = await Camera.getPhoto({
         quality: 80,
         allowEditing: false,
-        // DataUrl returns a ready-to-use data:image/jpeg;base64,... string.
-        // Uri would be more memory-efficient but its webPath needs
-        // Capacitor.convertFileSrc gymnastics and was failing silently.
         resultType: CameraResultType.DataUrl,
         source: CameraSource.Prompt,
       });
@@ -271,25 +305,21 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
       dataUrl = photo.dataUrl;
       format = photo.format ?? 'jpeg';
     } catch (e) {
-      // Picker was cancelled or permission denied — silent (user knows they cancelled).
+      // Picker was cancelled or permission denied — silent.
       return;
     }
 
-    setUploadingImage(true);
     try {
       const res = await fetch(dataUrl);
       const blob = await res.blob();
       const ext = format === 'jpeg' ? 'jpg' : format;
       const type = blob.type || `image/${format}`;
       const imageBlob = blob.type ? blob : new Blob([blob], { type });
-      const imageUrl = await uploadMessageImage(imageBlob, `message-photo.${ext}`);
-      await sendMessage(imageUrl);
+      setPendingAttachment({ dataUrl, blob: imageBlob, filename: `message-photo.${ext}` });
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to send photo';
-      console.error('[camera] send failure', err);
+      const message = err instanceof Error ? err.message : 'Failed to attach photo';
+      console.error('[camera] attach failure', err);
       setAttachError(message);
-    } finally {
-      setUploadingImage(false);
     }
   };
 
@@ -449,22 +479,23 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
                       )}
                       <div className={`max-w-[84%] sm:max-w-[70%] ${isMine ? 'order-1' : ''}`}>
                         {m.image_url && (
-                          <img
-                            src={m.image_url}
-                            alt="Shared image"
-                            className="max-h-64 rounded-2xl object-cover"
-                            loading="lazy"
-                            // Swap to a graceful placeholder if Supabase returns
-                            // 404 (RLS, deleted file, etc.). Suppresses the
-                            // iOS WebView's native "Load failed" toast banner
-                            // that was appearing on broken images.
-                            onError={(e) => {
-                              const target = e.currentTarget as HTMLImageElement;
-                              target.onerror = null; // prevent infinite loop
-                              target.src = '/cities/fallback.jpg';
-                              target.classList.add('opacity-40');
-                            }}
-                          />
+                          failedImages.has(m.image_url) ? (
+                            <div className="flex h-32 w-48 max-w-full items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2 text-[11px] text-slate-500">
+                              <span>Image unavailable</span>
+                            </div>
+                          ) : (
+                            <img
+                              src={m.image_url}
+                              alt="Shared image"
+                              className="max-h-64 rounded-2xl object-cover"
+                              loading="lazy"
+                              // On error, flag the URL — the next render swaps
+                              // to a div placeholder instead of an img, so the
+                              // iOS WebView doesn't keep firing "Load failed"
+                              // toasts every time the chat repolls.
+                              onError={() => handleImageLoadFailed(m.image_url!)}
+                            />
+                          )
                         )}
                         {m.content && (() => {
                           // Detect event links and render as rich cards
@@ -512,6 +543,31 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
               <div className="shrink-0 bg-rose-500/10 border-t border-rose-500/30 px-3 py-2 text-[12px] text-rose-300 flex items-center justify-between gap-3">
                 <span className="truncate">⚠ {attachError}</span>
                 <button type="button" onClick={() => setAttachError(null)} className="text-rose-200 underline">Dismiss</button>
+              </div>
+            )}
+            {pendingAttachment && (
+              <div className="shrink-0 border-t border-white/5 bg-slate-950 px-3 pt-2.5 pb-1">
+                <div className="relative inline-block">
+                  <img
+                    src={pendingAttachment.dataUrl}
+                    alt="Attachment preview"
+                    className="max-h-32 max-w-[12rem] rounded-xl border border-white/10 object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setPendingAttachment(null)}
+                    disabled={uploadingImage}
+                    className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-sm leading-none text-slate-200 ring-1 ring-white/20 transition hover:bg-slate-800 disabled:opacity-40"
+                    aria-label="Remove photo"
+                  >
+                    ×
+                  </button>
+                  {uploadingImage && (
+                    <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-slate-950/60">
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white/90" />
+                    </div>
+                  )}
+                </div>
               </div>
             )}
             <div className="shrink-0 border-t border-white/5 bg-slate-950 p-2.5 sm:p-3" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom, 0.75rem))' }}>
@@ -577,17 +633,21 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
                   value={newMsg}
                   onChange={(e) => setNewMsg(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-                  placeholder="Message..."
+                  placeholder={pendingAttachment ? 'Add a caption (optional)…' : 'Message...'}
                   autoComplete="off"
                   autoCorrect="on"
                 />
                 <button
                   type="button"
                   onClick={() => sendMessage()}
-                  disabled={sending || !newMsg.trim()}
+                  disabled={sending || uploadingImage || (!newMsg.trim() && !pendingAttachment)}
                   className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white transition hover:from-indigo-400 hover:to-purple-500 disabled:opacity-30 sm:h-10 sm:w-10"
                 >
-                  <Send className="h-4 w-4" />
+                  {uploadingImage || sending ? (
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
                 </button>
               </div>
             </div>

@@ -51,20 +51,32 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
 
   const supabase = createSupabaseBrowserClient();
 
-  const uploadMessageImage = async (file: Blob, filename: string) => {
-    const formData = new FormData();
-    formData.append('file', file, filename);
+  const uploadMessageImage = async (file: Blob, _filename: string) => {
+    // Two-step upload: server hands out a presigned URL, client PUTs the photo
+    // directly to Supabase storage. Bypasses Vercel's 4.5 MB body limit which
+    // was silently rejecting iPhone photos at the edge (no server log, no
+    // response, just "Load failed" in the WebView).
+    const contentType = file.type || 'image/jpeg';
 
-    const response = await fetch('/api/upload-message-image', {
+    const presignRes = await fetch('/api/upload-message-image/presign', {
       method: 'POST',
-      body: formData,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contentType }),
     });
-    const payload = await response.json().catch(() => null) as { url?: string; error?: string } | null;
-    if (!response.ok || !payload?.url) {
-      throw new Error(payload?.error ?? 'Failed to upload image');
+    const presign = await presignRes.json().catch(() => null) as
+      { signedUrl?: string; token?: string; path?: string; publicUrl?: string; error?: string } | null;
+    if (!presignRes.ok || !presign?.token || !presign?.path || !presign?.publicUrl) {
+      throw new Error(presign?.error ?? 'Could not start upload');
     }
 
-    return payload.url;
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .uploadToSignedUrl(presign.path, presign.token, file, { contentType });
+    if (uploadError) {
+      throw new Error(uploadError.message || 'Upload failed');
+    }
+
+    return presign.publicUrl;
   };
 
   const fileToDataUrl = (file: Blob) =>

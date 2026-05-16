@@ -140,59 +140,91 @@ export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past,
 
   return (
     <>
-      {/* ═══ HERO — full-width dark section ═══ */}
-      <div className="relative overflow-hidden bg-[linear-gradient(165deg,#06091a_0%,#0a1228_35%,#0d1840_60%,#0a1228_100%)] pb-16 pt-24 sm:pb-24 sm:pt-32">
-        {/* Ambient glows */}
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute left-[-5%] top-[-10%] h-[30rem] w-[30rem] rounded-full bg-[radial-gradient(ellipse,rgba(22,104,255,0.18),transparent_55%)]" />
-          <div className="absolute right-[-5%] top-[10%] h-[24rem] w-[24rem] rounded-full bg-[radial-gradient(ellipse,rgba(139,92,246,0.12),transparent_55%)]" />
-          <div className="absolute bottom-[-10%] left-[30%] h-[20rem] w-[20rem] rounded-full bg-[radial-gradient(ellipse,rgba(14,165,233,0.1),transparent_55%)]" />
+      {/* ═══ HERO — cinematic dark with floating logo, animated gradient name ═══ */}
+      <div className="relative overflow-hidden bg-[linear-gradient(165deg,#020617_0%,#06091a_25%,#0a1228_50%,#0d1840_75%,#0a1228_100%)] pb-16 pt-24 sm:pb-24 sm:pt-32">
+        {/* Ambient gradient orbs — bigger, more saturated */}
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          <div className="absolute left-[-10%] top-[-15%] h-[36rem] w-[36rem] rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.30),transparent_65%)] blur-3xl" />
+          <div className="absolute right-[-10%] top-[10%] h-[30rem] w-[30rem] rounded-full bg-[radial-gradient(circle,rgba(168,85,247,0.22),transparent_65%)] blur-3xl" />
+          <div className="absolute bottom-[-15%] left-[20%] h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle,rgba(20,184,166,0.18),transparent_65%)] blur-3xl" />
         </div>
-        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+        {/* Dot grid (replaces line grid — more modern) */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
 
         <div className="container-shell relative">
-          <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:gap-8">
-            {/* Logo */}
-            <div className="flex h-24 w-24 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-white p-3 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.5)] sm:h-32 sm:w-32">
-              {logoSrc ? (
-                <Image src={logoSrc} alt={page.name} width={120} height={120} className={`h-auto max-h-16 w-auto object-contain sm:max-h-24 ${invertLogo ? 'brightness-0' : ''}`} />
-              ) : (
-                <span className="text-4xl font-bold text-slate-400">{page.name.charAt(0)}</span>
-              )}
+          <div className="flex flex-col items-start gap-7 sm:flex-row sm:items-start sm:gap-10">
+            {/* Logo — floating with gradient glow ring */}
+            <div className="relative flex-shrink-0">
+              <div aria-hidden className="absolute -inset-2 rounded-3xl bg-gradient-to-br from-blue-400/40 via-purple-400/30 to-cyan-400/40 opacity-60 blur-xl" />
+              <div className="relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-3xl border border-white/20 bg-white p-3.5 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.5)] sm:h-36 sm:w-36">
+                {logoSrc ? (
+                  <Image src={logoSrc} alt={page.name} width={140} height={140} className={`h-auto max-h-20 w-auto object-contain sm:max-h-28 ${invertLogo ? 'brightness-0' : ''}`} />
+                ) : (
+                  <span className="text-5xl font-bold text-slate-400">{page.name.charAt(0)}</span>
+                )}
+              </div>
             </div>
 
-            <div>
-              <div className="flex flex-wrap items-center gap-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-blue-400/50">Professional Association</p>
-              </div>
-              <h1 className="mt-2 text-[1.8rem] font-bold leading-[0.95] tracking-[-0.04em] text-white sm:text-[2.5rem] lg:text-[3.2rem]">
+            <div className="min-w-0 flex-1">
+              {/* Eyebrow chip with pulsing dot */}
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-white/80 backdrop-blur-md sm:tracking-[0.28em]">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-400 shadow-[0_0_0_3px_rgba(59,130,246,0.25)] animate-pulse" />
+                Professional Association
+              </span>
+
+              {/* Name with animated gradient */}
+              <h1
+                className="mt-3 bg-[linear-gradient(92deg,#ffffff_0%,#cbd5e1_50%,#ffffff_100%)] bg-[length:200%_100%] bg-clip-text text-[2rem] font-bold leading-[0.95] tracking-[-0.04em] text-transparent drop-shadow-[0_4px_24px_rgba(0,0,0,0.5)] sm:text-[2.75rem] lg:text-[3.5rem]"
+                style={{ animation: 'gradient-text-cycle 6s ease-in-out infinite' }}
+              >
                 {page.name}
               </h1>
+
+              {/* Verified Partner badge — only when actually a partner */}
               {page.is_verified && (
-                <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-blue-500/20 px-3 py-1 text-[11px] font-bold text-blue-300 border border-blue-400/20">
+                <span className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-blue-400/30 bg-gradient-to-r from-blue-500/25 to-cyan-500/15 px-3.5 py-1.5 text-[11px] font-bold text-blue-200 shadow-[0_4px_14px_-4px_rgba(59,130,246,0.4)] backdrop-blur-sm">
                   <ShieldCheck className="h-3.5 w-3.5" /> Investigator Events Partner
                 </span>
               )}
+
+              {/* Gradient accent line */}
+              <div aria-hidden className="mt-4 h-px w-24 bg-gradient-to-r from-blue-400/80 via-purple-400/60 to-transparent" />
+
+              {/* Description */}
               {page.description && (
-                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/50 sm:text-base sm:leading-relaxed">{page.description}</p>
+                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/55 sm:text-base">{page.description}</p>
               )}
 
-              <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-white/35">
-                {page.country && <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> {page.country}</span>}
-                {page.founded_year && <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> Est. {page.founded_year}</span>}
-                {page.member_count && <span className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> {page.member_count.toLocaleString()} members</span>}
-                <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" /> {upcoming.length + past.length} events</span>
+              {/* Meta row */}
+              <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-white/45">
+                {page.country && <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-blue-400/70" /> {page.country}</span>}
+                {page.founded_year && <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5 text-purple-400/70" /> Est. {page.founded_year}</span>}
+                {page.member_count && <span className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5 text-cyan-400/70" /> {page.member_count.toLocaleString()} members</span>}
+                <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5 text-emerald-400/70" /> {upcoming.length + past.length} events</span>
               </div>
 
+              {/* CTAs */}
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 {page.website && (
-                  <a href={page.website} target="_blank" rel="noreferrer" className="btn-glow !px-6 !py-3 !text-sm">
-                    Join {page.name} <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                  <a
+                    href={page.website}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-white px-6 py-3 text-sm font-bold text-slate-950 shadow-[0_12px_30px_-8px_rgba(255,255,255,0.4)] transition active:scale-[0.98]"
+                  >
+                    <span className="absolute -top-px left-1/2 h-px w-1/2 -translate-x-1/2 bg-gradient-to-r from-transparent via-blue-500/40 to-transparent" />
+                    Join {page.name}
+                    <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
                   </a>
                 )}
                 {page.website && (
-                  <a href={page.website} target="_blank" rel="noreferrer" className="btn-outline-light !px-5 !py-2.5 !text-sm">
-                    <Globe className="mr-1.5 h-3.5 w-3.5" /> Website <ExternalLink className="ml-1 h-3 w-3 opacity-40" />
+                  <a
+                    href={page.website}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-5 py-2.5 text-sm font-semibold text-white/90 backdrop-blur-sm transition active:scale-[0.98] hover:bg-white/[0.10]"
+                  >
+                    <Globe className="h-3.5 w-3.5" /> Website <ExternalLink className="h-3 w-3 opacity-40" />
                   </a>
                 )}
               </div>
@@ -252,17 +284,33 @@ export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past,
         </div>
       )}
 
-      {/* ═══ EVENTS SECTION — light background ═══ */}
+      {/* ═══ EVENTS SECTION — light background with gradient orbs ═══ */}
       <div className="relative overflow-hidden bg-[linear-gradient(165deg,#f0f4ff_0%,#f8fbff_50%,#ffffff_100%)]">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_14%,rgba(22,104,255,0.06),transparent_24%),radial-gradient(circle_at_86%_20%,rgba(20,184,255,0.04),transparent_20%)]" />
+        <div aria-hidden className="pointer-events-none absolute -top-32 -left-24 h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.10),transparent_65%)] blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute top-1/3 -right-20 h-[22rem] w-[22rem] rounded-full bg-[radial-gradient(circle,rgba(168,85,247,0.08),transparent_65%)] blur-3xl" />
         <div className="container-shell relative py-12 sm:py-16">
-          <p className="eyebrow">Events</p>
-          <h2 className="section-title !mt-3">{page.name} events</h2>
-          <p className="section-copy max-w-xl">Browse all conferences, meetings, and training events organised by or linked to {page.name}.</p>
+          <span className="inline-flex items-center gap-2 rounded-full border border-blue-200/60 bg-white/80 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-blue-600 backdrop-blur-sm">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-500 shadow-[0_0_0_3px_rgba(59,130,246,0.2)] animate-pulse" />
+            Events
+          </span>
+          <h2 className="mt-3 text-[2rem] font-bold leading-[0.95] tracking-[-0.04em] text-slate-950 sm:text-[2.75rem]">
+            {page.name}{' '}
+            <span
+              className="inline-block bg-[linear-gradient(92deg,#3b82f6_0%,#22d3ee_30%,#a855f7_65%,#ec4899_100%)] bg-[length:200%_100%] bg-clip-text text-transparent"
+              style={{ animation: 'gradient-text-cycle 5s ease-in-out infinite' }}
+            >
+              events
+            </span>
+          </h2>
+          <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-600 sm:text-base">Browse all conferences, meetings, and training events organised by or linked to {page.name}.</p>
 
           {upcoming.length > 0 && (
             <div className="mt-8">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-blue-600">Upcoming</h3>
+              <div className="flex items-center gap-3">
+                <span aria-hidden className="inline-block h-2 w-2 rounded-full bg-gradient-to-br from-blue-400 to-cyan-500 shadow-[0_0_0_4px_rgba(59,130,246,0.15)]" />
+                <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-blue-600">Upcoming</h3>
+                <div className="h-px flex-1 bg-gradient-to-r from-blue-200/80 to-transparent" />
+              </div>
               <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {upcoming.map((e) => <EventCard key={e.id} event={e} />)}
               </div>
@@ -271,7 +319,11 @@ export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past,
 
           {past.length > 0 && (
             <div className="mt-10">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400">Past events</h3>
+              <div className="flex items-center gap-3">
+                <span aria-hidden className="inline-block h-2 w-2 rounded-full bg-slate-300" />
+                <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">Past events</h3>
+                <div className="h-px flex-1 bg-gradient-to-r from-slate-200 to-transparent" />
+              </div>
               <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {past.slice(0, 6).map((e) => <EventCard key={e.id} event={e} muted />)}
               </div>
@@ -280,10 +332,15 @@ export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past,
           )}
 
           {upcoming.length === 0 && past.length === 0 && (
-            <div className="mt-8 rounded-[1.5rem] border border-slate-200/60 bg-white py-12 text-center shadow-sm">
-              <Calendar className="mx-auto h-12 w-12 text-blue-200" />
-              <p className="mt-4 text-base font-semibold text-slate-400">No events listed yet</p>
-              <Link href="/submit-event" className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:underline">Submit an event <ArrowRight className="h-3 w-3" /></Link>
+            <div className="mt-8 rounded-3xl border border-slate-200/60 bg-gradient-to-br from-white via-slate-50/50 to-blue-50/30 py-12 text-center shadow-sm">
+              <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-100 to-violet-100 text-blue-500">
+                <Calendar className="h-6 w-6" />
+              </div>
+              <p className="text-base font-semibold text-slate-900">No events listed yet</p>
+              <p className="mt-1 text-sm text-slate-500">Be the first to add a {page.name} event.</p>
+              <Link href="/submit-event" className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-slate-950 px-5 py-2 text-xs font-bold text-white shadow-sm transition active:scale-95">
+                Submit an event <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
             </div>
           )}
         </div>
@@ -292,9 +349,20 @@ export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past,
       {/* ═══ MEMBERS SECTION ═══ */}
       <div className="border-t border-slate-200/40 bg-white">
         <div className="container-shell py-12 sm:py-16">
-          <p className="eyebrow">Directory</p>
-          <h2 className="section-title !mt-3">Members on Investigator Events</h2>
-          <p className="section-copy max-w-xl">Investigators who have added {page.name} to their profile. The green verified badge means the user has confirmed their identity (via LinkedIn or platform admin).</p>
+          <span className="inline-flex items-center gap-2 rounded-full border border-violet-200/60 bg-white/80 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-violet-600 backdrop-blur-sm">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-violet-500 shadow-[0_0_0_3px_rgba(168,85,247,0.2)] animate-pulse" />
+            Directory
+          </span>
+          <h2 className="mt-3 text-[2rem] font-bold leading-[0.95] tracking-[-0.04em] text-slate-950 sm:text-[2.75rem]">
+            Members on{' '}
+            <span
+              className="inline-block bg-[linear-gradient(92deg,#a855f7_0%,#ec4899_50%,#3b82f6_100%)] bg-[length:200%_100%] bg-clip-text text-transparent"
+              style={{ animation: 'gradient-text-cycle 5s ease-in-out infinite' }}
+            >
+              the platform
+            </span>
+          </h2>
+          <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-600 sm:text-base">Investigators who have added {page.name} to their profile. The green verified badge means the user has confirmed their identity (via LinkedIn or platform admin).</p>
 
           {members.length > 0 ? (
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

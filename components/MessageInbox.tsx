@@ -52,28 +52,52 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
   const supabase = createSupabaseBrowserClient();
 
   const uploadMessageImage = async (file: Blob, _filename: string) => {
-    // Two-step upload: server hands out a presigned URL, client PUTs the photo
-    // directly to Supabase storage. Bypasses Vercel's 4.5 MB body limit which
-    // was silently rejecting iPhone photos at the edge (no server log, no
-    // response, just "Load failed" in the WebView).
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'no-win';
     const contentType = file.type || 'image/jpeg';
 
-    const presignRes = await fetch('/api/upload-message-image/presign', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contentType }),
-    });
-    const presign = await presignRes.json().catch(() => null) as
-      { signedUrl?: string; token?: string; path?: string; publicUrl?: string; error?: string } | null;
-    if (!presignRes.ok || !presign?.token || !presign?.path || !presign?.publicUrl) {
-      throw new Error(presign?.error ?? 'Could not start upload');
+    // Use absolute URL to eliminate any host-resolution ambiguity in WKWebView.
+    const presignUrl = `${origin}/api/upload-message-image/presign`;
+
+    let presignRes: Response;
+    try {
+      presignRes = await fetch(presignUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contentType }),
+        credentials: 'include',
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new Error(`STEP1 fetch failed: ${msg} | url=${presignUrl} | size=${file.size}`);
     }
 
-    const { error: uploadError } = await supabase.storage
-      .from('avatars')
-      .uploadToSignedUrl(presign.path, presign.token, file, { contentType });
-    if (uploadError) {
-      throw new Error(uploadError.message || 'Upload failed');
+    if (!presignRes.ok) {
+      let serverMsg = '';
+      try {
+        const body = await presignRes.json();
+        serverMsg = body.error || JSON.stringify(body);
+      } catch {
+        try { serverMsg = await presignRes.text(); } catch {}
+      }
+      throw new Error(`STEP1 HTTP ${presignRes.status}: ${serverMsg}`);
+    }
+
+    const presign = await presignRes.json().catch(() => null) as
+      { signedUrl?: string; token?: string; path?: string; publicUrl?: string; error?: string } | null;
+    if (!presign?.token || !presign?.path || !presign?.publicUrl) {
+      throw new Error(`STEP1 bad response: ${JSON.stringify(presign)}`);
+    }
+
+    try {
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .uploadToSignedUrl(presign.path, presign.token, file, { contentType });
+      if (uploadError) {
+        throw new Error(`STEP2 supabase: ${uploadError.message}`);
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new Error(`STEP2 upload failed: ${msg} | path=${presign.path}`);
     }
 
     return presign.publicUrl;
@@ -577,9 +601,9 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
             {/* Surface camera/upload errors so silent failures don't look
                 like "tapped Use Photo and nothing happened". */}
             {attachError && (
-              <div className="shrink-0 bg-rose-500/10 border-t border-rose-500/30 px-3 py-2 text-[12px] text-rose-300 flex items-center justify-between gap-3">
-                <span className="truncate">⚠ {attachError}</span>
-                <button type="button" onClick={() => setAttachError(null)} className="text-rose-200 underline">Dismiss</button>
+              <div className="shrink-0 bg-rose-500/10 border-t border-rose-500/30 px-3 py-2 text-[11px] text-rose-300 flex items-start justify-between gap-3">
+                <span className="break-words whitespace-pre-wrap select-all">⚠ {attachError}</span>
+                <button type="button" onClick={() => setAttachError(null)} className="shrink-0 text-rose-200 underline">Dismiss</button>
               </div>
             )}
             {pendingAttachment && (

@@ -3,17 +3,13 @@ import { Resend } from 'resend';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { enforceRateLimitAsync, assertSameOriginRequest } from '@/lib/security/server';
 import { buildWelcomeEmail } from '@/lib/email/welcome-email';
-import { buildPublicEmailVerificationEmail } from '@/lib/email/public-email-verification';
-import { createPublicEmailVerificationToken } from '@/lib/security/public-email-verification';
 import { generateUniqueUsername } from '@/lib/utils/username';
-import { looksLikeRandomSignupName } from '@/lib/utils/signup-abuse';
 
 export async function POST(request: Request) {
   try {
     await enforceRateLimitAsync('signup', { maxRequests: 5, windowMs: 60_000 });
     assertSameOriginRequest();
 
-    const origin = new URL(request.url).origin;
     const body = await request.json().catch(() => null);
     const email = body?.email?.trim().toLowerCase();
     const password = body?.password;
@@ -26,9 +22,6 @@ export async function POST(request: Request) {
     if (!fullName || fullName.length < 2) {
       return NextResponse.json({ error: 'Full name is required' }, { status: 400 });
     }
-    if (looksLikeRandomSignupName(fullName)) {
-      return NextResponse.json({ error: 'Please enter your real first and last name.' }, { status: 400 });
-    }
     if (password.length < 8) {
       return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 });
     }
@@ -36,16 +29,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'You must accept the Terms of Service' }, { status: 400 });
     }
 
+    // Block known bot-source domains. korper.com was identified as the source
+    // of the random-name signups polluting /people. Generic 'enter a real
+    // email' message — don't tip off the bot operator that we're filtering.
+    const blockedDomains = ['korper.com'];
+    const emailDomain = email.split('@')[1] ?? '';
+    if (blockedDomains.includes(emailDomain)) {
+      return NextResponse.json({ error: 'Please use a real professional email address.' }, { status: 400 });
+    }
+
     const admin = createSupabaseAdminServerClient();
 
-    // Keep the smooth app flow: create the account so the UI can sign them in
-    // immediately, but keep the profile private until our public-profile email
-    // verification link is clicked.
+    // Create user with admin client — auto-confirms email
     const { data, error } = await admin.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
-      user_metadata: { full_name: fullName || null, email_verified_for_public: false },
+      user_metadata: { full_name: fullName || null },
     });
 
     if (error) {
@@ -56,19 +56,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unable to create account. Please try again.' }, { status: 400 });
     }
 
-    // Create a private profile row. Profile setup/edit makes it public after
-    // the user has verified email and completed the profile.
+    // Create profile row
     if (data.user) {
       const username = await generateUniqueUsername(admin, fullName, data.user.id);
-      const { error: profileError } = await admin.from('profiles').upsert({
+      const { error: profileError } = await admin.from('profiles').insert({
         id: data.user.id,
         full_name: fullName || null,
         username,
-        is_public: false,
-        auth_provider: 'email',
-        email_verified_for_public: false,
+        is_public: true,
         tos_accepted_at: new Date().toISOString(),
-      } as any, { onConflict: 'id' });
+      } as any);
       if (profileError) {
         console.error('Failed to create profile:', profileError.message);
       }
@@ -78,16 +75,6 @@ export async function POST(request: Request) {
     const resendKey = process.env.RESEND_API_KEY;
     if (resendKey && email) {
       const resend = new Resend(resendKey);
-      const token = data.user ? createPublicEmailVerificationToken(data.user.id, email) : null;
-      if (token) {
-        const verifyUrl = `${origin}/api/auth/verify-public-email?token=${encodeURIComponent(token)}`;
-        resend.emails.send({
-          from: 'Investigator Events <info@investigatorevents.com>',
-          to: email,
-          subject: 'Confirm your Investigator Events email',
-          html: buildPublicEmailVerificationEmail(fullName || null, verifyUrl),
-        }).catch((err) => console.error('Public email verification failed:', err));
-      }
       resend.emails.send({
         from: 'Investigator Events <info@investigatorevents.com>',
         to: email,
@@ -96,11 +83,7 @@ export async function POST(request: Request) {
       }).catch((err) => console.error('Welcome email failed:', err));
     }
 
-    return NextResponse.json({
-      message: 'Account created. Check your email to make your profile public.',
-      userId: data.user?.id,
-      requiresEmailConfirmation: false,
-    });
+    return NextResponse.json({ message: 'Account created', userId: data.user?.id });
   } catch (err) {
     console.error('signup error:', err);
     return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });

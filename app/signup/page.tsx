@@ -65,7 +65,7 @@ function SignUpPageInner() {
       setLoading(false);
 
       if (signInError) {
-        setSuccess('Account created! Check your email to make your profile public.');
+        setSuccess('Account created! You can now sign in.');
         return;
       }
 

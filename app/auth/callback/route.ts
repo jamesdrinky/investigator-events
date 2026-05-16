@@ -3,7 +3,6 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { generateUniqueUsername } from '@/lib/utils/username';
-import { looksLikeRandomSignupName } from '@/lib/utils/signup-abuse';
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -99,16 +98,14 @@ export async function GET(request: Request) {
 
           if (!existing) {
             // New user — create profile with OAuth data
-            const hasUsableName = !!fullName && !looksLikeRandomSignupName(fullName);
             const username = await generateUniqueUsername(admin, fullName, user.id);
             await admin.from('profiles').insert({
               id: user.id,
               full_name: fullName,
               avatar_url: resolvedAvatarUrl,
               username,
-              is_public: hasUsableName,
+              is_public: true,
               auth_provider: provider,
-              email_verified_for_public: provider === 'apple' || provider === 'linkedin_oidc',
               linkedin_name: linkedinName,
               linkedin_picture: linkedinPicture,
               tos_accepted_at: new Date().toISOString(),

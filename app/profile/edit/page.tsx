@@ -198,7 +198,6 @@ export default function EditProfilePage() {
   const [verifyMessage, setVerifyMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [linkedinUrl, setLinkedinUrl] = useState('');
   const [authProvider, setAuthProvider] = useState<string | null>(null);
-  const [canPublishProfile, setCanPublishProfile] = useState(false);
   const [appleLinked, setAppleLinked] = useState(false);
 
   // Work experience
@@ -244,13 +243,7 @@ export default function EditProfilePage() {
         const storedProvider = (profile as any).auth_provider;
         const providers: string[] = data.user?.app_metadata?.providers ?? [];
         const hasLinkedIn = providers.includes('linkedin_oidc') || storedProvider === 'linkedin_oidc';
-        const resolvedProvider = hasLinkedIn
-          ? 'linkedin_oidc'
-          : providers.includes('apple') || storedProvider === 'apple'
-            ? 'apple'
-            : storedProvider ?? data.user.app_metadata?.provider ?? null;
-        setAuthProvider(resolvedProvider);
-        setCanPublishProfile(resolvedProvider !== 'email' || (profile as any).email_verified_for_public === true);
+        setAuthProvider(hasLinkedIn ? 'linkedin_oidc' : storedProvider ?? null);
         setAppleLinked(providers.includes('apple') || storedProvider === 'apple');
       }
 
@@ -433,7 +426,7 @@ export default function EditProfilePage() {
       avatar_url: avatarUrl,
       banner_url: bannerUrl,
       badges: selectedBadges.length > 0 ? selectedBadges : null,
-      is_public: canPublishProfile,
+      is_public: true,
     } as any).eq('id', userId);
 
     // Sync associations

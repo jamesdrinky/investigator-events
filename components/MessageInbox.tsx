@@ -111,6 +111,24 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
       reader.readAsDataURL(file);
     });
 
+  // Parse a data URL into a Blob without using fetch(). iOS WKWebView's
+  // fetch() silently dies with "Load failed" for large data URLs (>~2MB
+  // — iPhone screenshots and Camera plugin photos hit this routinely).
+  // atob + Uint8Array is synchronous and has no size limit.
+  const dataUrlToBlob = (dataUrl: string): Blob => {
+    const commaIdx = dataUrl.indexOf(',');
+    if (commaIdx < 0) throw new Error('Invalid data URL');
+    const meta = dataUrl.slice(0, commaIdx);
+    const base64 = dataUrl.slice(commaIdx + 1);
+    const mimeMatch = meta.match(/data:([^;]+)/);
+    const mime = mimeMatch?.[1] || 'image/jpeg';
+
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new Blob([bytes], { type: mime });
+  };
+
   const handleImageLoadFailed = useCallback((url: string) => {
     setFailedImages((prev) => {
       if (prev.has(url)) return prev;
@@ -340,8 +358,11 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
     try {
       const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera');
       const photo = await Camera.getPhoto({
-        quality: 80,
+        quality: 70,
         allowEditing: false,
+        // Cap the longest edge so iPhone screenshots and full-res photos
+        // don't produce ~10MB data URLs that further punish the WebView.
+        width: 1920,
         resultType: CameraResultType.DataUrl,
         source: CameraSource.Prompt,
       });
@@ -357,16 +378,15 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
     }
 
     try {
-      const res = await fetch(dataUrl);
-      const blob = await res.blob();
+      // Synchronous parse — fetch(dataUrl) dies with "Load failed" on iOS
+      // WKWebView for any sizable photo. atob is reliable at any size.
+      const blob = dataUrlToBlob(dataUrl);
       const ext = format === 'jpeg' ? 'jpg' : format;
-      const type = blob.type || `image/${format}`;
-      const imageBlob = blob.type ? blob : new Blob([blob], { type });
-      setPendingAttachment({ dataUrl, blob: imageBlob, filename: `message-photo.${ext}` });
+      setPendingAttachment({ dataUrl, blob, filename: `message-photo.${ext}` });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to attach photo';
       console.error('[camera] attach failure', err);
-      setAttachError(message);
+      setAttachError(`Camera parse failed: ${message}`);
     }
   };
 

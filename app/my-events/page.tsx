@@ -140,13 +140,28 @@ export default function MyEventsPage() {
   const hasImage = (e: EventItem) => e.image_path && /^(\/(cities|events|images)\/|https?:\/\/)/.test(e.image_path);
 
   return (
-    <main className="min-h-screen bg-slate-50 pt-2 lg:pt-20">
-      <div className="container-shell max-w-3xl py-4 lg:py-10">
-        <button onClick={() => window.history.back()} className="mb-3 flex items-center gap-1 text-sm text-slate-500 transition hover:text-slate-700 lg:hidden">
-          <ArrowLeft className="h-4 w-4" /> Back
-        </button>
-        <h1 className="text-2xl font-bold text-slate-900 lg:text-3xl">My Events</h1>
-        <p className="mt-1 text-sm text-slate-500">Events you're attending and personalised recommendations</p>
+    <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_25%,#f0e8ff_50%,#f4f0ff_75%,#f8fbff_100%)] pt-16 lg:pt-20">
+      {/* Futuristic gradient orb backdrop */}
+      <div aria-hidden className="pointer-events-none absolute -top-32 -left-24 h-[26rem] w-[26rem] rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.18),transparent_65%)] blur-3xl" />
+      <div aria-hidden className="pointer-events-none absolute top-10 -right-20 h-[22rem] w-[22rem] rounded-full bg-[radial-gradient(circle,rgba(168,85,247,0.14),transparent_65%)] blur-3xl" />
+      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.035]" style={{ backgroundImage: 'radial-gradient(circle, #0f172a 1px, transparent 1px)', backgroundSize: '22px 22px' }} />
+
+      <div className="container-shell relative max-w-3xl py-6 lg:py-10">
+        {/* Page-level Back removed — global MobileBackButton already shows */}
+        <span className="inline-flex items-center gap-2 rounded-full border border-blue-200/60 bg-white/80 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-blue-600 backdrop-blur-sm">
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-500 shadow-[0_0_0_3px_rgba(59,130,246,0.2)] animate-pulse" />
+          Your calendar
+        </span>
+        <h1 className="mt-3 text-[2rem] font-bold leading-[0.95] tracking-[-0.04em] text-slate-950 lg:text-[2.75rem]">
+          My{' '}
+          <span
+            className="inline-block bg-[linear-gradient(92deg,#3b82f6_0%,#22d3ee_30%,#a855f7_65%,#ec4899_100%)] bg-[length:200%_100%] bg-clip-text text-transparent"
+            style={{ animation: 'gradient-text-cycle 5s ease-in-out infinite' }}
+          >
+            Events
+          </span>
+        </h1>
+        <p className="mt-2 text-sm text-slate-600 lg:text-base">Events you're attending and personalised recommendations</p>
 
         {/* ── Upcoming events you're going to ── */}
         <section className="mt-8">

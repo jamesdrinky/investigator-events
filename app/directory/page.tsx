@@ -292,7 +292,11 @@ export default function DirectoryPage() {
         <div className="pointer-events-none absolute right-0 top-1/3 h-[400px] w-[400px] rounded-full bg-indigo-500/[0.05] blur-[100px]" />
 
         <div className="container-shell relative z-10 text-center">
-          <Link href="/people" className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium text-white/50 transition hover:bg-white/10 hover:text-white">
+          {/* Back to Community link — desktop only; mobile uses the global
+              MobileBackButton at top-left of the viewport. Was rendering
+              twice on mobile (this + the global button overlapping the
+              hero). */}
+          <Link href="/people" className="mb-4 hidden items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium text-white/50 transition hover:bg-white/10 hover:text-white lg:inline-flex">
             ← Back to Community
           </Link>
           <span className="inline-flex items-center gap-2 rounded-full border border-blue-400/25 bg-blue-500/10 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-300 backdrop-blur-md sm:tracking-[0.3em]">

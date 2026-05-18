@@ -69,8 +69,8 @@ export async function GET(request: Request) {
     return NextResponse.json({ message: 'No subscribers', sent: 0 });
   }
 
-  let sent = 0;
-  let failed = 0;
+  type RecipientResult = { email: string; status: 'sent' | 'failed'; error?: string };
+  const results: RecipientResult[] = [];
 
   for (let i = 0; i < subs.length; i += BATCH_SIZE) {
     const batch = subs.slice(i, i + BATCH_SIZE);
@@ -86,22 +86,40 @@ export async function GET(request: Request) {
           html: buildWeeklyNewsletterHtml({ upcoming, newlyAdded, featured, recentlyPast, unsubscribeToken: sub.unsubscribe_token }),
         }))
       );
-      sent += batch.length;
+      for (const sub of batch) results.push({ email: sub.email, status: 'sent' });
     } catch (err: any) {
-      console.error(`Batch send failed (${i}-${i + batch.length}):`, err.message);
-      failed += batch.length;
+      const errMsg = err?.message ?? 'unknown error';
+      console.error(`Batch send failed (${i}-${i + batch.length}):`, errMsg);
+      for (const sub of batch) results.push({ email: sub.email, status: 'failed', error: errMsg });
     }
   }
 
-  // Log the send
-  await supabase.from('newsletter_sends' as never).insert({
+  const sent = results.filter((r) => r.status === 'sent').length;
+  const failed = results.filter((r) => r.status === 'failed').length;
+
+  // Log the send: aggregate row in newsletter_sends + per-recipient rows in newsletter_send_recipients.
+  const { data: sendRow } = await (supabase.from('newsletter_sends' as never).insert({
     sent_at: new Date().toISOString(),
     recipient_count: sent,
     failed_count: failed,
     upcoming_count: upcoming.length,
     new_count: newlyAdded.length,
     featured_count: featured.length,
-  } as never);
+  } as never).select('id').single() as any);
+
+  const sendId = (sendRow as { id: string } | null)?.id;
+  if (sendId && results.length > 0) {
+    const sentAt = new Date().toISOString();
+    const rows = results.map((r) => ({
+      send_id: sendId,
+      email: r.email,
+      status: r.status,
+      error: r.error ?? null,
+      sent_at: sentAt,
+    }));
+    const { error: recipErr } = await (supabase.from('newsletter_send_recipients' as never).insert(rows as never) as any);
+    if (recipErr) console.error('Failed to log per-recipient rows:', recipErr.message);
+  }
 
   return NextResponse.json({
     message: 'Newsletter sent',

@@ -214,6 +214,20 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
 
   const newsletterSends = (newsletterSendsResult?.data ?? []) as any[];
   const recentSubscribers = (recentSubscribersResult?.data ?? []) as any[];
+
+  // Per-recipient delivery log for the recent sends shown above.
+  const sendIds = newsletterSends.map((s: any) => s.id).filter(Boolean);
+  const recipientsBySendId: Record<string, { email: string; status: string; error: string | null }[]> = {};
+  if (sendIds.length > 0) {
+    const { data: recipRows } = await (admin
+      .from('newsletter_send_recipients' as never)
+      .select('send_id, email, status, error')
+      .in('send_id', sendIds)
+      .order('email', { ascending: true }) as any);
+    for (const row of ((recipRows ?? []) as { send_id: string; email: string; status: string; error: string | null }[])) {
+      (recipientsBySendId[row.send_id] ??= []).push({ email: row.email, status: row.status, error: row.error });
+    }
+  }
   const allUsers = (allUsersResult?.data ?? []) as { id: string; full_name: string | null; username: string | null; avatar_url: string | null; country: string | null; specialisation: string | null; is_verified: boolean; is_public: boolean; created_at: string; linkedin_url: string | null; linkedin_name: string | null; linkedin_picture: string | null; auth_provider: string | null; headline: string | null; bio: string | null; website: string | null; banner_url: string | null }[];
 
   // Re-engagement campaign state. Only 'sent' rows count as 'already sent';
@@ -777,7 +791,11 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                   <p className="mt-3 text-sm text-slate-500">No newsletters sent yet.</p>
                 ) : (
                   <div className="mt-4 space-y-3">
-                    {newsletterSends.map((send: any, i: number) => (
+                    {newsletterSends.map((send: any, i: number) => {
+                      const recipients = recipientsBySendId[send.id] ?? [];
+                      const sentTo = recipients.filter((r) => r.status === 'sent');
+                      const failedTo = recipients.filter((r) => r.status === 'failed');
+                      return (
                       <div key={send.id} className={`rounded-xl border px-4 py-3.5 text-sm ${i === 0 ? 'border-blue-200 bg-blue-50/30' : 'border-slate-100 bg-slate-50/50'}`}>
                         <div className="flex flex-wrap items-center gap-3">
                           <span className="font-semibold text-slate-900">{new Date(send.sent_at).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}</span>
@@ -790,8 +808,48 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                           {send.click_count > 0 && <span className="rounded-full bg-purple-100 px-2.5 py-0.5 text-[10px] font-bold text-purple-700">{send.click_count} clicks ({send.recipient_count > 0 ? Math.round((send.click_count / send.recipient_count) * 100) : 0}%)</span>}
                         </div>
                         <div className="mt-1.5 text-xs text-slate-400">Content: {send.upcoming_count} upcoming · {send.new_count} new · {send.featured_count} featured</div>
+
+                        {recipients.length > 0 && (
+                          <details className="mt-3 group">
+                            <summary className="cursor-pointer text-xs font-semibold text-slate-600 hover:text-slate-900">
+                              View recipients ({recipients.length}) ▾
+                            </summary>
+                            <div className="mt-3 grid gap-3 lg:grid-cols-2">
+                              <div>
+                                <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">Sent ({sentTo.length})</p>
+                                <div className="mt-1.5 max-h-64 overflow-y-auto rounded-lg border border-emerald-200/60 bg-white p-2 text-xs">
+                                  {sentTo.length === 0 ? (
+                                    <p className="text-slate-400">None</p>
+                                  ) : (
+                                    <ul className="space-y-0.5 font-mono text-slate-700">
+                                      {sentTo.map((r) => <li key={r.email}>{r.email}</li>)}
+                                    </ul>
+                                  )}
+                                </div>
+                              </div>
+                              <div>
+                                <p className="text-[11px] font-bold uppercase tracking-wider text-red-700">Failed ({failedTo.length})</p>
+                                <div className="mt-1.5 max-h-64 overflow-y-auto rounded-lg border border-red-200/60 bg-white p-2 text-xs">
+                                  {failedTo.length === 0 ? (
+                                    <p className="text-slate-400">None</p>
+                                  ) : (
+                                    <ul className="space-y-1 font-mono text-slate-700">
+                                      {failedTo.map((r) => (
+                                        <li key={r.email}>
+                                          <span>{r.email}</span>
+                                          {r.error && <span className="ml-1 text-red-600">— {r.error}</span>}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </details>
+                        )}
                       </div>
-                    ))}
+                    );
+                    })}
                   </div>
                 )}
               </div>

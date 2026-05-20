@@ -1,4 +1,5 @@
 import { createPrivateKey, createSign, KeyObject } from 'node:crypto';
+import http2 from 'node:http2';
 
 // APNs JWT-based HTTP/2 sender. Self-contained — no external library.
 // Caches the JWT for 50 minutes (Apple allows up to 60).
@@ -95,47 +96,96 @@ export async function sendApnsPush(token: string, alert: ApnsAlert): Promise<Apn
       ...(alert.url ? { url: alert.url } : {}),
     };
 
-    let res: Response;
-    try {
-      res = await fetch(`https://${APNS_HOST}/3/device/${token}`, {
-        method: 'POST',
-        headers: {
-          authorization: `bearer ${jwt}`,
-          'apns-topic': bundleId,
-          'apns-push-type': 'alert',
-          'apns-priority': '10',
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-    } catch (err) {
-      const msg = (err as Error)?.message ?? String(err);
-      console.error('[apns] fetch threw:', msg, '| host:', APNS_HOST, '| bundle:', bundleId, '| tokenLen:', token.length);
-      return { token, ok: false, reason: `fetch failed: ${msg}` };
-    }
+    // Use Node's http2 module directly — Vercel's fetch (undici) doesn't reliably
+    // handle HTTP/2 outbound to APNs, every request dies at the TLS layer.
+    const body = JSON.stringify(payload);
+    const result = await sendViaHttp2(token, jwt, bundleId, body);
 
-    if (res.status === 200) return { token, ok: true, status: 200 };
+    if (result.status === 200) return { token, ok: true, status: 200 };
 
-    // Apple returns a JSON body with { reason } for failures.
-    let reason: string | undefined;
-    let rawBody = '';
-    try {
-      rawBody = await res.text();
-      try {
-        const body = JSON.parse(rawBody);
-        reason = body?.reason;
-      } catch {}
-    } catch {}
+    const invalid =
+      result.status === 410 ||
+      result.reason === 'BadDeviceToken' ||
+      result.reason === 'Unregistered';
 
     console.error(
-      `[apns] HTTP ${res.status} from APNs | reason=${reason ?? 'n/a'} | body=${rawBody.slice(0, 200)} | host=${APNS_HOST} | bundle=${bundleId} | tokenLen=${token.length} | apns-id=${res.headers.get('apns-id') ?? 'n/a'}`,
+      `[apns] HTTP ${result.status ?? 'n/a'} from APNs | reason=${result.reason ?? 'n/a'} | body=${(result.rawBody ?? '').slice(0, 200)} | host=${APNS_HOST} | bundle=${bundleId} | tokenLen=${token.length} | apns-id=${result.apnsId ?? 'n/a'}`,
     );
 
-    const invalid = res.status === 410 || reason === 'BadDeviceToken' || reason === 'Unregistered';
-    return { token, ok: false, status: res.status, reason, invalid };
+    return { token, ok: false, status: result.status, reason: result.reason, invalid };
   } catch (err) {
     const msg = (err as Error)?.message ?? String(err);
     console.error('[apns] outer catch:', msg);
     return { token, ok: false, reason: `outer: ${msg}` };
   }
+}
+
+interface Http2Result {
+  status?: number;
+  reason?: string;
+  rawBody?: string;
+  apnsId?: string;
+}
+
+function sendViaHttp2(token: string, jwt: string, bundleId: string, body: string): Promise<Http2Result> {
+  return new Promise((resolve) => {
+    const session = http2.connect(`https://${APNS_HOST}`);
+    let resolved = false;
+    const done = (r: Http2Result) => {
+      if (resolved) return;
+      resolved = true;
+      try { session.close(); } catch {}
+      resolve(r);
+    };
+
+    session.on('error', (err) => {
+      console.error('[apns] http2 session error:', (err as Error).message);
+      done({ reason: `session: ${(err as Error).message}` });
+    });
+
+    // Hard timeout: APNs is fast (<1s typical). If we hit 8s, something is wrong.
+    const timer = setTimeout(() => {
+      console.error('[apns] http2 request timed out after 8s');
+      done({ reason: 'timeout' });
+    }, 8000);
+
+    const req = session.request({
+      ':method': 'POST',
+      ':path': `/3/device/${token}`,
+      'authorization': `bearer ${jwt}`,
+      'apns-topic': bundleId,
+      'apns-push-type': 'alert',
+      'apns-priority': '10',
+      'content-type': 'application/json',
+      'content-length': Buffer.byteLength(body),
+    });
+
+    let status: number | undefined;
+    let apnsId: string | undefined;
+    let rawBody = '';
+
+    req.on('response', (headers) => {
+      status = headers[':status'] as number | undefined;
+      apnsId = headers['apns-id'] as string | undefined;
+    });
+    req.on('data', (chunk) => {
+      rawBody += chunk.toString('utf8');
+    });
+    req.on('end', () => {
+      clearTimeout(timer);
+      let reason: string | undefined;
+      if (rawBody) {
+        try { reason = (JSON.parse(rawBody) as { reason?: string }).reason; } catch {}
+      }
+      done({ status, reason, rawBody, apnsId });
+    });
+    req.on('error', (err) => {
+      clearTimeout(timer);
+      console.error('[apns] http2 request error:', (err as Error).message);
+      done({ reason: `request: ${(err as Error).message}` });
+    });
+
+    req.write(body);
+    req.end();
+  });
 }

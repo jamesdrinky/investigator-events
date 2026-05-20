@@ -300,11 +300,13 @@ export async function approveSubmissionAction(formData: FormData) {
   }
 
   // Notify the submitter that their event was approved (fire-and-forget)
+  let submitterId: string | null = null;
   try {
     const slug = finalPayload.slug;
     const { data: authUsers } = await supabase.auth.admin.listUsers({ perPage: 1000 });
     const submitter = authUsers?.users?.find(u => u.email === submission.contact_email);
     if (submitter) {
+      submitterId = submitter.id;
       const { createNotification } = await import('@/lib/notifications');
       await createNotification({
         userId: submitter.id,
@@ -316,6 +318,33 @@ export async function approveSubmissionAction(formData: FormData) {
       });
     }
   } catch {}
+
+  // Notify members of the event's association (fire-and-forget)
+  try {
+    const association = finalPayload.association;
+    if (association) {
+      const { data: members } = await (supabase
+        .from('user_associations')
+        .select('user_id')
+        .eq('association_name', association) as any);
+      const memberIds = ((members ?? []) as { user_id: string }[]).map((m) => m.user_id);
+      if (memberIds.length > 0) {
+        const { sendPushToUser } = await import('@/lib/notifications');
+        const slug = finalPayload.slug;
+        const link = slug ? `/events/${slug}` : '/calendar';
+        const title = `New ${association} event`;
+        const body = `${finalPayload.title} — ${finalPayload.city}, ${finalPayload.country}`;
+        // Throttle so we don't spike APNs — sequential with a tiny gap.
+        for (const uid of memberIds) {
+          // Don't push to the submitter twice (they already got the event_approved push above)
+          if (submitterId && uid === submitterId) continue;
+          await sendPushToUser(supabase, uid, title, body, link);
+        }
+      }
+    }
+  } catch (err) {
+    console.error('association event push failed:', err);
+  }
 
   // Send outreach email to association contact (once per association, fire-and-forget)
   if (submission.contact_email) {

@@ -1,6 +1,7 @@
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
+import { sendApnsPush } from '@/lib/push/apns';
 
-type NotificationType = 'follow' | 'connection_request' | 'connection_accepted' | 'post_like' | 'post_comment' | 'event_approved';
+type NotificationType = 'follow' | 'connection_request' | 'connection_accepted' | 'post_like' | 'post_comment' | 'event_approved' | 'message' | 'association_event';
 
 interface CreateNotificationParams {
   userId: string;
@@ -55,18 +56,45 @@ export async function createNotification(params: CreateNotificationParams) {
 }
 
 /**
- * Send a push notification to all of a user's registered devices.
- * Uses Expo's push service as a universal relay (works for both APNs and FCM
- * without needing separate server-side certificates).
+ * Send a push to every iOS device the user has registered.
+ * Fire-and-forget: never throws. Stale tokens (410 from APNs) get cleaned up.
+ * Android (FCM) not wired yet — silently ignored when present.
+ * (Typed as `any` because device_tokens isn't in the generated Database types yet.)
  */
-async function sendPushToUser(supabase: any, userId: string, title: string, body: string, url: string) {
-  const { data: tokens } = await supabase
-    .from('device_tokens')
-    .select('token, platform')
-    .eq('user_id', userId);
+export async function sendPushToUser(
+  supabase: any,
+  userId: string,
+  title: string,
+  body: string,
+  url: string,
+) {
+  try {
+    if (!process.env.APNS_KEY_ID || !process.env.APNS_PRIVATE_KEY) return;
 
-  if (!tokens || tokens.length === 0) return;
+    const { data: tokens } = await supabase
+      .from('device_tokens')
+      .select('token, platform')
+      .eq('user_id', userId);
 
-  // APNs/FCM delivery will be wired up once Developer account keys are configured.
-  // Tokens are stored and ready — just needs the push provider integration.
+    if (!tokens || tokens.length === 0) return;
+
+    const iosTokens = (tokens as { token: string; platform: string }[]).filter((t) => t.platform === 'ios');
+    if (iosTokens.length === 0) return;
+
+    const results = await Promise.all(
+      iosTokens.map((t) => sendApnsPush(t.token, { title, body, url })),
+    );
+
+    const deadTokens = results.filter((r) => r.invalid).map((r) => r.token);
+    if (deadTokens.length > 0) {
+      await supabase.from('device_tokens').delete().in('token', deadTokens);
+    }
+
+    const failed = results.filter((r) => !r.ok && !r.invalid);
+    if (failed.length > 0) {
+      console.error('APNs send failures:', failed.map((f) => `${f.status}/${f.reason}`).join(', '));
+    }
+  } catch (err) {
+    console.error('sendPushToUser failed:', err);
+  }
 }

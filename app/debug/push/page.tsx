@@ -32,9 +32,15 @@ export default function DebugPushPage() {
       const userEmail = user?.email;
 
       // 2. Check if we're in the native app
-      const { Capacitor } = await import('@capacitor/core');
-      const isNativeApp = Capacitor.isNativePlatform();
-      const platform = Capacitor.getPlatform();
+      let isNativeApp = false;
+      let platform = 'web';
+      try {
+        const { Capacitor } = await import('@capacitor/core');
+        isNativeApp = Capacitor.isNativePlatform();
+        platform = Capacitor.getPlatform();
+      } catch (err) {
+        log(`failed to import @capacitor/core: ${(err as Error).message}`);
+      }
 
       // 3. Check permission state
       let permission = 'n/a';
@@ -73,7 +79,17 @@ export default function DebugPushPage() {
         tokenError,
         registrationLog: [],
       });
+
+      // Auto-run registration on load if we're in the native app and signed in
+      if (isNativeApp && userId) {
+        setTimeout(() => runRegistration(), 500);
+      } else if (!isNativeApp) {
+        log('⚠️ NOT running in native app — open this URL inside the IE iOS app, not Safari');
+      } else if (!userId) {
+        log('⚠️ not signed in — sign in first, then revisit this page');
+      }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function runRegistration() {

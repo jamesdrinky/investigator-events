@@ -324,6 +324,13 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
           </form>
         </div>
 
+        <a
+          href="/debug/push"
+          className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700 transition hover:bg-amber-100"
+        >
+          🐛 Push debug
+        </a>
+
         {/* Stats */}
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <StatCard icon={Calendar} label="Total events" value={events.length} color="#3b82f6" />

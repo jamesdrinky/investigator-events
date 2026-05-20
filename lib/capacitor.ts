@@ -10,51 +10,62 @@ export const currentPlatform = Capacitor.getPlatform(); // 'ios' | 'android' | '
  * Register for push notifications and store the device token in Supabase.
  * Call this after the user signs in.
  */
+let pushListenersAttached = false;
+
 export async function registerPushNotifications(supabase: any) {
   if (!isNativeApp) return;
 
   try {
     const { PushNotifications } = await import('@capacitor/push-notifications');
 
-    // Request permission
-    const permResult = await PushNotifications.requestPermissions();
-    if (permResult.receive !== 'granted') return;
+    // Attach listeners FIRST — registering before listeners are in place
+    // can lose the 'registration' event on iOS (Apple fires it instantly).
+    if (!pushListenersAttached) {
+      pushListenersAttached = true;
 
-    // Register with APNs/FCM
+      await PushNotifications.addListener('registration', async (token) => {
+        console.log('[push] registration event fired, token:', token.value.slice(0, 12) + '…');
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          console.warn('[push] no user signed in when token arrived, skipping upsert');
+          return;
+        }
+        const platform = Capacitor.getPlatform();
+        const { error } = await supabase.from('device_tokens').upsert(
+          { user_id: user.id, token: token.value, platform, updated_at: new Date().toISOString() },
+          { onConflict: 'user_id,token' }
+        );
+        if (error) console.error('[push] upsert failed:', error.message);
+        else console.log('[push] device token stored for user', user.id);
+      });
+
+      await PushNotifications.addListener('registrationError', (error) => {
+        console.error('[push] registration error:', error);
+      });
+
+      await PushNotifications.addListener('pushNotificationReceived', () => {
+        // Foreground delivery — iOS hides the banner by default; could surface an in-app toast here.
+      });
+
+      await PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
+        const url = action.notification.data?.url;
+        if (url) window.location.href = url;
+      });
+    }
+
+    // Check current permission state. checkPermissions returns the cached
+    // answer; requestPermissions only prompts if the user hasn't decided yet.
+    let perm = await PushNotifications.checkPermissions();
+    if (perm.receive === 'prompt' || perm.receive === 'prompt-with-rationale') {
+      perm = await PushNotifications.requestPermissions();
+    }
+    if (perm.receive !== 'granted') {
+      console.log('[push] permission not granted:', perm.receive);
+      return;
+    }
+
+    // Trigger the actual APNs/FCM registration. The listener above catches the resulting token.
     await PushNotifications.register();
-
-    // Listen for the token
-    PushNotifications.addListener('registration', async (token) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const platform = Capacitor.getPlatform(); // 'ios' or 'android'
-
-      // Upsert the token
-      await supabase.from('device_tokens').upsert(
-        { user_id: user.id, token: token.value, platform, updated_at: new Date().toISOString() },
-        { onConflict: 'user_id,token' }
-      );
-    });
-
-    // Handle registration errors
-    PushNotifications.addListener('registrationError', (error) => {
-      console.error('Push registration failed:', error);
-    });
-
-    // Handle incoming notifications when app is in foreground
-    PushNotifications.addListener('pushNotificationReceived', (notification) => {
-      // Could show an in-app toast here
-      // Push received in foreground — could show in-app toast
-    });
-
-    // Handle notification tap — deep link to the relevant page
-    PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
-      const url = action.notification.data?.url;
-      if (url) {
-        window.location.href = url;
-      }
-    });
   } catch (err) {
     console.error('Push notification setup failed:', err);
   }

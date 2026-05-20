@@ -95,30 +95,47 @@ export async function sendApnsPush(token: string, alert: ApnsAlert): Promise<Apn
       ...(alert.url ? { url: alert.url } : {}),
     };
 
-    const res = await fetch(`https://${APNS_HOST}/3/device/${token}`, {
-      method: 'POST',
-      headers: {
-        authorization: `bearer ${jwt}`,
-        'apns-topic': bundleId,
-        'apns-push-type': 'alert',
-        'apns-priority': '10',
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
+    let res: Response;
+    try {
+      res = await fetch(`https://${APNS_HOST}/3/device/${token}`, {
+        method: 'POST',
+        headers: {
+          authorization: `bearer ${jwt}`,
+          'apns-topic': bundleId,
+          'apns-push-type': 'alert',
+          'apns-priority': '10',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+    } catch (err) {
+      const msg = (err as Error)?.message ?? String(err);
+      console.error('[apns] fetch threw:', msg, '| host:', APNS_HOST, '| bundle:', bundleId, '| tokenLen:', token.length);
+      return { token, ok: false, reason: `fetch failed: ${msg}` };
+    }
 
     if (res.status === 200) return { token, ok: true, status: 200 };
 
     // Apple returns a JSON body with { reason } for failures.
     let reason: string | undefined;
+    let rawBody = '';
     try {
-      const body = await res.json();
-      reason = body?.reason;
+      rawBody = await res.text();
+      try {
+        const body = JSON.parse(rawBody);
+        reason = body?.reason;
+      } catch {}
     } catch {}
+
+    console.error(
+      `[apns] HTTP ${res.status} from APNs | reason=${reason ?? 'n/a'} | body=${rawBody.slice(0, 200)} | host=${APNS_HOST} | bundle=${bundleId} | tokenLen=${token.length} | apns-id=${res.headers.get('apns-id') ?? 'n/a'}`,
+    );
 
     const invalid = res.status === 410 || reason === 'BadDeviceToken' || reason === 'Unregistered';
     return { token, ok: false, status: res.status, reason, invalid };
   } catch (err) {
-    return { token, ok: false, reason: (err as Error).message };
+    const msg = (err as Error)?.message ?? String(err);
+    console.error('[apns] outer catch:', msg);
+    return { token, ok: false, reason: `outer: ${msg}` };
   }
 }

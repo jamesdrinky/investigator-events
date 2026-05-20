@@ -39,6 +39,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
+    // Required for the Capacitor PushNotifications plugin to receive the APNs
+    // device token. iOS calls this method after PushNotifications.register()
+    // succeeds — the plugin listens on NotificationCenter for these names and
+    // forwards the token to the JS 'registration' event listener.
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        NotificationCenter.default.post(
+            name: .capacitorDidRegisterForRemoteNotifications,
+            object: deviceToken
+        )
+    }
+
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        NotificationCenter.default.post(
+            name: .capacitorDidFailToRegisterForRemoteNotifications,
+            object: error
+        )
+    }
+
     @discardableResult
     private func disableBounce() -> Bool {
         guard let vc = window?.rootViewController else { return false }

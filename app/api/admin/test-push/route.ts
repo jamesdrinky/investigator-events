@@ -41,6 +41,90 @@ export async function GET(request: Request) {
     }, { status: 400 });
   }
 
+  const type = searchParams.get('type');
+
+  // Catalogue of every push the app sends in production, so we can preview each
+  // one by hitting ?type=<key>. Hitting ?type=all fires them sequentially with
+  // a small gap so iOS shows them all in the notification centre.
+  const samples: Record<string, { title: string; body: string; url: string }> = {
+    message: {
+      title: 'Mike LaCorte',
+      body: 'Just sent you a message about the WAD conference',
+      url: '/messages',
+    },
+    follow: {
+      title: 'New follower',
+      body: 'Mike LaCorte started following you',
+      url: '/profile/mike-lacorte',
+    },
+    connection_request: {
+      title: 'New connection request',
+      body: 'Mike LaCorte wants to connect',
+      url: '/my-connections',
+    },
+    connection_accepted: {
+      title: 'Connection accepted',
+      body: 'Mike LaCorte accepted your connection request',
+      url: '/profile/mike-lacorte',
+    },
+    post_like: {
+      title: 'Post liked',
+      body: 'Mike LaCorte liked your post',
+      url: '/forum',
+    },
+    post_comment: {
+      title: 'New comment',
+      body: 'Mike LaCorte commented on your post',
+      url: '/forum',
+    },
+    event_approved: {
+      title: 'Your event has been approved!',
+      body: '"ABI Annual Conference 2026" is now live on Investigator Events',
+      url: '/calendar',
+    },
+    association_event: {
+      title: 'New ABI event',
+      body: 'ABI Annual Conference 2026 — London, United Kingdom',
+      url: '/calendar',
+    },
+    event_review_prompt: {
+      title: 'How was the WAD Annual Conference?',
+      body: 'Tap to leave a quick review — helps your network plan ahead.',
+      url: '/calendar',
+    },
+  };
+
+  if (type === 'all') {
+    const keys = Object.keys(samples);
+    for (const key of keys) {
+      const s = samples[key];
+      await sendPushToUser(admin, target.id, s.title, s.body, s.url);
+      // 1.2s gap so iOS doesn't collapse multiple banners into one
+      await new Promise((r) => setTimeout(r, 1200));
+    }
+    return NextResponse.json({
+      success: true,
+      user: target.id,
+      email: target.email,
+      pushed: keys.length,
+      types: keys,
+    });
+  }
+
+  if (type && samples[type]) {
+    const s = samples[type];
+    await sendPushToUser(admin, target.id, s.title, s.body, s.url);
+    return NextResponse.json({
+      success: true,
+      user: target.id,
+      email: target.email,
+      type,
+      title: s.title,
+      body: s.body,
+    });
+  }
+
+  // No type → default smoke test
   await sendPushToUser(
     admin,
     target.id,
@@ -54,5 +138,7 @@ export async function GET(request: Request) {
     user: target.id,
     email: target.email,
     ios_tokens_targeted: iosCount,
+    available_types: ['all', ...Object.keys(samples)],
+    hint: 'Add &type=all to fire one of each, or &type=<key> for a specific one',
   });
 }

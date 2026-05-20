@@ -3,6 +3,9 @@ import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { hasValidAdminSessionCookie } from '@/lib/admin/session';
 import { sendPushToUser } from '@/lib/notifications';
 
+// Allow up to 30s so ?type=all has time to fire all 9 pushes.
+export const maxDuration = 30;
+
 // Fire a test push to a specific user. Admin-only.
 // Usage: GET /api/admin/test-push?email=james@drinky.com
 export async function GET(request: Request) {
@@ -96,12 +99,15 @@ export async function GET(request: Request) {
 
   if (type === 'all') {
     const keys = Object.keys(samples);
-    for (const key of keys) {
-      const s = samples[key];
-      await sendPushToUser(admin, target.id, s.title, s.body, s.url);
-      // 1.2s gap so iOS doesn't collapse multiple banners into one
-      await new Promise((r) => setTimeout(r, 1200));
-    }
+    // Fire all in parallel — APNs handles concurrent requests fine, and this
+    // finishes in ~2s instead of ~12s (which was hitting Vercel's function
+    // timeout and only delivering the first push).
+    await Promise.all(
+      keys.map((key) => {
+        const s = samples[key];
+        return sendPushToUser(admin, target.id, s.title, s.body, s.url);
+      }),
+    );
     return NextResponse.json({
       success: true,
       user: target.id,

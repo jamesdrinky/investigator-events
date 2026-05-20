@@ -6,7 +6,7 @@ export async function GET(request: Request) {
   const authError = verifyCronSecret(request);
   if (authError) return authError;
 
-  const [outreach, digest] = await Promise.all([
+  const [outreach, digest, reviewPrompts] = await Promise.all([
     processOutreachQueue().catch((err) => {
       console.error('Outreach queue failed:', err);
       return { sent: 0, failed: 0, error: true };
@@ -15,14 +15,111 @@ export async function GET(request: Request) {
       console.error('Daily digest failed:', err);
       return { sent: 0, failed: 0, error: true };
     }),
+    runEventReviewPrompts().catch((err) => {
+      console.error('Event review prompts failed:', err);
+      return { pushed: 0, skipped: 0, error: true };
+    }),
   ]);
 
   return NextResponse.json({
     ok: true,
     outreach,
     digest,
+    reviewPrompts,
     timestamp: new Date().toISOString(),
   });
+}
+
+/**
+ * Push event attendees once after their event ends, prompting them to leave
+ * a review. Dedupes via the notifications table — each user gets at most one
+ * review prompt per event, ever.
+ *
+ * Looks back 2 days so a missed cron run still catches yesterday's events.
+ */
+async function runEventReviewPrompts() {
+  const { createSupabaseAdminServerClient } = await import('@/lib/supabase/admin');
+  const { sendPushToUser } = await import('@/lib/notifications');
+  const supabase = createSupabaseAdminServerClient();
+
+  // Today's date in UTC YYYY-MM-DD form
+  const today = new Date().toISOString().slice(0, 10);
+  const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+  // Find events whose end_date (or start_date if no end_date) is today or yesterday.
+  // We query both windows so a missed run yesterday still gets caught up.
+  const { data: events } = await (supabase
+    .from('events')
+    .select('id, title, slug, start_date, end_date')
+    .or(`end_date.eq.${today},end_date.eq.${yesterday}`) as any);
+
+  // Also pull events with no end_date that started today/yesterday (single-day events)
+  const { data: singleDay } = await (supabase
+    .from('events')
+    .select('id, title, slug, start_date, end_date')
+    .is('end_date', null)
+    .in('start_date', [today, yesterday]) as any);
+
+  const allEnded = [
+    ...((events ?? []) as { id: string; title: string; slug: string }[]),
+    ...((singleDay ?? []) as { id: string; title: string; slug: string }[]),
+  ];
+
+  if (allEnded.length === 0) return { pushed: 0, skipped: 0, reason: 'no events ended' };
+
+  let pushed = 0;
+  let skipped = 0;
+
+  for (const event of allEnded) {
+    // Find users who said they were going
+    const { data: attendees } = await (supabase
+      .from('event_attendees')
+      .select('user_id')
+      .eq('event_id', event.id)
+      .eq('is_going', true) as any);
+
+    const attendeeIds = ((attendees ?? []) as { user_id: string }[]).map((a) => a.user_id);
+    if (attendeeIds.length === 0) continue;
+
+    // Dedupe: skip anyone already prompted for THIS event
+    const link = `/events/${event.slug}#reviews`;
+    const { data: alreadyPrompted } = await (supabase
+      .from('notifications')
+      .select('user_id')
+      .eq('type', 'event_review_prompt')
+      .eq('link', link)
+      .in('user_id', attendeeIds) as any);
+    const alreadySet = new Set(((alreadyPrompted ?? []) as { user_id: string }[]).map((p) => p.user_id));
+
+    for (const userId of attendeeIds) {
+      if (alreadySet.has(userId)) { skipped += 1; continue; }
+
+      // Record the notification (visible in the bell) + send push in one go
+      await (supabase.from('notifications') as any).insert({
+        user_id: userId,
+        actor_id: userId, // self-actor; not a person-driven notification
+        type: 'event_review_prompt',
+        title: `How was ${event.title}?`,
+        body: 'Tap to leave a quick review — helps your network plan ahead.',
+        link,
+        emailed: false,
+      });
+
+      await sendPushToUser(
+        supabase,
+        userId,
+        `How was ${event.title}?`,
+        'Tap to leave a quick review',
+        link,
+      );
+
+      // 220ms throttle to stay under Resend/APNs rate limits
+      await new Promise((r) => setTimeout(r, 220));
+      pushed += 1;
+    }
+  }
+
+  return { pushed, skipped, eventsChecked: allEnded.length };
 }
 
 async function runDigest() {

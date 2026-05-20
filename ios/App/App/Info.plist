@@ -57,5 +57,12 @@
 		<key>NSAllowsArbitraryLoadsInWebContent</key>
 		<true/>
 	</dict>
+	<!-- Allows silent / data-only pushes in the background (e.g. badge updates).
+	     Visible alert pushes work without this, but having it set means we can
+	     ship background-update features later without a native rebuild. -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 </dict>
 </plist>

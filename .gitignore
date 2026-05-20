@@ -30,3 +30,8 @@ android/keystore.properties
 *.jks
 *.keystore
 google-services.json
+
+# Local working notes / chat transcripts — never commit
+CHAT_LOG*.md
+chat_log*.md
+TOMORROW.md

@@ -90,6 +90,11 @@ export async function GET(request: Request) {
       body: 'ABI Annual Conference 2026 — London, United Kingdom',
       url: '/calendar',
     },
+    country_event: {
+      title: 'New event in United Kingdom',
+      body: 'PI World London Summit 2026 — London',
+      url: '/calendar',
+    },
     event_review_prompt: {
       title: 'How was the WAD Annual Conference?',
       body: 'Tap to leave a quick review — helps your network plan ahead.',

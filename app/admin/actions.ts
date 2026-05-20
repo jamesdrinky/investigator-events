@@ -319,6 +319,11 @@ export async function approveSubmissionAction(formData: FormData) {
     }
   } catch {}
 
+  // Tracks every user_id we've already pushed for this event so the geo push
+  // below doesn't double-up on association members already notified.
+  const pushedIds = new Set<string>();
+  if (submitterId) pushedIds.add(submitterId);
+
   // Notify members of the event's association (fire-and-forget)
   try {
     const association = finalPayload.association;
@@ -337,13 +342,44 @@ export async function approveSubmissionAction(formData: FormData) {
         // Throttle so we don't spike APNs — sequential with a tiny gap.
         for (const uid of memberIds) {
           // Don't push to the submitter twice (they already got the event_approved push above)
-          if (submitterId && uid === submitterId) continue;
+          if (pushedIds.has(uid)) continue;
           await sendPushToUser(supabase, uid, title, body, link);
+          pushedIds.add(uid);
         }
       }
     }
   } catch (err) {
     console.error('association event push failed:', err);
+  }
+
+  // Notify users based in the same country as the event (fire-and-forget).
+  // Skipped for US events because we don't have state/city data on profiles —
+  // a country-wide US push goes to too many irrelevant people. Once we have
+  // location filled in (currently null for everyone), we can revisit US.
+  try {
+    const country = finalPayload.country;
+    const US_VARIANTS = new Set(['United States', 'USA', 'US', 'United States of America']);
+    if (country && !US_VARIANTS.has(country)) {
+      const { data: locals } = await (supabase
+        .from('profiles')
+        .select('id')
+        .eq('country', country) as any);
+      const localIds = ((locals ?? []) as { id: string }[]).map((p) => p.id);
+      if (localIds.length > 0) {
+        const { sendPushToUser } = await import('@/lib/notifications');
+        const slug = finalPayload.slug;
+        const link = slug ? `/events/${slug}` : '/calendar';
+        const title = `New event in ${country}`;
+        const body = `${finalPayload.title} — ${finalPayload.city}`;
+        for (const uid of localIds) {
+          if (pushedIds.has(uid)) continue;
+          await sendPushToUser(supabase, uid, title, body, link);
+          pushedIds.add(uid);
+        }
+      }
+    }
+  } catch (err) {
+    console.error('country event push failed:', err);
   }
 
   // Send outreach email to association contact (once per association, fire-and-forget)

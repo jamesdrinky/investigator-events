@@ -3,21 +3,18 @@ import nextDynamic from 'next/dynamic';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { FounderQuoteSection } from '@/components/home/FounderQuoteSection';
-import { UpcomingEventsGallery } from '@/components/home/UpcomingEventsGallery';
 import { WhyUseSection } from '@/components/home/WhyUseSection';
 import { HomepageHero } from '@/components/home/homepage-hero';
 import { LoggedInHome } from '@/components/home/LoggedInHome';
 import { WhatYouGet } from '@/components/home/WhatYouGet';
 import { VerifiedInvestigators, type VerifiedMember } from '@/components/home/VerifiedInvestigators';
 import { FinalConversionCTA } from '@/components/home/FinalConversionCTA';
+import { EventsShowcase, type ShowcaseEvent } from '@/components/home/EventsShowcase';
 import { fetchAllEvents, fetchFeaturedEvents } from '@/lib/data/events';
 import { getCoverageMetrics } from '@/lib/utils/coverage';
-import { parseDate, sortEventsByDate } from '@/lib/utils/date';
+import { parseDate, sortEventsByDate, formatEventDate } from '@/lib/utils/date';
+import { getEventSlug } from '@/lib/utils/event-slugs';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
-
-const FeaturedEventsSection = nextDynamic(
-  () => import('@/components/home/FeaturedEventsSection').then((m) => m.FeaturedEventsSection),
-);
 
 const GlobeNewsletterSection = nextDynamic(
   () => import('@/components/home/GlobeNewsletterSection').then((m) => m.GlobeNewsletterSection),
@@ -36,10 +33,6 @@ export const metadata: Metadata = {
 async function fetchVerifiedMembers(): Promise<{ members: VerifiedMember[]; countries: number }> {
   try {
     const admin = createSupabaseAdminServerClient();
-
-    // Pull profiles that look strongest on the homepage (real face, country
-    // shown, headline filled). Pinning Mike LaCorte first — he's the
-    // co-founder, his profile is the platform's face.
     const { data } = await (admin.from('profiles' as never)
       .select('id, full_name, username, avatar_url, country, headline, auth_provider, is_public')
       .eq('is_public', true)
@@ -48,20 +41,13 @@ async function fetchVerifiedMembers(): Promise<{ members: VerifiedMember[]; coun
       .not('country', 'is', null)
       .limit(50) as any);
     const rows = (data ?? []) as Array<{ id: string; full_name: string; username: string | null; avatar_url: string | null; country: string | null; headline: string | null; auth_provider: string | null }>;
-
     const mike = rows.find((p) => (p.full_name ?? '').toLowerCase().includes('mike lacorte') || (p.full_name ?? '').toLowerCase().includes('michael lacorte'));
-
-    // Prefer LinkedIn-verified members with a headline (they look most polished)
     const polished = rows
       .filter((p) => p.id !== mike?.id)
       .filter((p) => p.auth_provider === 'linkedin_oidc')
       .filter((p) => !!p.headline);
-
-    // Light shuffle so we don't show the same 3 every time
     const shuffled = [...polished].sort(() => Math.random() - 0.5);
-
     const ordered = [mike, ...shuffled].filter((p): p is NonNullable<typeof p> => !!p).slice(0, 4);
-
     const members: VerifiedMember[] = ordered.map((p) => ({
       id: p.id,
       fullName: p.full_name,
@@ -70,14 +56,12 @@ async function fetchVerifiedMembers(): Promise<{ members: VerifiedMember[]; coun
       country: p.country,
       headline: p.headline,
     }));
-
     const { data: countryRows } = await (admin
       .from('profiles' as never)
       .select('country')
       .eq('is_public', true)
       .not('country', 'is', null) as any);
     const distinctCountries = new Set(((countryRows ?? []) as { country: string }[]).map((r) => r.country)).size;
-
     return { members, countries: distinctCountries };
   } catch {
     return { members: [], countries: 0 };
@@ -85,7 +69,6 @@ async function fetchVerifiedMembers(): Promise<{ members: VerifiedMember[]; coun
 }
 
 export default async function HomePage() {
-  // Check for auth cookie server-side to prevent marketing page flash
   const cookieStore = await cookies();
   const hasAuthCookie = cookieStore.getAll().some(c => c.name.startsWith('sb-') && c.name.endsWith('-auth-token'));
 
@@ -100,8 +83,32 @@ export default async function HomePage() {
   const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   const upcomingEvents = mainEvents.filter((event) => parseDate(event.date).getTime() >= today.getTime());
 
+  // Hero gets featured (or next upcoming if none featured)
   const heroEvents = (featuredEvents.length > 0 ? featuredEvents : upcomingEvents).slice(0, 4);
-  const featuredCarouselEvents = featuredEvents.length > 0 ? featuredEvents : upcomingEvents.slice(0, 8);
+
+  // Merged events showcase — featured events take priority, then upcoming
+  // events fill the rest. Hero = next big featured / upcoming event.
+  const showcaseFeed = (() => {
+    const featuredIds = new Set(featuredEvents.map((e) => e.id));
+    const remainingUpcoming = upcomingEvents.filter((e) => !featuredIds.has(e.id));
+    return [...featuredEvents, ...remainingUpcoming].slice(0, 7);
+  })();
+  const toShowcase = (e: typeof showcaseFeed[number]): ShowcaseEvent => ({
+    id: e.id,
+    title: e.title,
+    date: formatEventDate(e),
+    city: e.city,
+    country: e.country,
+    region: e.region,
+    category: e.category,
+    slug: getEventSlug(e),
+    association: e.association ?? e.organiser,
+    coverImage: e.coverImage,
+    description: e.description || undefined,
+    featured: e.featured,
+  });
+  const showcaseHero = showcaseFeed[0] ? toShowcase(showcaseFeed[0]) : null;
+  const showcaseRest = showcaseFeed.slice(1).map(toShowcase);
 
   const uniqueAssociations = new Set(mainEvents.map((e) => e.association ?? e.organiser)).size;
   const heroStats = [
@@ -112,15 +119,12 @@ export default async function HomePage() {
 
   return (
     <div className="relative flex flex-col">
-      {/* Hide marketing sections immediately if auth cookie present (prevents flash) */}
       {hasAuthCookie && (
         <style dangerouslySetInnerHTML={{ __html: `.mesh-blob { display: none !important; } [data-homepage-section] { display: none !important; }` }} />
       )}
 
-      {/* ── Personalised home for logged-in mobile users ── */}
       <LoggedInHome />
 
-      {/* ── Stripe-style animated gradient mesh blobs ── */}
       <div className="mesh-blob mesh-blob-1" aria-hidden="true" />
       <div className="mesh-blob mesh-blob-2" aria-hidden="true" />
       <div className="mesh-blob mesh-blob-3" aria-hidden="true" />
@@ -131,17 +135,19 @@ export default async function HomePage() {
         <HomepageHero events={heroEvents} stats={heroStats} />
       </div>
 
-      {/* 2. WHAT YOU GET — feature grid showing all 6 capabilities */}
+      {/* 2. WHAT YOU GET — feature grid */}
       <div data-homepage-section className="order-2 sm:order-none">
         <WhatYouGet />
       </div>
 
-      {/* 3. NEXT ON THE CALENDAR — real events */}
-      <div data-homepage-section className="order-3 mobile-section-divider sm:order-none">
-        <UpcomingEventsGallery events={upcomingEvents} />
-      </div>
+      {/* 3. EVENTS SHOWCASE — merged "Coming up" + "Featured events" into ONE */}
+      {showcaseHero && (
+        <div data-homepage-section className="order-3 sm:order-none">
+          <EventsShowcase hero={showcaseHero} rest={showcaseRest} />
+        </div>
+      )}
 
-      {/* 4. VERIFIED INVESTIGATORS — social proof with real members */}
+      {/* 4. VERIFIED INVESTIGATORS — social proof */}
       {verifiedData.members.length > 0 && (
         <div data-homepage-section className="order-4 sm:order-none">
           <VerifiedInvestigators
@@ -152,7 +158,7 @@ export default async function HomePage() {
         </div>
       )}
 
-      {/* WhyUseSection — heavy marketing block, hidden on mobile. */}
+      {/* WhyUseSection — desktop only marketing block */}
       <div data-homepage-section className="order-5 hidden sm:order-none sm:block">
         <WhyUseSection />
       </div>
@@ -180,23 +186,18 @@ export default async function HomePage() {
         </div>
       </div>
 
-      {/* Founder quote — long marketing copy, desktop only on mobile. */}
+      {/* Founder quote — desktop only */}
       <div data-homepage-section className="order-7 hidden sm:order-none sm:block">
         <FounderQuoteSection />
       </div>
 
-      {/* 6. FEATURED EVENTS */}
+      {/* 6. FINAL CONVERSION CTA */}
       <div data-homepage-section className="order-8 sm:order-none">
-        <FeaturedEventsSection events={featuredCarouselEvents} />
-      </div>
-
-      {/* 7. FINAL CONVERSION CTA — replaces the sticky bar + the old "Get discovered" block */}
-      <div data-homepage-section className="order-9 sm:order-none">
         <FinalConversionCTA countriesCount={verifiedData.countries || 19} />
       </div>
 
-      {/* 8. NEWSLETTER */}
-      <div data-homepage-section className="order-10 sm:order-none">
+      {/* 7. NEWSLETTER */}
+      <div data-homepage-section className="order-9 sm:order-none">
         <div className="container-shell py-6 sm:py-20">
           <div className="app-mobile-shell">
             <GlobeNewsletterSection />

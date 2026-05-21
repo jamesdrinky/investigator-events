@@ -19,7 +19,7 @@ function SignUpPageInner() {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSignUp = async ({ email, password, name, tosAccepted, newsletterOptIn }: { email: string; password: string; name?: string; tosAccepted?: boolean; newsletterOptIn?: boolean }) => {
+  const handleSignUp = async ({ email, password, name, tosAccepted, newsletterOptIn, websiteUrl }: { email: string; password: string; name?: string; tosAccepted?: boolean; newsletterOptIn?: boolean; websiteUrl?: string }) => {
     setError('');
     setSuccess('');
     setLoading(true);
@@ -40,7 +40,7 @@ function SignUpPageInner() {
       const res = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, full_name: name, tos_accepted: true }),
+        body: JSON.stringify({ email, password, full_name: name, tos_accepted: true, website_url: websiteUrl ?? '' }),
       });
       const result = await res.json();
 

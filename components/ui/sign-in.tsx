@@ -37,7 +37,7 @@ interface AuthPageProps {
   mode: 'signin' | 'signup';
   heroImageSrc?: string;
   testimonials?: Testimonial[];
-  onSubmit: (data: { email: string; password: string; name?: string; tosAccepted?: boolean; newsletterOptIn?: boolean }) => void;
+  onSubmit: (data: { email: string; password: string; name?: string; tosAccepted?: boolean; newsletterOptIn?: boolean; websiteUrl?: string }) => void;
   onGoogleSignIn?: () => void;
   onLinkedInSignIn?: () => void;
   onAppleSignIn?: () => void;
@@ -85,13 +85,16 @@ export function AuthPage({
   const [password, setPassword] = useState('');
   const [tosAccepted, setTosAccepted] = useState(false);
   const [newsletterOptIn, setNewsletterOptIn] = useState(true);
+  // Honeypot — humans never touch this (display: none + tabindex=-1).
+  // Bots that crawl the form auto-fill every input; the API rejects if non-empty.
+  const [websiteUrl, setWebsiteUrl] = useState('');
   const [resetStatus, setResetStatus] = useState<{ kind: 'idle' | 'sending' | 'sent' | 'error'; message?: string }>({ kind: 'idle' });
 
   const isSignUp = mode === 'signup';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ email, password, ...(isSignUp ? { name, tosAccepted, newsletterOptIn } : { newsletterOptIn }) });
+    onSubmit({ email, password, ...(isSignUp ? { name, tosAccepted, newsletterOptIn, websiteUrl } : { newsletterOptIn }) });
   };
 
   return (
@@ -191,6 +194,24 @@ export function AuthPage({
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Honeypot — bots auto-fill every input on a page; humans can't
+                  see this one. Submission with a non-empty value is rejected
+                  server-side. Plain attributes so the field name + label still
+                  read as natural to bots, but invisible/unfocusable to humans. */}
+              {isSignUp && (
+                <div aria-hidden="true" style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }}>
+                  <label htmlFor="website_url_field">Website</label>
+                  <input
+                    id="website_url_field"
+                    type="text"
+                    name="website_url"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={websiteUrl}
+                    onChange={(e) => setWebsiteUrl(e.target.value)}
+                  />
+                </div>
+              )}
               {isSignUp && (
                 <div style={{ opacity: 0, animation: 'fadeSlideIn 0.5s ease forwards 0.4s' }}>
                   <label className="mb-1 block text-sm font-medium text-slate-600">Full Name</label>

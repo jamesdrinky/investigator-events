@@ -2,7 +2,6 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState, useEffect, useMemo } from 'react';
 import { Calendar, MapPin } from 'lucide-react';
 import { getAssociationBrandLogoSrc, shouldInvertLogoOnLight } from '@/lib/utils/association-branding';
 
@@ -20,148 +19,83 @@ export interface ExpandingEventItem {
   description?: string;
 }
 
+/**
+ * Horizontal scrolling event preview. Replaces the previous accordion
+ * (which had the spazz-out bug where focus events triggered active-state
+ * changes as the user scrolled, opening and closing cards rapidly).
+ * Each card here is a fixed-size proper preview — no layout shifts on
+ * interaction, no overlapping text states.
+ */
 export function ExpandingEventCards({ items }: { items: ExpandingEventItem[] }) {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [isDesktop, setIsDesktop] = useState(false);
-
-  useEffect(() => {
-    const check = () => setIsDesktop(window.innerWidth >= 768);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
-
-  const gridStyle = useMemo(() => {
-    if (isDesktop) {
-      return {
-        gridTemplateColumns: items.map((_, i) => (i === activeIndex ? '5fr' : '1fr')).join(' '),
-        gridTemplateRows: '1fr',
-      };
-    }
-    return {
-      gridTemplateColumns: '1fr',
-      gridTemplateRows: items.map((_, i) => (i === activeIndex ? '5fr' : 'minmax(56px, 0.6fr)')).join(' '),
-    };
-  }, [activeIndex, items.length, isDesktop]);
+  if (items.length === 0) return null;
 
   const safeSrc = (src?: string) =>
     src && /^(\/(cities|events|images)\/|https?:\/\/)/.test(src) ? src : '/cities/fallback.jpg';
 
   return (
-    <ul
-      className="grid w-full gap-2"
-      style={{
-        ...gridStyle,
-        height: isDesktop ? '480px' : 'min(620px, 82vh)',
-        transition: 'grid-template-columns 0.45s cubic-bezier(0.4,0,0.2,1), grid-template-rows 0.45s cubic-bezier(0.4,0,0.2,1)',
-        willChange: 'grid-template-columns, grid-template-rows',
-        contain: 'layout style',
-      }}
+    <div
+      className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-4 sm:mx-0 sm:gap-5 sm:px-0"
+      style={{ scrollbarWidth: 'none' }}
     >
-      {items.map((item, index) => {
-        const active = activeIndex === index;
+      {items.map((item) => {
         const logoSrc = getAssociationBrandLogoSrc(item.association);
         const invertLogo = shouldInvertLogoOnLight(item.association);
 
         return (
-          <li
+          <Link
             key={item.id}
-            className="group relative min-h-0 min-w-0 cursor-pointer overflow-hidden rounded-2xl md:min-w-[60px]"
-            data-active={active}
-            onMouseEnter={() => setActiveIndex(index)}
-            onClick={() => setActiveIndex(index)}
-            tabIndex={0}
-            onFocus={() => setActiveIndex(index)}
-            style={{
-              border: active ? '2px solid rgba(99, 102, 241, 0.6)' : '1px solid rgba(226, 232, 240, 0.25)',
-              boxShadow: active
-                ? '0 0 24px rgba(99, 102, 241, 0.35), 0 0 60px rgba(139, 92, 246, 0.15)'
-                : 'none',
-              transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
-            }}
+            href={`/events/${item.slug}`}
+            className="group relative block flex-shrink-0 snap-start overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.18)] transition active:scale-[0.98] sm:rounded-3xl"
+            style={{ width: 'min(78vw, 320px)' }}
           >
-            {/* Background image — always colourful, no grayscale */}
-            <Image
-              src={safeSrc(item.coverImage)}
-              alt={item.title}
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover transition-all duration-500 ease-out group-data-[active=true]:scale-100 scale-110"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
+            <div className="relative aspect-[5/4] w-full overflow-hidden bg-slate-100">
+              <Image
+                src={safeSrc(item.coverImage)}
+                alt={item.title}
+                fill
+                sizes="(max-width: 768px) 78vw, 320px"
+                className="object-cover transition-transform duration-500 group-active:scale-[1.02] sm:group-hover:scale-[1.04]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
 
-            {/* Association logo — top-left, always visible */}
-            {logoSrc && (
-              <div className="absolute left-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-xl border border-white/30 bg-white/90 p-1.5 shadow-lg sm:h-12 sm:w-12 sm:p-2">
-                <Image src={logoSrc} alt={item.association} width={40} height={40} className={`h-auto max-h-7 w-auto max-w-7 object-contain sm:max-h-8 sm:max-w-8 ${invertLogo ? 'brightness-0' : ''}`} />
-              </div>
-            )}
+              {logoSrc && (
+                <div className="absolute left-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-xl border border-white/40 bg-white/95 p-1.5 shadow-md sm:h-12 sm:w-12 sm:p-2">
+                  <Image
+                    src={logoSrc}
+                    alt={item.association}
+                    width={40}
+                    height={40}
+                    className={`h-auto max-h-7 w-auto max-w-7 object-contain sm:max-h-8 sm:max-w-8 ${invertLogo ? 'brightness-0' : ''}`}
+                  />
+                </div>
+              )}
 
-            {/* Collapsed: title on mobile — horizontal at bottom */}
-            <div
-              className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end p-3 md:hidden"
-              style={{
-                opacity: active ? 0 : 1,
-                transition: 'opacity 0.3s ease',
-              }}
-            >
-              <p className="truncate text-sm font-bold text-white drop-shadow-md">{item.title}</p>
-            </div>
-
-            {/* Collapsed: rotated title (desktop only) — use simple opacity, no layout shift */}
-            <div
-              className="pointer-events-none absolute bottom-4 left-4 hidden md:block"
-              style={{
-                opacity: active ? 0 : 0.7,
-                transition: 'opacity 0.3s ease',
-                transformOrigin: 'bottom left',
-                transform: 'rotate(-90deg) translateX(-100%)',
-              }}
-            >
-              <span className="whitespace-nowrap text-xs font-medium uppercase tracking-widest text-white">
-                {item.title}
-              </span>
-            </div>
-
-            {/* Expanded: full details — fade in/out cleanly */}
-            <div
-              className="absolute inset-0 flex flex-col justify-end p-4 sm:p-5"
-              style={{
-                opacity: active ? 1 : 0,
-                transition: 'opacity 0.35s ease',
-                pointerEvents: active ? 'auto' : 'none',
-              }}
-            >
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-1 text-[10px] font-semibold text-white/90">
-                  <Calendar className="h-3 w-3" /> {item.date}
+              <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-center gap-1.5 p-3 sm:p-4">
+                <span className="inline-flex items-center gap-1 rounded-full bg-black/40 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
+                  <Calendar className="h-2.5 w-2.5" /> {item.date}
                 </span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-1 text-[10px] font-semibold text-white/90">
-                  <MapPin className="h-3 w-3" /> {item.city}, {item.country}
+                <span className="inline-flex items-center gap-1 rounded-full bg-black/40 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
+                  <MapPin className="h-2.5 w-2.5" /> {item.city}
                 </span>
               </div>
+            </div>
 
-              <h3 className="mt-2 text-lg font-bold leading-tight text-white sm:text-xl">
+            <div className="p-4 sm:p-5">
+              <h3 className="line-clamp-2 text-base font-bold leading-tight text-slate-900 sm:text-lg">
                 {item.title}
               </h3>
-
               {item.description && (
-                <p className="mt-1.5 max-w-sm text-sm leading-relaxed text-white/70 line-clamp-2">
+                <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-slate-500 sm:text-sm">
                   {item.description}
                 </p>
               )}
-
-              <Link
-                href={`/events/${item.slug}`}
-                className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-white/15 px-4 py-2 text-sm font-semibold text-white hover:bg-white/25"
-                onClick={(e) => e.stopPropagation()}
-              >
-                View event →
-              </Link>
+              <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-blue-600 transition group-hover:gap-2">
+                View event <span aria-hidden>→</span>
+              </span>
             </div>
-          </li>
+          </Link>
         );
       })}
-    </ul>
+    </div>
   );
 }

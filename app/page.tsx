@@ -10,7 +10,6 @@ import { LoggedInHome } from '@/components/home/LoggedInHome';
 import { WhatYouGet } from '@/components/home/WhatYouGet';
 import { VerifiedInvestigators, type VerifiedMember } from '@/components/home/VerifiedInvestigators';
 import { FinalConversionCTA } from '@/components/home/FinalConversionCTA';
-import { Reveal } from '@/components/motion/reveal';
 import { fetchAllEvents, fetchFeaturedEvents } from '@/lib/data/events';
 import { getCoverageMetrics } from '@/lib/utils/coverage';
 import { parseDate, sortEventsByDate } from '@/lib/utils/date';
@@ -34,24 +33,36 @@ export const metadata: Metadata = {
   description: 'Confirmed private investigator conferences, AGMs, training events, and association meetings in one global calendar.'
 };
 
-async function fetchVerifiedMembers(): Promise<{ members: VerifiedMember[]; total: number; countries: number }> {
+async function fetchVerifiedMembers(): Promise<{ members: VerifiedMember[]; countries: number }> {
   try {
     const admin = createSupabaseAdminServerClient();
-    // Pull LinkedIn-verified, public profiles with an avatar — those are the
-    // best social-proof picks (real face, real name, real verification).
+
+    // Pull profiles that look strongest on the homepage (real face, country
+    // shown, headline filled). Pinning Mike LaCorte first — he's the
+    // co-founder, his profile is the platform's face.
     const { data } = await (admin.from('profiles' as never)
       .select('id, full_name, username, avatar_url, country, headline, auth_provider, is_public')
-      .eq('auth_provider', 'linkedin_oidc')
       .eq('is_public', true)
       .not('avatar_url', 'is', null)
       .not('full_name', 'is', null)
-      .limit(20) as any);
-    const rows = (data ?? []) as Array<{ id: string; full_name: string; username: string | null; avatar_url: string | null; country: string | null; headline: string | null }>;
+      .not('country', 'is', null)
+      .limit(50) as any);
+    const rows = (data ?? []) as Array<{ id: string; full_name: string; username: string | null; avatar_url: string | null; country: string | null; headline: string | null; auth_provider: string | null }>;
 
-    // Light shuffle so the homepage doesn't always show the same 4
-    const shuffled = [...rows].sort(() => Math.random() - 0.5);
+    const mike = rows.find((p) => (p.full_name ?? '').toLowerCase().includes('mike lacorte') || (p.full_name ?? '').toLowerCase().includes('michael lacorte'));
 
-    const members: VerifiedMember[] = shuffled.slice(0, 4).map((p) => ({
+    // Prefer LinkedIn-verified members with a headline (they look most polished)
+    const polished = rows
+      .filter((p) => p.id !== mike?.id)
+      .filter((p) => p.auth_provider === 'linkedin_oidc')
+      .filter((p) => !!p.headline);
+
+    // Light shuffle so we don't show the same 3 every time
+    const shuffled = [...polished].sort(() => Math.random() - 0.5);
+
+    const ordered = [mike, ...shuffled].filter((p): p is NonNullable<typeof p> => !!p).slice(0, 4);
+
+    const members: VerifiedMember[] = ordered.map((p) => ({
       id: p.id,
       fullName: p.full_name,
       username: p.username,
@@ -60,11 +71,6 @@ async function fetchVerifiedMembers(): Promise<{ members: VerifiedMember[]; tota
       headline: p.headline,
     }));
 
-    const { count: totalCount } = await (admin
-      .from('profiles' as never)
-      .select('id', { count: 'exact', head: true })
-      .eq('is_public', true) as any);
-
     const { data: countryRows } = await (admin
       .from('profiles' as never)
       .select('country')
@@ -72,13 +78,9 @@ async function fetchVerifiedMembers(): Promise<{ members: VerifiedMember[]; tota
       .not('country', 'is', null) as any);
     const distinctCountries = new Set(((countryRows ?? []) as { country: string }[]).map((r) => r.country)).size;
 
-    return {
-      members,
-      total: totalCount ?? rows.length,
-      countries: distinctCountries,
-    };
+    return { members, countries: distinctCountries };
   } catch {
-    return { members: [], total: 0, countries: 0 };
+    return { members: [], countries: 0 };
   }
 }
 
@@ -144,7 +146,7 @@ export default async function HomePage() {
         <div data-homepage-section className="order-4 sm:order-none">
           <VerifiedInvestigators
             members={verifiedData.members}
-            totalCount={verifiedData.total}
+            totalCount={100}
             countriesCount={verifiedData.countries}
           />
         </div>
@@ -190,16 +192,14 @@ export default async function HomePage() {
 
       {/* 7. FINAL CONVERSION CTA — replaces the sticky bar + the old "Get discovered" block */}
       <div data-homepage-section className="order-9 sm:order-none">
-        <FinalConversionCTA totalMembers={verifiedData.total || 90} countriesCount={verifiedData.countries || 19} />
+        <FinalConversionCTA countriesCount={verifiedData.countries || 19} />
       </div>
 
       {/* 8. NEWSLETTER */}
       <div data-homepage-section className="order-10 sm:order-none">
-        <div className="container-shell py-14 sm:py-20">
+        <div className="container-shell py-6 sm:py-20">
           <div className="app-mobile-shell">
-            <Reveal>
-              <GlobeNewsletterSection />
-            </Reveal>
+            <GlobeNewsletterSection />
           </div>
         </div>
       </div>

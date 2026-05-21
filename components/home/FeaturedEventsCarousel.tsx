@@ -25,7 +25,10 @@ export function FeaturedEventsCarousel({ items }: { items: FeaturedEventCard[] }
     align: 'start',
     slidesToScroll: 1,
     containScroll: 'trimSnaps',
-    dragFree: true,
+    // dragFree caused laggy/jittery momentum behaviour on iOS WebView.
+    // Snap-based scrolling is smoother + lets each card settle cleanly.
+    dragFree: false,
+    skipSnaps: false,
   });
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(false);
@@ -66,15 +69,15 @@ export function FeaturedEventsCarousel({ items }: { items: FeaturedEventCard[] }
             const invertLogo = shouldInvertLogoOnLight(item.association);
 
             return (
-              <div key={item.id} className="min-w-0 shrink-0 grow-0 basis-[85%] pl-4 sm:basis-[45%] lg:basis-[32%]">
+              <div key={item.id} className="min-w-0 shrink-0 grow-0 basis-[85%] pl-4 sm:basis-[45%] lg:basis-[32%]" style={{ transform: 'translateZ(0)' }}>
                 <Link
                   href={`/events/${item.slug}`}
-                  className="group block h-full overflow-hidden rounded-2xl border border-white/10 bg-white/5 transition-all duration-300 hover:border-white/20 hover:bg-white/8"
+                  className="group block h-full overflow-hidden rounded-2xl border border-white/10 bg-white/5 sm:transition-colors sm:duration-300 sm:hover:border-white/20 sm:hover:bg-white/[0.08]"
                 >
                   {/* Image with logo */}
                   <div className="relative h-48 w-full overflow-hidden sm:h-56">
                     {item.coverImage ? (
-                      <Image src={item.coverImage} alt={item.title} fill sizes="(max-width: 640px) 85vw, (max-width: 1024px) 45vw, 32vw" className="object-cover transition-transform duration-500 group-hover:scale-105" />
+                      <Image src={item.coverImage} alt={item.title} fill sizes="(max-width: 640px) 85vw, (max-width: 1024px) 45vw, 32vw" className="object-cover sm:transition-transform sm:duration-500 sm:group-hover:scale-105" />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-900/40 to-indigo-900/40">
                         <p className="text-base font-semibold text-white/60">{item.city}</p>

@@ -118,27 +118,24 @@ export function GlobeNewsletterSection() {
   return (
     <section
       id="newsletter"
-      className="relative overflow-hidden rounded-[1.8rem] border border-white/10 bg-[linear-gradient(145deg,#06091a,#0d1840)] px-7 py-14 shadow-[0_40px_120px_-40px_rgba(0,0,50,0.5)] sm:rounded-[3rem] sm:px-10 sm:py-16 lg:px-14"
+      className="relative overflow-hidden rounded-[1.5rem] border border-white/10 bg-[linear-gradient(145deg,#06091a,#0d1840)] px-5 py-8 shadow-[0_40px_120px_-40px_rgba(0,0,50,0.5)] sm:rounded-[3rem] sm:px-10 sm:py-16 lg:px-14"
     >
-      {/* Subtle glow accents */}
       <div className="pointer-events-none absolute left-[5%] top-[10%] h-64 w-64 rounded-full bg-[radial-gradient(ellipse,rgba(22,104,255,0.15),transparent_60%)]" />
       <div className="pointer-events-none absolute right-[10%] bottom-[10%] h-48 w-48 rounded-full bg-[radial-gradient(ellipse,rgba(236,72,153,0.08),transparent_60%)]" />
 
-      <div className="relative grid items-center gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-        {/* Left: text + form */}
+      <div className="relative grid items-center gap-6 sm:gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-cyan-400 sm:text-xs">
-            Newsletter
+            Weekly briefing
           </p>
-          <h2 className="mt-5 max-w-[12ch] text-[2.4rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white sm:text-[2.8rem] lg:text-[3.5rem]">
-            Get free weekly event alerts
+          <h2 className="mt-2.5 max-w-[14ch] text-2xl font-semibold leading-[0.96] tracking-[-0.04em] text-white sm:mt-5 sm:text-[2.8rem] lg:text-[3.5rem]">
+            Free weekly event alerts
           </h2>
-          <p className="mt-4 max-w-md text-base leading-relaxed text-blue-200/50 sm:mt-5">
-            New events, important dates, and key conferences sent straight to
-            your inbox. No spam. Unsubscribe any time.
+          <p className="mt-2.5 max-w-md text-sm leading-relaxed text-blue-200/55 sm:mt-5 sm:text-base">
+            New events + key conferences straight to your inbox. No spam, unsubscribe anytime.
           </p>
 
-          <div className="mt-6 hidden flex-wrap gap-2 sm:flex">
+          <div className="mt-4 hidden flex-wrap gap-2 sm:flex">
             {['New events', 'Upcoming dates', 'Featured events'].map((tag) => (
               <span
                 key={tag}
@@ -149,12 +146,11 @@ export function GlobeNewsletterSection() {
             ))}
           </div>
 
-          <div className="mt-8">
+          <div className="mt-5 sm:mt-8">
             <NewsletterSignupForm />
           </div>
         </div>
 
-        {/* Right: COBE globe */}
         <div className="relative mx-auto hidden w-full max-w-[26rem] lg:block">
           <CobeGlobe />
         </div>

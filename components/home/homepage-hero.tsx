@@ -280,7 +280,7 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
             </Link>
           </div>
 
-          <p className="mt-3 text-center text-[11px] text-blue-100/40">Free forever · No credit card required</p>
+          <p className="mt-3 text-center text-[11px] text-blue-100/40">100+ investigators · 19 countries · Verified community</p>
 
           <p className="mt-4 text-center sm:mt-5">
             <Link href="/submit-event" className="text-xs font-medium text-blue-300/70 transition hover:text-blue-200 sm:text-sm">

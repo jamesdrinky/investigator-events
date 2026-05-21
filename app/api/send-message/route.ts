@@ -47,22 +47,24 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Failed to send message' }, { status: 500 });
     }
 
-    // Fire-and-forget push to the recipient. Never blocks the response.
-    (async () => {
-      try {
-        const { data: senderProfile } = await (admin
-          .from('profiles')
-          .select('full_name')
-          .eq('id', user.id)
-          .maybeSingle() as any);
-        const senderName = (senderProfile?.full_name as string | undefined) ?? 'Someone';
-        const preview = imageUrl && !content ? '📷 Photo' : (content.length > 140 ? content.slice(0, 137) + '…' : content);
-        const { sendPushToUser } = await import('@/lib/notifications');
-        await sendPushToUser(admin, receiverId, senderName, preview, `/messages?user=${user.id}`);
-      } catch (err) {
-        console.error('message push failed:', err);
-      }
-    })();
+    // Push must complete before the response returns. Vercel freezes the
+    // function instance the moment we return, so fire-and-forget async work
+    // gets paused until the NEXT request unfreezes the lambda — which made
+    // every push arrive one message behind the message that triggered it.
+    // Adds ~1-2s to message send latency in exchange for reliable delivery.
+    try {
+      const { data: senderProfile } = await (admin
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .maybeSingle() as any);
+      const senderName = (senderProfile?.full_name as string | undefined) ?? 'Someone';
+      const preview = imageUrl && !content ? '📷 Photo' : (content.length > 140 ? content.slice(0, 137) + '…' : content);
+      const { sendPushToUser } = await import('@/lib/notifications');
+      await sendPushToUser(admin, receiverId, senderName, preview, `/messages?user=${user.id}`);
+    } catch (err) {
+      console.error('message push failed:', err);
+    }
 
     return NextResponse.json({ message: data });
   } catch (error) {

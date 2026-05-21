@@ -48,8 +48,11 @@ export async function createNotification(params: CreateNotificationParams) {
       emailed: false,
     } as any);
 
-    // Send push notification to user's devices (fire-and-forget)
-    sendPushToUser(supabase, userId, title, body ?? '', link ?? '/').catch(() => {});
+    // Await the push — on Vercel serverless, fire-and-forget after the
+    // response returns gets frozen mid-flight and only resumes when the
+    // next request hits the same lambda instance, making each push arrive
+    // one trigger behind. ~1-2s added per call but reliable delivery.
+    await sendPushToUser(supabase, userId, title, body ?? '', link ?? '/');
   } catch (err) {
     console.error('createNotification failed:', err);
   }

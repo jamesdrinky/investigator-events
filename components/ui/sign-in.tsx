@@ -89,6 +89,18 @@ export function AuthPage({
   // Bots that crawl the form auto-fill every input; the API rejects if non-empty.
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [resetStatus, setResetStatus] = useState<{ kind: 'idle' | 'sending' | 'sent' | 'error'; message?: string }>({ kind: 'idle' });
+  // Tracks which OAuth provider the user just tapped — shows a full-screen
+  // 'Connecting to <provider>…' overlay so the wait between tap and the OAuth
+  // page loading doesn't feel like a dead button. Survives until the browser
+  // navigates away (which destroys the overlay too).
+  const [oauthLoading, setOauthLoading] = useState<'apple' | 'linkedin' | 'google' | null>(null);
+
+  const triggerOauth = (provider: 'apple' | 'linkedin' | 'google', handler?: () => void) => {
+    if (oauthLoading || !handler) return;
+    setOauthLoading(provider);
+    // Tiny delay lets React paint the overlay before the WebView navigates.
+    setTimeout(() => handler(), 30);
+  };
 
   const isSignUp = mode === 'signup';
 
@@ -148,25 +160,24 @@ export function AuthPage({
               <div style={{ opacity: 0, animation: 'fadeSlideIn 0.5s ease forwards 0.3s' }}>
                 <button
                   type="button"
-                  onClick={onLinkedInSignIn}
-                  className="flex w-full items-center justify-center gap-3 rounded-xl bg-[#0077B5] py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#006097]"
+                  onClick={() => triggerOauth('linkedin', onLinkedInSignIn)}
+                  disabled={!!oauthLoading}
+                  className="flex w-full items-center justify-center gap-3 rounded-xl bg-[#0077B5] py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#006097] disabled:opacity-60"
                 >
                   <LinkedInIcon white />
-                  Continue with LinkedIn
+                  {oauthLoading === 'linkedin' ? 'Connecting to LinkedIn…' : 'Continue with LinkedIn'}
                 </button>
                 <p className="mt-1.5 text-center text-[11px] text-slate-400">Recommended for professionals — verifies your identity</p>
               </div>
             )}
 
-            {/* Google — disabled in WebView/Capacitor. Google blocks OAuth in
-                non-system browsers (error 403 disallowed_useragent), so the
-                button is hidden unless explicitly opted in. Re-enable post-
-                launch with @capacitor-community/google-signin native plugin. */}
+            {/* Google — disabled in WebView/Capacitor. */}
             {onGoogleSignIn && (
               <button
                 type="button"
-                onClick={onGoogleSignIn}
-                className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white py-3 text-sm font-medium text-slate-600 shadow-sm transition hover:bg-slate-50"
+                onClick={() => triggerOauth('google', onGoogleSignIn)}
+                disabled={!!oauthLoading}
+                className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white py-3 text-sm font-medium text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:opacity-60"
                 style={{ opacity: 0, animation: 'fadeSlideIn 0.5s ease forwards 0.35s' }}
               >
                 <GoogleIcon />
@@ -178,12 +189,13 @@ export function AuthPage({
             {onAppleSignIn && (
               <button
                 type="button"
-                onClick={onAppleSignIn}
-                className="flex w-full items-center justify-center gap-3 rounded-xl bg-black py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-900"
+                onClick={() => triggerOauth('apple', onAppleSignIn)}
+                disabled={!!oauthLoading}
+                className="flex w-full items-center justify-center gap-3 rounded-xl bg-black py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-900 disabled:opacity-60"
                 style={{ opacity: 0, animation: 'fadeSlideIn 0.5s ease forwards 0.38s' }}
               >
                 <AppleIcon />
-                Continue with Apple
+                {oauthLoading === 'apple' ? 'Connecting to Apple…' : 'Continue with Apple'}
               </button>
             )}
 

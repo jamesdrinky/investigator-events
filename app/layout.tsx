@@ -66,6 +66,13 @@ export default function RootLayout({
             server-side, the preconnect is harmless and helps any client-side
             ping). */}
         <link rel="dns-prefetch" href="https://api.resend.com" />
+        {/* Apple Sign In OAuth — preconnect so DNS+TLS is warm when the user
+            taps 'Continue with Apple', shaving 200-500ms off the redirect. */}
+        <link rel="preconnect" href="https://appleid.apple.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://appleid.apple.com" />
+        {/* LinkedIn OAuth — same reasoning. */}
+        <link rel="preconnect" href="https://www.linkedin.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://www.linkedin.com" />
         {/* Synchronous auth detection — runs before paint so the homepage's
             marketing sections never flash for logged-in users. Sets
             html.is-authed if any Supabase auth cookie is present. Replaces a

@@ -2,7 +2,9 @@ import type { Metadata } from 'next';
 import nextDynamic from 'next/dynamic';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
+import { AssociationLoopSection } from '@/components/home/AssociationLoopSection';
 import { FounderQuoteSection } from '@/components/home/FounderQuoteSection';
+import { UpcomingEventsGallery } from '@/components/home/UpcomingEventsGallery';
 import { WhyUseSection } from '@/components/home/WhyUseSection';
 import { HomepageHero } from '@/components/home/homepage-hero';
 import { LoggedInHome } from '@/components/home/LoggedInHome';
@@ -15,6 +17,10 @@ import { getCoverageMetrics } from '@/lib/utils/coverage';
 import { parseDate, sortEventsByDate, formatEventDate } from '@/lib/utils/date';
 import { getEventSlug } from '@/lib/utils/event-slugs';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
+
+const FeaturedEventsSection = nextDynamic(
+  () => import('@/components/home/FeaturedEventsSection').then((m) => m.FeaturedEventsSection),
+);
 
 const GlobeNewsletterSection = nextDynamic(
   () => import('@/components/home/GlobeNewsletterSection').then((m) => m.GlobeNewsletterSection),
@@ -83,11 +89,10 @@ export default async function HomePage() {
   const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   const upcomingEvents = mainEvents.filter((event) => parseDate(event.date).getTime() >= today.getTime());
 
-  // Hero gets featured (or next upcoming if none featured)
   const heroEvents = (featuredEvents.length > 0 ? featuredEvents : upcomingEvents).slice(0, 4);
+  const featuredCarouselEvents = featuredEvents.length > 0 ? featuredEvents : upcomingEvents.slice(0, 8);
 
-  // Merged events showcase — featured events take priority, then upcoming
-  // events fill the rest. Hero = next big featured / upcoming event.
+  // EventsShowcase is mobile-only — desktop keeps the original sections.
   const showcaseFeed = (() => {
     const featuredIds = new Set(featuredEvents.map((e) => e.id));
     const remainingUpcoming = upcomingEvents.filter((e) => !featuredIds.has(e.id));
@@ -130,26 +135,36 @@ export default async function HomePage() {
       <div className="mesh-blob mesh-blob-3" aria-hidden="true" />
       <div className="mesh-blob mesh-blob-4" aria-hidden="true" />
 
-      {/* 1. HERO */}
+      {/* 1. HERO — globe restored for desktop, hero adapts for mobile */}
       <div data-homepage-section className="order-1 sm:order-none">
         <HomepageHero events={heroEvents} stats={heroStats} />
       </div>
 
-      {/* 2. WHAT YOU GET — feature grid */}
-      <div data-homepage-section className="order-2 sm:order-none">
+      {/* 2. ASSOCIATION LOOP — desktop only (mobile gets the WhatYouGet grid + EventsShowcase) */}
+      <div data-homepage-section className="order-2 hidden mobile-section-divider sm:order-none sm:block">
+        <AssociationLoopSection />
+      </div>
+
+      {/* 3. WHAT YOU GET — both viewports */}
+      <div data-homepage-section className="order-3 sm:order-none">
         <WhatYouGet />
       </div>
 
-      {/* 3. EVENTS SHOWCASE — merged "Coming up" + "Featured events" into ONE */}
+      {/* 4a. EVENTS — mobile-only merged showcase */}
       {showcaseHero && (
-        <div data-homepage-section className="order-3 sm:order-none">
+        <div data-homepage-section className="order-4 sm:hidden">
           <EventsShowcase hero={showcaseHero} rest={showcaseRest} />
         </div>
       )}
 
-      {/* 4. VERIFIED INVESTIGATORS — social proof */}
+      {/* 4b. EVENTS — desktop keeps the original two sections (accordion + featured carousel) */}
+      <div data-homepage-section className="order-5 hidden mobile-section-divider sm:order-none sm:block">
+        <UpcomingEventsGallery events={upcomingEvents} />
+      </div>
+
+      {/* 5. VERIFIED INVESTIGATORS — both viewports */}
       {verifiedData.members.length > 0 && (
-        <div data-homepage-section className="order-4 sm:order-none">
+        <div data-homepage-section className="order-6 sm:order-none">
           <VerifiedInvestigators
             members={verifiedData.members}
             totalCount={100}
@@ -158,13 +173,13 @@ export default async function HomePage() {
         </div>
       )}
 
-      {/* WhyUseSection — desktop only marketing block */}
-      <div data-homepage-section className="order-5 hidden sm:order-none sm:block">
+      {/* 6. WHY USE — desktop only */}
+      <div data-homepage-section className="order-7 hidden sm:order-none sm:block">
         <WhyUseSection />
       </div>
 
-      {/* 5. FOR ORGANISERS */}
-      <div data-homepage-section className="order-6 sm:order-none">
+      {/* 7. FOR ORGANISERS — both viewports */}
+      <div data-homepage-section className="order-8 sm:order-none">
         <div className="container-shell py-6 sm:py-10">
           <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 px-6 py-8 shadow-[0_20px_60px_-30px_rgba(15,23,42,0.6)] sm:rounded-3xl sm:px-10 sm:py-10">
             <div className="pointer-events-none absolute -right-12 -top-12 h-44 w-44 rounded-full bg-blue-500/20 blur-3xl" />
@@ -186,18 +201,23 @@ export default async function HomePage() {
         </div>
       </div>
 
-      {/* Founder quote — desktop only */}
-      <div data-homepage-section className="order-7 hidden sm:order-none sm:block">
+      {/* 8. FOUNDER QUOTE — desktop only */}
+      <div data-homepage-section className="order-9 hidden sm:order-none sm:block">
         <FounderQuoteSection />
       </div>
 
-      {/* 6. FINAL CONVERSION CTA */}
-      <div data-homepage-section className="order-8 sm:order-none">
+      {/* 9. FEATURED EVENTS — desktop only (mobile already saw them in EventsShowcase above) */}
+      <div data-homepage-section className="order-10 hidden sm:order-none sm:block">
+        <FeaturedEventsSection events={featuredCarouselEvents} />
+      </div>
+
+      {/* 10. FINAL CONVERSION CTA — both viewports */}
+      <div data-homepage-section className="order-11 sm:order-none">
         <FinalConversionCTA countriesCount={verifiedData.countries || 19} />
       </div>
 
-      {/* 7. NEWSLETTER */}
-      <div data-homepage-section className="order-9 sm:order-none">
+      {/* 11. NEWSLETTER */}
+      <div data-homepage-section className="order-12 sm:order-none">
         <div className="container-shell py-6 sm:py-20">
           <div className="app-mobile-shell">
             <GlobeNewsletterSection />

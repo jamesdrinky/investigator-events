@@ -7,7 +7,9 @@ import { FounderQuoteSection } from '@/components/home/FounderQuoteSection';
 import { UpcomingEventsGallery } from '@/components/home/UpcomingEventsGallery';
 import { WhyUseSection } from '@/components/home/WhyUseSection';
 import { HomepageHero } from '@/components/home/homepage-hero';
+import { MobileHero } from '@/components/home/MobileHero';
 import { LoggedInHome } from '@/components/home/LoggedInHome';
+import { CinematicAppPromo } from '@/components/home/CinematicAppPromo';
 import { WhatYouGet } from '@/components/home/WhatYouGet';
 import { VerifiedInvestigators, type VerifiedMember } from '@/components/home/VerifiedInvestigators';
 import { FinalConversionCTA } from '@/components/home/FinalConversionCTA';
@@ -135,8 +137,13 @@ export default async function HomePage() {
       <div className="mesh-blob mesh-blob-3" aria-hidden="true" />
       <div className="mesh-blob mesh-blob-4" aria-hidden="true" />
 
-      {/* 1. HERO — globe restored for desktop, hero adapts for mobile */}
-      <div data-homepage-section className="order-1 sm:order-none">
+      {/* 1a. HERO — MOBILE (sm:hidden) — completely new design, no globe */}
+      <div data-homepage-section className="order-1 sm:hidden">
+        <MobileHero events={heroEvents} stats={heroStats} />
+      </div>
+
+      {/* 1b. HERO — DESKTOP (hidden sm:block) — keeps the D3 globe */}
+      <div data-homepage-section className="order-1 hidden sm:order-none sm:block">
         <HomepageHero events={heroEvents} stats={heroStats} />
       </div>
 
@@ -209,6 +216,13 @@ export default async function HomePage() {
       {/* 9. FEATURED EVENTS — desktop only (mobile already saw them in EventsShowcase above) */}
       <div data-homepage-section className="order-10 hidden sm:order-none sm:block">
         <FeaturedEventsSection events={featuredCarouselEvents} />
+      </div>
+
+      {/* 9b. CINEMATIC APP PROMO — desktop only — plugs the iOS app with a
+              count-up of live events. Heavy GSAP scroll-pin scene, mobile is
+              skipped entirely (component returns early in its effects). */}
+      <div data-homepage-section className="order-11 hidden lg:order-none lg:block">
+        <CinematicAppPromo metricValue={coverage.totalEvents} />
       </div>
 
       {/* 10. FINAL CONVERSION CTA — both viewports */}

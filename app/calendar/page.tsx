@@ -10,7 +10,7 @@ import { formatEventDate, parseDate, sortEventsByDate } from '@/lib/utils/date';
 import { getEventSlug } from '@/lib/utils/event-slugs';
 import { createSupabaseSSRServerClient } from '@/lib/supabase/ssr-server';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: 'PI Events Calendar 2026',

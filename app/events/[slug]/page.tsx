@@ -16,7 +16,7 @@ import { EventShareButtons } from '@/components/EventShareButtons';
 import { InlineAdminEdit } from '@/components/admin/InlineAdminEdit';
 import { hasValidAdminSessionCookie } from '@/lib/admin/session';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 async function resolveEvent(slug: string) {
   if (!slug) return { event: null, events: [] };

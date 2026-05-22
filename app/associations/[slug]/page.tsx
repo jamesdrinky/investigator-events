@@ -5,7 +5,7 @@ import { getAssociationBrandLogoSrc, shouldInvertLogoOnLight } from '@/lib/utils
 import { formatEventDate } from '@/lib/utils/date';
 import { AssociationPageTabs } from '@/components/associations/AssociationPageTabs';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const supabase = await createSupabaseSSRServerClient();

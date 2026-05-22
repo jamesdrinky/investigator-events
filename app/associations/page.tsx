@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: 'Browse professional investigator associations and industry bodies. Find your association, see upcoming events, and verify your membership.'
 };
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 export default async function AssociationsPage() {
   const events = await fetchAllEvents();

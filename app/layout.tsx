@@ -66,6 +66,21 @@ export default function RootLayout({
             server-side, the preconnect is harmless and helps any client-side
             ping). */}
         <link rel="dns-prefetch" href="https://api.resend.com" />
+        {/* Synchronous auth detection — runs before paint so the homepage's
+            marketing sections never flash for logged-in users. Sets
+            html.is-authed if any Supabase auth cookie is present. Replaces a
+            server-side cookies() check that forced the homepage into
+            force-dynamic rendering — now the homepage can be edge-cached. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var c=document.cookie.split(';');for(var i=0;i<c.length;i++){var n=c[i].trim().split('=')[0];if(n.indexOf('sb-')===0&&n.endsWith('-auth-token')){document.documentElement.classList.add('is-authed');return}}}catch(e){}})();`,
+          }}
+        />
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `html.is-authed .mesh-blob,html.is-authed [data-homepage-section]{display:none!important}`,
+          }}
+        />
       </head>
       <body className="font-[var(--font-sans)]">
         <div data-app-shell className="relative flex min-h-screen flex-col">

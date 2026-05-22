@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import nextDynamic from 'next/dynamic';
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import { AssociationLoopSection } from '@/components/home/AssociationLoopSection';
 import { FounderQuoteSection } from '@/components/home/FounderQuoteSection';
 import { UpcomingEventsGallery } from '@/components/home/UpcomingEventsGallery';
@@ -29,7 +28,10 @@ const GlobeNewsletterSection = nextDynamic(
   { ssr: false }
 );
 
-export const dynamic = 'force-dynamic';
+// Cached at Vercel edge for 60s. The auth-aware UI swap (marketing vs.
+// LoggedInHome) is handled client-side now via a synchronous head script
+// that sets html.is-authed before paint — see app/layout.tsx.
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: {
@@ -77,9 +79,6 @@ async function fetchVerifiedMembers(): Promise<{ members: VerifiedMember[]; coun
 }
 
 export default async function HomePage() {
-  const cookieStore = await cookies();
-  const hasAuthCookie = cookieStore.getAll().some(c => c.name.startsWith('sb-') && c.name.endsWith('-auth-token'));
-
   const [featuredEvents, allEvents, verifiedData] = await Promise.all([
     fetchFeaturedEvents(6),
     fetchAllEvents(),
@@ -126,9 +125,9 @@ export default async function HomePage() {
 
   return (
     <div className="relative flex flex-col">
-      {hasAuthCookie && (
-        <style dangerouslySetInnerHTML={{ __html: `.mesh-blob { display: none !important; } [data-homepage-section] { display: none !important; }` }} />
-      )}
+      {/* Auth-aware section hiding is now handled by layout.tsx's head script
+          which sets html.is-authed before paint. That + a CSS rule hides
+          .mesh-blob and [data-homepage-section] when logged in. */}
 
       <LoggedInHome />
 

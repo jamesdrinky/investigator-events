@@ -9,7 +9,7 @@ import { WhyUseSection } from '@/components/home/WhyUseSection';
 import { HomepageHero } from '@/components/home/homepage-hero';
 import { MobileHero } from '@/components/home/MobileHero';
 import { LoggedInHome } from '@/components/home/LoggedInHome';
-import { CinematicAppPromo } from '@/components/home/CinematicAppPromo';
+import { AppPromo } from '@/components/home/AppPromo';
 import { WhatYouGet } from '@/components/home/WhatYouGet';
 import { VerifiedInvestigators, type VerifiedMember } from '@/components/home/VerifiedInvestigators';
 import { FinalConversionCTA } from '@/components/home/FinalConversionCTA';
@@ -218,11 +218,14 @@ export default async function HomePage() {
         <FeaturedEventsSection events={featuredCarouselEvents} />
       </div>
 
-      {/* 9b. CINEMATIC APP PROMO — desktop only — plugs the iOS app with a
-              count-up of live events. Heavy GSAP scroll-pin scene, mobile is
-              skipped entirely (component returns early in its effects). */}
-      <div data-homepage-section className="order-11 hidden lg:order-none lg:block">
-        <CinematicAppPromo metricValue={coverage.totalEvents} />
+      {/* 9b. APP PROMO — replaces the heavy scroll-pinned cinematic with a
+              normal-flow section that keeps scroll pace fast. Same iPhone
+              mockup + count-up + App Store buttons + floating badges, but
+              IntersectionObserver-triggered animations (one-shot, smooth).
+              Renders on both desktop AND mobile since it no longer breaks
+              scroll responsiveness. */}
+      <div data-homepage-section className="order-11 sm:order-none">
+        <AppPromo liveEventCount={coverage.totalEvents} countriesCount={verifiedData.countries || 19} />
       </div>
 
       {/* 10. FINAL CONVERSION CTA — both viewports */}

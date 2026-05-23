@@ -49,7 +49,7 @@ export function VerifiedInvestigators({ members, totalCount, countriesCount }: V
         </div>
 
         <div className="mt-6 grid grid-cols-2 gap-3 sm:mt-10 sm:grid-cols-4 sm:gap-4">
-          {members.slice(0, 4).map((member) => (
+          {members.slice(0, 7).map((member) => (
             <Link
               key={member.id}
               href={member.username ? `/profile/${member.username}` : '/directory'}

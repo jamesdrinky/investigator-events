@@ -40,24 +40,41 @@ export const metadata: Metadata = {
   description: 'Confirmed private investigator conferences, AGMs, training events, and association meetings in one global calendar.'
 };
 
+// Curated showcase: 4 fixed leaders + 3 newest LinkedIn-verified signups with a banner.
+// The fixed 4 are Mike's pick — order is locked. The trailing 3 rotate as polished
+// profiles join, so the bottom row stays fresh without ever showing duplicate stubs.
+const SHOWCASE_FIXED_IDS = [
+  'f1933441-a50e-4e30-81e7-4c9546216259', // Mike LaCorte — CEO Conflict International, ABI President
+  'ad551a2d-c5cf-4a0c-8c9f-f97e4b77acd3', // Charlotte Notley — Director Taylor Investigations, ABI
+  'a12422ae-8e92-4fc5-8b22-e4427f61d50e', // Alex Auslander — Alex Auslander Investigations
+  'd8b1dd37-837a-4f23-9e34-9115f6e03ea7', // Hayk Gabrielyan — CEO Gabrielyan, Armenian PI Assoc President
+];
+
 async function fetchVerifiedMembers(): Promise<{ members: VerifiedMember[]; countries: number }> {
   try {
     const admin = createSupabaseAdminServerClient();
-    const { data } = await (admin.from('profiles' as never)
-      .select('id, full_name, username, avatar_url, country, headline, auth_provider, is_public')
+
+    const { data: fixedRows } = await (admin.from('profiles' as never)
+      .select('id, full_name, username, avatar_url, country, headline')
+      .in('id', SHOWCASE_FIXED_IDS) as any);
+    const fixedById = new Map<string, any>(((fixedRows ?? []) as any[]).map((p) => [p.id, p]));
+    const fixed = SHOWCASE_FIXED_IDS
+      .map((id) => fixedById.get(id))
+      .filter((p): p is NonNullable<typeof p> => !!p);
+
+    const { data: freshRows } = await (admin.from('profiles' as never)
+      .select('id, full_name, username, avatar_url, country, headline, created_at')
       .eq('is_public', true)
+      .eq('auth_provider', 'linkedin_oidc')
       .not('avatar_url', 'is', null)
-      .not('full_name', 'is', null)
-      .not('country', 'is', null)
-      .limit(50) as any);
-    const rows = (data ?? []) as Array<{ id: string; full_name: string; username: string | null; avatar_url: string | null; country: string | null; headline: string | null; auth_provider: string | null }>;
-    const mike = rows.find((p) => (p.full_name ?? '').toLowerCase().includes('mike lacorte') || (p.full_name ?? '').toLowerCase().includes('michael lacorte'));
-    const polished = rows
-      .filter((p) => p.id !== mike?.id)
-      .filter((p) => p.auth_provider === 'linkedin_oidc')
-      .filter((p) => !!p.headline);
-    const shuffled = [...polished].sort(() => Math.random() - 0.5);
-    const ordered = [mike, ...shuffled].filter((p): p is NonNullable<typeof p> => !!p).slice(0, 4);
+      .not('banner_url', 'is', null)
+      .not('headline', 'is', null)
+      .not('id', 'in', `(${SHOWCASE_FIXED_IDS.join(',')})`)
+      .order('created_at', { ascending: false })
+      .limit(3) as any);
+    const fresh = (freshRows ?? []) as any[];
+
+    const ordered = [...fixed, ...fresh];
     const members: VerifiedMember[] = ordered.map((p) => ({
       id: p.id,
       fullName: p.full_name,
@@ -66,6 +83,7 @@ async function fetchVerifiedMembers(): Promise<{ members: VerifiedMember[]; coun
       country: p.country,
       headline: p.headline,
     }));
+
     const { data: countryRows } = await (admin
       .from('profiles' as never)
       .select('country')

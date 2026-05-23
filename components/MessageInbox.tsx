@@ -224,9 +224,19 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
       .limit(100);
     const newMessages = (data ?? []) as unknown as Message[];
     setMessages((prev) => {
-      // Only update if messages actually changed to avoid unnecessary scroll triggers
-      if (prev.length === newMessages.length && prev.every((m, i) => m.id === newMessages[i]?.id)) return prev;
-      return newMessages;
+      // Preserve any optimistic messages that haven't been reconciled yet —
+      // otherwise the 3s poll would briefly erase a just-sent message between
+      // the optimistic render and the /api/send-message response landing.
+      const pending = prev.filter((m) => m.id.startsWith('optimistic-'));
+      const realPrev = prev.filter((m) => !m.id.startsWith('optimistic-'));
+      if (
+        pending.length === 0 &&
+        realPrev.length === newMessages.length &&
+        realPrev.every((m, i) => m.id === newMessages[i]?.id)
+      ) {
+        return prev;
+      }
+      return [...newMessages, ...pending];
     });
 
     await supabase.from('messages' as any).update({ is_read: true } as any).eq('sender_id', activeChat).eq('receiver_id', userId).eq('is_read', false);
@@ -274,22 +284,50 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
     const trimmed = newMsg.trim();
     if (!pendingAttachment && !trimmed) return;
 
+    // Optimistic insert FIRST — message appears in the thread instantly, input
+    // clears, view scrolls to bottom. The network round-trip (image upload +
+    // /api/send-message) then runs in the background. If anything fails we roll
+    // back: remove the placeholder, restore the input + attachment, show error.
+    // For image messages we use the local data URL so the photo is visible
+    // immediately instead of waiting for the upload to finish.
+    const tempId = `optimistic-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const optimisticMessage: Message = {
+      id: tempId,
+      sender_id: userId,
+      receiver_id: activeChat,
+      content: trimmed,
+      image_url: pendingAttachment?.dataUrl ?? null,
+      is_read: false,
+      created_at: new Date().toISOString(),
+    };
+    const savedText = newMsg;
+    const savedAttachment = pendingAttachment;
+    setMessages((prev) => [...prev, optimisticMessage]);
+    setNewMsg('');
+    setPendingAttachment(null);
+    setTimeout(() => {
+      const container = messagesContainerRef.current;
+      if (container) container.scrollTop = container.scrollHeight;
+    }, 50);
+
+    setSending(true);
+
     let imageUrl: string | undefined;
-    if (pendingAttachment) {
-      setUploadingImage(true);
+    if (savedAttachment) {
       try {
-        imageUrl = await uploadMessageImage(pendingAttachment.blob, pendingAttachment.filename);
+        imageUrl = await uploadMessageImage(savedAttachment.blob, savedAttachment.filename);
       } catch (err) {
+        setMessages((prev) => prev.filter((m) => m.id !== tempId));
+        setNewMsg(savedText);
+        setPendingAttachment(savedAttachment);
         const message = err instanceof Error ? err.message : 'Failed to upload photo';
         console.error('[message-image] upload failure', err);
         setAttachError(message);
-        setUploadingImage(false);
+        setSending(false);
         return;
       }
-      setUploadingImage(false);
     }
 
-    setSending(true);
     // Route through /api/send-message rather than direct supabase.insert so
     // the server (SSR client) does the auth check + admin client does the
     // insert. The client-side insert was silently failing on iOS WebView
@@ -303,19 +341,20 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
       });
       const json = await res.json().catch(() => null) as { message?: Message; error?: string } | null;
       if (!res.ok || !json?.message) {
-        setSending(false);
+        setMessages((prev) => prev.filter((m) => m.id !== tempId));
+        setNewMsg(savedText);
+        setPendingAttachment(savedAttachment);
         setAttachError(json?.error || 'Failed to send message');
+        setSending(false);
         return;
       }
-      setMessages((prev) => [...prev, json.message as Message]);
-      setNewMsg('');
-      setPendingAttachment(null);
+      // Swap the optimistic placeholder for the server's authoritative row.
+      setMessages((prev) => prev.map((m) => (m.id === tempId ? (json.message as Message) : m)));
       loadConversations();
-      setTimeout(() => {
-        const container = messagesContainerRef.current;
-        if (container) container.scrollTop = container.scrollHeight;
-      }, 50);
     } catch (err) {
+      setMessages((prev) => prev.filter((m) => m.id !== tempId));
+      setNewMsg(savedText);
+      setPendingAttachment(savedAttachment);
       const message = err instanceof Error ? err.message : 'Failed to send message';
       setAttachError(message);
     }
@@ -402,30 +441,47 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
   const sendEvent = async (event: { title: string; slug: string }) => {
     if (!userId || !activeChat) return;
     const url = `${window.location.origin}/events/${event.slug}`;
+    const content = `Check out ${event.title}\n${url}`;
+
+    const tempId = `optimistic-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const optimisticMessage: Message = {
+      id: tempId,
+      sender_id: userId,
+      receiver_id: activeChat,
+      content,
+      image_url: null,
+      is_read: false,
+      created_at: new Date().toISOString(),
+    };
+    setMessages((prev) => [...prev, optimisticMessage]);
+    setShowEventPicker(false);
+    setEventSearch('');
+    setEventResults([]);
+    setTimeout(() => {
+      const container = messagesContainerRef.current;
+      if (container) container.scrollTop = container.scrollHeight;
+    }, 50);
+
     setSending(true);
     try {
       const res = await fetch('/api/send-message', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          receiverId: activeChat,
-          content: `Check out ${event.title}\n${url}`,
-        }),
+        body: JSON.stringify({ receiverId: activeChat, content }),
       });
       const json = await res.json().catch(() => null) as { message?: Message; error?: string } | null;
       if (res.ok && json?.message) {
-        setMessages((prev) => [...prev, json.message as Message]);
+        setMessages((prev) => prev.map((m) => (m.id === tempId ? (json.message as Message) : m)));
         loadConversations();
       } else {
+        setMessages((prev) => prev.filter((m) => m.id !== tempId));
         setAttachError(json?.error || 'Failed to share event');
       }
     } catch {
+      setMessages((prev) => prev.filter((m) => m.id !== tempId));
       setAttachError('Failed to share event');
     }
     setSending(false);
-    setShowEventPicker(false);
-    setEventSearch('');
-    setEventResults([]);
   };
 
   const searchUsers = async (q: string) => {

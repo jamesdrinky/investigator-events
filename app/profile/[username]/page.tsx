@@ -87,21 +87,26 @@ export default async function PublicProfilePage({ params }: { params: { username
   // Profile pages used to do 10+ serial round-trips (~500ms+ on slow
   // networks) — this collapses it to one batch + a small follow-up.
   const userEmail = user?.email;
-  const adminClient = isOwner && userEmail ? createSupabaseAdminServerClient() : null;
+  // Admin client is needed both for (a) the newsletter lookup for own profile
+  // and (b) the connection count — the connections table has RLS scoped to
+  // requester_id/addressee_id = auth.uid(), so the SSR client only ever sees
+  // the viewer's own rows. Counting via SSR returned 0 (stranger) or 1 (mutual
+  // connection) on someone else's profile instead of their real total.
+  const adminClient = createSupabaseAdminServerClient();
   const [
     assocsRes, verifsRes, connRes, sectionsRes, attendingRowsRes,
     experienceRes, recentPostsRes, reviewRowsRes, newsletterRes,
   ] = await Promise.all([
     supabase.from('user_associations').select('*').eq('user_id', profile.id),
     supabase.from('member_verifications').select('association_name, status, expires_at').eq('user_id', profile.id),
-    supabase.from('connections').select('id', { count: 'exact', head: true }).or(`requester_id.eq.${profile.id},addressee_id.eq.${profile.id}`).eq('status', 'accepted'),
+    adminClient.from('connections' as any).select('id', { count: 'exact', head: true }).or(`requester_id.eq.${profile.id},addressee_id.eq.${profile.id}`).eq('status', 'accepted'),
     supabase.from('profile_sections').select('*').eq('user_id', profile.id).eq('visible', true).order('sort_order'),
     supabase.from('event_attendees').select('event_id').eq('user_id', profile.id).eq('is_going', true),
     supabase.from('work_experience').select('*').eq('user_id', profile.id).order('sort_order'),
     supabase.from('posts').select('id, content, image_url, likes_count, comments_count, created_at').eq('user_id', profile.id).order('created_at', { ascending: false }).limit(3),
     supabase.from('event_reviews').select('id, event_id, rating, review_text, created_at').eq('user_id', profile.id).order('created_at', { ascending: false }).limit(4),
-    adminClient
-      ? (adminClient.from('newsletter_subscribers' as any).select('id, status').ilike('email', userEmail!.trim()).in('status', ['active', 'pending']).maybeSingle() as any)
+    isOwner && userEmail
+      ? (adminClient.from('newsletter_subscribers' as any).select('id, status').ilike('email', userEmail.trim()).in('status', ['active', 'pending']).maybeSingle() as any)
       : Promise.resolve({ data: null }),
   ]);
 

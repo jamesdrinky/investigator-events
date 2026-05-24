@@ -1,4 +1,4 @@
-import { createHmac, timingSafeEqual } from 'node:crypto';
+import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { headers } from 'next/headers';
 import { getEnvVar } from '@/lib/supabase/env';
 
@@ -10,10 +10,12 @@ type RateLimitOptions = {
 // ── Upstash Redis rate limiting (production) ──
 // Falls back to in-memory if UPSTASH_REDIS_REST_URL is not set
 
-let upstashRatelimit: any = null;
+const upstashRatelimitByConfig = new Map<string, any>();
 
 async function getUpstashRatelimiter(scope: string, options: RateLimitOptions) {
-  if (upstashRatelimit) return upstashRatelimit;
+  const cacheKey = `${scope}:${options.maxRequests}:${options.windowMs}`;
+  const cached = upstashRatelimitByConfig.get(cacheKey);
+  if (cached) return cached;
 
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -24,12 +26,13 @@ async function getUpstashRatelimiter(scope: string, options: RateLimitOptions) {
     const { Redis } = await import('@upstash/redis');
 
     const redis = new Redis({ url, token });
-    upstashRatelimit = new Ratelimit({
+    const ratelimit = new Ratelimit({
       redis,
       limiter: Ratelimit.slidingWindow(options.maxRequests, `${options.windowMs}ms`),
       prefix: `ratelimit:${scope}`,
     });
-    return upstashRatelimit;
+    upstashRatelimitByConfig.set(cacheKey, ratelimit);
+    return ratelimit;
   } catch {
     return null;
   }
@@ -83,12 +86,17 @@ export class RateLimitError extends Error {
 }
 
 export function enforceRateLimit(scope: string, options: RateLimitOptions) {
-  const key = `${scope}:${getClientIdentifier()}`;
+  enforceRateLimitForKey(scope, getClientIdentifier(), options);
+}
+
+export function hashRateLimitKey(value: string) {
+  return createHash('sha256').update(value.trim().toLowerCase()).digest('base64url').slice(0, 32);
+}
+
+export function enforceRateLimitForKey(scope: string, identifier: string, options: RateLimitOptions) {
+  const key = `${scope}:${identifier.slice(0, 160)}`;
   const now = Date.now();
 
-  // Try Upstash first (async, but we need sync — so we use in-memory as primary
-  // and Upstash as a fire-and-forget check that blocks on the second call)
-  // For now: in-memory is the sync check, Upstash is checked async below
   const store = getRateLimitStore();
   const recent = (store.get(key) ?? []).filter((timestamp) => now - timestamp < options.windowMs);
 
@@ -106,18 +114,18 @@ export function enforceRateLimit(scope: string, options: RateLimitOptions) {
  * Falls back to in-memory if Upstash is not configured.
  */
 export async function enforceRateLimitAsync(scope: string, options: RateLimitOptions): Promise<void> {
-  const identifier = getClientIdentifier();
+  await enforceRateLimitForKeyAsync(scope, getClientIdentifier(), options);
+}
 
-  // Try Upstash Redis first
+export async function enforceRateLimitForKeyAsync(scope: string, identifier: string, options: RateLimitOptions): Promise<void> {
   const limiter = await getUpstashRatelimiter(scope, options);
   if (limiter) {
-    const { success } = await limiter.limit(`${scope}:${identifier}`);
+    const { success } = await limiter.limit(`${scope}:${identifier.slice(0, 160)}`);
     if (!success) throw new RateLimitError();
     return;
   }
 
-  // Fallback to in-memory
-  enforceRateLimit(scope, options);
+  enforceRateLimitForKey(scope, identifier, options);
 }
 
 export function assertSameOriginRequest() {

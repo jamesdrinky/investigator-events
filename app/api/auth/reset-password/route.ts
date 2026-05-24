@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
-import { enforceRateLimit, RateLimitError } from '@/lib/security/server';
+import {
+  assertSameOriginRequest,
+  enforceRateLimitAsync,
+  enforceRateLimitForKeyAsync,
+  hashRateLimitKey,
+  RateLimitError
+} from '@/lib/security/server';
 
 /**
  * Self-contained password reset flow that bypasses Supabase's email service
@@ -28,13 +34,19 @@ import { enforceRateLimit, RateLimitError } from '@/lib/security/server';
  */
 export async function POST(request: Request) {
   try {
-    enforceRateLimit('reset-password', { maxRequests: 3, windowMs: 60_000 });
+    assertSameOriginRequest();
+    await enforceRateLimitAsync('reset-password', { maxRequests: 3, windowMs: 60_000 });
 
     const body = (await request.json().catch(() => null)) as { email?: string } | null;
     const email = body?.email?.trim().toLowerCase();
     if (!email || !email.includes('@')) {
       return NextResponse.json({ error: 'Invalid email' }, { status: 400 });
     }
+
+    await enforceRateLimitForKeyAsync('reset-password-email', hashRateLimitKey(email), {
+      maxRequests: 3,
+      windowMs: 60 * 60_000,
+    });
 
     const resendKey = process.env.RESEND_API_KEY;
     if (!resendKey) {

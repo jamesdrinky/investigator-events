@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
-import { enforceRateLimitAsync, assertSameOriginRequest, RateLimitError } from '@/lib/security/server';
+import {
+  enforceRateLimitAsync,
+  enforceRateLimitForKeyAsync,
+  assertSameOriginRequest,
+  hashRateLimitKey,
+  RateLimitError
+} from '@/lib/security/server';
 import { buildConfirmationEmail } from '@/lib/email/confirmation-email';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -22,6 +28,12 @@ export async function POST(request: Request) {
     if (!email || !EMAIL_REGEX.test(email)) {
       return NextResponse.json({ error: 'Invalid email' }, { status: 400 });
     }
+
+    const emailDomain = email.split('@')[1] ?? '';
+    await Promise.all([
+      enforceRateLimitForKeyAsync('newsletter-email', hashRateLimitKey(email), { maxRequests: 3, windowMs: 60 * 60_000 }),
+      enforceRateLimitForKeyAsync('newsletter-domain', hashRateLimitKey(emailDomain), { maxRequests: 30, windowMs: 60 * 60_000 }),
+    ]);
 
     const supabase = createSupabaseAdminServerClient();
 

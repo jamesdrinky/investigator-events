@@ -2,6 +2,7 @@ import type { EventItem } from '@/lib/data/events';
 import { findAssociationBranding } from '@/lib/utils/association-branding';
 import { getEventImage, getCityHeroImageUrl } from '@/lib/utils/city-media';
 import { slugifyEventTitle } from '@/lib/utils/event-slugs';
+import { buildAppPushBanner, type AppPushSize, type AppPushRegion } from './app-push-banner';
 
 const SITE = 'https://investigatorevents.com';
 const LOGO = `${SITE}/logo/ielogo1.PNG`;
@@ -188,6 +189,41 @@ function section(title: string, events: EventItem[]) {
   </table>`;
 }
 
+const BEARSTONE_CEE_SLUGS = new Set([
+  'warsaw-disputes-days-2026',
+  'asset-recovery-cee-2026',
+  'collective-redress-cee-2026',
+]);
+
+function mergeBearstoneNewsletterEvents(events: EventItem[]) {
+  const bearstone = events.filter((event) => BEARSTONE_CEE_SLUGS.has(event.slug));
+  if (bearstone.length < 2) return events;
+
+  const firstIndex = events.findIndex((event) => BEARSTONE_CEE_SLUGS.has(event.slug));
+  const base = bearstone.find((event) => event.slug === 'warsaw-disputes-days-2026') ?? bearstone[0];
+  const merged: EventItem = {
+    ...base,
+    id: 'bearstone-cee-2026-newsletter',
+    title: 'Bearstone CEE Week 2026',
+    slug: base.slug,
+    date: '2026-06-10',
+    endDate: '2026-06-12',
+    eventScope: 'main',
+    category: 'Conference',
+    website: base.website || 'https://warsawdisputesdays.com',
+    description: 'A three-day Warsaw programme from Bearstone, bringing Warsaw Disputes Days, Asset Recovery CEE, and Collective Redress CEE together for the newsletter edition.',
+    image_path: base.image_path ?? '/cities/warsaw.jpg',
+    coverImage: base.coverImage ?? '/cities/warsaw.jpg',
+  };
+
+  const withoutCluster = events.filter((event) => !BEARSTONE_CEE_SLUGS.has(event.slug));
+  return [
+    ...withoutCluster.slice(0, firstIndex),
+    merged,
+    ...withoutCluster.slice(firstIndex),
+  ];
+}
+
 /* ── Review card ── */
 function reviewCard(ev: EventItem) {
   const lg = assocLogo(ev);
@@ -289,17 +325,24 @@ function statPill(value: string | number, label: string) {
 }
 
 export function buildWeeklyNewsletterHtml({
-  upcoming, newlyAdded, featured, recentlyPast = [], unsubscribeToken,
+  upcoming, newlyAdded, featured, recentlyPast = [], unsubscribeToken, appPush,
 }: {
   upcoming: EventItem[];
   newlyAdded: EventItem[];
   featured: EventItem[];
   recentlyPast?: EventItem[];
   unsubscribeToken?: string;
+  appPush?: { size: AppPushSize; region?: AppPushRegion } | null;
 }): string {
+  const displayUpcoming = mergeBearstoneNewsletterEvents(upcoming);
+  const displayNewlyAdded = mergeBearstoneNewsletterEvents(newlyAdded);
+  const displayFeatured = mergeBearstoneNewsletterEvents(featured);
   const weekOf = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-  const countries = new Set([...upcoming, ...newlyAdded].map(e => e.country)).size;
-  const hero = featured[0] ?? upcoming[0];
+  const countries = new Set([...displayUpcoming, ...displayNewlyAdded].map(e => e.country)).size;
+  const hero = displayFeatured[0] ?? displayUpcoming[0];
+  const appHeroBanner = appPush?.size === 'hero' ? buildAppPushBanner({ size: 'hero', region: appPush.region ?? 'available' }) : '';
+  const appCompactBanner = appPush?.size === 'compact' ? buildAppPushBanner({ size: 'compact', region: appPush.region ?? 'available' }) : '';
+  const isAppHero = Boolean(appHeroBanner);
 
   return `<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -370,7 +413,7 @@ export function buildWeeklyNewsletterHtml({
 <div id="wrapper" style="background-color:#ffffff;">
 
 <!-- Preheader -->
-<div style="display:none;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:#ffffff;">${upcoming.length} upcoming event${upcoming.length !== 1 ? 's' : ''} across ${countries} countr${countries !== 1 ? 'ies' : 'y'} &middot; investigatorevents.com &#847; &#847; &#847; &#847; &#847;</div>
+<div style="display:none;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:#ffffff;">${isAppHero ? 'The Investigator Events iOS app is live in 148 countries; EU rollout is expected next week.' : `${displayUpcoming.length} upcoming event${displayUpcoming.length !== 1 ? 's' : ''} across ${countries} countr${countries !== 1 ? 'ies' : 'y'}`} &middot; investigatorevents.com &#847; &#847; &#847; &#847; &#847;</div>
 
 <table width="100%" cellpadding="0" cellspacing="0" class="outer" style="background-color:#ffffff;">
 <tr><td align="center" class="outer-wrap" style="padding:16px;">
@@ -399,16 +442,16 @@ export function buildWeeklyNewsletterHtml({
   <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:22px;">
     <tr><td>
       <p style="margin:0;font-size:28px;font-weight:800;color:${C.dark};letter-spacing:-0.03em;line-height:1.15;">Weekly Briefing</p>
-      <p style="margin:6px 0 0;font-size:13px;color:${C.muted};line-height:1.4;">Your weekly roundup of PI conferences, meetings, and networking events worldwide.</p>
+      <p style="margin:6px 0 0;font-size:13px;color:${C.muted};line-height:1.4;">${isAppHero ? 'This week: the Investigator Events app is live, plus the latest PI conferences, meetings, and networking updates.' : 'Your weekly roundup of PI conferences, meetings, and networking events worldwide.'}</p>
     </td></tr>
   </table>
 
   <!-- Stat pills -->
   <table cellpadding="0" cellspacing="0" class="stat-row bg-soft" style="margin-top:18px;background-color:${C.bgSoft};border:1px solid ${C.border};border-radius:12px;">
     <tr>
-      ${statPill(upcoming.length, 'Upcoming')}
+      ${statPill(displayUpcoming.length, 'Upcoming')}
       <td style="width:1px;padding:8px 0;"><div style="width:1px;height:28px;background-color:${C.border};"></div></td>
-      ${statPill(newlyAdded.length, 'New')}
+      ${statPill(displayNewlyAdded.length, 'New')}
       <td style="width:1px;padding:8px 0;"><div style="width:1px;height:28px;background-color:${C.border};"></div></td>
       ${statPill(countries, countries !== 1 ? 'Countries' : 'Country')}
     </tr>
@@ -421,14 +464,20 @@ export function buildWeeklyNewsletterHtml({
     <td width="33%" style="height:3px;background-color:${C.pink};font-size:0;line-height:0;">&nbsp;</td>
   </tr></table>
 
+  <!-- App push hero (Monday launch week) -->
+  ${appHeroBanner}
+
   <!-- Featured hero -->
-  ${hero ? heroCard(hero) : ''}
+  ${!isAppHero && hero ? heroCard(hero) : ''}
 
   <!-- Upcoming -->
-  ${section('Upcoming Events', upcoming.filter(e => e.id !== hero?.id))}
+  ${section('Upcoming Events', displayUpcoming.filter(e => e.id !== hero?.id))}
 
   <!-- Just added -->
-  ${section('Just Added', newlyAdded.filter(e => e.id !== hero?.id))}
+  ${section('Just Added', displayNewlyAdded.filter(e => e.id !== hero?.id))}
+
+  <!-- App push compact (subsequent weeks) -->
+  ${appCompactBanner}
 
   <!-- Review section -->
   ${reviewSection(recentlyPast)}

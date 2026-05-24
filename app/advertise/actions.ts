@@ -3,7 +3,13 @@
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import type { AdvertiserFormState } from '@/app/advertise/form-state';
 import { normalizeOptionalUrl } from '@/lib/utils/url';
-import { enforceRateLimit, assertSameOriginRequest, RateLimitError } from '@/lib/security/server';
+import {
+  enforceRateLimitAsync,
+  enforceRateLimitForKeyAsync,
+  assertSameOriginRequest,
+  hashRateLimitKey,
+  RateLimitError
+} from '@/lib/security/server';
 
 export async function submitAdvertiserLead(
   _prevState: AdvertiserFormState,
@@ -11,7 +17,7 @@ export async function submitAdvertiserLead(
 ): Promise<AdvertiserFormState> {
   try {
     assertSameOriginRequest();
-    enforceRateLimit('advertiser-lead', { maxRequests: 5, windowMs: 60_000 });
+    await enforceRateLimitAsync('advertiser-lead', { maxRequests: 5, windowMs: 60_000 });
   } catch (err) {
     if (err instanceof RateLimitError) {
       return { status: 'error', message: 'Too many submissions. Please try again later.' };
@@ -32,6 +38,18 @@ export async function submitAdvertiserLead(
       status: 'error',
       message: 'Please complete all required fields before submitting.'
     };
+  }
+
+  try {
+    await Promise.all([
+      enforceRateLimitForKeyAsync('advertiser-lead-email', hashRateLimitKey(email), { maxRequests: 5, windowMs: 60 * 60_000 }),
+      enforceRateLimitForKeyAsync('advertiser-lead-company', hashRateLimitKey(companyName), { maxRequests: 5, windowMs: 60 * 60_000 }),
+    ]);
+  } catch (err) {
+    if (err instanceof RateLimitError) {
+      return { status: 'error', message: 'Too many submissions. Please try again later.' };
+    }
+    return { status: 'error', message: 'Unable to submit right now.' };
   }
 
   const supabase = createSupabaseAdminServerClient();

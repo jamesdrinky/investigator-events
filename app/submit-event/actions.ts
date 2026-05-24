@@ -6,7 +6,13 @@ import { Resend } from 'resend';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import type { EventSubmissionInsert } from '@/lib/data/event-submissions';
 import { eventRegions } from '@/lib/forms/event-form-options';
-import { assertSameOriginRequest, enforceRateLimit, verifySignedFormState } from '@/lib/security/server';
+import {
+  assertSameOriginRequest,
+  enforceRateLimitAsync,
+  enforceRateLimitForKeyAsync,
+  hashRateLimitKey,
+  verifySignedFormState
+} from '@/lib/security/server';
 import { normalizeRequiredUrl } from '@/lib/utils/url';
 import { buildSubmissionConfirmationEmail } from '@/lib/email/submission-confirmation';
 
@@ -61,9 +67,9 @@ function parseDateValue(formData: FormData, key: string, required = true) {
   return value;
 }
 
-function parseSubmissionData(formData: FormData): Omit<EventSubmissionInsert, 'id' | 'status' | 'created_at'> {
+async function parseSubmissionData(formData: FormData): Promise<Omit<EventSubmissionInsert, 'id' | 'status' | 'created_at'>> {
   assertSameOriginRequest();
-  enforceRateLimit('submit-event', {
+  await enforceRateLimitAsync('submit-event', {
     maxRequests: RATE_LIMIT_MAX_REQUESTS,
     windowMs: RATE_LIMIT_WINDOW_MS
   });
@@ -109,6 +115,17 @@ function parseSubmissionData(formData: FormData): Omit<EventSubmissionInsert, 'i
     throw new Error('Invalid end date');
   }
 
+  const websiteHost = new URL(website).host.replace(/^www\./, '');
+  const emailKey = hashRateLimitKey(contactEmail);
+  const websiteKey = hashRateLimitKey(websiteHost);
+  const duplicateKey = hashRateLimitKey(`${eventName}|${websiteHost}|${startDate}`);
+
+  await Promise.all([
+    enforceRateLimitForKeyAsync('submit-event-email', emailKey, { maxRequests: 12, windowMs: 60 * 60 * 1000 }),
+    enforceRateLimitForKeyAsync('submit-event-website', websiteKey, { maxRequests: 8, windowMs: 60 * 60 * 1000 }),
+    enforceRateLimitForKeyAsync('submit-event-duplicate', duplicateKey, { maxRequests: 2, windowMs: 24 * 60 * 60 * 1000 }),
+  ]);
+
   return {
     event_name: eventName,
     organiser,
@@ -127,7 +144,7 @@ function parseSubmissionData(formData: FormData): Omit<EventSubmissionInsert, 'i
 
 export async function submitEventAction(formData: FormData) {
   try {
-    const payload = parseSubmissionData(formData);
+    const payload = await parseSubmissionData(formData);
     const supabase = createSupabaseAdminServerClient();
     const { error } = await supabase.from('event_submissions').insert({
       ...payload,

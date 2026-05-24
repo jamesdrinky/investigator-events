@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
-import { enforceRateLimitAsync, assertSameOriginRequest } from '@/lib/security/server';
+import {
+  enforceRateLimitAsync,
+  enforceRateLimitForKeyAsync,
+  assertSameOriginRequest,
+  hashRateLimitKey,
+  RateLimitError
+} from '@/lib/security/server';
 import { buildWelcomeEmail } from '@/lib/email/welcome-email';
 import { generateUniqueUsername } from '@/lib/utils/username';
 import { looksLikeRandomSignupName } from '@/lib/utils/signup-abuse';
@@ -59,6 +65,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Please use a real professional email address.' }, { status: 400 });
     }
 
+    await Promise.all([
+      enforceRateLimitForKeyAsync('signup-email', hashRateLimitKey(email), { maxRequests: 2, windowMs: 60 * 60_000 }),
+      enforceRateLimitForKeyAsync('signup-domain', hashRateLimitKey(emailDomain), { maxRequests: 20, windowMs: 60 * 60_000 }),
+    ]);
+
     const admin = createSupabaseAdminServerClient();
 
     // Create user with admin client — auto-confirms email
@@ -106,6 +117,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ message: 'Account created', userId: data.user?.id });
   } catch (err) {
+    if (err instanceof RateLimitError) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
     console.error('signup error:', err);
     return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
   }

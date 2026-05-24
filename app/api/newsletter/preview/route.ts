@@ -3,6 +3,7 @@ import { Resend } from 'resend';
 import { fetchAllEvents } from '@/lib/data/events';
 import { getWeeklyCollections } from '@/lib/data/weekly';
 import { buildWeeklyNewsletterHtml } from '@/lib/email/weekly-newsletter';
+import { getWeeklyNewsletterAppPush, getWeeklyNewsletterEdition, getWeeklyNewsletterSubject } from '@/lib/email/newsletter-editions';
 import { verifyCronSecret } from '@/lib/security/server';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 
@@ -33,12 +34,22 @@ export async function GET(request: Request) {
   const events = await fetchAllEvents();
   const { upcoming, newlyAdded, featured, recentlyPast } = getWeeklyCollections(events);
 
+  const appPushParam = searchParams.get('appPush');
+  const regionParam = searchParams.get('region');
+  const region = regionParam === 'eu-pending' ? ('eu-pending' as const) : ('available' as const);
+  const edition = getWeeklyNewsletterEdition(searchParams.get('edition'));
+  const appPush: { size: 'hero' | 'compact'; region: 'available' | 'eu-pending' } | null =
+    appPushParam === 'hero' ? { size: 'hero', region }
+    : appPushParam === 'compact' ? { size: 'compact', region }
+    : getWeeklyNewsletterAppPush(edition);
+
   const html = buildWeeklyNewsletterHtml({
     upcoming,
     newlyAdded,
     featured,
     recentlyPast,
     unsubscribeToken: 'preview-token',
+    appPush,
   });
 
   const sendTo = searchParams.get('send');
@@ -57,10 +68,10 @@ export async function GET(request: Request) {
     const resend = new Resend(resendKey);
     const heroEvent = featured[0] ?? upcoming[0];
     const countries = new Set([...upcoming, ...newlyAdded].map(e => e.country)).size;
-
-    const subject = heroEvent
+    const fallbackSubject = heroEvent
       ? `${heroEvent.title} + ${Math.max(0, upcoming.length + newlyAdded.length - 1)} more — Weekly Briefing`
       : `Weekly Briefing — ${upcoming.length} event${upcoming.length !== 1 ? 's' : ''} across ${countries} countries`;
+    const subject = getWeeklyNewsletterSubject(edition, fallbackSubject);
 
     await resend.emails.send({
       from: 'Investigator Events <weekly@investigatorevents.com>',

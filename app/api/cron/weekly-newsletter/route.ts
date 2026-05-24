@@ -4,6 +4,7 @@ import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { fetchAllEvents } from '@/lib/data/events';
 import { getWeeklyCollections } from '@/lib/data/weekly';
 import { buildWeeklyNewsletterHtml } from '@/lib/email/weekly-newsletter';
+import { getWeeklyNewsletterAppPush, getWeeklyNewsletterEdition, getWeeklyNewsletterSubject } from '@/lib/email/newsletter-editions';
 import { verifyCronSecret } from '@/lib/security/server';
 
 const BATCH_SIZE = 50;
@@ -39,6 +40,13 @@ export async function GET(request: Request) {
     .maybeSingle() as any;
 
   const { searchParams } = new URL(request.url);
+  const edition = getWeeklyNewsletterEdition(searchParams.get('edition'));
+  const fallbackSubject = heroEvent
+    ? `${heroEvent.title} + ${Math.max(0, upcoming.length + newlyAdded.length - 1)} more — Weekly Briefing`
+    : `Weekly Briefing — ${upcoming.length} event${upcoming.length !== 1 ? 's' : ''} across ${countries} countries`;
+  const subject = getWeeklyNewsletterSubject(edition, fallbackSubject);
+  const appPush = getWeeklyNewsletterAppPush(edition);
+
   if (recentSend && !searchParams.get('force')) {
     return NextResponse.json({ message: 'Already sent this week', lastSent: recentSend.sent_at, sent: 0 });
   }
@@ -80,10 +88,15 @@ export async function GET(request: Request) {
         batch.map((sub) => ({
           from: 'Investigator Events <weekly@investigatorevents.com>',
           to: sub.email,
-          subject: heroEvent
-            ? `${heroEvent.title} + ${Math.max(0, upcoming.length + newlyAdded.length - 1)} more — Weekly Briefing`
-            : `Weekly Briefing — ${upcoming.length} event${upcoming.length !== 1 ? 's' : ''} across ${countries} countries`,
-          html: buildWeeklyNewsletterHtml({ upcoming, newlyAdded, featured, recentlyPast, unsubscribeToken: sub.unsubscribe_token }),
+          subject,
+          html: buildWeeklyNewsletterHtml({
+            upcoming,
+            newlyAdded,
+            featured,
+            recentlyPast,
+            unsubscribeToken: sub.unsubscribe_token,
+            appPush,
+          }),
         }))
       );
       for (const sub of batch) results.push({ email: sub.email, status: 'sent' });

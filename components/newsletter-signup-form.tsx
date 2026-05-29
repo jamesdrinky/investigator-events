@@ -1,11 +1,35 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import Script from 'next/script';
 
 type NewsletterFormState = {
   status: 'idle' | 'loading' | 'success' | 'error';
   message?: string;
 };
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (
+        selector: string | HTMLElement,
+        options: {
+          sitekey: string;
+          callback?: (token: string) => void;
+          'expired-callback'?: () => void;
+          'error-callback'?: () => void;
+          theme?: 'light' | 'dark' | 'auto';
+          size?: 'normal' | 'flexible' | 'compact';
+          appearance?: 'always' | 'execute' | 'interaction-only';
+        }
+      ) => string;
+      reset: (widgetId?: string) => void;
+      remove: (widgetId?: string) => void;
+    };
+  }
+}
+
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? '';
 
 function inputClasses() {
   return 'h-13 rounded-[1.15rem] border border-white/80 bg-white/92 px-4 text-sm text-slate-800 outline-none shadow-[0_18px_40px_-34px_rgba(15,23,42,0.16),inset_0_1px_0_rgba(255,255,255,0.8)] transition duration-300 focus:border-sky-400 focus:ring-2 focus:ring-sky-100';
@@ -26,12 +50,51 @@ function SubmitButton({ pending }: { pending: boolean }) {
 export function NewsletterSignupForm() {
   const [email, setEmail] = useState('');
   const [region, setRegion] = useState('');
+  const [websiteUrl, setWebsiteUrl] = useState(''); // honeypot
+  const [turnstileToken, setTurnstileToken] = useState('');
   const [state, setState] = useState<NewsletterFormState>({ status: 'idle' });
+  const turnstileContainerRef = useRef<HTMLDivElement>(null);
+  const turnstileWidgetIdRef = useRef<string | null>(null);
+  const turnstileContainerId = useId().replace(/:/g, '');
+
+  const renderTurnstile = useCallback(() => {
+    if (!TURNSTILE_SITE_KEY || !window.turnstile || !turnstileContainerRef.current) return;
+    if (turnstileWidgetIdRef.current) return;
+    turnstileWidgetIdRef.current = window.turnstile.render(turnstileContainerRef.current, {
+      sitekey: TURNSTILE_SITE_KEY,
+      theme: 'light',
+      size: 'flexible',
+      appearance: 'interaction-only',
+      callback: (token: string) => setTurnstileToken(token),
+      'expired-callback': () => setTurnstileToken(''),
+      'error-callback': () => setTurnstileToken(''),
+    });
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (window.turnstile) renderTurnstile();
+  }, [renderTurnstile]);
+
+  useEffect(() => {
+    return () => {
+      if (turnstileWidgetIdRef.current && window.turnstile) {
+        window.turnstile.remove(turnstileWidgetIdRef.current);
+        turnstileWidgetIdRef.current = null;
+      }
+    };
+  }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (state.status === 'loading') {
+      return;
+    }
+
+    // Honeypot — real users never fill this hidden field
+    if (websiteUrl) {
+      setState({ status: 'success', message: 'Check your email to confirm your subscription' });
       return;
     }
 
@@ -43,7 +106,12 @@ export function NewsletterSignupForm() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ email, region: region || undefined })
+        body: JSON.stringify({
+          email,
+          region: region || undefined,
+          website_url: websiteUrl || undefined,
+          turnstile_token: turnstileToken || undefined,
+        })
       });
 
       const payload = (await response.json().catch(() => null)) as { message?: string; error?: string } | null;
@@ -53,6 +121,11 @@ export function NewsletterSignupForm() {
           status: 'error',
           message: payload?.error ?? 'Unable to subscribe right now. Please try again shortly.'
         });
+        // Reset Turnstile so they can retry
+        if (turnstileWidgetIdRef.current && window.turnstile) {
+          window.turnstile.reset(turnstileWidgetIdRef.current);
+          setTurnstileToken('');
+        }
         return;
       }
 
@@ -65,79 +138,116 @@ export function NewsletterSignupForm() {
         status: 'error',
         message: 'Unable to subscribe right now. Please try again shortly.'
       });
+      if (turnstileWidgetIdRef.current && window.turnstile) {
+        window.turnstile.reset(turnstileWidgetIdRef.current);
+        setTurnstileToken('');
+      }
     }
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="relative grid gap-4 rounded-[1.5rem] border border-white/85 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-4 shadow-[0_34px_96px_-54px_rgba(15,23,42,0.16)] sm:gap-5 sm:rounded-[2.3rem] sm:p-6 lg:p-7"
-    >
-      <div className="pointer-events-none absolute inset-0 rounded-[1.5rem] bg-[linear-gradient(135deg,rgba(255,255,255,0.28),rgba(255,255,255,0)_26%,rgba(255,255,255,0.1)_54%,rgba(255,255,255,0)_100%)] sm:rounded-[2.3rem]" />
-      {state.status !== 'success' && (
-        <>
-          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto_auto]">
-            <label className="grid gap-2 text-sm text-slate-600">
-              <span>Email</span>
-              <input
-                type="email"
-                name="email"
-                required
-                autoComplete="email"
-                placeholder="Email address"
-                className={inputClasses()}
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                disabled={state.status === 'loading'}
-              />
-            </label>
-            <label className="grid gap-2 text-sm text-slate-600">
-              <span>Region <span className="text-slate-400">(optional)</span></span>
-              <select
-                value={region}
-                onChange={(e) => setRegion(e.target.value)}
-                disabled={state.status === 'loading'}
-                className={inputClasses()}
-              >
-                <option value="">All regions</option>
-                <option value="Europe">Europe</option>
-                <option value="North America">North America</option>
-                <option value="Asia-Pacific">Asia-Pacific</option>
-                <option value="Middle East">Middle East</option>
-                <option value="Latin America">Latin America</option>
-                <option value="Africa">Africa</option>
-              </select>
-            </label>
-            <div className="flex items-end">
-              <SubmitButton pending={state.status === 'loading'} />
-            </div>
-          </div>
+    <>
+      {TURNSTILE_SITE_KEY ? (
+        <Script
+          src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+          strategy="afterInteractive"
+          onLoad={renderTurnstile}
+        />
+      ) : null}
+      <form
+        onSubmit={handleSubmit}
+        className="relative grid gap-4 rounded-[1.5rem] border border-white/85 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(247,250,255,0.92))] p-4 shadow-[0_34px_96px_-54px_rgba(15,23,42,0.16)] sm:gap-5 sm:rounded-[2.3rem] sm:p-6 lg:p-7"
+      >
+        <div className="pointer-events-none absolute inset-0 rounded-[1.5rem] bg-[linear-gradient(135deg,rgba(255,255,255,0.28),rgba(255,255,255,0)_26%,rgba(255,255,255,0.1)_54%,rgba(255,255,255,0)_100%)] sm:rounded-[2.3rem]" />
 
-          <p className="text-sm leading-relaxed text-slate-500">
-            Weekly updates focused on new events, approaching dates, and one standout event.
-          </p>
-        </>
-      )}
-
-      <p className="text-xs leading-relaxed text-slate-400">
-        Your details are stored securely and used only to process your submission. See our{' '}
-        <a href="/privacy" className="underline underline-offset-2 hover:text-slate-600">privacy policy</a>.
-      </p>
-
-      {state.status === 'success' ? (
-        <div className="rounded-2xl border border-emerald-400/30 bg-emerald-50 px-4 py-3">
-          <p className="text-sm font-semibold text-emerald-700">Check your email to confirm your subscription.</p>
-          <p className="mt-2 text-sm text-emerald-600">
-            Want to build a profile and connect with investigators?{' '}
-            <a href={`/signup?email=${encodeURIComponent(email)}`} className="font-bold text-blue-600 underline hover:text-blue-700">
-              Create your free account
-            </a>
-          </p>
+        {/* Honeypot — hidden from real users, bots fill it */}
+        <div aria-hidden="true" className="absolute left-[-9999px] top-[-9999px] h-0 w-0 overflow-hidden">
+          <label>
+            Website
+            <input
+              type="text"
+              name="website_url"
+              tabIndex={-1}
+              autoComplete="off"
+              value={websiteUrl}
+              onChange={(event) => setWebsiteUrl(event.target.value)}
+            />
+          </label>
         </div>
-      ) : null}
-      {state.status === 'error' ? (
-        <p className="rounded-2xl border border-rose-400/30 bg-rose-50 px-4 py-3 text-sm text-rose-700">{state.message}</p>
-      ) : null}
-    </form>
+
+        {state.status !== 'success' && (
+          <>
+            <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto_auto]">
+              <label className="grid gap-2 text-sm text-slate-600">
+                <span>Email</span>
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  autoComplete="email"
+                  placeholder="Email address"
+                  className={inputClasses()}
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  disabled={state.status === 'loading'}
+                />
+              </label>
+              <label className="grid gap-2 text-sm text-slate-600">
+                <span>Region <span className="text-slate-400">(optional)</span></span>
+                <select
+                  value={region}
+                  onChange={(e) => setRegion(e.target.value)}
+                  disabled={state.status === 'loading'}
+                  className={inputClasses()}
+                >
+                  <option value="">All regions</option>
+                  <option value="Europe">Europe</option>
+                  <option value="North America">North America</option>
+                  <option value="Asia-Pacific">Asia-Pacific</option>
+                  <option value="Middle East">Middle East</option>
+                  <option value="Latin America">Latin America</option>
+                  <option value="Africa">Africa</option>
+                </select>
+              </label>
+              <div className="flex items-end">
+                <SubmitButton pending={state.status === 'loading'} />
+              </div>
+            </div>
+
+            {TURNSTILE_SITE_KEY ? (
+              <div
+                id={turnstileContainerId}
+                ref={turnstileContainerRef}
+                className="min-h-[4px]"
+              />
+            ) : null}
+
+            <p className="text-sm leading-relaxed text-slate-500">
+              Weekly updates focused on new events, approaching dates, and one standout event.
+            </p>
+          </>
+        )}
+
+        <p className="text-xs leading-relaxed text-slate-400">
+          Your details are stored securely and used only to process your submission. See our{' '}
+          <a href="/privacy" className="underline underline-offset-2 hover:text-slate-600">privacy policy</a>.
+        </p>
+
+        {state.status === 'success' ? (
+          <div className="rounded-2xl border border-emerald-400/30 bg-emerald-50 px-4 py-3">
+            <p className="text-sm font-semibold text-emerald-700">Check your email to confirm your subscription.</p>
+            <p className="mt-2 text-sm text-emerald-600">
+              Want to build a profile and connect with investigators?{' '}
+              <a href={`/signup?email=${encodeURIComponent(email)}`} className="font-bold text-blue-600 underline hover:text-blue-700">
+                Create your free account
+              </a>
+            </p>
+          </div>
+        ) : null}
+        {state.status === 'error' ? (
+          <p className="rounded-2xl border border-rose-400/30 bg-rose-50 px-4 py-3 text-sm text-rose-700">{state.message}</p>
+        ) : null}
+      </form>
+    </>
   );
 }

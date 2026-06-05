@@ -17,6 +17,8 @@ import {
   setAdminSessionCookie
 } from '@/lib/admin/session';
 import { queueApprovalOutreachEmail } from '@/lib/email/association-outreach';
+import { buildSubmissionApprovedEmail } from '@/lib/email/submission-confirmation';
+import { Resend } from 'resend';
 
 async function ensureAdminSession() {
   if (!await hasValidAdminSessionCookie()) {
@@ -297,6 +299,20 @@ export async function approveSubmissionAction(formData: FormData) {
   if (updateError) {
     console.error('Update submission status failed:', updateError.message);
     throw new Error('Failed to update submission status');
+  }
+
+  // Email the submitter that their event is approved & live (fire-and-forget).
+  const resendKey = process.env.RESEND_API_KEY;
+  if (resendKey && submission.contact_email) {
+    const eventUrl = finalPayload.slug
+      ? `https://investigatorevents.com/events/${finalPayload.slug}`
+      : 'https://investigatorevents.com/calendar';
+    new Resend(resendKey).emails.send({
+      from: 'Investigator Events <info@investigatorevents.com>',
+      to: submission.contact_email,
+      subject: `Your event is live — ${submission.event_name}`,
+      html: buildSubmissionApprovedEmail(submission.event_name, eventUrl),
+    }).catch((err) => console.error('Approval email failed:', err));
   }
 
   // Notify the submitter that their event was approved (fire-and-forget)

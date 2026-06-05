@@ -76,6 +76,51 @@ export function SubmitEventForm({
     return () => clearTimeout(timeout);
   }, [startDate, endDate, checkClashes]);
 
+  // ── Duplicate detection ──────────────────────────────────────────────
+  // Separate from the date-clash check above: this scans existing live events
+  // for one that looks like the SAME event (same title or same website host),
+  // so people don't re-submit something already on the platform. Soft warning,
+  // never blocks submission.
+  type DupEvent = { id: string; title: string; slug: string; start_date: string | null; city: string; country: string };
+  const [eventName, setEventName] = useState('');
+  const [website, setWebsite] = useState('');
+  const [duplicates, setDuplicates] = useState<DupEvent[]>([]);
+  const [checkingDup, setCheckingDup] = useState(false);
+
+  const checkDuplicates = useCallback(async (name: string, site: string) => {
+    // Tokens safe to drop into a PostgREST or()/ilike filter (commas and
+    // parentheses are the filter delimiters, so strip them).
+    const cleanName = name.replace(/[(),%*]/g, ' ').replace(/\s+/g, ' ').trim();
+    let host = '';
+    try {
+      const withProto = /^https?:\/\//i.test(site) ? site : `https://${site}`;
+      host = new URL(withProto).host.replace(/^www\./, '').replace(/[(),%*]/g, '');
+    } catch { host = ''; }
+
+    if (cleanName.length < 5 && !host) { setDuplicates([]); return; }
+
+    const filters: string[] = [];
+    if (cleanName.length >= 5) filters.push(`title.ilike.%${cleanName}%`);
+    if (host) filters.push(`website.ilike.%${host}%`);
+    if (filters.length === 0) { setDuplicates([]); return; }
+
+    setCheckingDup(true);
+    const supabase = createSupabaseBrowserClient();
+    const { data } = await supabase
+      .from('events')
+      .select('id, title, slug, start_date, city, country')
+      .eq('approved', true)
+      .or(filters.join(','))
+      .limit(5);
+    setDuplicates((data ?? []) as DupEvent[]);
+    setCheckingDup(false);
+  }, []);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => checkDuplicates(eventName, website), 400);
+    return () => clearTimeout(timeout);
+  }, [eventName, website, checkDuplicates]);
+
   return (
     <div className="grid min-w-0 items-start gap-5 lg:grid-cols-[20rem_minmax(0,1fr)] xl:grid-cols-[22rem_minmax(0,1fr)]">
       {/* ── Left: Submission guidance ── */}
@@ -137,9 +182,43 @@ export function SubmitEventForm({
               maxLength={140}
               rows={1}
               placeholder="Event Name"
+              value={eventName}
+              onChange={(e) => setEventName(e.target.value)}
               className="w-full resize-none border-0 bg-transparent text-[1.65rem] font-bold leading-tight tracking-[-0.04em] text-slate-950 placeholder:text-slate-300 focus:outline-none sm:text-[2.5rem]"
               style={{ fontFamily: 'var(--font-serif), serif' }}
             />
+
+            {/* Possible-duplicate warning (soft — does not block submission) */}
+            {duplicates.length > 0 && (
+              <div className="mt-2 overflow-hidden rounded-[1.2rem] border border-amber-300/70 bg-amber-50">
+                <div className="flex items-center gap-2.5 border-b border-amber-200/70 px-4 py-2.5">
+                  <AlertTriangle className="h-4 w-4 flex-shrink-0 text-amber-600" />
+                  <p className="text-sm font-bold text-amber-800">
+                    This may already be listed — {duplicates.length} similar {duplicates.length === 1 ? 'event' : 'events'}
+                  </p>
+                  {checkingDup && <Loader2 className="ml-auto h-3.5 w-3.5 animate-spin text-amber-500" />}
+                </div>
+                <div className="space-y-1 p-2">
+                  {duplicates.map((d) => (
+                    <Link
+                      key={d.id}
+                      href={`/events/${d.slug}`}
+                      target="_blank"
+                      className="flex items-center justify-between rounded-xl px-3 py-2 transition hover:bg-amber-100/60"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-slate-900">{d.title}</p>
+                        <p className="text-[11px] text-slate-500">{d.city}, {d.country}{d.start_date ? ` · ${d.start_date}` : ''}</p>
+                      </div>
+                      <span className="ml-2 flex-shrink-0 text-[11px] font-medium text-amber-600">View</span>
+                    </Link>
+                  ))}
+                </div>
+                <p className="px-4 pb-3 pt-1 text-[11px] leading-relaxed text-amber-700/80">
+                  If your event is different (or these are old), carry on — you can still submit.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Date/time row */}
@@ -268,7 +347,7 @@ export function SubmitEventForm({
           {/* Website */}
           <div className="flex items-center gap-3 rounded-[1.2rem] border border-slate-200/60 bg-white px-4 py-3 transition-colors hover:border-slate-300">
             <Globe className="h-4 w-4 flex-shrink-0 text-slate-400" />
-            <input type="text" name="website" required inputMode="url" placeholder="Event website (e.g. example.com)" className="min-h-10 min-w-0 flex-1 border-0 bg-transparent text-[16px] text-slate-900 placeholder:text-slate-400 focus:outline-none sm:text-sm" />
+            <input type="text" name="website" required inputMode="url" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="Event website (e.g. example.com)" className="min-h-10 min-w-0 flex-1 border-0 bg-transparent text-[16px] text-slate-900 placeholder:text-slate-400 focus:outline-none sm:text-sm" />
           </div>
 
           {/* Video URL (optional) */}

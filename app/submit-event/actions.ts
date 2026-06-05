@@ -15,6 +15,7 @@ import {
 } from '@/lib/security/server';
 import { normalizeRequiredUrl } from '@/lib/utils/url';
 import { buildSubmissionConfirmationEmail } from '@/lib/email/submission-confirmation';
+import { buildAdminAlertEmail, ADMIN_ALERT_INBOX } from '@/lib/email/admin-alert';
 
 const categories = new Set(['Conference', 'Training', 'Association Meeting', 'Seminar', 'Expo', 'Summit']);
 const regions = new Set(eventRegions);
@@ -166,6 +167,27 @@ export async function submitEventAction(formData: FormData) {
         subject: `Event received — ${payload.event_name}`,
         html: buildSubmissionConfirmationEmail(payload.event_name),
       }).catch((err) => console.error('Submission confirmation email failed:', err));
+
+      // Internal alert to the team inbox (fire-and-forget).
+      resend.emails.send({
+        from: 'Investigator Events <info@investigatorevents.com>',
+        to: ADMIN_ALERT_INBOX,
+        subject: `New event submission — ${payload.event_name}`,
+        html: buildAdminAlertEmail({
+          heading: 'New event submission',
+          intro: 'A new event is waiting in the review queue.',
+          rows: [
+            { label: 'Event', value: payload.event_name },
+            { label: 'Organiser', value: payload.organiser },
+            { label: 'When', value: payload.end_date ? `${payload.start_date} – ${payload.end_date}` : payload.start_date },
+            { label: 'Where', value: `${payload.city}, ${payload.country}` },
+            { label: 'Category', value: payload.category },
+            { label: 'Website', value: payload.website },
+            { label: 'Contact', value: payload.contact_email },
+          ],
+          cta: { label: 'Review submissions', url: 'https://investigatorevents.com/admin?tab=submissions' },
+        }),
+      }).catch((err) => console.error('Submission admin alert email failed:', err));
     }
 
     revalidatePath('/submit-event');

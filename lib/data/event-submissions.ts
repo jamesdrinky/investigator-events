@@ -56,3 +56,19 @@ export async function fetchPendingEventSubmissions(): Promise<EventSubmissionIte
 
   return ((data ?? []) as SubmissionRow[]).map(mapSubmissionRow);
 }
+
+/** Archived submissions — soft-held, not approved and not hard-rejected. */
+export async function fetchArchivedEventSubmissions(): Promise<EventSubmissionItem[]> {
+  const supabase = createSupabaseAdminServerClient();
+  const { data, error } = await supabase
+    .from('event_submissions')
+    .select('*')
+    .eq('status', 'archived')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    throw new Error(`Failed to fetch archived submissions: ${error.message}`);
+  }
+
+  return ((data ?? []) as SubmissionRow[]).map(mapSubmissionRow);
+}

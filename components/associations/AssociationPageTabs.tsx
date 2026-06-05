@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import type { Route } from 'next';
 import Image from 'next/image';
-import { Calendar, MapPin, Users, Globe, ShieldCheck, ExternalLink, ArrowRight, Award, Briefcase, Clock, Mail, MessageCircle, Heart } from 'lucide-react';
+import { Calendar, MapPin, Users, Globe, ShieldCheck, ExternalLink, ArrowRight, Award, Briefcase, Clock, Mail, MessageCircle, Heart, Video, Plus } from 'lucide-react';
 import { UserAvatar } from '@/components/UserAvatar';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 
@@ -12,6 +13,7 @@ interface AssocEvent { id: string; title: string; slug?: string; date: string; c
 interface AssocMember { user_id: string; role: string | null; member_since: number | null; profile: { full_name: string | null; avatar_url: string | null; username: string | null; specialisation: string | null; headline: string | null; country: string | null; profile_color: string | null; } | null; isVerified: boolean; }
 interface AssocPost { id: string; title: string | null; content: string; image_url: string | null; link_url: string | null; is_pinned: boolean; likes_count: number; created_at: string; author_name: string | null; author_avatar: string | null; }
 interface AssocJob { id: string; title: string; description: string; location: string | null; country: string | null; type: string | null; specialisation: string | null; created_at: string; }
+interface AssocVideo { id: string; title: string; description: string | null; videoUrl: string; thumbnailUrl: string | null; submitterName: string; isPaid: boolean; createdAt: string; }
 
 interface Props {
   page: { name: string; slug: string; description: string | null; country: string | null; website: string | null; founded_year: number | null; member_count: number | null; contact_email: string | null; social_links: any; is_verified: boolean; logo_url: string | null; cover_image_url: string | null; };
@@ -22,6 +24,7 @@ interface Props {
   members: AssocMember[];
   posts: AssocPost[];
   jobs: AssocJob[];
+  videos: AssocVideo[];
   platformMembers: number;
   verifiedCount: number;
 }
@@ -101,7 +104,7 @@ function timeAgo(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
 }
 
-export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past, members, posts, jobs, platformMembers, verifiedCount }: Props) {
+export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past, members, posts, jobs, videos, platformMembers, verifiedCount }: Props) {
   const [isVerifiedMember, setIsVerifiedMember] = useState(false);
   const [isMember, setIsMember] = useState(false);
 
@@ -415,6 +418,69 @@ export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past,
           </div>
         </div>
       )}
+
+      {/* ═══ VIDEOS SECTION — member-submitted clips (verified before going live) ═══ */}
+      <div className="border-t border-slate-200/40 bg-[linear-gradient(180deg,#ffffff,#f8fbff)]">
+        <div className="container-shell py-12 sm:py-16">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="eyebrow">Voices</p>
+              <h2 className="section-title !mt-3">Videos from the {page.name} community</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600">
+                Short clips from members. Want to add yours? It's free — every video is
+                reviewed by our team before it appears here.
+              </p>
+            </div>
+            <Link
+              href={`/associations/${page.slug}/submit-video` as Route}
+              className="inline-flex flex-shrink-0 items-center gap-2 self-start rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_30px_-10px_rgba(37,99,235,0.6)] transition hover:bg-blue-500 active:scale-[0.98]"
+            >
+              <Plus className="h-4 w-4" /> Submit a video
+            </Link>
+          </div>
+
+          {videos.length > 0 ? (
+            <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {videos.map((v) => (
+                <figure
+                  key={v.id}
+                  className="overflow-hidden rounded-[1.25rem] border border-white/80 bg-white shadow-[0_24px_54px_-36px_rgba(15,23,42,0.18)]"
+                >
+                  <video
+                    src={v.videoUrl}
+                    poster={v.thumbnailUrl ?? undefined}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    className="aspect-video w-full bg-black object-contain"
+                  />
+                  <figcaption className="px-4 py-3.5">
+                    <h3 className="line-clamp-2 text-sm font-bold text-slate-900">{v.title}</h3>
+                    {v.description && (
+                      <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-slate-500">{v.description}</p>
+                    )}
+                    <p className="mt-2 text-[11px] font-medium text-slate-400">{v.submitterName}</p>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-8 flex flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-slate-300 bg-white/60 px-6 py-12 text-center">
+              <Video className="h-9 w-9 text-slate-300" />
+              <p className="mt-3 text-sm font-semibold text-slate-700">No videos yet</p>
+              <p className="mt-1 max-w-sm text-xs leading-relaxed text-slate-500">
+                Be the first to share a short clip with the {page.name} community.
+              </p>
+              <Link
+                href={`/associations/${page.slug}/submit-video` as Route}
+                className="mt-5 inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700"
+              >
+                <Plus className="h-4 w-4" /> Submit the first video
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* ═══ WHY JOIN — CTA section ═══ */}
       <div className="relative overflow-hidden border-t border-slate-200/40 bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_25%,#f0e8ff_50%,#f4f0ff_75%,#f8fbff_100%)]">

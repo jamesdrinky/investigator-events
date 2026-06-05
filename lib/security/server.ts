@@ -78,6 +78,20 @@ export function getClientIdentifier() {
   return candidate.slice(0, 120);
 }
 
+/**
+ * Escape user-supplied text before interpolating it into an HTML string
+ * (e.g. transactional email bodies). React escapes JSX automatically, but
+ * hand-built HTML templates do not.
+ */
+export function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export class RateLimitError extends Error {
   constructor() {
     super('Rate limited');

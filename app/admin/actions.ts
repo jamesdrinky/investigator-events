@@ -424,6 +424,40 @@ export async function rejectSubmissionAction(formData: FormData) {
   revalidatePath('/admin/events');
 }
 
+// Move a submission to the archive — a soft hold (not approved, not rejected).
+export async function archiveSubmissionAction(formData: FormData) {
+  await ensureAdminSession();
+
+  const submissionId = parseRequired(formData, 'submissionId');
+  const supabase = createSupabaseAdminServerClient();
+  const { error } = await supabase.from('event_submissions').update({ status: 'archived' }).eq('id', submissionId);
+
+  if (error) {
+    console.error('Archive submission failed:', error.message);
+    throw new Error('Failed to archive submission');
+  }
+
+  revalidatePath('/admin');
+  revalidatePath('/admin/events');
+}
+
+// Pull a submission back out of the archive into the active pending queue.
+export async function restoreSubmissionAction(formData: FormData) {
+  await ensureAdminSession();
+
+  const submissionId = parseRequired(formData, 'submissionId');
+  const supabase = createSupabaseAdminServerClient();
+  const { error } = await supabase.from('event_submissions').update({ status: 'pending' }).eq('id', submissionId);
+
+  if (error) {
+    console.error('Restore submission failed:', error.message);
+    throw new Error('Failed to restore submission');
+  }
+
+  revalidatePath('/admin');
+  revalidatePath('/admin/events');
+}
+
 export async function toggleUserVerifiedAction(formData: FormData) {
   await ensureAdminSession();
 

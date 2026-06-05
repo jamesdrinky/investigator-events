@@ -1,5 +1,5 @@
 import { fetchAllEvents } from '@/lib/data/events';
-import { fetchPendingEventSubmissions } from '@/lib/data/event-submissions';
+import { fetchPendingEventSubmissions, fetchArchivedEventSubmissions } from '@/lib/data/event-submissions';
 import { fetchAdvertiserLeads } from '@/lib/data/advertiser-leads';
 import { hasValidAdminSessionCookie } from '@/lib/admin/session';
 import { eventCountries, eventRegions } from '@/lib/forms/event-form-options';
@@ -7,6 +7,8 @@ import {
   adminLoginAction,
   adminLogoutAction,
   approveSubmissionAction,
+  archiveSubmissionAction,
+  restoreSubmissionAction,
   createEventAction,
   deleteEventAction,
   rejectSubmissionAction,
@@ -16,7 +18,7 @@ import {
   adminAddAssociationAction,
   adminRemoveAssociationAction
 } from '@/app/admin/actions';
-import { Calendar, Users, FileText, Megaphone, Globe, MapPin, Tag, ExternalLink, CheckCircle2, XCircle, Plus, Trash2, ShieldCheck, AlertTriangle, Mail, Send } from 'lucide-react';
+import { Calendar, Users, FileText, Megaphone, Globe, MapPin, Tag, ExternalLink, CheckCircle2, XCircle, Plus, Trash2, ShieldCheck, AlertTriangle, Mail, Send, Archive, RotateCcw } from 'lucide-react';
 import { VerificationCodeManager } from '@/components/admin/VerificationCodeManager';
 import { ModerationPanel } from '@/components/admin/ModerationPanel';
 import { QuickAddEvent } from '@/components/admin/QuickAddEvent';
@@ -198,9 +200,10 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
   }
 
   const admin = createSupabaseAdminServerClient();
-  const [events, pendingSubmissions, advertiserLeads, assocPagesResult, assocSuggestionsResult, subscriberCountResult, newsletterSendsResult, recentSubscribersResult, allUsersResult] = await Promise.all([
+  const [events, pendingSubmissions, archivedSubmissions, advertiserLeads, assocPagesResult, assocSuggestionsResult, subscriberCountResult, newsletterSendsResult, recentSubscribersResult, allUsersResult] = await Promise.all([
     fetchAllEvents(),
     fetchPendingEventSubmissions(),
+    fetchArchivedEventSubmissions(),
     fetchAdvertiserLeads(20),
     admin.from('association_pages').select('id, name, slug').order('name'),
     admin.from('association_suggestions' as any).select('*').eq('status', 'pending').order('created_at', { ascending: false }),
@@ -324,12 +327,20 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
           </form>
         </div>
 
-        <a
-          href="/debug/push"
-          className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700 transition hover:bg-amber-100"
-        >
-          🐛 Push debug
-        </a>
+        <div className="mt-2 flex flex-wrap gap-2">
+          <a
+            href="/debug/push"
+            className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700 transition hover:bg-amber-100"
+          >
+            🐛 Push debug
+          </a>
+          <a
+            href="/admin/videos"
+            className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 transition hover:bg-blue-100"
+          >
+            🎬 Video verification
+          </a>
+        </div>
 
         {/* Stats */}
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -401,6 +412,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
           {activeTab === 'submissions' && (() => {
             const subsSort = searchParams?.sort ?? 'newest';
             const subsQuery = (searchParams?.q ?? '').trim().toLowerCase();
+            const subview = (searchParams as any)?.subview === 'archived' ? 'archived' : 'pending';
             let visibleSubs = pendingSubmissions;
             if (subsQuery) {
               visibleSubs = visibleSubs.filter((s) => {
@@ -418,11 +430,81 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
               const next = { q: subsQuery, sort: subsSort, ...overrides };
               if (next.q) params.set('q', next.q);
               if (next.sort && next.sort !== 'newest') params.set('sort', next.sort);
+              if (subview === 'archived') params.set('subview', 'archived');
               return `/admin?${params.toString()}`;
             };
             return (
             <div className="space-y-4">
-              {pendingSubmissions.length > 0 && (
+              {/* Pending / Archived toggle */}
+              <div className="flex gap-1 rounded-xl border border-slate-200/60 bg-white p-1 shadow-sm">
+                <a
+                  href="/admin?tab=submissions"
+                  className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition ${subview === 'pending' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`}
+                >
+                  <FileText className="h-4 w-4" /> Pending ({pendingSubmissions.length})
+                </a>
+                <a
+                  href="/admin?tab=submissions&subview=archived"
+                  className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition ${subview === 'archived' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`}
+                >
+                  <Archive className="h-4 w-4" /> Archived ({archivedSubmissions.length})
+                </a>
+              </div>
+
+              {/* ── Archived sub-view ── */}
+              {subview === 'archived' && (
+                archivedSubmissions.length === 0 ? (
+                  <div className="rounded-2xl border border-slate-200/60 bg-white p-8 text-center shadow-sm">
+                    <Archive className="mx-auto h-10 w-10 text-slate-300" />
+                    <p className="mt-3 text-sm font-medium text-slate-900">Nothing archived</p>
+                    <p className="mt-1 text-sm text-slate-500">Submissions you archive land here — held, not rejected.</p>
+                  </div>
+                ) : (
+                  archivedSubmissions.map((submission) => (
+                    <div key={submission.id} className="overflow-hidden rounded-2xl border border-slate-200/60 bg-white shadow-sm">
+                      <div className="border-b border-slate-100 bg-slate-50/60 px-6 py-4">
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div>
+                            <h3 className="text-base font-bold text-slate-900">{submission.eventName}</h3>
+                            <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                              <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{submission.startDate}{submission.endDate ? ` - ${submission.endDate}` : ''}</span>
+                              <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{submission.city}, {submission.country}</span>
+                              <span className="flex items-center gap-1"><Tag className="h-3 w-3" />{submission.category}</span>
+                            </div>
+                          </div>
+                          <span className="rounded-full bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-600">Archived</span>
+                        </div>
+                        <div className="mt-2 flex flex-wrap gap-3 text-xs text-slate-500">
+                          <span>Organiser: <strong className="text-slate-700">{submission.organiser}</strong></span>
+                          <span>Contact: <strong className="text-slate-700">{submission.contactEmail}</strong></span>
+                          {submission.website && (
+                            <a href={submission.website} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-blue-600 hover:text-blue-700">
+                              <ExternalLink className="h-3 w-3" /> Website
+                            </a>
+                          )}
+                        </div>
+                        {submission.notes && <p className="mt-2 text-sm text-slate-600">{submission.notes}</p>}
+                      </div>
+                      <div className="flex flex-wrap gap-3 p-4">
+                        <form action={restoreSubmissionAction}>
+                          <input type="hidden" name="submissionId" value={submission.id} />
+                          <button type="submit" className="flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white transition hover:bg-slate-700">
+                            <RotateCcw className="h-4 w-4" /> Restore to pending
+                          </button>
+                        </form>
+                        <form action={rejectSubmissionAction}>
+                          <input type="hidden" name="submissionId" value={submission.id} />
+                          <button type="submit" className="flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-5 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100">
+                            <XCircle className="h-4 w-4" /> Reject
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  ))
+                )
+              )}
+
+              {subview === 'pending' && pendingSubmissions.length > 0 && (
                 <div className="rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm">
                   <form action="/admin" method="get" className="flex flex-wrap items-center gap-2">
                     <input type="hidden" name="tab" value="submissions" />
@@ -447,7 +529,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                   <p className="mt-3 text-xs text-slate-400">Showing {visibleSubs.length} of {pendingSubmissions.length} pending submissions</p>
                 </div>
               )}
-              {visibleSubs.length === 0 ? (
+              {subview === 'pending' && (visibleSubs.length === 0 ? (
                 <div className="rounded-2xl border border-slate-200/60 bg-white p-8 text-center shadow-sm">
                   <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-400" />
                   <p className="mt-3 text-sm font-medium text-slate-900">{pendingSubmissions.length === 0 ? 'All caught up!' : 'No matches'}</p>
@@ -513,16 +595,24 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                           </button>
                         </div>
                       </form>
-                      <form action={rejectSubmissionAction} className="mt-3">
-                        <input type="hidden" name="submissionId" value={submission.id} />
-                        <button type="submit" className="flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-5 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100">
-                          <XCircle className="h-4 w-4" /> Reject
-                        </button>
-                      </form>
+                      <div className="mt-3 flex flex-wrap gap-3">
+                        <form action={archiveSubmissionAction}>
+                          <input type="hidden" name="submissionId" value={submission.id} />
+                          <button type="submit" className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-5 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100">
+                            <Archive className="h-4 w-4" /> Archive
+                          </button>
+                        </form>
+                        <form action={rejectSubmissionAction}>
+                          <input type="hidden" name="submissionId" value={submission.id} />
+                          <button type="submit" className="flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-5 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100">
+                            <XCircle className="h-4 w-4" /> Reject
+                          </button>
+                        </form>
+                      </div>
                     </div>
                   </div>
                 ))
-              )}
+              ))}
             </div>
             );
           })()}
@@ -788,6 +878,48 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                       <Mail className="h-4 w-4" /> Send test to me
                     </a>
                   </div>
+                </div>
+              </div>
+
+              {/* Upcoming email previews (drafts — not yet wired to send) */}
+              <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900">Upcoming email previews</h2>
+                    <p className="mt-1 text-sm text-slate-500">Drafts for next week's sends. Nothing here goes out automatically — these are preview-only until wired up.</p>
+                  </div>
+                  <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-800">Draft</span>
+                </div>
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  {[
+                    { key: 'monday-newsletter', title: 'Monday newsletter + app launch', desc: 'This Monday\'s weekly briefing with the hero app banner up top — real upcoming events.' },
+                    { key: 'app-launch', title: 'App launch announcement', desc: 'Standalone email to all account holders (non-newsletter audience).' },
+                    { key: 'newsletter-verify', title: 'Newsletter verify reminder', desc: 'Nudge for people who signed up to the newsletter but never confirmed.' },
+                    { key: 'newsletter-opt-in', title: 'Newsletter opt-in pitch', desc: 'For account holders not on the newsletter — one-click subscribe pitch.' },
+                  ].map((t) => (
+                    <div key={t.key} className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+                      <p className="text-sm font-semibold text-slate-900">{t.title}</p>
+                      <p className="mt-1 text-xs text-slate-500 leading-relaxed">{t.desc}</p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <a
+                          href={`/api/email-preview?template=${t.key}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                        >
+                          Preview
+                        </a>
+                        <a
+                          href={`/api/email-preview?template=${t.key}&send=james@drinky.com`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                        >
+                          <Send className="h-3 w-3" /> Send to me
+                        </a>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
 

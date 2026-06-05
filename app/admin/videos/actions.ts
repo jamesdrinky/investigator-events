@@ -6,6 +6,7 @@ import { Resend } from 'resend';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { hasValidAdminSessionCookie } from '@/lib/admin/session';
 import { assertSameOriginRequest, escapeHtml } from '@/lib/security/server';
+import { setFeatureFlag, VIDEO_SUBMISSIONS_FLAG } from '@/lib/data/feature-flags';
 
 const BUCKET = 'event-videos';
 
@@ -19,6 +20,18 @@ function parseId(formData: FormData) {
   const id = String(formData.get('videoId') ?? '').trim();
   if (!id) throw new Error('Missing videoId');
   return id;
+}
+
+// Lock/unlock the public video-submission flow (instant, no redeploy).
+export async function setVideoSubmissionsEnabledAction(formData: FormData) {
+  assertSameOriginRequest();
+  await ensureAdmin();
+
+  const enabled = String(formData.get('enabled') ?? '') === 'true';
+  await setFeatureFlag(VIDEO_SUBMISSIONS_FLAG, enabled);
+
+  revalidatePath('/admin/videos');
+  revalidatePath('/associations', 'layout');
 }
 
 export async function approveVideoAction(formData: FormData) {

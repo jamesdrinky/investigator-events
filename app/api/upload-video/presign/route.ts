@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { createSupabaseSSRServerClient } from '@/lib/supabase/ssr-server';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { assertSameOriginRequest, enforceRateLimit, RateLimitError } from '@/lib/security/server';
+import { isFeatureEnabled, VIDEO_SUBMISSIONS_FLAG } from '@/lib/data/feature-flags';
 
 const EXTENSIONS: Record<string, string> = {
   'video/mp4': 'mp4',
@@ -25,6 +26,10 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (!(await isFeatureEnabled(VIDEO_SUBMISSIONS_FLAG))) {
+      return NextResponse.json({ error: 'Video submissions are currently closed.' }, { status: 403 });
     }
 
     enforceRateLimit('upload-video-presign', { maxRequests: 10, windowMs: 60_000 });

@@ -5,6 +5,7 @@ import { getAssociationBrandLogoSrc, shouldInvertLogoOnLight } from '@/lib/utils
 import { formatEventDate } from '@/lib/utils/date';
 import { AssociationPageTabs } from '@/components/associations/AssociationPageTabs';
 import { fetchApprovedVideosForAssociation } from '@/lib/data/association-videos';
+import { isFeatureEnabled, VIDEO_SUBMISSIONS_FLAG } from '@/lib/data/feature-flags';
 
 export const revalidate = 60;
 
@@ -193,7 +194,10 @@ export default async function AssociationPage({ params }: { params: { slug: stri
   }));
 
   // Approved member videos for this association (verification-gated).
-  const approvedVideos = await fetchApprovedVideosForAssociation(page.slug);
+  const [approvedVideos, videoSubmissionsEnabled] = await Promise.all([
+    fetchApprovedVideosForAssociation(page.slug),
+    isFeatureEnabled(VIDEO_SUBMISSIONS_FLAG),
+  ]);
   const videos = approvedVideos.map((v) => ({
     id: v.id,
     title: v.title,
@@ -230,6 +234,7 @@ export default async function AssociationPage({ params }: { params: { slug: stri
         posts={posts}
         jobs={jobs}
         videos={videos}
+        videoSubmissionsEnabled={videoSubmissionsEnabled}
         platformMembers={totalMemberCount}
         verifiedCount={verifiedSet.size}
       />

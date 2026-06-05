@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, AlertCircle, Mail } from 'lucide-react';
 import { createSupabaseSSRServerClient } from '@/lib/supabase/ssr-server';
 import { SubmitVideoForm } from '@/components/associations/SubmitVideoForm';
+import { isFeatureEnabled, VIDEO_SUBMISSIONS_FLAG } from '@/lib/data/feature-flags';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,6 +30,37 @@ export default async function SubmitVideoPage({
     .single();
   if (!pageData) notFound();
   const page = pageData as any;
+
+  // If public submissions are locked, show a "contact us" state instead of the form.
+  const submissionsEnabled = await isFeatureEnabled(VIDEO_SUBMISSIONS_FLAG);
+  if (!submissionsEnabled) {
+    const contactHref = `mailto:info@investigatorevents.com?subject=${encodeURIComponent(`Feature a video — ${page.name}`)}`;
+    return (
+      <main className="min-h-screen bg-slate-50/80">
+        <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6 sm:py-14">
+          <Link
+            href={`/associations/${page.slug}`}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition hover:text-slate-800"
+          >
+            <ArrowLeft className="h-4 w-4" /> Back to {page.name}
+          </Link>
+          <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+            <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">Video submissions are by invitation</h1>
+            <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-slate-600">
+              We're not taking open video submissions for {page.name} right now. If you'd like a
+              video featuring your event or association, get in touch and we'll set it up for you.
+            </p>
+            <a
+              href={contactHref}
+              className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
+            >
+              <Mail className="h-4 w-4" /> Contact us about a video
+            </a>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   // Require sign-in — member videos are tied to a real account.
   const { data: { user } } = await supabase.auth.getUser();

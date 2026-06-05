@@ -25,6 +25,7 @@ interface Props {
   posts: AssocPost[];
   jobs: AssocJob[];
   videos: AssocVideo[];
+  videoSubmissionsEnabled: boolean;
   platformMembers: number;
   verifiedCount: number;
 }
@@ -104,7 +105,8 @@ function timeAgo(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
 }
 
-export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past, members, posts, jobs, videos, platformMembers, verifiedCount }: Props) {
+export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past, members, posts, jobs, videos, videoSubmissionsEnabled, platformMembers, verifiedCount }: Props) {
+  const videoContactHref = `mailto:info@investigatorevents.com?subject=${encodeURIComponent(`Feature a video — ${page.name}`)}`;
   const [isVerifiedMember, setIsVerifiedMember] = useState(false);
   const [isMember, setIsMember] = useState(false);
 
@@ -427,16 +429,26 @@ export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past,
               <p className="eyebrow">Voices</p>
               <h2 className="section-title !mt-3">Videos from the {page.name} community</h2>
               <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600">
-                Short clips from members. Want to add yours? It's free — every video is
-                reviewed by our team before it appears here.
+                {videoSubmissionsEnabled
+                  ? "Short clips from members. Want to add yours? It's free — every video is reviewed by our team before it appears here."
+                  : `Short clips featuring ${page.name}. Want your event or association featured here? Get in touch and we'll set it up.`}
               </p>
             </div>
-            <Link
-              href={`/associations/${page.slug}/submit-video` as Route}
-              className="inline-flex flex-shrink-0 items-center gap-2 self-start rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_30px_-10px_rgba(37,99,235,0.6)] transition hover:bg-blue-500 active:scale-[0.98]"
-            >
-              <Plus className="h-4 w-4" /> Submit a video
-            </Link>
+            {videoSubmissionsEnabled ? (
+              <Link
+                href={`/associations/${page.slug}/submit-video` as Route}
+                className="inline-flex flex-shrink-0 items-center gap-2 self-start rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_30px_-10px_rgba(37,99,235,0.6)] transition hover:bg-blue-500 active:scale-[0.98]"
+              >
+                <Plus className="h-4 w-4" /> Submit a video
+              </Link>
+            ) : (
+              <a
+                href={videoContactHref}
+                className="inline-flex flex-shrink-0 items-center gap-2 self-start rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_30px_-10px_rgba(37,99,235,0.6)] transition hover:bg-blue-500 active:scale-[0.98]"
+              >
+                <Mail className="h-4 w-4" /> Contact us about a video
+              </a>
+            )}
           </div>
 
           {videos.length > 0 ? (
@@ -469,14 +481,25 @@ export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past,
               <Video className="h-9 w-9 text-slate-300" />
               <p className="mt-3 text-sm font-semibold text-slate-700">No videos yet</p>
               <p className="mt-1 max-w-sm text-xs leading-relaxed text-slate-500">
-                Be the first to share a short clip with the {page.name} community.
+                {videoSubmissionsEnabled
+                  ? `Be the first to share a short clip with the ${page.name} community.`
+                  : `Want a video featuring ${page.name} here? Get in touch and we'll arrange it.`}
               </p>
-              <Link
-                href={`/associations/${page.slug}/submit-video` as Route}
-                className="mt-5 inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700"
-              >
-                <Plus className="h-4 w-4" /> Submit the first video
-              </Link>
+              {videoSubmissionsEnabled ? (
+                <Link
+                  href={`/associations/${page.slug}/submit-video` as Route}
+                  className="mt-5 inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700"
+                >
+                  <Plus className="h-4 w-4" /> Submit the first video
+                </Link>
+              ) : (
+                <a
+                  href={videoContactHref}
+                  className="mt-5 inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700"
+                >
+                  <Mail className="h-4 w-4" /> Contact us
+                </a>
+              )}
             </div>
           )}
         </div>

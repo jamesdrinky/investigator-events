@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { ArrowLeft, CheckCircle2, XCircle, Film, Clock } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, XCircle, Film, Clock, ToggleLeft, ToggleRight } from 'lucide-react';
 import { hasValidAdminSessionCookie } from '@/lib/admin/session';
 import { fetchPendingVideos } from '@/lib/data/association-videos';
-import { approveVideoAction, rejectVideoAction } from './actions';
+import { isFeatureEnabled, VIDEO_SUBMISSIONS_FLAG } from '@/lib/data/feature-flags';
+import { approveVideoAction, rejectVideoAction, setVideoSubmissionsEnabledAction } from './actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +15,10 @@ export default async function AdminVideosPage() {
     redirect('/admin?error=auth');
   }
 
-  const pending = await fetchPendingVideos();
+  const [pending, submissionsEnabled] = await Promise.all([
+    fetchPendingVideos(),
+    isFeatureEnabled(VIDEO_SUBMISSIONS_FLAG),
+  ]);
 
   return (
     <main className="min-h-screen bg-slate-100">
@@ -35,6 +39,29 @@ export default async function AdminVideosPage() {
         <p className="mt-1.5 text-sm text-slate-500">
           Nothing appears publicly until you approve it here.
         </p>
+
+        {/* Public-submission lock toggle */}
+        <div className={`mt-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border p-4 shadow-sm ${submissionsEnabled ? 'border-emerald-200 bg-emerald-50/60' : 'border-slate-200 bg-white'}`}>
+          <div>
+            <p className="text-sm font-bold text-slate-900">
+              Public video submissions: {submissionsEnabled ? 'OPEN' : 'LOCKED'}
+            </p>
+            <p className="mt-0.5 text-xs text-slate-500">
+              {submissionsEnabled
+                ? 'Anyone signed in can submit a video for review. Approved videos already showing stay live either way.'
+                : 'The submit flow is closed — buttons hidden, page and uploads blocked. Existing approved videos still show.'}
+            </p>
+          </div>
+          <form action={setVideoSubmissionsEnabledAction}>
+            <input type="hidden" name="enabled" value={submissionsEnabled ? 'false' : 'true'} />
+            <button
+              type="submit"
+              className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white transition ${submissionsEnabled ? 'bg-slate-900 hover:bg-slate-700' : 'bg-emerald-600 hover:bg-emerald-500'}`}
+            >
+              {submissionsEnabled ? <><ToggleRight className="h-4 w-4" /> Lock submissions</> : <><ToggleLeft className="h-4 w-4" /> Open submissions</>}
+            </button>
+          </form>
+        </div>
 
         {pending.length === 0 ? (
           <div className="mt-10 flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center">

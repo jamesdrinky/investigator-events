@@ -7,6 +7,7 @@ import { createSupabaseSSRServerClient } from '@/lib/supabase/ssr-server';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { assertSameOriginRequest, enforceRateLimitAsync, escapeHtml } from '@/lib/security/server';
 import { buildAdminAlertEmail, ADMIN_ALERT_INBOX } from '@/lib/email/admin-alert';
+import { isFeatureEnabled, VIDEO_SUBMISSIONS_FLAG } from '@/lib/data/feature-flags';
 
 const MAX_DURATION_SECONDS = 46; // 45s cap + 1s rounding tolerance
 
@@ -26,6 +27,11 @@ export async function submitAssociationVideoAction(formData: FormData) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       redirect(`/signin?next=/associations/${slug}/submit-video`);
+    }
+
+    // Hard stop if public submissions are locked (the page shows a contact CTA).
+    if (!(await isFeatureEnabled(VIDEO_SUBMISSIONS_FLAG))) {
+      redirect(`/associations/${slug}/submit-video`);
     }
 
     await enforceRateLimitAsync('submit-association-video', {

@@ -120,6 +120,33 @@ export async function sendApnsPush(token: string, alert: ApnsAlert): Promise<Apn
   }
 }
 
+/**
+ * Update just the app-icon badge, silently — no alert, no sound. iOS sets the
+ * badge to `badge` (0 clears the red dot) without showing a banner. Used when a
+ * user reads their notifications/messages and the dot should drop.
+ */
+export async function sendApnsBadge(token: string, badge: number): Promise<ApnsResult> {
+  try {
+    const bundleId = process.env.APNS_BUNDLE_ID;
+    if (!bundleId) return { token, ok: false, reason: 'APNS_BUNDLE_ID not set' };
+
+    const jwt = getJwt();
+    const body = JSON.stringify({ aps: { badge } });
+    const result = await sendViaHttp2(token, jwt, bundleId, body);
+
+    if (result.status === 200) return { token, ok: true, status: 200 };
+
+    const invalid =
+      result.status === 410 ||
+      result.reason === 'BadDeviceToken' ||
+      result.reason === 'Unregistered';
+
+    return { token, ok: false, status: result.status, reason: result.reason, invalid };
+  } catch (err) {
+    return { token, ok: false, reason: `outer: ${(err as Error)?.message ?? String(err)}` };
+  }
+}
+
 interface Http2Result {
   status?: number;
   reason?: string;

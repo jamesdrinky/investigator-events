@@ -1,5 +1,5 @@
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
-import { sendApnsPush } from '@/lib/push/apns';
+import { sendApnsPush, sendApnsBadge } from '@/lib/push/apns';
 
 type NotificationType = 'follow' | 'connection_request' | 'connection_accepted' | 'post_like' | 'post_comment' | 'event_approved' | 'message' | 'association_event';
 
@@ -59,6 +59,54 @@ export async function createNotification(params: CreateNotificationParams) {
 }
 
 /**
+ * Total unread count for the app-icon badge: unread notifications + unread
+ * messages (mirrors the in-app red dot in the navbar). Best-effort — returns 0
+ * on any error so a badge query never blocks a push.
+ */
+export async function getUnreadBadgeCount(supabase: any, userId: string): Promise<number> {
+  try {
+    const [notif, msgs] = await Promise.all([
+      supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', userId).eq('is_read', false),
+      supabase.from('messages' as any).select('id', { count: 'exact', head: true }).eq('receiver_id', userId).eq('is_read', false),
+    ]);
+    return (notif.count ?? 0) + (msgs.count ?? 0);
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * Re-sync the app-icon badge to the user's live unread count (silently, no
+ * alert). Call after the user reads notifications/messages so the red dot drops
+ * — or clears entirely when they've read everything. No app update required.
+ */
+export async function updateUserBadge(userId: string) {
+  try {
+    if (!process.env.APNS_KEY_ID || !process.env.APNS_PRIVATE_KEY) return;
+    // device_tokens isn't in the generated Database types yet (same as sendPushToUser).
+    const supabase: any = createSupabaseAdminServerClient();
+
+    const { data: tokens } = await supabase
+      .from('device_tokens')
+      .select('token, platform')
+      .eq('user_id', userId);
+
+    const iosTokens = ((tokens ?? []) as { token: string; platform: string }[]).filter((t) => t.platform === 'ios');
+    if (iosTokens.length === 0) return;
+
+    const badge = await getUnreadBadgeCount(supabase, userId);
+    const results = await Promise.all(iosTokens.map((t) => sendApnsBadge(t.token, badge)));
+
+    const deadTokens = results.filter((r) => r.invalid).map((r) => r.token);
+    if (deadTokens.length > 0) {
+      await supabase.from('device_tokens').delete().in('token', deadTokens);
+    }
+  } catch (err) {
+    console.error('updateUserBadge failed:', err);
+  }
+}
+
+/**
  * Send a push to every iOS device the user has registered.
  * Fire-and-forget: never throws. Stale tokens (410 from APNs) get cleaned up.
  * Android (FCM) not wired yet — silently ignored when present.
@@ -84,8 +132,11 @@ export async function sendPushToUser(
     const iosTokens = (tokens as { token: string; platform: string }[]).filter((t) => t.platform === 'ios');
     if (iosTokens.length === 0) return;
 
+    // Set the app-icon badge to the user's live unread count.
+    const badge = await getUnreadBadgeCount(supabase, userId);
+
     const results = await Promise.all(
-      iosTokens.map((t) => sendApnsPush(t.token, { title, body, url })),
+      iosTokens.map((t) => sendApnsPush(t.token, { title, body, url, badge })),
     );
 
     const deadTokens = results.filter((r) => r.invalid).map((r) => r.token);

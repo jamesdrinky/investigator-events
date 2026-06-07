@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseSSRServerClient } from '@/lib/supabase/ssr-server';
-import { createNotification } from '@/lib/notifications';
+import { createNotification, updateUserBadge } from '@/lib/notifications';
 import { enforceRateLimitAsync, assertSameOriginRequest, RateLimitError } from '@/lib/security/server';
 
 export async function POST(request: Request) {
@@ -118,6 +118,9 @@ export async function PATCH(request: Request) {
       .update({ is_read: true } as any)
       .eq('user_id', user.id)
       .eq('is_read', false);
+
+    // Drop the app-icon badge to the remaining unread count (likely 0).
+    await updateUserBadge(user.id);
 
     return NextResponse.json({ ok: true });
   } catch {

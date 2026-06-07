@@ -240,6 +240,9 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
     });
 
     await supabase.from('messages' as any).update({ is_read: true } as any).eq('sender_id', activeChat).eq('receiver_id', userId).eq('is_read', false);
+
+    // Re-sync the iOS app-icon badge to the new (lower) unread count.
+    fetch('/api/push/badge-sync', { method: 'POST' }).catch(() => {});
   }, [userId, activeChat]);
 
   useEffect(() => {

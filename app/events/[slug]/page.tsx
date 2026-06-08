@@ -205,6 +205,70 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
               <SaveDateLinks event={event} />
             </div>
 
+            {/* ── Featured showcase video — prominent, top of the content ── */}
+            {(eventVideos.length > 0 || videoSubmissionsEnabled) && (
+              <Reveal>
+                <div>
+                  {eventVideos.length > 0 ? (
+                    <>
+                      <div className="overflow-hidden rounded-2xl border border-slate-200/60 bg-black shadow-lg">
+                        <video
+                          src={eventVideos[0].videoUrl}
+                          poster={eventVideos[0].thumbnailUrl ?? undefined}
+                          controls
+                          playsInline
+                          preload="metadata"
+                          className="aspect-video w-full bg-black object-contain"
+                        />
+                      </div>
+                      <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2">
+                        <div className="min-w-0">
+                          {eventVideos[0].title && <p className="truncate text-sm font-bold text-slate-900">{eventVideos[0].title}</p>}
+                          <p className="text-xs text-slate-500">{eventVideos[0].submitterName}</p>
+                        </div>
+                        {videoSubmissionsEnabled && (
+                          <Link
+                            href={`/events/${event.slug}/submit-video` as Route}
+                            className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                          >
+                            + Add a video
+                          </Link>
+                        )}
+                      </div>
+                      {eventVideos.length > 1 && (
+                        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                          {eventVideos.slice(1).map((v) => (
+                            <figure key={v.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                              <video
+                                src={v.videoUrl}
+                                poster={v.thumbnailUrl ?? undefined}
+                                controls
+                                playsInline
+                                preload="metadata"
+                                className="aspect-video w-full bg-black object-contain"
+                              />
+                              {v.title && <figcaption className="line-clamp-1 px-2.5 py-2 text-[11px] font-semibold text-slate-700">{v.title}</figcaption>}
+                            </figure>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white/60 px-6 py-8 text-center">
+                      <p className="text-sm font-semibold text-slate-700">Got a video of {title}?</p>
+                      <p className="mt-1 max-w-sm text-xs leading-relaxed text-slate-500">Share a clip to feature here — it's free and reviewed before it goes live.</p>
+                      <Link
+                        href={`/events/${event.slug}/submit-video` as Route}
+                        className="mt-4 inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-500"
+                      >
+                        + Submit a video
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </Reveal>
+            )}
+
             {/* Video section — if event has video */}
             {videoUrl && (
               <Reveal>
@@ -237,55 +301,6 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
               </div>
             </Reveal>
 
-            {/* Videos — community/showcase clips (verified before going live) */}
-            {(eventVideos.length > 0 || videoSubmissionsEnabled) && (
-              <Reveal>
-                <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <h2 className="text-lg font-bold text-slate-950">Videos</h2>
-                      <p className="mt-1 text-sm text-slate-500">
-                        {eventVideos.length > 0
-                          ? `Clips featuring ${title}.`
-                          : `Got a video about ${title}? Share it — it's free and reviewed before going live.`}
-                      </p>
-                    </div>
-                    {videoSubmissionsEnabled && (
-                      <Link
-                        href={`/events/${event.slug}/submit-video` as Route}
-                        className="inline-flex flex-shrink-0 items-center justify-center gap-1.5 self-start rounded-full bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-500 active:scale-[0.98]"
-                      >
-                        + Submit a video
-                      </Link>
-                    )}
-                  </div>
-
-                  {eventVideos.length > 0 && (
-                    <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      {eventVideos.map((v) => (
-                        <figure key={v.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                          <video
-                            src={v.videoUrl}
-                            poster={v.thumbnailUrl ?? undefined}
-                            controls
-                            playsInline
-                            preload="metadata"
-                            className="aspect-video w-full bg-black object-contain"
-                          />
-                          <figcaption className="px-3.5 py-3">
-                            {v.title && <h3 className="line-clamp-2 text-sm font-bold text-slate-900">{v.title}</h3>}
-                            {v.description && (
-                              <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-slate-500">{v.description}</p>
-                            )}
-                            <p className="mt-1.5 text-[11px] font-medium text-slate-400">{v.submitterName}</p>
-                          </figcaption>
-                        </figure>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </Reveal>
-            )}
           </div>
 
           {/* Right column — sidebar */}

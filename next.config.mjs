@@ -24,7 +24,6 @@ const nextConfig = {
     // correctly at runtime, and trace the binary into the transcode functions.
     serverComponentsExternalPackages: ['ffmpeg-static'],
     outputFileTracingIncludes: {
-      '/api/zz-ffmpeg-test': ['./node_modules/ffmpeg-static/ffmpeg'],
       '/api/cron/transcode-videos': ['./node_modules/ffmpeg-static/ffmpeg'],
     },
   },

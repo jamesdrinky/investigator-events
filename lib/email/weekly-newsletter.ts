@@ -2,7 +2,7 @@ import type { EventItem } from '@/lib/data/events';
 import { findAssociationBranding } from '@/lib/utils/association-branding';
 import { getEventImage, getCityHeroImageUrl } from '@/lib/utils/city-media';
 import { slugifyEventTitle } from '@/lib/utils/event-slugs';
-import { buildAppPushBanner, type AppPushSize, type AppPushRegion } from './app-push-banner';
+import { buildAppPushBanner, buildGlobalLaunchBanner, type AppPushSize, type AppPushRegion } from './app-push-banner';
 
 const SITE = 'https://investigatorevents.com';
 const LOGO = `${SITE}/logo/ielogo1.PNG`;
@@ -325,7 +325,7 @@ function statPill(value: string | number, label: string) {
 }
 
 export function buildWeeklyNewsletterHtml({
-  upcoming, newlyAdded, featured, recentlyPast = [], unsubscribeToken, appPush,
+  upcoming, newlyAdded, featured, recentlyPast = [], unsubscribeToken, appPush, globalLaunchBanner,
 }: {
   upcoming: EventItem[];
   newlyAdded: EventItem[];
@@ -333,6 +333,7 @@ export function buildWeeklyNewsletterHtml({
   recentlyPast?: EventItem[];
   unsubscribeToken?: string;
   appPush?: { size: AppPushSize; region?: AppPushRegion } | null;
+  globalLaunchBanner?: boolean;
 }): string {
   const displayUpcoming = mergeBearstoneNewsletterEvents(upcoming);
   const displayNewlyAdded = mergeBearstoneNewsletterEvents(newlyAdded);
@@ -342,6 +343,7 @@ export function buildWeeklyNewsletterHtml({
   const hero = displayFeatured[0] ?? displayUpcoming[0];
   const appHeroBanner = appPush?.size === 'hero' ? buildAppPushBanner({ size: 'hero', region: appPush.region ?? 'available' }) : '';
   const appCompactBanner = appPush?.size === 'compact' ? buildAppPushBanner({ size: 'compact', region: appPush.region ?? 'available' }) : '';
+  const globalLaunchHtml = globalLaunchBanner ? buildGlobalLaunchBanner() : '';
   const isAppHero = Boolean(appHeroBanner);
 
   return `<!DOCTYPE html>
@@ -413,7 +415,7 @@ export function buildWeeklyNewsletterHtml({
 <div id="wrapper" style="background-color:#ffffff;">
 
 <!-- Preheader -->
-<div style="display:none;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:#ffffff;">${isAppHero ? 'The Investigator Events iOS app is live in 148 countries; EU rollout is expected next week.' : `${displayUpcoming.length} upcoming event${displayUpcoming.length !== 1 ? 's' : ''} across ${countries} countr${countries !== 1 ? 'ies' : 'y'}`} &middot; investigatorevents.com &#847; &#847; &#847; &#847; &#847;</div>
+<div style="display:none;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:#ffffff;">${isAppHero ? 'The Investigator Events iOS app is live in 175 countries; EU rollout is expected next week.' : `${displayUpcoming.length} upcoming event${displayUpcoming.length !== 1 ? 's' : ''} across ${countries} countr${countries !== 1 ? 'ies' : 'y'}`} &middot; investigatorevents.com &#847; &#847; &#847; &#847; &#847;</div>
 
 <table width="100%" cellpadding="0" cellspacing="0" class="outer" style="background-color:#ffffff;">
 <tr><td align="center" class="outer-wrap" style="padding:16px;">
@@ -464,11 +466,15 @@ export function buildWeeklyNewsletterHtml({
     <td width="33%" style="height:3px;background-color:${C.pink};font-size:0;line-height:0;">&nbsp;</td>
   </tr></table>
 
+  <!-- Global launch banner -->
+  ${globalLaunchHtml}
+
   <!-- App push hero (Monday launch week) -->
   ${appHeroBanner}
 
-  <!-- Featured hero -->
-  ${!isAppHero && hero ? heroCard(hero) : ''}
+  <!-- Featured hero — always shown; when the app banner is on top it sits right
+       below it (previously it was dropped entirely, hiding the featured event). -->
+  ${hero ? heroCard(hero) : ''}
 
   <!-- Upcoming -->
   ${section('Upcoming Events', displayUpcoming.filter(e => e.id !== hero?.id))}

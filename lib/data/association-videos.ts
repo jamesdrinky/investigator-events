@@ -26,6 +26,7 @@ export interface AssociationVideoItem {
   thumbnailUrl: string | null;
   durationSeconds: number | null;
   status: 'pending' | 'approved' | 'rejected';
+  transcodeStatus: string;
   isPaid: boolean;
   createdAt: string;
 }
@@ -86,6 +87,7 @@ function mapRow(row: any, videoUrl: string, associationName: string | null, even
     thumbnailUrl: row.thumbnail_url ?? null,
     durationSeconds: row.duration_seconds ?? null,
     status: row.status,
+    transcodeStatus: row.transcode_status ?? 'ready',
     isPaid: Boolean(row.is_paid),
     createdAt: row.created_at,
   };
@@ -139,6 +141,7 @@ export async function fetchApprovedVideosForEvent(slug: string): Promise<Associa
     .select('*')
     .eq('event_slug', slug)
     .eq('status', 'approved')
+    .eq('transcode_status', 'ready')
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -161,6 +164,7 @@ export async function fetchApprovedVideosForAssociation(slug: string): Promise<A
     .select('*')
     .eq('association_slug', slug)
     .eq('status', 'approved')
+    .eq('transcode_status', 'ready')
     .order('created_at', { ascending: false });
 
   if (error) {

@@ -89,7 +89,22 @@ export default async function AdminVideosPage() {
                         Paid
                       </span>
                     )}
+                    {v.transcodeStatus === 'pending' && (
+                      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700">
+                        Converting…
+                      </span>
+                    )}
+                    {v.transcodeStatus === 'needs_manual' && (
+                      <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-red-700">
+                        Needs manual conversion
+                      </span>
+                    )}
                   </div>
+                  {v.transcodeStatus === 'needs_manual' && (
+                    <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-xs leading-relaxed text-red-700">
+                      Too big to auto-convert. <a href={v.videoUrl} download className="font-semibold underline">Download the original</a>, convert it to MP4 (<code>ffmpeg -i in.mov -c:v h264_videotoolbox -b:v 6M -c:a aac -movflags +faststart out.mp4</code>), then re-submit it.
+                    </p>
+                  )}
                   {v.description && (
                     <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{v.description}</p>
                   )}

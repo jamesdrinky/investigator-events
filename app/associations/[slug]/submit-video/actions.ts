@@ -97,6 +97,7 @@ export async function submitAssociationVideoAction(formData: FormData) {
       video_url: videoPath,
       duration_seconds: durationSeconds,
       status: 'pending',
+      transcode_status: 'pending',
       is_paid: false,
       payment_status: 'none',
     });

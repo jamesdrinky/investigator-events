@@ -459,7 +459,7 @@ export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past,
                   className="overflow-hidden rounded-[1.25rem] border border-white/80 bg-white shadow-[0_24px_54px_-36px_rgba(15,23,42,0.18)]"
                 >
                   <video
-                    src={v.videoUrl}
+                    src={`/api/video/${v.id}`}
                     poster={v.thumbnailUrl ?? undefined}
                     controls
                     playsInline

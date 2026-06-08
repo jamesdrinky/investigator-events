@@ -213,7 +213,7 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
                     <>
                       <div className="overflow-hidden rounded-2xl border border-slate-200/60 bg-black shadow-lg">
                         <video
-                          src={eventVideos[0].videoUrl}
+                          src={`/api/video/${eventVideos[0].id}`}
                           poster={eventVideos[0].thumbnailUrl ?? undefined}
                           controls
                           playsInline
@@ -240,7 +240,7 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
                           {eventVideos.slice(1).map((v) => (
                             <figure key={v.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                               <video
-                                src={v.videoUrl}
+                                src={`/api/video/${v.id}`}
                                 poster={v.thumbnailUrl ?? undefined}
                                 controls
                                 playsInline

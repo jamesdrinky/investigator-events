@@ -57,7 +57,7 @@ const NETWORK_LOGOS: Array<{ src: string; name: string }> = [
   { src: '/associations/nali.webp', name: 'NALI' },
   { src: '/associations/aldonys.png', name: 'ALDONYS' },
   { src: '/associations/wapi.webp', name: 'WAPI' },
-  { src: '/associations/spi.png', name: 'SPI' },
+  { src: '/associations/spi2.webp', name: 'SPI' },
 ];
 
 function NetworkLogoStrip({ excludeName, excludeSlug }: { excludeName: string; excludeSlug: string }) {

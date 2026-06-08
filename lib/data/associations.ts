@@ -137,7 +137,7 @@ export const associationRecords: AssociationRecord[] = [
     name: 'Biznesa Drosiba',
     country: 'Latvia',
     region: 'Europe',
-    website: 'https://www.businesecurity.lv/',
+    website: 'https://www.businessecurity.lv/',
     aliases: ['Biznesa Drosiba', 'Biznesa Drošība', 'Single Member'],
     logoFileName: 'biznesa-drosiba.png'
   },
@@ -279,7 +279,7 @@ export const associationRecords: AssociationRecord[] = [
     name: 'APDU',
     country: 'Ukraine',
     region: 'Europe',
-    website: 'https://www.apdu.pt',
+    website: 'https://apdua.org',
     aliases: ['APDU'],
     logoFileName: 'apdu.png'
   },
@@ -289,7 +289,7 @@ export const associationRecords: AssociationRecord[] = [
     name: 'FAPI',
     country: 'Italy',
     region: 'Europe',
-    website: 'https://www.fapi.it',
+    website: 'https://myfapi.org',
     aliases: ['FAPI'],
     logoFileName: 'fapi.png'
   },
@@ -309,7 +309,7 @@ export const associationRecords: AssociationRecord[] = [
     name: 'IAIACE',
     country: 'Ukraine',
     region: 'Europe',
-    website: 'https://www.iaiace.be',
+    website: 'https://www.iaiace.org',
     aliases: ['IAIACE'],
     logoFileName: 'iaiace.png'
   },
@@ -442,7 +442,7 @@ export const associationRecords: AssociationRecord[] = [
     region: 'North America',
     website: 'https://spinyc.org/',
     aliases: ['SPI', 'Society of Professional Investigators'],
-    logoFileName: 'spi.png'
+    logoFileName: 'spi2.webp'
   },
   {
     slug: 'scali',

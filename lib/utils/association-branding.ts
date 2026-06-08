@@ -59,7 +59,7 @@ const associationBrandingRecords: AssociationBrandingRecord[] = [
   { name: 'National Association of Legal Investigators', shortName: 'NALI', aliases: ['NALI', 'National Association of Legal Investigators'], logoFileName: 'nali.webp' },
   { name: 'Associated Licensed Detectives of New York State', shortName: 'ALDONYS', aliases: ['ALDONYS', 'Associated Licensed Detectives of New York State'], logoFileName: 'aldonys.png' },
   { name: 'World Association of Professional Investigators', shortName: 'WAPI', aliases: ['WAPI', 'World Association of Professional Investigators'], logoFileName: 'wapi.webp' },
-  { name: 'Society of Professional Investigators', shortName: 'SPI', aliases: ['SPI', 'Society of Professional Investigators'], logoFileName: 'spi.png' },
+  { name: 'Society of Professional Investigators', shortName: 'SPI', aliases: ['SPI', 'Society of Professional Investigators'], logoFileName: 'spi2.webp' },
   { name: 'ACFE', shortName: 'ACFE', aliases: ['ACFE', 'Association of Certified Fraud Examiners'], logoFileName: 'acfe.png' },
   { name: 'SCALI', shortName: 'SCALI', aliases: ['SCALI', 'South Carolina Association of Legal Investigators'], logoFileName: 'scali.png' },
   { name: 'MAPI', shortName: 'MAPI', aliases: ['MAPI', 'Minnesota Association of Private Investigators'], logoFileName: 'mapi.png' },

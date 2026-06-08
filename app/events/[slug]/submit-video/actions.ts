@@ -9,8 +9,6 @@ import { assertSameOriginRequest, enforceRateLimitAsync, escapeHtml } from '@/li
 import { buildAdminAlertEmail, ADMIN_ALERT_INBOX } from '@/lib/email/admin-alert';
 import { isFeatureEnabled, VIDEO_SUBMISSIONS_FLAG } from '@/lib/data/feature-flags';
 
-const MAX_DURATION_SECONDS = 181; // 3 min + rounding tolerance
-
 function clean(value: string, maxLength: number) {
   return value.replace(/\s+/g, ' ').trim().slice(0, maxLength);
 }
@@ -54,10 +52,6 @@ export async function submitEventVideoAction(formData: FormData) {
     const videoPath = String(formData.get('videoUrl') ?? '').trim();
     const durationRaw = Number(formData.get('durationSeconds') ?? 0);
 
-    if (!title) {
-      redirect(`/events/${slug}/submit-video?status=error&reason=title`);
-    }
-
     const pathOk =
       videoPath.startsWith(`${user.id}/`) &&
       !videoPath.includes('..') &&
@@ -66,13 +60,9 @@ export async function submitEventVideoAction(formData: FormData) {
       redirect(`/events/${slug}/submit-video?status=error&reason=video`);
     }
 
+    // Title is optional; length is informational only (the 500 MB size cap is
+    // the real limit) — capture the duration when known, never block on it.
     const durationSeconds = Number.isFinite(durationRaw) && durationRaw > 0 ? Math.round(durationRaw) : null;
-    if (durationSeconds === null) {
-      redirect(`/events/${slug}/submit-video?status=error&reason=duration`);
-    }
-    if (durationSeconds > MAX_DURATION_SECONDS) {
-      redirect(`/events/${slug}/submit-video?status=error&reason=length`);
-    }
 
     const { data: profile } = await admin
       .from('profiles')
@@ -106,7 +96,7 @@ export async function submitEventVideoAction(formData: FormData) {
     const resendKey = process.env.RESEND_API_KEY;
     if (resendKey && submitterEmail) {
       const safeName = escapeHtml(submitterName);
-      const safeTitle = escapeHtml(title);
+      const titleClause = title ? ` <strong>"${escapeHtml(title)}"</strong>` : '';
       const safeEvent = escapeHtml(event.title ?? '');
       const resend = new Resend(resendKey);
       resend.emails.send({
@@ -115,7 +105,7 @@ export async function submitEventVideoAction(formData: FormData) {
         subject: `Video received — ${event.title}`,
         html: `<div style="font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#0f172a">
           <h2 style="margin:0 0 12px;font-size:20px">Video received</h2>
-          <p style="margin:0 0 12px;font-size:15px;line-height:1.6;color:#334155">Thanks ${safeName} — we've received your video <strong>"${safeTitle}"</strong> for <strong>${safeEvent}</strong>.</p>
+          <p style="margin:0 0 12px;font-size:15px;line-height:1.6;color:#334155">Thanks ${safeName} — we've received your video${titleClause} for <strong>${safeEvent}</strong>.</p>
           <p style="margin:0 0 12px;font-size:15px;line-height:1.6;color:#334155">It's now in our verification queue. Once approved it'll appear on the event page. We review submissions regularly.</p>
           <p style="margin:24px 0 0;font-size:12px;color:#94a3b8">Investigator Events · The global PI conference calendar.</p>
         </div>`,

@@ -273,7 +273,7 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
                             className="aspect-video w-full bg-black object-contain"
                           />
                           <figcaption className="px-3.5 py-3">
-                            <h3 className="line-clamp-2 text-sm font-bold text-slate-900">{v.title}</h3>
+                            {v.title && <h3 className="line-clamp-2 text-sm font-bold text-slate-900">{v.title}</h3>}
                             {v.description && (
                               <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-slate-500">{v.description}</p>
                             )}

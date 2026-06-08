@@ -83,7 +83,7 @@ export default async function AdminVideosPage() {
                 />
                 <div className="p-5">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="text-base font-bold text-slate-900">{v.title}</h2>
+                    <h2 className="text-base font-bold text-slate-900">{v.title || '(untitled)'}</h2>
                     {v.isPaid && (
                       <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-violet-700">
                         Paid

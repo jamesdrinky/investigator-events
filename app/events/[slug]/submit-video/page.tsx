@@ -69,7 +69,7 @@ export default async function SubmitEventVideoPage({
         <div className="mt-6">
           <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Submit a video</h1>
           <p className="mt-2 text-sm leading-relaxed text-slate-600">
-            Share a video (up to 3 minutes) to feature on the{' '}
+            Share a video (up to 500 MB) to feature on the{' '}
             <strong className="text-slate-800">{event.title}</strong> event page. It's free — our team
             reviews every submission before it goes live.
           </p>
@@ -105,7 +105,7 @@ export default async function SubmitEventVideoPage({
             )}
 
             <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-              <SubmitVideoForm slug={event.slug} targetName={event.title} action={submitEventVideoAction} maxSeconds={180} />
+              <SubmitVideoForm slug={event.slug} targetName={event.title} action={submitEventVideoAction} maxSeconds={null} />
             </div>
           </>
         )}

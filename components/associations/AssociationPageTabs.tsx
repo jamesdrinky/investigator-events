@@ -467,7 +467,7 @@ export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past,
                     className="aspect-video w-full bg-black object-contain"
                   />
                   <figcaption className="px-4 py-3.5">
-                    <h3 className="line-clamp-2 text-sm font-bold text-slate-900">{v.title}</h3>
+                    {v.title && <h3 className="line-clamp-2 text-sm font-bold text-slate-900">{v.title}</h3>}
                     {v.description && (
                       <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-slate-500">{v.description}</p>
                     )}

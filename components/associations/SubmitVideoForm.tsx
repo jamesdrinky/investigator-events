@@ -1,15 +1,15 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
-import { UploadCloud, Film, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { UploadCloud, Film, Loader2, AlertCircle } from 'lucide-react';
 
 const MAX_BYTES = 500 * 1024 * 1024; // 500 MB ceiling (matches the storage bucket)
 const ACCEPTED = ['video/mp4', 'video/quicktime', 'video/webm'];
 
-// Shared between association member clips (short) and event showcase videos
-// (longer). `action` is the server action to submit to; `maxSeconds` is the
-// length cap shown + enforced client-side.
+// Shared between association member clips and event showcase videos. `action`
+// is the server action to submit to. `maxSeconds` is an optional length cap
+// (client-side soft check + label); pass null for no length limit (size only).
 export function SubmitVideoForm({
   slug,
   targetName,
@@ -19,28 +19,27 @@ export function SubmitVideoForm({
   slug: string;
   targetName: string;
   action: (formData: FormData) => void;
-  maxSeconds?: number;
+  maxSeconds?: number | null;
 }) {
   const supabase = createSupabaseBrowserClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const [file, setFile] = useState<File | null>(null);
   const [duration, setDuration] = useState<number | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
 
-  const [uploading, setUploading] = useState(false);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [pendingSubmit, setPendingSubmit] = useState(false);
 
   const readDuration = (f: File) =>
     new Promise<number>((resolve, reject) => {
       const url = URL.createObjectURL(f);
       const el = document.createElement('video');
       el.preload = 'metadata';
-      el.onloadedmetadata = () => {
-        resolve(el.duration);
-      };
+      el.onloadedmetadata = () => resolve(el.duration);
       el.onerror = () => reject(new Error('Could not read video'));
       el.src = url;
     });
@@ -64,15 +63,14 @@ export function SubmitVideoForm({
       return;
     }
 
+    // Read the duration when we can (for display) — but never block on it.
     let secs: number | null = null;
     try {
       secs = await readDuration(f);
     } catch {
-      // Some browsers can't read metadata for certain codecs — let the server
-      // cap stand and proceed without a client-side number.
       secs = null;
     }
-    if (secs !== null && secs > maxSeconds + 1) {
+    if (maxSeconds != null && secs != null && secs > maxSeconds + 1) {
       setFileError(`Videos must be ${maxSeconds} seconds or less. Yours is ${Math.round(secs)}s.`);
       return;
     }
@@ -96,9 +94,7 @@ export function SubmitVideoForm({
       const body = await presignRes.json().catch(() => null);
       throw new Error(body?.error || `Upload could not start (${presignRes.status})`);
     }
-    const presign = (await presignRes.json()) as {
-      token?: string; path?: string;
-    };
+    const presign = (await presignRes.json()) as { token?: string; path?: string };
     if (!presign.token || !presign.path) {
       throw new Error('Upload could not start.');
     }
@@ -106,41 +102,54 @@ export function SubmitVideoForm({
     const { error } = await supabase.storage
       .from('event-videos')
       .uploadToSignedUrl(presign.path, presign.token, f, { contentType });
-    if (error) {
-      throw new Error(error.message);
-    }
-    // Private bucket: submit the object path, not a public URL.
-    return presign.path;
+    if (error) throw new Error(error.message);
+    return presign.path; // private bucket: submit the object path
   };
 
-  const onUpload = async () => {
-    if (!file) return;
-    setUploading(true);
-    setFileError(null);
-    try {
-      const url = await uploadToStorage(file);
-      setUploadedUrl(url);
-    } catch (err) {
-      setFileError(err instanceof Error ? err.message : 'Upload failed. Please try again.');
-    } finally {
-      setUploading(false);
+  // One button: if the file isn't uploaded yet, upload it, then re-submit the
+  // form natively so the server action (and its redirect) run the normal way.
+  useEffect(() => {
+    if (pendingSubmit && uploadedUrl) {
+      setPendingSubmit(false);
+      formRef.current?.requestSubmit();
     }
+  }, [pendingSubmit, uploadedUrl]);
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    if (uploadedUrl) {
+      // Already uploaded — let the native form action submit.
+      setSubmitting(true);
+      return;
+    }
+    e.preventDefault();
+    if (!file) {
+      setFileError('Please choose a video first.');
+      return;
+    }
+    setSubmitting(true);
+    setFileError(null);
+    uploadToStorage(file)
+      .then((path) => {
+        setUploadedUrl(path);
+        setPendingSubmit(true);
+      })
+      .catch((err) => {
+        setFileError(err instanceof Error ? err.message : 'Upload failed. Please try again.');
+        setSubmitting(false);
+      });
   };
 
   return (
-    <form
-      action={action}
-      onSubmit={() => setSubmitting(true)}
-      className="space-y-6"
-    >
+    <form ref={formRef} action={action} onSubmit={handleSubmit} className="space-y-6">
       <input type="hidden" name="slug" value={slug} />
       <input type="hidden" name="videoUrl" value={uploadedUrl ?? ''} />
       <input type="hidden" name="durationSeconds" value={duration ?? ''} />
-
-      {/* Step 1 — choose + upload the file */}
+      {/* Step 1 — choose the file */}
       <div>
         <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-          Your video (max {maxSeconds >= 60 ? `${Math.round(maxSeconds / 60)} min` : `${maxSeconds}s`})
+          {maxSeconds != null
+            ? `Your video (max ${maxSeconds >= 60 ? `${Math.round(maxSeconds / 60)} min` : `${maxSeconds}s`})`
+            : 'Your video'}
         </label>
 
         <input
@@ -163,12 +172,7 @@ export function SubmitVideoForm({
           </button>
         ) : (
           <div className="mt-2 space-y-3">
-            <video
-              src={previewUrl}
-              controls
-              playsInline
-              className="aspect-video w-full rounded-2xl bg-black object-contain"
-            />
+            <video src={previewUrl} controls playsInline className="aspect-video w-full rounded-2xl bg-black object-contain" />
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
               <span className="inline-flex items-center gap-1 font-medium text-slate-700">
                 <Film className="h-3.5 w-3.5" /> {file?.name}
@@ -182,22 +186,6 @@ export function SubmitVideoForm({
                 Change
               </button>
             </div>
-
-            {!uploadedUrl ? (
-              <button
-                type="button"
-                onClick={onUpload}
-                disabled={uploading}
-                className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:opacity-60"
-              >
-                {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadCloud className="h-4 w-4" />}
-                {uploading ? 'Uploading…' : 'Upload video'}
-              </button>
-            ) : (
-              <p className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600">
-                <CheckCircle2 className="h-4 w-4" /> Uploaded
-              </p>
-            )}
           </div>
         )}
 
@@ -211,14 +199,13 @@ export function SubmitVideoForm({
       {/* Step 2 — details */}
       <div>
         <label htmlFor="title" className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-          Title
+          Title <span className="font-normal normal-case text-slate-400">(optional)</span>
         </label>
         <input
           id="title"
           name="title"
-          required
           maxLength={120}
-          placeholder={`e.g. Why I joined ${targetName}`}
+          placeholder={`e.g. ${targetName}`}
           className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
         />
       </div>
@@ -244,14 +231,14 @@ export function SubmitVideoForm({
 
       <button
         type="submit"
-        disabled={!uploadedUrl || submitting}
+        disabled={!file || submitting}
         className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-blue-600 px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
       >
         {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
         {submitting ? 'Submitting…' : 'Submit for review'}
       </button>
-      {!uploadedUrl && (
-        <p className="text-xs text-slate-400">Upload your video first to enable submission.</p>
+      {!file && (
+        <p className="text-xs text-slate-400">Choose a video, then submit — it uploads automatically.</p>
       )}
     </form>
   );

@@ -13,7 +13,5 @@ export function getWeeklyNewsletterSubject(edition: WeeklyNewsletterEdition, fal
 
 export function getWeeklyNewsletterAppPush(edition: WeeklyNewsletterEdition) {
   if (edition !== 'app-launch') return null;
-  // Dialled back from a full-width 'hero' takeover to a slimmer 'compact'
-  // mention so the newsletter leads with events and pushes the app a bit less.
-  return { size: 'compact' as const, region: 'available' as const };
+  return { size: 'hero' as const, region: 'available' as const };
 }

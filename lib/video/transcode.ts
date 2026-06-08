@@ -94,6 +94,14 @@ async function processOne(admin: any, row: Row) {
 /** Process up to `limit` pending videos. Returns a per-video result list. */
 export async function processPendingVideos(limit = 1) {
   const admin: any = createSupabaseAdminServerClient();
+
+  // Recover anything stuck 'processing' for too long (a prior run died mid-job).
+  const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+  await admin.from('association_videos')
+    .update({ transcode_status: 'pending' })
+    .eq('transcode_status', 'processing')
+    .lt('created_at', cutoff);
+
   const { data: rows } = await admin
     .from('association_videos')
     .select('id, video_url')
@@ -103,6 +111,14 @@ export async function processPendingVideos(limit = 1) {
 
   const out = [];
   for (const row of (rows ?? []) as Row[]) {
+    // Atomically claim the row so an overlapping cron run can't grab it too.
+    const { data: claimed } = await admin
+      .from('association_videos')
+      .update({ transcode_status: 'processing' })
+      .eq('id', row.id)
+      .eq('transcode_status', 'pending')
+      .select('id');
+    if (!claimed || claimed.length === 0) continue; // already taken by another run
     out.push(await processOne(admin, row));
   }
   return out;

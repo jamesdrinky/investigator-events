@@ -39,8 +39,12 @@ export function SubmitVideoForm({
       const url = URL.createObjectURL(f);
       const el = document.createElement('video');
       el.preload = 'metadata';
-      el.onloadedmetadata = () => resolve(el.duration);
-      el.onerror = () => reject(new Error('Could not read video'));
+      // Some files (e.g. iPhone HEVC) never fire loadedmetadata OR error in
+      // some browsers — without this timeout the picker would hang forever and
+      // the video would never appear in the form. Give up after 4s and proceed.
+      const timer = setTimeout(() => { try { URL.revokeObjectURL(url); } catch {} reject(new Error('timeout')); }, 4000);
+      el.onloadedmetadata = () => { clearTimeout(timer); resolve(el.duration); };
+      el.onerror = () => { clearTimeout(timer); reject(new Error('Could not read video')); };
       el.src = url;
     });
 

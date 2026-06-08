@@ -43,7 +43,7 @@ export async function approveVideoAction(formData: FormData) {
 
   const { data: row } = await admin
     .from('association_videos' as any)
-    .select('id, title, submitter_name, submitter_email, association_slug')
+    .select('id, title, submitter_name, submitter_email, association_slug, event_slug')
     .eq('id', id)
     .single();
 
@@ -63,9 +63,12 @@ export async function approveVideoAction(formData: FormData) {
   const resendKey = process.env.RESEND_API_KEY;
   if (resendKey && video?.submitter_email) {
     const resend = new Resend(resendKey);
-    const link = video.association_slug
-      ? `https://investigatorevents.com/associations/${video.association_slug}`
-      : 'https://investigatorevents.com';
+    const link = video.event_slug
+      ? `https://investigatorevents.com/events/${video.event_slug}`
+      : video.association_slug
+        ? `https://investigatorevents.com/associations/${video.association_slug}`
+        : 'https://investigatorevents.com';
+    const where = video.event_slug ? 'event page' : 'association page';
     const safeName = escapeHtml(video.submitter_name || 'there');
     const safeTitle = escapeHtml(video.title ?? '');
     resend.emails.send({
@@ -74,7 +77,7 @@ export async function approveVideoAction(formData: FormData) {
       subject: `Your video is live — ${video.title}`,
       html: `<div style="font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#0f172a">
         <h2 style="margin:0 0 12px;font-size:20px">Your video is live 🎉</h2>
-        <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#334155">Hi ${safeName} — your video <strong>"${safeTitle}"</strong> has been approved and is now showing on the association page.</p>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#334155">Hi ${safeName} — your video <strong>"${safeTitle}"</strong> has been approved and is now showing on the ${where}.</p>
         <a href="${link}" style="display:inline-block;padding:12px 28px;background:#0f172a;color:#fff;text-decoration:none;font-size:14px;font-weight:600;border-radius:99px">View it</a>
         <p style="margin:24px 0 0;font-size:12px;color:#94a3b8">Investigator Events · The global PI conference calendar.</p>
       </div>`,
@@ -83,6 +86,9 @@ export async function approveVideoAction(formData: FormData) {
 
   if (video?.association_slug) {
     revalidatePath(`/associations/${video.association_slug}`);
+  }
+  if (video?.event_slug) {
+    revalidatePath(`/events/${video.event_slug}`);
   }
   revalidatePath('/admin/videos');
 }

@@ -2,14 +2,25 @@
 
 import { useRef, useState } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
-import { submitAssociationVideoAction } from '@/app/associations/[slug]/submit-video/actions';
 import { UploadCloud, Film, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 
-const MAX_SECONDS = 45;
-const MAX_BYTES = 80 * 1024 * 1024; // 80 MB ceiling for a short clip
+const MAX_BYTES = 200 * 1024 * 1024; // 200 MB ceiling (matches the storage bucket)
 const ACCEPTED = ['video/mp4', 'video/quicktime', 'video/webm'];
 
-export function SubmitVideoForm({ slug, associationName }: { slug: string; associationName: string }) {
+// Shared between association member clips (short) and event showcase videos
+// (longer). `action` is the server action to submit to; `maxSeconds` is the
+// length cap shown + enforced client-side.
+export function SubmitVideoForm({
+  slug,
+  targetName,
+  action,
+  maxSeconds = 45,
+}: {
+  slug: string;
+  targetName: string;
+  action: (formData: FormData) => void;
+  maxSeconds?: number;
+}) {
   const supabase = createSupabaseBrowserClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -49,7 +60,7 @@ export function SubmitVideoForm({ slug, associationName }: { slug: string; assoc
       return;
     }
     if (f.size > MAX_BYTES) {
-      setFileError('That file is over 80 MB. Please trim or compress it.');
+      setFileError('That file is over 200 MB. Please trim or compress it.');
       return;
     }
 
@@ -61,8 +72,8 @@ export function SubmitVideoForm({ slug, associationName }: { slug: string; assoc
       // cap stand and proceed without a client-side number.
       secs = null;
     }
-    if (secs !== null && secs > MAX_SECONDS + 1) {
-      setFileError(`Videos must be ${MAX_SECONDS} seconds or less. Yours is ${Math.round(secs)}s.`);
+    if (secs !== null && secs > maxSeconds + 1) {
+      setFileError(`Videos must be ${maxSeconds} seconds or less. Yours is ${Math.round(secs)}s.`);
       return;
     }
 
@@ -118,7 +129,7 @@ export function SubmitVideoForm({ slug, associationName }: { slug: string; assoc
 
   return (
     <form
-      action={submitAssociationVideoAction}
+      action={action}
       onSubmit={() => setSubmitting(true)}
       className="space-y-6"
     >
@@ -129,7 +140,7 @@ export function SubmitVideoForm({ slug, associationName }: { slug: string; assoc
       {/* Step 1 — choose + upload the file */}
       <div>
         <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-          Your video (max {MAX_SECONDS}s)
+          Your video (max {maxSeconds >= 60 ? `${Math.round(maxSeconds / 60)} min` : `${maxSeconds}s`})
         </label>
 
         <input
@@ -148,7 +159,7 @@ export function SubmitVideoForm({ slug, associationName }: { slug: string; assoc
           >
             <UploadCloud className="h-8 w-8 text-slate-400" />
             <span className="text-sm font-medium text-slate-700">Tap to choose a video</span>
-            <span className="text-xs text-slate-400">MP4, MOV or WebM · up to 80 MB</span>
+            <span className="text-xs text-slate-400">MP4, MOV or WebM · up to 200 MB</span>
           </button>
         ) : (
           <div className="mt-2 space-y-3">
@@ -207,7 +218,7 @@ export function SubmitVideoForm({ slug, associationName }: { slug: string; assoc
           name="title"
           required
           maxLength={120}
-          placeholder={`e.g. Why I joined ${associationName}`}
+          placeholder={`e.g. Why I joined ${targetName}`}
           className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
         />
       </div>
@@ -227,7 +238,7 @@ export function SubmitVideoForm({ slug, associationName }: { slug: string; assoc
       </div>
 
       <div className="rounded-xl bg-blue-50/70 px-4 py-3 text-xs leading-relaxed text-slate-600">
-        Every video is reviewed by our team before it appears on the {associationName} page.
+        Every video is reviewed by our team before it appears on the {targetName} page.
         You'll get an email once it's approved. It's free to submit.
       </div>
 

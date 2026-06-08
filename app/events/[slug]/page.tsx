@@ -14,7 +14,10 @@ import { AttendeeAvatars } from '@/components/AttendeeAvatars';
 import { StickyGoingBar } from '@/components/StickyGoingBar';
 import { EventShareButtons } from '@/components/EventShareButtons';
 import { InlineAdminEdit } from '@/components/admin/InlineAdminEdit';
+import type { Route } from 'next';
 import { hasValidAdminSessionCookie } from '@/lib/admin/session';
+import { fetchApprovedVideosForEvent } from '@/lib/data/association-videos';
+import { isFeatureEnabled, VIDEO_SUBMISSIONS_FLAG } from '@/lib/data/feature-flags';
 
 export const revalidate = 60;
 
@@ -55,6 +58,12 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
   const { event, events } = await resolveEvent(slug);
   if (!event) notFound();
   const isAdmin = await hasValidAdminSessionCookie();
+
+  // Showcase videos for this event (verification-gated) + submission toggle.
+  const [eventVideos, videoSubmissionsEnabled] = await Promise.all([
+    fetchApprovedVideosForEvent(slug),
+    isFeatureEnabled(VIDEO_SUBMISSIONS_FLAG),
+  ]);
 
   const category = event.category ?? 'Event';
   const region = event.region ?? 'Global';
@@ -227,6 +236,56 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
                 </p>
               </div>
             </Reveal>
+
+            {/* Videos — community/showcase clips (verified before going live) */}
+            {(eventVideos.length > 0 || videoSubmissionsEnabled) && (
+              <Reveal>
+                <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <h2 className="text-lg font-bold text-slate-950">Videos</h2>
+                      <p className="mt-1 text-sm text-slate-500">
+                        {eventVideos.length > 0
+                          ? `Clips featuring ${title}.`
+                          : `Got a video about ${title}? Share it — it's free and reviewed before going live.`}
+                      </p>
+                    </div>
+                    {videoSubmissionsEnabled && (
+                      <Link
+                        href={`/events/${event.slug}/submit-video` as Route}
+                        className="inline-flex flex-shrink-0 items-center justify-center gap-1.5 self-start rounded-full bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-500 active:scale-[0.98]"
+                      >
+                        + Submit a video
+                      </Link>
+                    )}
+                  </div>
+
+                  {eventVideos.length > 0 && (
+                    <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      {eventVideos.map((v) => (
+                        <figure key={v.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                          <video
+                            src={v.videoUrl}
+                            poster={v.thumbnailUrl ?? undefined}
+                            controls
+                            playsInline
+                            preload="metadata"
+                            className="aspect-video w-full bg-black object-contain"
+                          />
+                          <figcaption className="px-3.5 py-3">
+                            <h3 className="line-clamp-2 text-sm font-bold text-slate-900">{v.title}</h3>
+                            {v.description && (
+                              <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-slate-500">{v.description}</p>
+                            )}
+                            <p className="mt-1.5 text-[11px] font-medium text-slate-400">{v.submitterName}</p>
+                          </figcaption>
+                        </figure>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </Reveal>
+            )}
           </div>
 
           {/* Right column — sidebar */}

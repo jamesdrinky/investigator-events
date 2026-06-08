@@ -16,6 +16,8 @@ export interface AssociationVideoItem {
   kind: string;
   associationSlug: string | null;
   associationName: string | null;
+  eventSlug: string | null;
+  eventTitle: string | null;
   submitterName: string;
   submitterEmail: string;
   title: string;
@@ -68,12 +70,14 @@ async function signVideoUrls(admin: AdminClient, rows: any[]): Promise<Map<strin
   return resolved;
 }
 
-function mapRow(row: any, videoUrl: string, associationName: string | null): AssociationVideoItem {
+function mapRow(row: any, videoUrl: string, associationName: string | null, eventTitle: string | null = null): AssociationVideoItem {
   return {
     id: row.id,
     kind: row.kind,
     associationSlug: row.association_slug ?? null,
     associationName,
+    eventSlug: row.event_slug ?? null,
+    eventTitle,
     submitterName: row.submitter_name,
     submitterEmail: row.submitter_email,
     title: row.title,
@@ -105,6 +109,48 @@ async function fetchAssociationNames(admin: AdminClient, slugs: string[]): Promi
     if (row.slug) names.set(row.slug, row.name ?? null);
   }
   return names;
+}
+
+/** Look up event titles for a set of slugs (for the admin queue). */
+async function fetchEventTitles(admin: AdminClient, slugs: string[]): Promise<Map<string, string>> {
+  const titles = new Map<string, string>();
+  const unique = [...new Set(slugs.filter(Boolean))];
+  if (unique.length === 0) return titles;
+
+  const { data, error } = await admin
+    .from('events')
+    .select('slug, title')
+    .in('slug', unique);
+  if (error) {
+    console.error('fetchEventTitles failed:', error.message);
+    return titles;
+  }
+  for (const row of (data ?? []) as any[]) {
+    if (row.slug) titles.set(row.slug, row.title ?? null);
+  }
+  return titles;
+}
+
+/** Approved videos for a single event page (public). */
+export async function fetchApprovedVideosForEvent(slug: string): Promise<AssociationVideoItem[]> {
+  const supabase = createSupabaseAdminServerClient();
+  const { data, error } = await supabase
+    .from('association_videos' as any)
+    .select('*')
+    .eq('event_slug', slug)
+    .eq('status', 'approved')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('fetchApprovedVideosForEvent failed:', error.message);
+    return [];
+  }
+
+  const rows = (data ?? []) as any[];
+  const signed = await signVideoUrls(supabase, rows);
+  return rows
+    .map((row) => mapRow(row, signed.get(row.video_url) ?? '', null, null))
+    .filter((v) => v.videoUrl !== '');
 }
 
 /** Approved videos for a single association page (public). */
@@ -144,12 +190,18 @@ export async function fetchPendingVideos(): Promise<AssociationVideoItem[]> {
   }
 
   const rows = (data ?? []) as any[];
-  const [signed, names] = await Promise.all([
+  const [signed, names, eventTitles] = await Promise.all([
     signVideoUrls(supabase, rows),
     fetchAssociationNames(supabase, rows.map((r) => r.association_slug)),
+    fetchEventTitles(supabase, rows.map((r) => r.event_slug)),
   ]);
 
   return rows.map((row) =>
-    mapRow(row, signed.get(row.video_url) ?? '', row.association_slug ? names.get(row.association_slug) ?? null : null),
+    mapRow(
+      row,
+      signed.get(row.video_url) ?? '',
+      row.association_slug ? names.get(row.association_slug) ?? null : null,
+      row.event_slug ? eventTitles.get(row.event_slug) ?? null : null,
+    ),
   );
 }

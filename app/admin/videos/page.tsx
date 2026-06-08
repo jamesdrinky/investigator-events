@@ -95,7 +95,8 @@ export default async function AdminVideosPage() {
                   )}
                   <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-400">
                     <span className="inline-flex items-center gap-1">
-                      <Film className="h-3.5 w-3.5" /> {v.associationName ?? v.associationSlug ?? '—'}
+                      <Film className="h-3.5 w-3.5" />
+                      {v.eventTitle ? `Event: ${v.eventTitle}` : (v.associationName ?? v.associationSlug ?? '—')}
                     </span>
                     <span>{v.submitterName}</span>
                     <span>{v.submitterEmail}</span>

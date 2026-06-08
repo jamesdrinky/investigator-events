@@ -19,7 +19,14 @@ const contentSecurityPolicy = [
 const nextConfig = {
   poweredByHeader: false,
   experimental: {
-    typedRoutes: true
+    typedRoutes: true,
+    // Keep ffmpeg-static out of the webpack bundle so its binary path resolves
+    // correctly at runtime, and trace the binary into the transcode functions.
+    serverComponentsExternalPackages: ['ffmpeg-static'],
+    outputFileTracingIncludes: {
+      '/api/zz-ffmpeg-test': ['./node_modules/ffmpeg-static/ffmpeg'],
+      '/api/cron/transcode-videos': ['./node_modules/ffmpeg-static/ffmpeg'],
+    },
   },
   images: {
     remotePatterns: [

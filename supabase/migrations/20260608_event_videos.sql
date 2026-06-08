@@ -9,5 +9,6 @@ create index if not exists association_videos_event_slug_status_idx
   on public.association_videos (event_slug, status, created_at desc);
 
 -- Event showcase videos can be longer than the 45s member clips, so raise the
--- private bucket's per-file limit to 200 MB.
-update storage.buckets set file_size_limit = 209715200 where id = 'event-videos';
+-- private bucket's per-file limit to 500 MB (comfortably fits a 3-min 1080p/4K
+-- clip while staying in reliable single-PUT upload territory).
+update storage.buckets set file_size_limit = 524288000 where id = 'event-videos';

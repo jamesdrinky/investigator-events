@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { UploadCloud, Film, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 
-const MAX_BYTES = 200 * 1024 * 1024; // 200 MB ceiling (matches the storage bucket)
+const MAX_BYTES = 500 * 1024 * 1024; // 500 MB ceiling (matches the storage bucket)
 const ACCEPTED = ['video/mp4', 'video/quicktime', 'video/webm'];
 
 // Shared between association member clips (short) and event showcase videos
@@ -60,7 +60,7 @@ export function SubmitVideoForm({
       return;
     }
     if (f.size > MAX_BYTES) {
-      setFileError('That file is over 200 MB. Please trim or compress it.');
+      setFileError('That file is over 500 MB. Please trim or compress it.');
       return;
     }
 
@@ -159,7 +159,7 @@ export function SubmitVideoForm({
           >
             <UploadCloud className="h-8 w-8 text-slate-400" />
             <span className="text-sm font-medium text-slate-700">Tap to choose a video</span>
-            <span className="text-xs text-slate-400">MP4, MOV or WebM · up to 200 MB</span>
+            <span className="text-xs text-slate-400">MP4, MOV or WebM · up to 500 MB</span>
           </button>
         ) : (
           <div className="mt-2 space-y-3">

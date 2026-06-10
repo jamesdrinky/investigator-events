@@ -9,6 +9,7 @@ import { getCountryFlag } from '@/lib/utils/location';
 import { AvatarCropUpload } from '@/components/AvatarCropUpload';
 import { getProfileCompletion, PROFILE_VISIBILITY_THRESHOLD } from '@/lib/utils/profile-completion';
 import { slugifyUsername } from '@/lib/utils/username';
+import { DEFAULT_EMAIL_PREFS, normalizeEmailPrefs, type EmailPrefs } from '@/lib/notifications-prefs';
 
 const COUNTRIES = [
   'Afghanistan','Albania','Algeria','Andorra','Angola','Argentina','Armenia','Australia','Austria','Azerbaijan',
@@ -200,6 +201,9 @@ export default function EditProfilePage() {
   const [authProvider, setAuthProvider] = useState<string | null>(null);
   const [appleLinked, setAppleLinked] = useState(false);
 
+  // Email notification preferences (governs the daily activity digest only)
+  const [emailPrefs, setEmailPrefs] = useState<EmailPrefs>(DEFAULT_EMAIL_PREFS);
+
   // Work experience
   type Experience = { id?: string; company_name: string; organisation_id: string | null; job_title: string; description: string; start_year: string; end_year: string; is_current: boolean };
   const [experience, setExperience] = useState<Experience[]>([]);
@@ -238,6 +242,7 @@ export default function EditProfilePage() {
         const profileBadges = profile.badges as string[] | null;
         if (profileBadges) setSelectedBadges(profileBadges);
         setLinkedinUrl((profile as any).linkedin_url ?? '');
+        setEmailPrefs(normalizeEmailPrefs((data.user.user_metadata as any)?.email_prefs));
 
         // Check auth_provider from profile, but also check live auth state
         const storedProvider = (profile as any).auth_provider;
@@ -428,6 +433,9 @@ export default function EditProfilePage() {
       badges: selectedBadges.length > 0 ? selectedBadges : null,
       is_public: true,
     } as any).eq('id', userId);
+
+    // Email notification preferences live in auth user metadata (no DB column needed)
+    await supabase.auth.updateUser({ data: { email_prefs: emailPrefs } });
 
     // Sync associations
     await supabase.from('user_associations').delete().eq('user_id', userId);
@@ -993,6 +1001,48 @@ export default function EditProfilePage() {
             <button type="button" onClick={addSection} className="mt-4 flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700">
               <Plus className="h-4 w-4" /> Add section
             </button>
+          </div>
+
+          {/* Email notifications */}
+          <div className="mt-10 rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm sm:p-6">
+            <h2 className="text-lg font-bold text-slate-900">Email notifications</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Choose which activity emails you get. This doesn&apos;t affect important account emails or the weekly newsletter.
+            </p>
+
+            <div className="mt-4 space-y-1">
+              <label className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3">
+                <span className="text-sm font-semibold text-slate-900">Pause all activity emails</span>
+                <input
+                  type="checkbox"
+                  className="h-5 w-5 accent-blue-600"
+                  checked={!emailPrefs.all}
+                  onChange={(e) => setEmailPrefs((p) => ({ ...p, all: !e.target.checked }))}
+                />
+              </label>
+
+              {([
+                ['requests', 'Connection requests & follows'],
+                ['events', 'Events'],
+                ['messages', 'Messages'],
+                ['social', 'Likes & comments'],
+              ] as const).map(([key, label]) => (
+                <label
+                  key={key}
+                  className={`flex items-center justify-between gap-4 rounded-xl px-4 py-3 ${emailPrefs.all ? 'cursor-pointer' : 'opacity-40'}`}
+                >
+                  <span className="text-sm font-medium text-slate-700">{label}</span>
+                  <input
+                    type="checkbox"
+                    className="h-5 w-5 accent-blue-600"
+                    disabled={!emailPrefs.all}
+                    checked={emailPrefs.all && emailPrefs[key]}
+                    onChange={(e) => setEmailPrefs((p) => ({ ...p, [key]: e.target.checked }))}
+                  />
+                </label>
+              ))}
+            </div>
+            <p className="mt-2 text-xs text-slate-400">Saved when you hit &ldquo;Save profile&rdquo;.</p>
           </div>
 
           {/* Save */}

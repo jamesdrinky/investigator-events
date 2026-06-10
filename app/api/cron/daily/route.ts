@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { processOutreachQueue } from '@/lib/email/association-outreach';
 import { verifyCronSecret } from '@/lib/security/server';
+import { normalizeEmailPrefs, emailAllowed } from '@/lib/notifications-prefs';
 
 export async function GET(request: Request) {
   const authError = verifyCronSecret(request);
@@ -185,9 +186,10 @@ async function runDigest() {
   for (const [userId, userNotifs] of Object.entries(byUser)) {
     if (userNotifs.length === 0) continue;
 
-    const [emailResult, profileResult] = await Promise.all([
+    const [emailResult, profileResult, userResult] = await Promise.all([
       (supabase.rpc as any)('get_user_email', { uid: userId }),
       supabase.from('profiles').select('full_name').eq('id', userId).single(),
+      supabase.auth.admin.getUserById(userId),
     ]);
 
     const email = emailResult?.data;
@@ -197,9 +199,20 @@ async function runDigest() {
       continue;
     }
 
+    // Respect the user's email notification preferences (stored in auth metadata).
+    // Drop the types they've muted; if nothing's left, suppress the digest
+    // entirely (still mark the notifications emailed below so we don't
+    // reconsider them tomorrow).
+    const prefs = normalizeEmailPrefs((userResult?.data?.user?.user_metadata as any)?.email_prefs);
+    const allowedNotifs = userNotifs.filter((n: any) => emailAllowed(prefs, n.type));
+    if (allowedNotifs.length === 0) {
+      successUserIds.push(userId);
+      continue;
+    }
+
     const name = profileResult?.data?.full_name ?? 'there';
-    const html = buildDailyDigestEmail(name, userNotifs);
-    const total = userNotifs.length;
+    const html = buildDailyDigestEmail(name, allowedNotifs);
+    const total = allowedNotifs.length;
 
     const { error } = await resend.emails.send({
       from: 'Investigator Events <info@investigatorevents.com>',

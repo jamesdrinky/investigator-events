@@ -5,6 +5,7 @@ import { getWeeklyCollections } from '@/lib/data/weekly';
 import { buildWeeklyNewsletterHtml } from '@/lib/email/weekly-newsletter';
 import { buildNewsletterVerifyReminderEmail } from '@/lib/email/newsletter-verify-reminder';
 import { buildNewsletterOptInPitchEmail } from '@/lib/email/newsletter-opt-in-pitch';
+import { buildCreateAccountPitchEmail } from '@/lib/email/create-account-pitch';
 import { buildAppLaunchAnnounceEmail, type AppLaunchRegion } from '@/lib/email/app-launch-announce';
 import { verifyCronSecret } from '@/lib/security/server';
 
@@ -17,13 +18,13 @@ const ALLOWED_RECIPIENTS = new Set([
   'jamesdrinky@yahoo.com',
 ]);
 
-type TemplateName = 'newsletter-verify' | 'newsletter-opt-in' | 'app-launch' | 'monday-newsletter';
+type TemplateName = 'newsletter-verify' | 'newsletter-opt-in' | 'create-account' | 'app-launch' | 'monday-newsletter';
 
 async function buildTemplate(template: TemplateName, region: AppLaunchRegion) {
   switch (template) {
     case 'newsletter-verify':
       return {
-        subject: 'One click to finish your newsletter signup',
+        subject: 'Confirm your spot before we remove you from the list',
         html: buildNewsletterVerifyReminderEmail('preview-token', 'James'),
       };
     case 'newsletter-opt-in':
@@ -33,6 +34,11 @@ async function buildTemplate(template: TemplateName, region: AppLaunchRegion) {
           `${SITE}/api/newsletter/one-click-subscribe?token=preview-token`,
           'James',
         ),
+      };
+    case 'create-account':
+      return {
+        subject: 'You read the briefing — now claim your free profile',
+        html: buildCreateAccountPitchEmail('James'),
       };
     case 'app-launch':
       return {
@@ -75,7 +81,7 @@ export async function GET(request: Request) {
   const regionParam = searchParams.get('region');
   const region: AppLaunchRegion = regionParam === 'eu-pending' ? 'eu-pending' : 'available';
 
-  const validTemplates: TemplateName[] = ['newsletter-verify', 'newsletter-opt-in', 'app-launch', 'monday-newsletter'];
+  const validTemplates: TemplateName[] = ['newsletter-verify', 'newsletter-opt-in', 'create-account', 'app-launch', 'monday-newsletter'];
   if (!template || !validTemplates.includes(template)) {
     return NextResponse.json({
       error: `Invalid template. Use one of: ${validTemplates.join(', ')}`,

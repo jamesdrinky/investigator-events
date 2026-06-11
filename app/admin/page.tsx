@@ -492,9 +492,15 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                             <RotateCcw className="h-4 w-4" /> Restore to pending
                           </button>
                         </form>
-                        <form action={rejectSubmissionAction}>
+                        <form action={rejectSubmissionAction} className="flex flex-col gap-2 sm:w-72">
                           <input type="hidden" name="submissionId" value={submission.id} />
-                          <button type="submit" className="flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-5 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100">
+                          <textarea
+                            name="message"
+                            rows={2}
+                            placeholder="Optional note to the submitter — type or paste. If filled, it's emailed to them (nicely branded). Leave blank to reject silently."
+                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-red-300"
+                          />
+                          <button type="submit" className="flex items-center justify-center gap-2 rounded-full border border-red-200 bg-red-50 px-5 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100">
                             <XCircle className="h-4 w-4" /> Reject
                           </button>
                         </form>
@@ -602,9 +608,15 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
                             <Archive className="h-4 w-4" /> Archive
                           </button>
                         </form>
-                        <form action={rejectSubmissionAction}>
+                        <form action={rejectSubmissionAction} className="flex flex-col gap-2 sm:w-72">
                           <input type="hidden" name="submissionId" value={submission.id} />
-                          <button type="submit" className="flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-5 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100">
+                          <textarea
+                            name="message"
+                            rows={2}
+                            placeholder="Optional note to the submitter — type or paste. If filled, it's emailed to them (nicely branded). Leave blank to reject silently."
+                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-red-300"
+                          />
+                          <button type="submit" className="flex items-center justify-center gap-2 rounded-full border border-red-200 bg-red-50 px-5 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100">
                             <XCircle className="h-4 w-4" /> Reject
                           </button>
                         </form>

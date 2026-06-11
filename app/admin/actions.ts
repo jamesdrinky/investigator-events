@@ -17,7 +17,7 @@ import {
   setAdminSessionCookie
 } from '@/lib/admin/session';
 import { queueApprovalOutreachEmail } from '@/lib/email/association-outreach';
-import { buildSubmissionApprovedEmail } from '@/lib/email/submission-confirmation';
+import { buildSubmissionApprovedEmail, buildSubmissionRejectedEmail } from '@/lib/email/submission-confirmation';
 import { Resend } from 'resend';
 
 async function ensureAdminSession() {
@@ -427,12 +427,35 @@ export async function rejectSubmissionAction(formData: FormData) {
   await ensureAdminSession();
 
   const submissionId = parseRequired(formData, 'submissionId');
+  const message = ((formData.get('message') as string | null) ?? '').trim();
   const supabase = createSupabaseAdminServerClient();
+
+  // Load the submission first so we have the submitter's email + event name
+  // for the (optional) rejection email.
+  const { data: submission } = await supabase
+    .from('event_submissions')
+    .select('contact_email, event_name')
+    .eq('id', submissionId)
+    .maybeSingle();
+
   const { error } = await supabase.from('event_submissions').update({ status: 'rejected' }).eq('id', submissionId);
 
   if (error) {
     console.error('Reject submission failed:', error.message);
     throw new Error('Failed to reject submission');
+  }
+
+  // Only email the submitter if the admin actually wrote a message. Blank =
+  // silent reject (the original behaviour). Fire-and-forget — never blocks.
+  const resendKey = process.env.RESEND_API_KEY;
+  if (message && resendKey && submission?.contact_email) {
+    const eventName = submission.event_name ?? 'your event';
+    new Resend(resendKey).emails.send({
+      from: 'Investigator Events <info@investigatorevents.com>',
+      to: submission.contact_email,
+      subject: `About your event submission — ${eventName}`,
+      html: buildSubmissionRejectedEmail(eventName, message),
+    }).catch((err) => console.error('Rejection email failed:', err));
   }
 
   revalidatePath('/submit-event');

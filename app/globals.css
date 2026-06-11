@@ -79,8 +79,17 @@ html { background-color: #ffffff; }
 @media (max-width: 1023px) {
   body { -webkit-user-select: none; user-select: none; }
   /* Allow selection in text-heavy areas */
-  p, article, .selectable, input, textarea, [contenteditable] {
+  p, article, .selectable {
     -webkit-user-select: text; user-select: text;
+  }
+  /* Form fields MUST keep selection + the iOS paste callout, or users can't
+     paste into them (long-press → Paste never appears) and have to type
+     manually. The body's user-select:none was suppressing the paste menu;
+     restoring -webkit-touch-callout here brings it back. */
+  input, textarea, select, [contenteditable] {
+    -webkit-user-select: text !important;
+    user-select: text !important;
+    -webkit-touch-callout: default !important;
   }
 }
 

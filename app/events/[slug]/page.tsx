@@ -308,7 +308,7 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
             {/* Who's going — desktop only (mobile is in hero) */}
             <Reveal delay={0.02}>
               <div className="hidden rounded-2xl border border-blue-200/60 bg-gradient-to-b from-blue-50/40 to-white p-5 shadow-sm lg:block">
-                <h3 className="mb-3 text-sm font-bold text-slate-950">Who&apos;s going</h3>
+                <h3 className="mb-3 text-sm font-bold text-slate-950">Who’s going</h3>
                 <AttendeeAvatars eventId={event.id} />
               </div>
             </Reveal>

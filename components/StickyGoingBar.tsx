@@ -73,7 +73,7 @@ export function StickyGoingBar({ eventId, eventTitle }: { eventId: string; event
             disabled={toggling}
             className="flex items-center gap-1.5 rounded-full bg-blue-600 px-5 py-2 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 disabled:opacity-60"
           >
-            <ThumbsUp className="h-3.5 w-3.5" /> I&apos;m going
+            <ThumbsUp className="h-3.5 w-3.5" /> I’m going
           </button>
         )}
       </div>

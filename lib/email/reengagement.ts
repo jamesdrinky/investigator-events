@@ -54,12 +54,12 @@ export function pickVariant(input: ReengagementInput): ReengagementVariant {
 export function pickSubject(input: ReengagementInput): string {
   const v = pickVariant(input);
   if (v.startsWith('tier_a')) return `Finish setting up your Investigator Events profile`;
-  if (v.startsWith('tier_b')) return `You're nearly there — add the finishing touches to your profile`;
+  if (v.startsWith('tier_b')) return `You’re nearly there — add the finishing touches to your profile`;
   // tier_c
   if (input.eventsMode === 'new_since_visit' && input.eventsTotalCount > 0) {
     return `${input.eventsTotalCount} new event${input.eventsTotalCount === 1 ? '' : 's'} on Investigator Events since you were last here`;
   }
-  return `What's coming up on Investigator Events`;
+  return `What’s coming up on Investigator Events`;
 }
 
 function formatDate(iso: string): string {
@@ -153,7 +153,7 @@ function noAssociationsCallout(): string {
   <table cellpadding="0" cellspacing="0" border="0" width="100%" role="presentation" style="margin:0 0 14px;background-color:#fef3c7;border:1px solid #fcd34d;border-radius:12px;">
     <tr><td style="padding:14px 18px;">
       <p style="margin:0;font-size:13px;font-weight:700;color:#92400e;">
-        You haven't added any association memberships yet
+        You haven’t added any association memberships yet
       </p>
       <p style="margin:4px 0 8px;font-size:13px;color:#78350f;line-height:1.5;">
         Adding your associations gets you onto member lists and pushes you up the directory. Takes 30 seconds.
@@ -222,7 +222,7 @@ function statsBlock(input: ReengagementInput): string {
   const hasNewSinceVisit = input.eventsMode === 'new_since_visit' || input.associationsMode === 'new_since_visit';
   const lead = hasNewSinceVisit && sinceWhen
     ? `Since you were last here (${sinceWhen})`
-    : `What's on Investigator Events right now`;
+    : `What’s on Investigator Events right now`;
 
   const hasEvents = input.events.length > 0;
   const hasAssocs = input.associations.length > 0;
@@ -281,21 +281,21 @@ function tierCopy(input: ReengagementInput): { headline: string; subline: string
   if (variant.startsWith('tier_a')) {
     return {
       headline: 'Finish setting up your profile',
-      subline: 'You signed up but haven\'t filled in the basics yet — take 2 minutes and you\'ll show up in the PI directory and on event attendance lists.',
+      subline: 'You signed up but haven’t filled in the basics yet — take 2 minutes and you’ll show up in the PI directory and on event attendance lists.',
       primaryCta: { href: `${SITE}/profile/edit`, label: 'Complete my profile' },
     };
   }
   if (variant.startsWith('tier_b')) {
     return {
       headline: 'Add the finishing touches',
-      subline: 'Your profile is in good shape — a couple more details and you\'ll rank higher in the directory and look the part to peers and event organisers.',
+      subline: 'Your profile is in good shape — a couple more details and you’ll rank higher in the directory and look the part to peers and event organisers.',
       primaryCta: { href: `${SITE}/profile/edit`, label: 'Polish my profile' },
     };
   }
   // tier_c
   return {
-    headline: 'Your profile looks great — see what\'s new',
-    subline: 'You\'re set up. Here\'s what\'s landed on Investigator Events since you were last here.',
+    headline: 'Your profile looks great — see what’s new',
+    subline: 'You’re set up. Here’s what’s landed on Investigator Events since you were last here.',
     primaryCta: { href: `${SITE}/calendar`, label: 'Browse the calendar' },
   };
 }
@@ -373,7 +373,7 @@ export function buildReengagementEmail(input: ReengagementInput, sample?: Sample
         ${showProgressBar ? `<tr><td style="background-color:${C.white};padding:14px 32px 0;">${progressBar(input.completionScore)}</td></tr>` : ''}
 
         ${showChecklist ? `<tr><td style="background-color:${C.white};padding:0 32px 6px;">
-          <p style="margin:6px 0 0;font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:${C.muted};text-align:left;">What's still to do</p>
+          <p style="margin:6px 0 0;font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:${C.muted};text-align:left;">What’s still to do</p>
           ${missingChecklist(input.missingItems)}
         </td></tr>` : ''}
 

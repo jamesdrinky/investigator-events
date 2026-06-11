@@ -24,71 +24,71 @@ const beforeDos = [
   { title: 'Set clear objectives', detail: 'Decide what you want from the conference before you arrive. New contacts, CPD hours, specific sessions, supplier leads — know your purpose going in.' },
   { title: 'Study the programme in advance', detail: 'Read the agenda properly. Identify the two or three sessions most relevant to your work and block them in your diary. Workshops and breakouts often fill up — register early.' },
   { title: 'Bring more business cards than you think you need', detail: 'Physical cards still matter in this industry. Bring twice as many as you expect to use. Include your professional memberships and any specialist areas on the card.' },
-  { title: 'Research the speakers and key attendees', detail: "Look up the presenters. If there's someone specific you want to meet, know who they are and what they do before you walk in. It makes introductions less awkward and conversations more substantive." },
+  { title: 'Research the speakers and key attendees', detail: "Look up the presenters. If there’s someone specific you want to meet, know who they are and what they do before you walk in. It makes introductions less awkward and conversations more substantive." },
   { title: 'Dress appropriately', detail: "Professional standards vary by country and event type. Business professional is always safe. Read the invitation or event page carefully — some international conferences are formal, others are not." },
 ];
 
 const beforeDonts = [
-  { title: "Don't try to attend everything", detail: "Attempting to cover the full programme leads to exhaustion and shallow engagement with everything. It's better to attend fewer sessions with full attention than sprint between rooms." },
-  { title: "Don't go in blind", detail: "Showing up without any preparation wastes an expensive day. Know the venue layout, the rough timings, and who is in the room. This isn't surveillance work — but the mindset applies." },
-  { title: "Don't plan to work from the hotel in the evenings", detail: "Some of the best conversations happen at the evening social. Block the time out of your diary properly before you travel, not after." },
-  { title: "Don't leave registration documents until the last minute", detail: "If the conference offers CPD accreditation, understand how it's recorded before the day. Some require pre-registration; others issue certificates only if you sign in at each session." },
+  { title: "Don’t try to attend everything", detail: "Attempting to cover the full programme leads to exhaustion and shallow engagement with everything. It’s better to attend fewer sessions with full attention than sprint between rooms." },
+  { title: "Don’t go in blind", detail: "Showing up without any preparation wastes an expensive day. Know the venue layout, the rough timings, and who is in the room. This isn’t surveillance work — but the mindset applies." },
+  { title: "Don’t plan to work from the hotel in the evenings", detail: "Some of the best conversations happen at the evening social. Block the time out of your diary properly before you travel, not after." },
+  { title: "Don’t leave registration documents until the last minute", detail: "If the conference offers CPD accreditation, understand how it’s recorded before the day. Some require pre-registration; others issue certificates only if you sign in at each session." },
 ];
 
 const duringDos = [
-  { title: 'Take notes during sessions', detail: "Sessions move quickly. A speaker's case study, a regulatory update, a statistic — if it's useful, write it down. You'll find it difficult to reconstruct from memory the following week." },
-  { title: 'Introduce yourself to speakers after their session', detail: "Speakers are there to engage. If a session resonated, say so briefly and specifically. Keep it short, exchange cards if appropriate, and don't monopolise their time when others are waiting." },
-  { title: 'Visit the exhibitor stands', detail: "Technology providers, legal service firms, and specialist suppliers often exhibit. Even if you're not buying, knowing what's available keeps you current and gives you things to discuss with clients." },
-  { title: 'Attend the AGM or association business sessions if relevant', detail: "If you're a member of the organising association, attend the formal business. These sessions shape the direction of the profession and are where influence is built over time." },
+  { title: 'Take notes during sessions', detail: "Sessions move quickly. A speaker’s case study, a regulatory update, a statistic — if it’s useful, write it down. You’ll find it difficult to reconstruct from memory the following week." },
+  { title: 'Introduce yourself to speakers after their session', detail: "Speakers are there to engage. If a session resonated, say so briefly and specifically. Keep it short, exchange cards if appropriate, and don’t monopolise their time when others are waiting." },
+  { title: 'Visit the exhibitor stands', detail: "Technology providers, legal service firms, and specialist suppliers often exhibit. Even if you’re not buying, knowing what’s available keeps you current and gives you things to discuss with clients." },
+  { title: 'Attend the AGM or association business sessions if relevant', detail: "If you’re a member of the organising association, attend the formal business. These sessions shape the direction of the profession and are where influence is built over time." },
 ];
 
 const duringDonts = [
-  { title: "Don't be on your phone during sessions", detail: "It's visible, it's disrespectful to the speaker, and it signals to everyone around you that you're not fully there. Check messages during breaks." },
-  { title: "Don't dismiss sessions outside your immediate specialism", detail: "Cross-discipline sessions — cyber, financial crime, employment, legal — can open referral networks and client conversations you didn't expect. Keep an open mind on the programme." },
-  { title: "Don't leave early just to beat the traffic", detail: "Some of the best conversations happen on the last afternoon, when the room thins out and people relax. Stay to the end where possible." },
-  { title: "Don't overdo the evening events", detail: "If there's a formal dinner or evening drinks, pace yourself. Morning sessions follow. A poor first impression at breakfast the next day can undo good work the day before." },
+  { title: "Don’t be on your phone during sessions", detail: "It’s visible, it’s disrespectful to the speaker, and it signals to everyone around you that you’re not fully there. Check messages during breaks." },
+  { title: "Don’t dismiss sessions outside your immediate specialism", detail: "Cross-discipline sessions — cyber, financial crime, employment, legal — can open referral networks and client conversations you didn’t expect. Keep an open mind on the programme." },
+  { title: "Don’t leave early just to beat the traffic", detail: "Some of the best conversations happen on the last afternoon, when the room thins out and people relax. Stay to the end where possible." },
+  { title: "Don’t overdo the evening events", detail: "If there’s a formal dinner or evening drinks, pace yourself. Morning sessions follow. A poor first impression at breakfast the next day can undo good work the day before." },
 ];
 
 const networkingDos = [
-  { title: 'Seek out people you don\'t know', detail: "Gravitating towards familiar faces is comfortable but unproductive. Introduce yourself to at least three or four people you've not met before. Start with the question: \"What area do you work in?\"" },
-  { title: 'Ask questions and listen properly', detail: "People remember those who showed genuine interest in what they do. Ask about specific cases, jurisdictions they work in, or challenges they're facing. Let them talk." },
+  { title: 'Seek out people you don’t know', detail: "Gravitating towards familiar faces is comfortable but unproductive. Introduce yourself to at least three or four people you’ve not met before. Start with the question: “What area do you work in?”" },
+  { title: 'Ask questions and listen properly', detail: "People remember those who showed genuine interest in what they do. Ask about specific cases, jurisdictions they work in, or challenges they’re facing. Let them talk." },
   { title: 'Engage with international delegates', detail: "Investigators from other countries are attending the same event with purpose. Cross-border referral relationships are built face to face. International conferences in particular are an opportunity not to waste." },
   { title: 'Exchange cards after a conversation, not instead of one', detail: "Hand your card at the end of a meaningful exchange. Handing cards to everyone in the room without context is forgettable. A short conversation makes you memorable." },
 ];
 
 const networkingDonts = [
-  { title: "Don't open with a sales pitch", detail: "Conferences are not the right environment for selling. Lead with curiosity about the other person, not with what your firm does. If there's mutual interest, that conversation will follow naturally." },
-  { title: "Don't spend the day with people you already know", detail: "It's easy to fall into this. If you've come with colleagues, split up during breaks and lunch. You can debrief on the train home." },
-  { title: "Don't talk disparagingly about competitors", detail: "The PI industry is a small world. Critical remarks about other firms or individuals travel quickly. Say nothing you wouldn't want repeated — because it probably will be." },
-  { title: "Don't dominate conversations", detail: "Know when to move on. If a conversation has run its course, it's fine to say it was good to meet and move on. Overstaying a conversation is uncomfortable for both parties." },
+  { title: "Don’t open with a sales pitch", detail: "Conferences are not the right environment for selling. Lead with curiosity about the other person, not with what your firm does. If there’s mutual interest, that conversation will follow naturally." },
+  { title: "Don’t spend the day with people you already know", detail: "It’s easy to fall into this. If you’ve come with colleagues, split up during breaks and lunch. You can debrief on the train home." },
+  { title: "Don’t talk disparagingly about competitors", detail: "The PI industry is a small world. Critical remarks about other firms or individuals travel quickly. Say nothing you wouldn’t want repeated — because it probably will be." },
+  { title: "Don’t dominate conversations", detail: "Know when to move on. If a conversation has run its course, it’s fine to say it was good to meet and move on. Overstaying a conversation is uncomfortable for both parties." },
 ];
 
 const speakingTips = [
-  { title: 'Know your material cold', detail: "If you're presenting on a case study, know every detail. You will be asked questions. Saying \"I'll have to check that\" once is acceptable; doing it repeatedly is not.", num: '01' },
+  { title: 'Know your material cold', detail: "If you’re presenting on a case study, know every detail. You will be asked questions. Saying “I’ll have to check that” once is acceptable; doing it repeatedly is not.", num: '01' },
   { title: 'Arrive before your session starts', detail: "Check the room, confirm the AV setup, and load your slides in advance. Technical delays at the start of a presentation create the wrong first impression.", num: '02' },
   { title: 'Keep slides clean and minimal', detail: "Dense slides with paragraphs of text lose the room. Use visuals, brief points, and leave room to speak. If you read from your own slides, the audience will too.", num: '03' },
   { title: 'Be careful with client data', detail: "Case studies are powerful but require care. Anonymise fully, obtain any necessary permissions, and never include information that could identify a client or expose live intelligence.", num: '04' },
-  { title: 'Engage with the audience during Q&A', detail: "Don't rush off the stage the moment Q&A ends. Stay in the room. The conversations immediately after a session are often the most valuable of the day.", num: '05' },
+  { title: 'Engage with the audience during Q&A', detail: "Don’t rush off the stage the moment Q&A ends. Stay in the room. The conversations immediately after a session are often the most valuable of the day.", num: '05' },
   { title: 'Share your slides afterwards if appropriate', detail: "Offering to send slides to interested attendees gives you a legitimate, warm reason to follow up. Collect cards or LinkedIn details before you leave the room.", num: '06' },
 ];
 
 const afterDos = [
   { title: 'Follow up within 48 hours', detail: "Send a short LinkedIn connection request or a brief email while the conference is still fresh. Reference something specific from your conversation — it shows you were paying attention." },
-  { title: 'Organise your contacts while they\'re fresh', detail: "Go through the cards you collected the same evening or the next morning. Note where you met each person, what you discussed, and any agreed next steps." },
-  { title: 'Write a short summary of what you learned', detail: "Capture key takeaways from sessions while they're still clear. Even a brief internal memo helps embed the learning and demonstrates value from the time invested." },
+  { title: 'Organise your contacts while they’re fresh', detail: "Go through the cards you collected the same evening or the next morning. Note where you met each person, what you discussed, and any agreed next steps." },
+  { title: 'Write a short summary of what you learned', detail: "Capture key takeaways from sessions while they’re still clear. Even a brief internal memo helps embed the learning and demonstrates value from the time invested." },
   { title: 'Note the next event in the series', detail: "Annual conferences build on the last. Check the next event date and book early. Consistent attendance over two or three years builds far stronger relationships than a one-off visit." },
 ];
 
 const afterDonts = [
-  { title: "Don't let connections go cold", detail: "Meeting someone once and never following up means you'll spend the next conference reintroducing yourself. That's not a network — that's an address book." },
-  { title: "Don't send a generic follow-up message", detail: "A message that reads \"great to meet you at the conference\" and nothing more does almost nothing. Personalise it — even a single sentence of context is the difference between remembered and deleted." },
-  { title: "Don't ignore the CPD documentation", detail: "Many industry conferences carry formal CPD points. If you've attended sessions that qualify, log them immediately. Certificates and attendance records become harder to locate a month later." },
-  { title: "Don't oversell new connections immediately", detail: "Following up within 48 hours with a service offer is too soon. Reconnect, reference the conversation, and let the relationship develop at a natural pace." },
+  { title: "Don’t let connections go cold", detail: "Meeting someone once and never following up means you’ll spend the next conference reintroducing yourself. That’s not a network — that’s an address book." },
+  { title: "Don’t send a generic follow-up message", detail: "A message that reads “great to meet you at the conference” and nothing more does almost nothing. Personalise it — even a single sentence of context is the difference between remembered and deleted." },
+  { title: "Don’t ignore the CPD documentation", detail: "Many industry conferences carry formal CPD points. If you’ve attended sessions that qualify, log them immediately. Certificates and attendance records become harder to locate a month later." },
+  { title: "Don’t oversell new connections immediately", detail: "Following up within 48 hours with a service offer is too soon. Reconnect, reference the conversation, and let the relationship develop at a natural pace." },
 ];
 
 const checklist = [
   'Programme reviewed and key sessions highlighted',
-  'Business cards packed (more than you think you\'ll need)',
+  'Business cards packed (more than you think you’ll need)',
   'Registration confirmed and badge collected or on-site plan noted',
   'Venue location and parking or transport confirmed',
   'Phone charged, notebook or note-taking app ready',
@@ -382,7 +382,7 @@ export function AdviceContent() {
               </h1>
 
               <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-white/35 sm:mt-6 sm:text-lg">
-                The practical dos and don&apos;ts for investigators attending an industry conference for the first time — from first impressions to lasting relationships.
+                The practical dos and don&rsquo;ts for investigators attending an industry conference for the first time — from first impressions to lasting relationships.
               </p>
 
               <div className="mt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
@@ -466,7 +466,7 @@ export function AdviceContent() {
           id="during" num="02"
           label="During the Event"
           title="How you conduct yourself in the room matters"
-          description="Conferences in this industry are small worlds. Reputations travel. The standards you'd apply professionally apply here too."
+          description="Conferences in this industry are small worlds. Reputations travel. The standards you’d apply professionally apply here too."
           dos={duringDos} donts={duringDonts}
         />
       </div>
@@ -517,7 +517,7 @@ export function AdviceContent() {
                 <span className="font-[var(--font-serif)] text-2xl font-bold text-blue-600">&ldquo;</span>
               </div>
               <blockquote className="relative font-[var(--font-serif)] text-xl font-medium italic leading-relaxed text-slate-700 sm:text-2xl lg:text-[1.65rem]">
-                The referral you&apos;ll land next year starts with a thirty-second conversation at a conference today. Show up, be curious, and follow up.
+                The referral you’ll land next year starts with a thirty-second conversation at a conference today. Show up, be curious, and follow up.
               </blockquote>
               <cite className="mt-6 block text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 not-italic">
                 Investigator Events — Career Advice Series
@@ -541,10 +541,10 @@ export function AdviceContent() {
           <div className="mx-auto max-w-6xl">
             <SectionBadge num="04" variant="light" />
             <Reveal>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-blue-600 sm:text-xs">If You&apos;re Speaking or Presenting</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-blue-600 sm:text-xs">If You’re Speaking or Presenting</p>
               <h2 className="mt-4 text-[1.75rem] font-bold leading-[1.1] tracking-tight text-slate-900 sm:text-3xl lg:text-[2.5rem]">Speaking at a conference raises your profile — get it right</h2>
               <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-500 sm:text-base">
-                Whether you&apos;re delivering a full session, sitting on a panel, or contributing to a workshop, how you present reflects directly on your professional standing.
+                Whether you’re delivering a full session, sitting on a panel, or contributing to a workshop, how you present reflects directly on your professional standing.
               </p>
             </Reveal>
 

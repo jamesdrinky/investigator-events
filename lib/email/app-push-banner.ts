@@ -130,7 +130,7 @@ function heroBanner(region: AppPushRegion): string {
   const ctaBlock = region === 'eu-pending'
     ? `
     <p style="margin:18px 0 0;font-size:12px;font-weight:600;color:#fcd34d;text-align:center;line-height:1.5;">
-      EU App Store rollout is expected next week — we'll email you when it's live in your country.
+      EU App Store rollout is expected next week — we’ll email you when it’s live in your country.
     </p>`
     : `
     <table cellpadding="0" cellspacing="0" role="presentation" style="margin:22px auto 0;">

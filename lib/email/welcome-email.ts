@@ -54,7 +54,7 @@ export function buildWelcomeEmail(fullName: string | null): string {
             ${greeting},
           </p>
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.6;">
-            Thanks for joining Investigator Events. You're one step away from being visible to the global PI community.
+            Thanks for joining Investigator Events. You’re one step away from being visible to the global PI community.
           </p>
           <p style="margin:12px 0 0;font-size:15px;color:${C.body};line-height:1.6;">
             Complete your profile to connect with fellow investigators, follow events and associations, and show up in the PI directory.

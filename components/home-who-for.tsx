@@ -20,7 +20,7 @@ export function HomeWhoItsFor() {
     <section className="section-pad relative overflow-hidden pt-0">
       <div className="container-shell">
         <Reveal className="mb-10 max-w-3xl">
-          <p className="eyebrow">Who It&apos;s For</p>
+          <p className="eyebrow">Who It’s For</p>
           <h2 className="section-title">Built for the Entire Investigator Events Ecosystem</h2>
         </Reveal>
 

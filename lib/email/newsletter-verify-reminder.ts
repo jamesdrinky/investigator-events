@@ -74,15 +74,15 @@ export function buildNewsletterVerifyReminderEmail(
 
         <tr><td style="background-color:${C.white};padding:24px 32px 8px;text-align:center;">
           <p style="margin:0;font-size:22px;font-weight:800;color:${C.dark};letter-spacing:-0.02em;line-height:1.25;">
-            ${greeting} — you're one click away
+            ${greeting} — you’re one click away
           </p>
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.6;">
             You signed up for the <strong>Investigator Events</strong> weekly briefing, but your
-            email was never confirmed — so you haven't received a single issue, and right now you're
+            email was never confirmed — so you haven’t received a single issue, and right now you’re
             not on the active list.
           </p>
           <p style="margin:12px 0 0;font-size:15px;color:${C.body};line-height:1.6;">
-            Confirm below and you're in — the next edition lands straight in your inbox.
+            Confirm below and you’re in — the next edition lands straight in your inbox.
           </p>
         </td></tr>
 
@@ -119,8 +119,8 @@ export function buildNewsletterVerifyReminderEmail(
           <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:${C.amberSoft};border:1px solid ${C.amberBorder};border-radius:12px;">
             <tr><td style="padding:14px 18px;">
               <p style="margin:0;font-size:13px;color:${C.amber};line-height:1.55;">
-                <strong>Heads up:</strong> we're tidying our list and will remove unconfirmed
-                sign-ups around <strong>${deadlineLabel}</strong>. Confirm now and you'll keep your
+                <strong>Heads up:</strong> we’re tidying our list and will remove unconfirmed
+                sign-ups around <strong>${deadlineLabel}</strong>. Confirm now and you’ll keep your
                 place — no need to sign up again later.
               </p>
             </td></tr>
@@ -142,8 +142,8 @@ export function buildNewsletterVerifyReminderEmail(
           </p>
           <p style="margin:4px 0 0;font-size:10px;color:${C.faint};line-height:1.5;">
             You received this because you entered your email to subscribe to the Investigator Events
-            weekly briefing. Didn't sign up? Ignore this email and you'll be removed automatically —
-            we won't message you again.
+            weekly briefing. Didn’t sign up? Ignore this email and you’ll be removed automatically —
+            we won’t message you again.
           </p>
         </td></tr>
 

@@ -100,7 +100,7 @@ function SuggestAssociation() {
         onClick={() => setOpen(true)}
         className="mt-3 text-xs font-medium text-blue-600 hover:underline"
       >
-        Don&apos;t see your association? Suggest one
+        Don’t see your association? Suggest one
       </button>
     );
   }
@@ -108,7 +108,7 @@ function SuggestAssociation() {
   if (status === 'sent') {
     return (
       <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50/50 px-4 py-3 text-sm text-emerald-700">
-        Thanks! Your suggestion has been submitted for review. We&apos;ll add it if it meets our criteria.
+        Thanks! Your suggestion has been submitted for review. We’ll add it if it meets our criteria.
       </div>
     );
   }
@@ -116,7 +116,7 @@ function SuggestAssociation() {
   return (
     <div className="mt-3 rounded-xl border border-blue-200/60 bg-blue-50/30 p-4">
       <p className="text-sm font-bold text-slate-900">Suggest an association</p>
-      <p className="mt-1 text-xs text-slate-500">We&apos;ll review it and add it to the platform if it qualifies.</p>
+      <p className="mt-1 text-xs text-slate-500">We’ll review it and add it to the platform if it qualifies.</p>
       <div className="mt-3 grid gap-2 sm:grid-cols-3">
         <input
           className="field-input"
@@ -531,10 +531,10 @@ export default function EditProfilePage() {
                   <>
                     <div className="flex items-center justify-center gap-2 sm:justify-start">
                       <AlertTriangle className="h-5 w-5 text-amber-500" />
-                      <h2 className="text-lg font-bold text-amber-900">Your profile isn&apos;t visible yet</h2>
+                      <h2 className="text-lg font-bold text-amber-900">Your profile isn’t visible yet</h2>
                     </div>
                     <p className="mt-1 text-sm text-amber-800/70">
-                      Complete at least <strong>{PROFILE_VISIBILITY_THRESHOLD}%</strong> of your profile to appear in the investigator directory. You&apos;re {PROFILE_VISIBILITY_THRESHOLD - completion.score}% away.
+                      Complete at least <strong>{PROFILE_VISIBILITY_THRESHOLD}%</strong> of your profile to appear in the investigator directory. You’re {PROFILE_VISIBILITY_THRESHOLD - completion.score}% away.
                     </p>
                   </>
                 )}
@@ -637,7 +637,7 @@ export default function EditProfilePage() {
 
             <div>
               <label className="text-sm font-medium text-slate-700">Headline</label>
-              <p className="mb-1.5 text-xs text-slate-400">A short tagline that appears under your name. Like LinkedIn&apos;s headline.</p>
+              <p className="mb-1.5 text-xs text-slate-400">A short tagline that appears under your name. Like LinkedIn’s headline.</p>
               <input className="field-input w-full" value={headline} onChange={(e) => { if (e.target.value.length <= 200) setHeadline(e.target.value); }} placeholder="e.g. CEO, Conflict International | ABI President | International Speaker" />
               <p className="mt-1 text-xs text-slate-400">{headline.length}/200</p>
             </div>
@@ -727,7 +727,7 @@ export default function EditProfilePage() {
           {/* Associations */}
           <div className="mt-10 rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm sm:p-6">
             <h2 className="text-lg font-bold text-slate-900">Professional memberships</h2>
-            <p className="text-sm text-slate-400">Add the associations you belong to. You&apos;ll appear on each association&apos;s member page automatically.</p>
+            <p className="text-sm text-slate-400">Add the associations you belong to. You’ll appear on each association’s member page automatically.</p>
 
             {associations.length > 0 && (
               <div className="mt-4 space-y-2">
@@ -968,7 +968,7 @@ export default function EditProfilePage() {
               )}
               {orgSearch.length >= 2 && (
                 <button type="button" onClick={() => addExperience(orgSearch, null)} className="mt-2 flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700">
-                  <Plus className="h-4 w-4" /> Add &quot;{orgSearch}&quot; as custom company
+                  <Plus className="h-4 w-4" /> Add “{orgSearch}” as custom company
                 </button>
               )}
             </div>
@@ -1007,7 +1007,7 @@ export default function EditProfilePage() {
           <div className="mt-10 rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm sm:p-6">
             <h2 className="text-lg font-bold text-slate-900">Email notifications</h2>
             <p className="mt-1 text-sm text-slate-500">
-              Choose which activity emails you get. This doesn&apos;t affect important account emails or the weekly newsletter.
+              Choose which activity emails you get. This doesn’t affect important account emails or the weekly newsletter.
             </p>
 
             <div className="mt-4 space-y-1">
@@ -1146,7 +1146,7 @@ export default function EditProfilePage() {
                   <a href="mailto:info@investigatorevents.com" className="font-semibold underline">
                     info@investigatorevents.com
                   </a>{' '}
-                  and we&apos;ll remove it for you.
+                  and we’ll remove it for you.
                 </p>
                 <button
                   type="button"

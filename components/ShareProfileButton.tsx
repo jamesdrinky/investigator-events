@@ -26,8 +26,8 @@ export function ShareProfileButton({ username, fullName, avatarUrl, specialisati
   const tagline = specialisation ? ` — ${specialisation}` : '';
 
   // Pre-written shareable messages
-  const casualMsg = `${name} is on Investigator Events${tagline}. Worth connecting with if you're in the industry.\n\n${url}`;
-  const inviteMsg = `Thought you'd find this useful — ${name} is on Investigator Events, the global network for private investigators.${tagline}\n\nYou can view their full profile and connect here:\n${url}`;
+  const casualMsg = `${name} is on Investigator Events${tagline}. Worth connecting with if you’re in the industry.\n\n${url}`;
+  const inviteMsg = `Thought you’d find this useful — ${name} is on Investigator Events, the global network for private investigators.${tagline}\n\nYou can view their full profile and connect here:\n${url}`;
 
   useEffect(() => {
     if (!open) return;

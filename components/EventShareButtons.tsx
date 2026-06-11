@@ -22,7 +22,7 @@ export function EventShareButtons({ eventTitle, eventSlug }: { eventTitle: strin
     : `https://investigatorevents.com/events/${eventSlug}`;
 
   const casualMsg = `${eventTitle} — thought this would be on your radar. Details and attendees here:\n\n${url}`;
-  const inviteMsg = `${eventTitle} is coming up and I thought you'd want to know about it. You can see the full details, who's going, and join the discussion on Investigator Events.\n\n${url}`;
+  const inviteMsg = `${eventTitle} is coming up and I thought you’d want to know about it. You can see the full details, who’s going, and join the discussion on Investigator Events.\n\n${url}`;
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();

@@ -88,7 +88,7 @@ export function buildCreateAccountPitchEmail(fullName: string | null): string {
             ${greeting} — claim your free profile
           </p>
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.6;">
-            You already get our weekly briefing — but you're missing the rest of
+            You already get our weekly briefing — but you’re missing the rest of
             <strong>Investigator Events</strong>. Creating a free profile takes under a minute and
             puts you on the map with investigators worldwide.
           </p>
@@ -130,7 +130,7 @@ export function buildCreateAccountPitchEmail(fullName: string | null): string {
             </td></tr>
           </table>
           <p style="margin:12px 0 0;font-size:12px;color:${C.faint};line-height:1.5;">
-            Free forever. You'll keep getting the weekly briefing either way.
+            Free forever. You’ll keep getting the weekly briefing either way.
           </p>
         </td></tr>
 

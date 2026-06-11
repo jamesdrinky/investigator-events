@@ -130,7 +130,7 @@ export function NewsletterBanner() {
                   <Zap className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-base font-bold text-white">Don&apos;t miss the next big event</p>
+                  <p className="text-base font-bold text-white">Don’t miss the next big event</p>
                   <p className="mt-0.5 text-sm text-slate-400">
                     Join <span className="font-semibold text-blue-400">500+ investigators</span> getting the weekly brief — new events, dates, and one featured listing.
                   </p>

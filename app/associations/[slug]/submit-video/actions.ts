@@ -111,7 +111,7 @@ export async function submitAssociationVideoAction(formData: FormData) {
     const resendKey = process.env.RESEND_API_KEY;
     if (resendKey && submitterEmail) {
       const safeName = escapeHtml(submitterName);
-      const titleClause = title ? ` <strong>"${escapeHtml(title)}"</strong>` : '';
+      const titleClause = title ? ` <strong>“${escapeHtml(title)}”</strong>` : '';
       const safeAssoc = escapeHtml(assoc.name ?? '');
       const resend = new Resend(resendKey);
       resend.emails.send({
@@ -120,8 +120,8 @@ export async function submitAssociationVideoAction(formData: FormData) {
         subject: `Video received — ${assoc.name}`,
         html: `<div style="font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#0f172a">
           <h2 style="margin:0 0 12px;font-size:20px">Video received</h2>
-          <p style="margin:0 0 12px;font-size:15px;line-height:1.6;color:#334155">Thanks ${safeName} — we've received your video${titleClause} for <strong>${safeAssoc}</strong>.</p>
-          <p style="margin:0 0 12px;font-size:15px;line-height:1.6;color:#334155">It's now in our verification queue. Once approved it'll appear on the association page. We review submissions regularly.</p>
+          <p style="margin:0 0 12px;font-size:15px;line-height:1.6;color:#334155">Thanks ${safeName} — we’ve received your video${titleClause} for <strong>${safeAssoc}</strong>.</p>
+          <p style="margin:0 0 12px;font-size:15px;line-height:1.6;color:#334155">It’s now in our verification queue. Once approved it’ll appear on the association page. We review submissions regularly.</p>
           <p style="margin:24px 0 0;font-size:12px;color:#94a3b8">Investigator Events · The global PI conference calendar.</p>
         </div>`,
       }).catch((err) => console.error('Video confirmation email failed:', err));

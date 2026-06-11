@@ -401,7 +401,7 @@ export function AuthPage({
               className="text-center text-sm text-slate-500"
               style={{ opacity: 0, animation: `fadeSlideIn 0.5s ease forwards ${isSignUp ? '0.6s' : '0.55s'}` }}
             >
-              {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+              {isSignUp ? 'Already have an account?' : "Don’t have an account?"}{' '}
               <button type="button" onClick={onSwitchMode} className="font-semibold text-blue-600 hover:underline">
                 {isSignUp ? 'Sign in' : 'Create one'}
               </button>

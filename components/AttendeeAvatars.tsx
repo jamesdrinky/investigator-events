@@ -92,14 +92,14 @@ export function AttendeeAvatars({ eventId }: { eventId: string }) {
             className="flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 disabled:opacity-60"
           >
             <ThumbsUp className="h-4 w-4" />
-            I&apos;m going
+            I’m going
           </button>
         )}
         {userId && isGoing && (
           <div className="flex items-center gap-2">
             <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-4 py-2.5 text-sm font-bold text-emerald-700 border border-emerald-200">
               <ThumbsUp className="h-4 w-4 fill-emerald-600 text-emerald-600" />
-              You&apos;re going
+              You’re going
             </span>
             <button
               type="button"

@@ -230,7 +230,7 @@ export function SubmitVideoForm({
 
       <div className="rounded-xl bg-blue-50/70 px-4 py-3 text-xs leading-relaxed text-slate-600">
         Every video is reviewed by our team before it appears on the {targetName} page.
-        You'll get an email once it's approved. It's free to submit.
+        You’ll get an email once it’s approved. It’s free to submit.
       </div>
 
       <button

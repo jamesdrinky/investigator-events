@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 const credibilityPoints = [
   '25+ years in international investigations',
-  "Spear's 500 Top Investigator",
+  "Spear’s 500 Top Investigator",
   'Investigator of the Year (2016)',
   'President, Association of British Investigators',
   'Former President, World Association of Detectives',

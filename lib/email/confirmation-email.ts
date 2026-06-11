@@ -40,7 +40,7 @@ export function buildConfirmationEmail(token: string): string {
                 </td></tr>
               </table>
               <p style="margin:20px 0 0;font-size:12px;color:#94a3b8;line-height:1.5;">
-                If you didn't subscribe, you can ignore this email.
+                If you didn’t subscribe, you can ignore this email.
               </p>
             </td></tr>
           </table>

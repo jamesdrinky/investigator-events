@@ -432,7 +432,7 @@ export default function DirectoryPage() {
         <div className="container-shell pt-4">
           <div className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
             <Clock className="h-4 w-4 flex-shrink-0 text-amber-600" />
-            <p className="flex-1 text-sm text-amber-800">Your profile isn&apos;t visible in the directory yet. <Link href="/profile/edit" className="font-semibold text-amber-900 underline">Complete your profile</Link> to appear here.</p>
+            <p className="flex-1 text-sm text-amber-800">Your profile isn’t visible in the directory yet. <Link href="/profile/edit" className="font-semibold text-amber-900 underline">Complete your profile</Link> to appear here.</p>
           </div>
         </div>
       )}

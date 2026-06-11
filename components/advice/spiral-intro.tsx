@@ -62,7 +62,7 @@ export function SpiralIntro({ children }: SpiralIntroProps) {
             <span className="absolute -bottom-2 left-0 h-px w-full scale-x-0 bg-gradient-to-r from-blue-500 via-cyan-400 to-purple-500 transition-transform duration-500 group-hover:scale-x-100" />
           </button>
           <p className="mt-8 max-w-xs text-center text-[11px] leading-relaxed tracking-[0.1em] text-white/20 sm:text-xs">
-            Conference Dos &amp; Don&apos;ts
+            Conference Dos &amp; Don’ts
           </p>
         </div>
       </div>

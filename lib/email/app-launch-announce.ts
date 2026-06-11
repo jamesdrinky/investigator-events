@@ -249,7 +249,7 @@ export function buildAppLaunchAnnounceEmail({
                   A note from the team
                 </p>
                 <p style="margin:10px 0 0;font-size:14px;color:${C.body};line-height:1.7;">
-                  We built Investigator Events to give the PI community one place to find each other, share what's happening and grow. Thanks for being part of it from the start &mdash; please tell a colleague, and if the app earns it, leave us a review.
+                  We built Investigator Events to give the PI community one place to find each other, share what’s happening and grow. Thanks for being part of it from the start &mdash; please tell a colleague, and if the app earns it, leave us a review.
                 </p>
                 <p style="margin:14px 0 0;font-size:12px;color:${C.muted};line-height:1.5;font-style:italic;">
                   &mdash; The Investigator Events team
@@ -289,7 +289,7 @@ export function buildAppLaunchAnnounceEmail({
             <a href="${APP_STORE_URL}" style="color:${C.muted};text-decoration:none;">App Store</a>
           </p>
           <p style="margin:10px 0 0;font-size:10px;color:${C.faint};line-height:1.6;max-width:440px;display:inline-block;">
-            You're receiving this one-off announcement because you have an Investigator Events account or are subscribed to our newsletter.
+            You’re receiving this one-off announcement because you have an Investigator Events account or are subscribed to our newsletter.
           </p>
         </td></tr>
 

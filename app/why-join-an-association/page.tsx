@@ -253,7 +253,7 @@ export default async function WhyJoinPage() {
                   <h2 className="text-lg font-bold tracking-[-0.03em] text-slate-950 sm:text-xl">How Investigator Events supports associations</h2>
                 </div>
                 <p className="mt-4 text-sm leading-relaxed text-slate-700 sm:text-base sm:leading-relaxed">
-                  Investigator Events is not an association. We do not vet members, set standards, or offer accreditation. We are the industry's open platform. We believe every serious investigator should belong to at least one recognised association — which is why verified association members display a badge on their profile here, and why every partner association has a dedicated page with events and a direct link to join.
+                  Investigator Events is not an association. We do not vet members, set standards, or offer accreditation. We are the industry’s open platform. We believe every serious investigator should belong to at least one recognised association — which is why verified association members display a badge on their profile here, and why every partner association has a dedicated page with events and a direct link to join.
                 </p>
                 <p className="mt-3 text-sm font-semibold text-emerald-700">
                   We connect the profession. Associations elevate it.

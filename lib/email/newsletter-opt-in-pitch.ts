@@ -73,7 +73,7 @@ export function buildNewsletterOptInPitchEmail(
             ${greeting} — get the weekly briefing
           </p>
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.6;text-align:center;">
-            You're on Investigator Events, but you're not yet getting our Monday weekly briefing. Here's what your inbox is missing:
+            You’re on Investigator Events, but you’re not yet getting our Monday weekly briefing. Here’s what your inbox is missing:
           </p>
 
           <table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0 0;">
@@ -110,7 +110,7 @@ export function buildNewsletterOptInPitchEmail(
             <a href="mailto:info@investigatorevents.com" style="color:${C.faint};text-decoration:none;">info@investigatorevents.com</a>
           </p>
           <p style="margin:4px 0 0;font-size:10px;color:${C.faint};">
-            You're receiving this because you have an Investigator Events account.
+            You’re receiving this because you have an Investigator Events account.
           </p>
         </td></tr>
 

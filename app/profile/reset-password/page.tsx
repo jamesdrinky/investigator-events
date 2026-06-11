@@ -132,7 +132,7 @@ export default function ResetPasswordPage() {
         </div>
         <h1 className="mt-4 text-2xl font-bold tracking-[-0.02em] text-slate-950 sm:text-3xl">Set a new password</h1>
         <p className="mt-1.5 text-sm text-slate-500">
-          You're signed in via the password reset link. Choose a new password and you're back in.
+          You’re signed in via the password reset link. Choose a new password and you’re back in.
         </p>
 
         {status === 'verifying' ? (

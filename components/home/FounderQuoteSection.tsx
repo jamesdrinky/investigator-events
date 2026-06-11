@@ -45,7 +45,7 @@ export function FounderQuoteSection() {
                     />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-blue-600">Founder&apos;s Note</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-blue-600">Founder’s Note</p>
                     <blockquote className="mt-2 text-[1.1rem] font-semibold leading-[1.35] tracking-[-0.02em] text-slate-950">
                       &ldquo;I have spent my career in this industry and I still get a buzz walking into a room full of investigators. The problem was never a lack of good events. It was that nobody could see them all in one place.&rdquo;
                     </blockquote>
@@ -93,7 +93,7 @@ export function FounderQuoteSection() {
 
                   {/* Content */}
                   <div className="text-center lg:text-left">
-                    <p className="eyebrow">Founder&apos;s Note</p>
+                    <p className="eyebrow">Founder’s Note</p>
                     <blockquote className="mt-6 text-[1.8rem] font-semibold leading-[1.32] tracking-[-0.025em] text-slate-950 lg:text-[2.2rem] lg:leading-[1.28]">
                       &ldquo;I have spent my career in this industry and I still get a buzz walking into a room full of investigators. The problem was never a lack of good events. It was that nobody could see them all in one place.&rdquo;
                     </blockquote>

@@ -14,7 +14,7 @@ export default function UnsubscribePage({ searchParams }: { searchParams?: { suc
               </div>
               <h1 className="mt-5 text-xl font-bold text-slate-900">Unsubscribed</h1>
               <p className="mt-2 text-sm text-slate-500">
-                You've been removed from the weekly briefing. You won't receive any more emails from us.
+                You’ve been removed from the weekly briefing. You won’t receive any more emails from us.
               </p>
               <p className="mt-4 text-sm text-slate-400">
                 Changed your mind? Subscribe again on the <Link href="/weekly" className="text-blue-600 hover:underline">weekly page</Link>.

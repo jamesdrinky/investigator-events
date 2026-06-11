@@ -135,12 +135,12 @@ export function buildDailyDigestEmail(name: string, notifications: DigestNotific
             <tr><td align="center">
               <!--[if mso]>
               <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${SITE}/people?tab=feed" style="height:44px;v-text-anchor:middle;width:220px;" arcsize="50%" fillcolor="${C.blue}" stroke="false">
-                <v:textbox inset="0,0,0,0"><center style="color:#ffffff;font-family:sans-serif;font-size:13px;font-weight:600;">See who's been active</center></v:textbox>
+                <v:textbox inset="0,0,0,0"><center style="color:#ffffff;font-family:sans-serif;font-size:13px;font-weight:600;">See who’s been active</center></v:textbox>
               </v:roundrect>
               <![endif]-->
               <!--[if !mso]><!-->
               <a href="${SITE}/people?tab=feed" style="display:inline-block;padding:12px 28px;background-color:${C.blue};color:${C.white};text-decoration:none;font-size:13px;font-weight:600;border-radius:99px;">
-                See who's been active
+                See who’s been active
               </a>
               <!--<![endif]-->
             </td></tr>

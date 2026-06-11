@@ -48,8 +48,8 @@ export default async function SubmitVideoPage({
           <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">Video submissions are by invitation</h1>
             <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-slate-600">
-              We're not taking open video submissions for {page.name} right now. If you'd like a
-              video featuring your event or association, get in touch and we'll set it up for you.
+              We’re not taking open video submissions for {page.name} right now. If you’d like a
+              video featuring your event or association, get in touch and we’ll set it up for you.
             </p>
             <a
               href={contactHref}
@@ -87,7 +87,7 @@ export default async function SubmitVideoPage({
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-slate-600">
             Share a short clip (up to 45 seconds) to feature on the{' '}
-            <strong className="text-slate-800">{page.name}</strong> page. It's free — our team
+            <strong className="text-slate-800">{page.name}</strong> page. It’s free — our team
             reviews every submission before it goes live.
           </p>
         </div>
@@ -97,7 +97,7 @@ export default async function SubmitVideoPage({
             <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-500" />
             <h2 className="mt-3 text-lg font-bold text-slate-900">Video received</h2>
             <p className="mt-1.5 text-sm text-slate-600">
-              Thanks! Your video is now in our verification queue. We'll email you once it's
+              Thanks! Your video is now in our verification queue. We’ll email you once it’s
               approved and live on the {page.name} page.
             </p>
             <Link
@@ -115,7 +115,7 @@ export default async function SubmitVideoPage({
                 {searchParams.reason === 'length'
                   ? 'That video is longer than 45 seconds.'
                   : searchParams.reason === 'duration'
-                    ? "We couldn't read your video's length. Please re-export it (MP4 works best) and try again."
+                    ? "We couldn’t read your video’s length. Please re-export it (MP4 works best) and try again."
                     : searchParams.reason === 'title'
                       ? 'Please add a title.'
                       : searchParams.reason === 'video'

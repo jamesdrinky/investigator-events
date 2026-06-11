@@ -10,27 +10,27 @@ export const metadata: Metadata = {
 const FAQ = [
   {
     q: 'How do I delete my account?',
-    a: 'Sign in → tap your avatar (top right) → Edit profile → scroll to the bottom → tap "Delete account" and confirm. This permanently removes your profile, posts, connections, events, and messages. The action cannot be undone.',
+    a: 'Sign in → tap your avatar (top right) → Edit profile → scroll to the bottom → tap “Delete account” and confirm. This permanently removes your profile, posts, connections, events, and messages. The action cannot be undone.',
   },
   {
-    q: "I can't sign in / I forgot my password",
-    a: 'If you signed up with Sign in with Apple or LinkedIn, use the same option on the sign-in screen. If you used email and password, tap "Forgot password?" on the sign-in screen — you\'ll receive an email with a reset link. If you don\'t see the email within a minute, check your spam folder.',
+    q: "I can’t sign in / I forgot my password",
+    a: 'If you signed up with Sign in with Apple or LinkedIn, use the same option on the sign-in screen. If you used email and password, tap “Forgot password?” on the sign-in screen — you’ll receive an email with a reset link. If you don’t see the email within a minute, check your spam folder.',
   },
   {
     q: 'How do I list my event?',
-    a: 'Tap "+ Submit" on the Events page (or visit /submit-event). Submissions are reviewed by our team before going live — usually within 24 hours. Listings are free.',
+    a: 'Tap “+ Submit” on the Events page (or visit /submit-event). Submissions are reviewed by our team before going live — usually within 24 hours. Listings are free.',
   },
   {
     q: 'How do I verify my association membership?',
-    a: 'Go to the association\'s page (Network tab) and tap "Verify membership". If you signed in with LinkedIn or have been admin-verified, your associations show as verified automatically. Otherwise an admin from the association can verify you directly.',
+    a: 'Go to the association’s page (Network tab) and tap “Verify membership”. If you signed in with LinkedIn or have been admin-verified, your associations show as verified automatically. Otherwise an admin from the association can verify you directly.',
   },
   {
     q: 'How do I report inappropriate content or a user?',
-    a: 'Tap the "⋯" menu on any profile or post → Report. Our moderation team reviews every report. Reports are confidential — the reported user is not told who reported them.',
+    a: 'Tap the “⋯” menu on any profile or post → Report. Our moderation team reviews every report. Reports are confidential — the reported user is not told who reported them.',
   },
   {
     q: 'Does the app work offline?',
-    a: 'Most of the app requires an internet connection to fetch the latest events, messages, and profiles. You\'ll see a banner if you go offline.',
+    a: 'Most of the app requires an internet connection to fetch the latest events, messages, and profiles. You’ll see a banner if you go offline.',
   },
   {
     q: 'How does the app use my camera and photos?',
@@ -56,7 +56,7 @@ export default function SupportPage() {
             ?
           </h1>
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate-600 sm:text-lg">
-            Most questions are answered below. If you can&apos;t find what you need, get in touch — we read every message.
+            Most questions are answered below. If you can’t find what you need, get in touch — we read every message.
           </p>
         </div>
 

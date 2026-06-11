@@ -430,8 +430,8 @@ export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past,
               <h2 className="section-title !mt-3">Videos from the {page.name} community</h2>
               <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600">
                 {videoSubmissionsEnabled
-                  ? "Short clips from members. Want to add yours? It's free — every video is reviewed by our team before it appears here."
-                  : `Short clips featuring ${page.name}. Want your event or association featured here? Get in touch and we'll set it up.`}
+                  ? "Short clips from members. Want to add yours? It’s free — every video is reviewed by our team before it appears here."
+                  : `Short clips featuring ${page.name}. Want your event or association featured here? Get in touch and we’ll set it up.`}
               </p>
             </div>
             {videoSubmissionsEnabled ? (
@@ -483,7 +483,7 @@ export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past,
               <p className="mt-1 max-w-sm text-xs leading-relaxed text-slate-500">
                 {videoSubmissionsEnabled
                   ? `Be the first to share a short clip with the ${page.name} community.`
-                  : `Want a video featuring ${page.name} here? Get in touch and we'll arrange it.`}
+                  : `Want a video featuring ${page.name} here? Get in touch and we’ll arrange it.`}
               </p>
               {videoSubmissionsEnabled ? (
                 <Link

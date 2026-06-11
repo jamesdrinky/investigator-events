@@ -113,7 +113,7 @@ function passwordResetHtml(resetUrl: string): string {
         <tr><td style="padding:40px 40px 24px;">
           <p style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#3b82f6;">Investigator Events</p>
           <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;letter-spacing:-0.02em;color:#0f172a;">Reset your password</h1>
-          <p style="margin:0 0 24px;font-size:14px;line-height:1.6;color:#475569;">Tap the button below to choose a new password. If you didn't request this, you can safely ignore this email — your password won't change.</p>
+          <p style="margin:0 0 24px;font-size:14px;line-height:1.6;color:#475569;">Tap the button below to choose a new password. If you didn’t request this, you can safely ignore this email — your password won’t change.</p>
           <table role="presentation" cellpadding="0" cellspacing="0"><tr><td align="center" style="border-radius:9999px;background:#0f172a;">
             <a href="${resetUrl}" style="display:inline-block;padding:14px 28px;font-size:14px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:9999px;">Reset password</a>
           </td></tr></table>

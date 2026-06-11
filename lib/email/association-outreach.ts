@@ -98,7 +98,7 @@ export function buildApprovalOutreachEmail(params: ApprovalOutreachParams): stri
           </p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
-            Thank you for getting in touch and for submitting <strong>${eventName}</strong> to Investigator Events. I'm delighted to confirm that your event is now approved and live on the calendar at <a href="${SITE}" style="color:${C.blue};text-decoration:none;">investigatorevents.com</a>.
+            Thank you for getting in touch and for submitting <strong>${eventName}</strong> to Investigator Events. I’m delighted to confirm that your event is now approved and live on the calendar at <a href="${SITE}" style="color:${C.blue};text-decoration:none;">investigatorevents.com</a>.
           </p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
@@ -110,7 +110,7 @@ export function buildApprovalOutreachEmail(params: ApprovalOutreachParams): stri
           </p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
-            To make that easier, I've drafted a short paragraph below that you are welcome to use as it stands, adapt, or rewrite entirely as you see fit.
+            To make that easier, I’ve drafted a short paragraph below that you are welcome to use as it stands, adapt, or rewrite entirely as you see fit.
           </p>
 
           <!-- Suggested copy block -->
@@ -129,7 +129,7 @@ export function buildApprovalOutreachEmail(params: ApprovalOutreachParams): stri
           </table>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
-            If there is anything I can help with as you get going, whether that's adding further events, updating listings or exploring any of the community features, please just drop me a line.
+            If there is anything I can help with as you get going, whether that’s adding further events, updating listings or exploring any of the community features, please just drop me a line.
           </p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
@@ -328,7 +328,7 @@ export function buildIntroductionOutreachEmail(params: { contactName: string; as
           <p style="margin:0;font-size:15px;color:${C.body};line-height:1.7;">Dear ${contactName},</p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
-            I'm writing to introduce <a href="${SITE}" style="color:${C.blue};text-decoration:none;">Investigator Events</a>, a free global calendar, community platform and professional network for the investigations profession. We've already listed ${association}'s upcoming events${hasPage ? ` and set up <a href="${pageUrl}" style="color:${C.blue};text-decoration:none;">your association page</a>` : ''} on the platform${hasMembers ? `, and ${memberText}` : ''}:
+            I’m writing to introduce <a href="${SITE}" style="color:${C.blue};text-decoration:none;">Investigator Events</a>, a free global calendar, community platform and professional network for the investigations profession. We’ve already listed ${association}’s upcoming events${hasPage ? ` and set up <a href="${pageUrl}" style="color:${C.blue};text-decoration:none;">your association page</a>` : ''} on the platform${hasMembers ? `, and ${memberText}` : ''}:
           </p>
 
           ${eventList ? `<ul style="margin:12px 0;padding-left:20px;">${eventList}</ul>` : ''}
@@ -358,7 +358,7 @@ export function buildIntroductionOutreachEmail(params: { contactName: string; as
           </table>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
-            If there is anything I can help with, whether that's updating listings, adding further events, or exploring any of the community features, please just drop me a line.
+            If there is anything I can help with, whether that’s updating listings, adding further events, or exploring any of the community features, please just drop me a line.
           </p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
@@ -414,7 +414,7 @@ export function buildColdOutreachEmail(params: { contactName: string; associatio
           <p style="margin:0;font-size:15px;color:${C.body};line-height:1.7;">Dear ${contactName},</p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
-            I'm writing to introduce <a href="${SITE}" style="color:${C.blue};text-decoration:none;">Investigator Events</a>, a free global calendar, community platform and professional network for the investigations profession.${hasPage ? ` We've already set up <a href="${pageUrl}" style="color:${C.blue};text-decoration:none;">${association}'s association page</a> on the platform${hasMembers ? `, and ${memberCount === 1 ? '1 of your members has already created a profile' : `${memberCount} of your members have already created profiles`}` : ''}, and we'd love to feature your upcoming events alongside it.` : ` We'd love to feature ${association}'s events on the platform.`}
+            I’m writing to introduce <a href="${SITE}" style="color:${C.blue};text-decoration:none;">Investigator Events</a>, a free global calendar, community platform and professional network for the investigations profession.${hasPage ? ` We’ve already set up <a href="${pageUrl}" style="color:${C.blue};text-decoration:none;">${association}’s association page</a> on the platform${hasMembers ? `, and ${memberCount === 1 ? '1 of your members has already created a profile' : `${memberCount} of your members have already created profiles`}` : ''}, and we’d love to feature your upcoming events alongside it.` : ` We’d love to feature ${association}’s events on the platform.`}
           </p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
@@ -422,11 +422,11 @@ export function buildColdOutreachEmail(params: { contactName: string; associatio
           </p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
-            Listing is completely free. You can submit events directly at <a href="${SITE}/submit-event" style="color:${C.blue};text-decoration:none;">investigatorevents.com/submit-event</a>, or simply reply to this email with your event details and I'll add them for you.
+            Listing is completely free. You can submit events directly at <a href="${SITE}/submit-event" style="color:${C.blue};text-decoration:none;">investigatorevents.com/submit-event</a>, or simply reply to this email with your event details and I’ll add them for you.
           </p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
-            Beyond the calendar, the platform includes professional profiles and a member directory where investigators can connect across jurisdictions, a community forum for referrals and discussion, and association pages where your organisation can showcase its events and members. We've also built an event review system where attendees can share their experience after conferences — helping the community decide which events are worth attending and giving organisers valuable feedback. Everything is free for investigators to use.
+            Beyond the calendar, the platform includes professional profiles and a member directory where investigators can connect across jurisdictions, a community forum for referrals and discussion, and association pages where your organisation can showcase its events and members. We’ve also built an event review system where attendees can share their experience after conferences — helping the community decide which events are worth attending and giving organisers valuable feedback. Everything is free for investigators to use.
           </p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
@@ -434,7 +434,7 @@ export function buildColdOutreachEmail(params: { contactName: string; associatio
           </p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
-            If you'd like to learn more or have any questions, please don't hesitate to get in touch.
+            If you’d like to learn more or have any questions, please don’t hesitate to get in touch.
           </p>
 
           <p style="margin:24px 0 0;font-size:15px;color:${C.body};line-height:1.7;">Warm regards,</p>

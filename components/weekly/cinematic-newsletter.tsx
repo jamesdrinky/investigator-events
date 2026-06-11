@@ -131,7 +131,7 @@ export function CinematicNewsletterPage() {
           <div className="container-shell">
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center">
               <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-indigo-500 sm:text-xs">What you get</p>
-              <h2 className="mt-2 text-2xl font-bold tracking-[-0.03em] text-slate-950 sm:text-3xl">Everything you need, nothing you don&apos;t.</h2>
+              <h2 className="mt-2 text-2xl font-bold tracking-[-0.03em] text-slate-950 sm:text-3xl">Everything you need, nothing you don’t.</h2>
             </motion.div>
 
             <div className="mx-auto mt-10 grid max-w-5xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -185,7 +185,7 @@ export function CinematicNewsletterPage() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.6 }}
               >
-                Don&apos;t miss what&apos;s next.
+                Don’t miss what’s next.
               </motion.h2>
               <motion.p
                 className="mx-auto mt-4 max-w-md text-base leading-relaxed text-blue-200/50 sm:mt-6 sm:text-lg"

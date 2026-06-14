@@ -48,6 +48,16 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval>>();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const composerRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-grow the message composer to fit its content (and shrink back to one
+  // line after sending). Capped so it never eats the whole screen.
+  useEffect(() => {
+    const el = composerRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, 128)}px`;
+  }, [newMsg]);
 
   const supabase = createSupabaseBrowserClient();
 
@@ -711,7 +721,7 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
               </div>
             )}
             <div className="shrink-0 border-t border-white/5 bg-slate-950 p-2.5 sm:p-3" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom, 0.75rem))' }}>
-              <div className="flex items-center gap-2">
+              <div className="flex items-end gap-2">
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -768,8 +778,10 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
                     </div>
                   )}
                 </div>
-                <input
-                  className="min-h-11 min-w-0 flex-1 rounded-xl border border-white/5 bg-white/5 px-4 py-2.5 text-[16px] text-white placeholder-slate-500 outline-none transition focus:border-indigo-500/40 focus:bg-white/8 sm:min-h-10"
+                <textarea
+                  ref={composerRef}
+                  rows={1}
+                  className="max-h-32 min-h-11 min-w-0 flex-1 resize-none whitespace-pre-wrap break-words rounded-xl border border-white/5 bg-white/5 px-4 py-2.5 text-[16px] leading-snug text-white placeholder-slate-500 outline-none transition focus:border-indigo-500/40 focus:bg-white/8 sm:min-h-10"
                   value={newMsg}
                   onChange={(e) => setNewMsg(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}

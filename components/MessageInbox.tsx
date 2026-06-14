@@ -281,6 +281,14 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
     hasScrolledRef.current = false;
   }, [activeChat]);
 
+  // Per-chat drafts: restore this conversation's unsent text when it opens (and
+  // after a refresh), and keep drafts separate so they never bleed between chats.
+  useEffect(() => {
+    if (!activeChat) { setNewMsg(''); return; }
+    try { setNewMsg(window.localStorage.getItem(`ie:draft:${activeChat}`) ?? ''); }
+    catch { setNewMsg(''); }
+  }, [activeChat]);
+
   useEffect(() => {
     if (!activeChat) { setActivePerson(null); return; }
     const cached = conversations.find((c) => c.user_id === activeChat);
@@ -291,6 +299,15 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
         .then(({ data }) => { if (data) setActivePerson(data); });
     }
   }, [activeChat, conversations]);
+
+  // Save/clear the draft for a given chat in local storage.
+  const persistDraft = useCallback((chat: string | null, text: string) => {
+    if (!chat) return;
+    try {
+      if (text) window.localStorage.setItem(`ie:draft:${chat}`, text);
+      else window.localStorage.removeItem(`ie:draft:${chat}`);
+    } catch { /* storage unavailable */ }
+  }, []);
 
   const sendMessage = async () => {
     if (!userId || !activeChat || sending || uploadingImage) return;
@@ -317,6 +334,7 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
     const savedAttachment = pendingAttachment;
     setMessages((prev) => [...prev, optimisticMessage]);
     setNewMsg('');
+    persistDraft(activeChat, '');
     setPendingAttachment(null);
     setTimeout(() => {
       const container = messagesContainerRef.current;
@@ -332,6 +350,7 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
       } catch (err) {
         setMessages((prev) => prev.filter((m) => m.id !== tempId));
         setNewMsg(savedText);
+        persistDraft(activeChat, savedText);
         setPendingAttachment(savedAttachment);
         const message = err instanceof Error ? err.message : 'Failed to upload photo';
         console.error('[message-image] upload failure', err);
@@ -356,6 +375,7 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
       if (!res.ok || !json?.message) {
         setMessages((prev) => prev.filter((m) => m.id !== tempId));
         setNewMsg(savedText);
+        persistDraft(activeChat, savedText);
         setPendingAttachment(savedAttachment);
         setAttachError(json?.error || 'Failed to send message');
         setSending(false);
@@ -781,9 +801,10 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
                 <textarea
                   ref={composerRef}
                   rows={1}
-                  className="max-h-32 min-h-11 min-w-0 flex-1 resize-none whitespace-pre-wrap break-words rounded-xl border border-white/5 bg-white/5 px-4 py-2.5 text-[16px] leading-snug text-white placeholder-slate-500 outline-none transition focus:border-indigo-500/40 focus:bg-white/8 sm:min-h-10"
+                  style={{ colorScheme: 'dark' }}
+                  className="max-h-32 min-h-11 min-w-0 flex-1 appearance-none resize-none whitespace-pre-wrap break-words rounded-xl border border-white/5 bg-slate-800/60 px-4 py-2.5 text-[16px] leading-snug text-white [-webkit-text-fill-color:#fff] placeholder-slate-500 outline-none transition focus:border-indigo-500/40 focus:bg-slate-800/80 sm:min-h-10"
                   value={newMsg}
-                  onChange={(e) => setNewMsg(e.target.value)}
+                  onChange={(e) => { const v = e.target.value; setNewMsg(v); persistDraft(activeChat, v); }}
                   onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
                   placeholder={pendingAttachment ? 'Add a caption (optional)…' : 'Message...'}
                   autoComplete="off"

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ThumbsUp, X, ChevronDown, ChevronUp, Send } from 'lucide-react';
 import Link from 'next/link';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
@@ -46,6 +47,14 @@ export function AttendeeAvatars({ eventId }: { eventId: string }) {
     if (!userId) return;
     setIsGoing(attendees.some((a) => a.user_id === userId));
   }, [userId, attendees]);
+
+  // Lock background scroll while the expanded attendee modal is open.
+  useEffect(() => {
+    if (!showAll) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, [showAll]);
 
   const toggle = async () => {
     if (!userId) return;
@@ -143,49 +152,74 @@ export function AttendeeAvatars({ eventId }: { eventId: string }) {
           call to action. The grey-circles + repeat-the-button-copy
           placeholder felt redundant and noisy. */}
 
-      {/* Expanded attendee list */}
-      {showAll && attendees.length > 0 && (
-        <div className="mt-4 space-y-1 rounded-xl border border-slate-100 bg-slate-50/50 p-2 animate-in fade-in slide-in-from-top-2 duration-200">
-          {attendees.map((a) => {
-            const isMe = a.user_id === userId;
-            return (
-              <div
-                key={a.id}
-                className="flex items-center gap-3 rounded-lg p-2 transition hover:bg-white hover:shadow-sm"
+      {/* Expanded attendee list — rendered in a portal at <body> so it escapes
+          the hero's clipped, backdrop-blurred overlay (which broke the page on
+          mobile when expanded). Scrollable bottom-sheet on mobile, centered card
+          on desktop, with a close button + backdrop tap-to-close. */}
+      {showAll && attendees.length > 0 && typeof document !== 'undefined' && createPortal(
+        <div
+          className="fixed inset-0 z-[120] flex items-end justify-center bg-black/50 backdrop-blur-sm sm:items-center sm:p-4"
+          onClick={() => setShowAll(false)}
+        >
+          <div
+            className="flex max-h-[80vh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:max-w-md sm:rounded-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+              <p className="text-sm font-bold text-slate-900">{total} going</p>
+              <button
+                type="button"
+                onClick={() => setShowAll(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                aria-label="Close"
               >
-                {a.username ? (
-                  <Link href={`/profile/${a.username}`} className="flex-shrink-0">
-                    <UserAvatar src={a.avatar_url} name={a.full_name} size={36} />
-                  </Link>
-                ) : (
-                  <div className="flex-shrink-0">
-                    <UserAvatar src={a.avatar_url} name={a.full_name} size={36} />
-                  </div>
-                )}
-                {a.username ? (
-                  <Link href={`/profile/${a.username}`} className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-slate-900">{a.full_name ?? 'Investigator'}</p>
-                    {a.specialisation && <p className="truncate text-[11px] text-slate-400">{a.specialisation}</p>}
-                  </Link>
-                ) : (
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-slate-900">{a.full_name ?? 'Investigator'}</p>
-                    {a.specialisation && <p className="truncate text-[11px] text-slate-400">{a.specialisation}</p>}
-                  </div>
-                )}
-                {userId && !isMe && (
-                  <Link
-                    href={`/messages?to=${a.user_id}`}
-                    className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
-                    title={`Message ${a.full_name}`}
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="space-y-1 overflow-y-auto p-2">
+              {attendees.map((a) => {
+                const isMe = a.user_id === userId;
+                return (
+                  <div
+                    key={a.id}
+                    className="flex items-center gap-3 rounded-lg p-2 transition hover:bg-slate-50"
                   >
-                    <Send className="h-3.5 w-3.5" />
-                  </Link>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                    {a.username ? (
+                      <Link href={`/profile/${a.username}`} className="flex-shrink-0">
+                        <UserAvatar src={a.avatar_url} name={a.full_name} size={36} />
+                      </Link>
+                    ) : (
+                      <div className="flex-shrink-0">
+                        <UserAvatar src={a.avatar_url} name={a.full_name} size={36} />
+                      </div>
+                    )}
+                    {a.username ? (
+                      <Link href={`/profile/${a.username}`} className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-slate-900">{a.full_name ?? 'Investigator'}</p>
+                        {a.specialisation && <p className="truncate text-[11px] text-slate-400">{a.specialisation}</p>}
+                      </Link>
+                    ) : (
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-slate-900">{a.full_name ?? 'Investigator'}</p>
+                        {a.specialisation && <p className="truncate text-[11px] text-slate-400">{a.specialisation}</p>}
+                      </div>
+                    )}
+                    {userId && !isMe && (
+                      <Link
+                        href={`/messages?to=${a.user_id}`}
+                        className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
+                        title={`Message ${a.full_name}`}
+                      >
+                        <Send className="h-3.5 w-3.5" />
+                      </Link>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );

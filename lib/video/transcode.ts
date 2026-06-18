@@ -31,6 +31,28 @@ async function cleanup(...files: string[]) {
   for (const f of files) { try { await fsp.unlink(f); } catch {} }
 }
 
+// Extract a still frame (~1s in) as the video's poster, upload it next to the
+// video, and record it on the row. Best-effort: never throws — a missing
+// poster just means the player falls back to a frame.
+async function generatePoster(admin: any, id: string, localVideoPath: string, storageVideoPath: string) {
+  const posterTmp = path.join(os.tmpdir(), `poster-${id}.jpg`);
+  try {
+    await run(ffmpegBin(), [
+      '-ss', '1', '-i', localVideoPath,
+      '-frames:v', '1',
+      '-vf', "scale='min(1280,iw)':-2",
+      '-q:v', '3',
+      '-y', posterTmp,
+    ], { timeout: 60_000, maxBuffer: 1024 * 1024 * 16 });
+    const buf = await fsp.readFile(posterTmp);
+    if (!buf.length) return;
+    const posterPath = `${storageVideoPath.replace(/\.[^.]+$/, '')}-poster.jpg`;
+    const { error } = await admin.storage.from(BUCKET).upload(posterPath, buf, { contentType: 'image/jpeg', upsert: true });
+    if (!error) await admin.from('association_videos').update({ thumbnail_url: posterPath }).eq('id', id);
+  } catch { /* poster is best-effort */ }
+  finally { await cleanup(posterTmp); }
+}
+
 type Row = { id: string; video_url: string };
 
 async function processOne(admin: any, row: Row) {
@@ -41,8 +63,21 @@ async function processOne(admin: any, row: Row) {
     if (/^https?:\/\//i.test(srcPath)) { await setStatus(admin, id, 'ready'); return { id, action: 'external' }; }
 
     const ext = (srcPath.split('.').pop() || '').toLowerCase();
-    // .mp4 is already web-friendly (assume H.264) — leave it.
-    if (ext === 'mp4') { await setStatus(admin, id, 'ready'); return { id, action: 'already-mp4' }; }
+    // .mp4 is already web-friendly (assume H.264) — keep it, but still generate
+    // a poster so it has a guaranteed thumbnail.
+    if (ext === 'mp4') {
+      try {
+        const { data: blob } = await admin.storage.from(BUCKET).download(srcPath);
+        if (blob) {
+          const tmp = path.join(os.tmpdir(), `mp4-${id}.mp4`);
+          await fsp.writeFile(tmp, Buffer.from(await blob.arrayBuffer()));
+          await generatePoster(admin, id, tmp, srcPath);
+          await cleanup(tmp);
+        }
+      } catch { /* poster best-effort */ }
+      await setStatus(admin, id, 'ready');
+      return { id, action: 'already-mp4' };
+    }
 
     // Check size before downloading — too big → manual.
     const slash = srcPath.lastIndexOf('/');
@@ -79,8 +114,11 @@ async function processOne(admin: any, row: Row) {
     const outBuf = await fsp.readFile(tmpOut);
     const newPath = `${srcPath.replace(/\.[^.]+$/, '')}-h264.mp4`;
     const { error: upErr } = await admin.storage.from(BUCKET).upload(newPath, outBuf, { contentType: 'video/mp4', upsert: true });
+    if (upErr) { await cleanup(tmpIn, tmpOut); await setStatus(admin, id, 'needs_manual'); return { id, action: 'upload-failed', error: upErr.message }; }
+
+    // Poster from the converted file (still on disk) before we clean up.
+    await generatePoster(admin, id, tmpOut, newPath);
     await cleanup(tmpIn, tmpOut);
-    if (upErr) { await setStatus(admin, id, 'needs_manual'); return { id, action: 'upload-failed', error: upErr.message }; }
 
     await setStatus(admin, id, 'ready', newPath);
     await admin.storage.from(BUCKET).remove([srcPath]); // drop the original

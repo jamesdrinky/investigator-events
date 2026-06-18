@@ -19,12 +19,13 @@ import { Play } from 'lucide-react';
  */
 export function VideoPlayer({
   id,
-  poster,
   className,
   videoClassName,
   label,
 }: {
   id: string;
+  /** Accepted for call-site compatibility; the poster is served from the
+   *  stable /api/video/<id>/poster route instead. */
   poster?: string | null;
   className?: string;
   videoClassName?: string;
@@ -38,7 +39,7 @@ export function VideoPlayer({
       <video
         ref={ref}
         src={`/api/video/${id}#t=0.1`}
-        poster={poster ?? undefined}
+        poster={`/api/video/${id}/poster`}
         controls
         playsInline
         preload="metadata"

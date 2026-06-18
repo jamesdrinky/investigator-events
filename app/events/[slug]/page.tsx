@@ -123,6 +123,37 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
+      {/* ── Prominent showcase video — promoted above the hero image when the
+          event has at least one video. Orientation-agnostic (portrait or
+          landscape) via a centered black container with no forced aspect
+          ratio. When there's no video, the hero image stays the top element. ── */}
+      {eventVideos.length > 0 && (
+        <div className="container-shell relative pt-20 sm:pt-24">
+          <video
+            src={`/api/video/${eventVideos[0].id}`}
+            poster={eventVideos[0].thumbnailUrl ?? undefined}
+            controls
+            playsInline
+            preload="metadata"
+            className="mx-auto w-auto max-w-full max-h-[70vh] rounded-2xl bg-black"
+          />
+          <div className="mx-auto mt-2.5 flex max-w-full flex-wrap items-center justify-between gap-2">
+            <div className="min-w-0">
+              {eventVideos[0].title && <p className="truncate text-sm font-bold text-slate-900">{eventVideos[0].title}</p>}
+              <p className="text-xs text-slate-500">{eventVideos[0].submitterName}</p>
+            </div>
+            {videoSubmissionsEnabled && (
+              <Link
+                href={`/events/${event.slug}/submit-video` as Route}
+                className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+              >
+                + Add a video
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* ── Hero — full-width cover image with futuristic accents ── */}
       <div className="relative h-[22rem] w-full overflow-hidden sm:h-[36rem] lg:h-[40rem]">
         <Image src={imageSrc} alt={title} fill className="object-cover" priority />
@@ -205,54 +236,28 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
               <SaveDateLinks event={event} />
             </div>
 
-            {/* ── Featured showcase video — prominent, top of the content ── */}
-            {(eventVideos.length > 0 || videoSubmissionsEnabled) && (
+            {/* ── Additional showcase videos + submit CTA. The primary video is
+                promoted above the hero image (see top of page); here we render
+                any additional clips and the empty-state submission prompt. ── */}
+            {(eventVideos.length > 1 || (eventVideos.length === 0 && videoSubmissionsEnabled)) && (
               <Reveal>
                 <div>
-                  {eventVideos.length > 0 ? (
-                    <>
-                      <div className="overflow-hidden rounded-2xl border border-slate-200/60 bg-black shadow-lg">
-                        <video
-                          src={`/api/video/${eventVideos[0].id}`}
-                          poster={eventVideos[0].thumbnailUrl ?? undefined}
-                          controls
-                          playsInline
-                          preload="metadata"
-                          className="aspect-video w-full bg-black object-contain"
-                        />
-                      </div>
-                      <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2">
-                        <div className="min-w-0">
-                          {eventVideos[0].title && <p className="truncate text-sm font-bold text-slate-900">{eventVideos[0].title}</p>}
-                          <p className="text-xs text-slate-500">{eventVideos[0].submitterName}</p>
-                        </div>
-                        {videoSubmissionsEnabled && (
-                          <Link
-                            href={`/events/${event.slug}/submit-video` as Route}
-                            className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
-                          >
-                            + Add a video
-                          </Link>
-                        )}
-                      </div>
-                      {eventVideos.length > 1 && (
-                        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                          {eventVideos.slice(1).map((v) => (
-                            <figure key={v.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                              <video
-                                src={`/api/video/${v.id}`}
-                                poster={v.thumbnailUrl ?? undefined}
-                                controls
-                                playsInline
-                                preload="metadata"
-                                className="aspect-video w-full bg-black object-contain"
-                              />
-                              {v.title && <figcaption className="line-clamp-1 px-2.5 py-2 text-[11px] font-semibold text-slate-700">{v.title}</figcaption>}
-                            </figure>
-                          ))}
-                        </div>
-                      )}
-                    </>
+                  {eventVideos.length > 1 ? (
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                      {eventVideos.slice(1).map((v) => (
+                        <figure key={v.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                          <video
+                            src={`/api/video/${v.id}`}
+                            poster={v.thumbnailUrl ?? undefined}
+                            controls
+                            playsInline
+                            preload="metadata"
+                            className="aspect-video w-full bg-black object-contain"
+                          />
+                          {v.title && <figcaption className="line-clamp-1 px-2.5 py-2 text-[11px] font-semibold text-slate-700">{v.title}</figcaption>}
+                        </figure>
+                      ))}
+                    </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white/60 px-6 py-8 text-center">
                       <p className="text-sm font-semibold text-slate-700">Got a video of {title}?</p>

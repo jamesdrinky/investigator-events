@@ -143,6 +143,94 @@ export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past,
     });
   }, [page.name]);
 
+  // Videos section extracted so it can render either immediately above the
+  // members directory (when videos exist) or in its original lower position
+  // (when there are none) — without duplicating the JSX.
+  const videosSection = (
+    <div className="border-t border-slate-200/40 bg-[linear-gradient(180deg,#ffffff,#f8fbff)]">
+      <div className="container-shell py-12 sm:py-16">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="eyebrow">Voices</p>
+            <h2 className="section-title !mt-3">Videos from the {page.name} community</h2>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600">
+              {videoSubmissionsEnabled
+                ? "Short clips from members. Want to add yours? It’s free — every video is reviewed by our team before it appears here."
+                : `Short clips featuring ${page.name}. Want your event or association featured here? Get in touch and we’ll set it up.`}
+            </p>
+          </div>
+          {videoSubmissionsEnabled ? (
+            <Link
+              href={`/associations/${page.slug}/submit-video` as Route}
+              className="inline-flex flex-shrink-0 items-center gap-2 self-start rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_30px_-10px_rgba(37,99,235,0.6)] transition hover:bg-blue-500 active:scale-[0.98]"
+            >
+              <Plus className="h-4 w-4" /> Submit a video
+            </Link>
+          ) : (
+            <a
+              href={videoContactHref}
+              className="inline-flex flex-shrink-0 items-center gap-2 self-start rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_30px_-10px_rgba(37,99,235,0.6)] transition hover:bg-blue-500 active:scale-[0.98]"
+            >
+              <Mail className="h-4 w-4" /> Contact us about a video
+            </a>
+          )}
+        </div>
+
+        {videos.length > 0 ? (
+          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {videos.map((v) => (
+              <figure
+                key={v.id}
+                className="overflow-hidden rounded-[1.25rem] border border-white/80 bg-white shadow-[0_24px_54px_-36px_rgba(15,23,42,0.18)]"
+              >
+                <video
+                  src={`/api/video/${v.id}`}
+                  poster={v.thumbnailUrl ?? undefined}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  className="aspect-video w-full bg-black object-contain"
+                />
+                <figcaption className="px-4 py-3.5">
+                  {v.title && <h3 className="line-clamp-2 text-sm font-bold text-slate-900">{v.title}</h3>}
+                  {v.description && (
+                    <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-slate-500">{v.description}</p>
+                  )}
+                  <p className="mt-2 text-[11px] font-medium text-slate-400">{v.submitterName}</p>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-8 flex flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-slate-300 bg-white/60 px-6 py-12 text-center">
+            <Video className="h-9 w-9 text-slate-300" />
+            <p className="mt-3 text-sm font-semibold text-slate-700">No videos yet</p>
+            <p className="mt-1 max-w-sm text-xs leading-relaxed text-slate-500">
+              {videoSubmissionsEnabled
+                ? `Be the first to share a short clip with the ${page.name} community.`
+                : `Want a video featuring ${page.name} here? Get in touch and we’ll arrange it.`}
+            </p>
+            {videoSubmissionsEnabled ? (
+              <Link
+                href={`/associations/${page.slug}/submit-video` as Route}
+                className="mt-5 inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700"
+              >
+                <Plus className="h-4 w-4" /> Submit the first video
+              </Link>
+            ) : (
+              <a
+                href={videoContactHref}
+                className="mt-5 inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700"
+              >
+                <Mail className="h-4 w-4" /> Contact us
+              </a>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <>
       {/* ═══ HERO — cinematic dark with floating logo, animated gradient name ═══ */}
@@ -344,6 +432,45 @@ export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past,
         </div>
       </div>
 
+      {/* ═══ VIDEOS SECTION (above members when videos exist) ═══ */}
+      {videos.length > 0 && videosSection}
+
+      {/* ═══ POSTS SECTION ═══ */}
+      {posts.length > 0 && (
+        <div className="border-t border-slate-200/40 bg-[linear-gradient(180deg,#f8fbff,#ffffff)]">
+          <div className="container-shell py-12 sm:py-16">
+            <p className="eyebrow">Updates</p>
+            <h2 className="section-title !mt-3">Latest from {page.name}</h2>
+            <div className="mt-8 space-y-5">
+              {posts.map((post) => (
+                <div key={post.id} className="overflow-hidden rounded-[1.5rem] border border-white/80 bg-white shadow-[0_24px_54px_-36px_rgba(15,23,42,0.12)]">
+                  <div className="flex items-center gap-3 px-5 pt-5 sm:px-6">
+                    {logoSrc ? (
+                      <Image src={logoSrc} alt={page.name} width={40} height={40} className={`h-10 w-10 rounded-xl border border-slate-100 object-contain p-1 ${invertLogo ? 'brightness-0' : ''}`} />
+                    ) : (
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-violet-50 text-sm font-bold text-blue-400">{page.name.charAt(0)}</div>
+                    )}
+                    <div>
+                      <p className="text-sm font-bold text-slate-900">{page.name}</p>
+                      <p className="text-[11px] text-slate-400">{timeAgo(post.created_at)}</p>
+                    </div>
+                  </div>
+                  <div className="px-5 py-4 sm:px-6">
+                    {post.title && <h3 className="text-base font-bold text-slate-900">{post.title}</h3>}
+                    <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{post.content}</p>
+                  </div>
+                  {post.image_url && (
+                    <div className="relative h-56 w-full overflow-hidden sm:h-72">
+                      <Image src={post.image_url} alt="" fill className="object-cover" />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ═══ MEMBERS SECTION ═══ */}
       <div className="border-t border-slate-200/40 bg-white">
         <div className="container-shell py-12 sm:py-16">
@@ -385,125 +512,11 @@ export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past,
         </div>
       </div>
 
-      {/* ═══ POSTS SECTION ═══ */}
-      {posts.length > 0 && (
-        <div className="border-t border-slate-200/40 bg-[linear-gradient(180deg,#f8fbff,#ffffff)]">
-          <div className="container-shell py-12 sm:py-16">
-            <p className="eyebrow">Updates</p>
-            <h2 className="section-title !mt-3">Latest from {page.name}</h2>
-            <div className="mt-8 space-y-5">
-              {posts.map((post) => (
-                <div key={post.id} className="overflow-hidden rounded-[1.5rem] border border-white/80 bg-white shadow-[0_24px_54px_-36px_rgba(15,23,42,0.12)]">
-                  <div className="flex items-center gap-3 px-5 pt-5 sm:px-6">
-                    {logoSrc ? (
-                      <Image src={logoSrc} alt={page.name} width={40} height={40} className={`h-10 w-10 rounded-xl border border-slate-100 object-contain p-1 ${invertLogo ? 'brightness-0' : ''}`} />
-                    ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-violet-50 text-sm font-bold text-blue-400">{page.name.charAt(0)}</div>
-                    )}
-                    <div>
-                      <p className="text-sm font-bold text-slate-900">{page.name}</p>
-                      <p className="text-[11px] text-slate-400">{timeAgo(post.created_at)}</p>
-                    </div>
-                  </div>
-                  <div className="px-5 py-4 sm:px-6">
-                    {post.title && <h3 className="text-base font-bold text-slate-900">{post.title}</h3>}
-                    <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{post.content}</p>
-                  </div>
-                  {post.image_url && (
-                    <div className="relative h-56 w-full overflow-hidden sm:h-72">
-                      <Image src={post.image_url} alt="" fill className="object-cover" />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ═══ VIDEOS SECTION — member-submitted clips (verified before going live) ═══ */}
-      <div className="border-t border-slate-200/40 bg-[linear-gradient(180deg,#ffffff,#f8fbff)]">
-        <div className="container-shell py-12 sm:py-16">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="eyebrow">Voices</p>
-              <h2 className="section-title !mt-3">Videos from the {page.name} community</h2>
-              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600">
-                {videoSubmissionsEnabled
-                  ? "Short clips from members. Want to add yours? It’s free — every video is reviewed by our team before it appears here."
-                  : `Short clips featuring ${page.name}. Want your event or association featured here? Get in touch and we’ll set it up.`}
-              </p>
-            </div>
-            {videoSubmissionsEnabled ? (
-              <Link
-                href={`/associations/${page.slug}/submit-video` as Route}
-                className="inline-flex flex-shrink-0 items-center gap-2 self-start rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_30px_-10px_rgba(37,99,235,0.6)] transition hover:bg-blue-500 active:scale-[0.98]"
-              >
-                <Plus className="h-4 w-4" /> Submit a video
-              </Link>
-            ) : (
-              <a
-                href={videoContactHref}
-                className="inline-flex flex-shrink-0 items-center gap-2 self-start rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_30px_-10px_rgba(37,99,235,0.6)] transition hover:bg-blue-500 active:scale-[0.98]"
-              >
-                <Mail className="h-4 w-4" /> Contact us about a video
-              </a>
-            )}
-          </div>
-
-          {videos.length > 0 ? (
-            <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {videos.map((v) => (
-                <figure
-                  key={v.id}
-                  className="overflow-hidden rounded-[1.25rem] border border-white/80 bg-white shadow-[0_24px_54px_-36px_rgba(15,23,42,0.18)]"
-                >
-                  <video
-                    src={`/api/video/${v.id}`}
-                    poster={v.thumbnailUrl ?? undefined}
-                    controls
-                    playsInline
-                    preload="metadata"
-                    className="aspect-video w-full bg-black object-contain"
-                  />
-                  <figcaption className="px-4 py-3.5">
-                    {v.title && <h3 className="line-clamp-2 text-sm font-bold text-slate-900">{v.title}</h3>}
-                    {v.description && (
-                      <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-slate-500">{v.description}</p>
-                    )}
-                    <p className="mt-2 text-[11px] font-medium text-slate-400">{v.submitterName}</p>
-                  </figcaption>
-                </figure>
-              ))}
-            </div>
-          ) : (
-            <div className="mt-8 flex flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-slate-300 bg-white/60 px-6 py-12 text-center">
-              <Video className="h-9 w-9 text-slate-300" />
-              <p className="mt-3 text-sm font-semibold text-slate-700">No videos yet</p>
-              <p className="mt-1 max-w-sm text-xs leading-relaxed text-slate-500">
-                {videoSubmissionsEnabled
-                  ? `Be the first to share a short clip with the ${page.name} community.`
-                  : `Want a video featuring ${page.name} here? Get in touch and we’ll arrange it.`}
-              </p>
-              {videoSubmissionsEnabled ? (
-                <Link
-                  href={`/associations/${page.slug}/submit-video` as Route}
-                  className="mt-5 inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700"
-                >
-                  <Plus className="h-4 w-4" /> Submit the first video
-                </Link>
-              ) : (
-                <a
-                  href={videoContactHref}
-                  className="mt-5 inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700"
-                >
-                  <Mail className="h-4 w-4" /> Contact us
-                </a>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
+      {/* ═══ VIDEOS SECTION — member-submitted clips (verified before going live).
+          Renders here only when there are no videos, so an empty box doesn't
+          push the members directory down. When videos exist, the section is
+          rendered above the members section instead. ═══ */}
+      {videos.length === 0 && videosSection}
 
       {/* ═══ WHY JOIN — CTA section ═══ */}
       <div className="relative overflow-hidden border-t border-slate-200/40 bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_25%,#f0e8ff_50%,#f4f0ff_75%,#f8fbff_100%)]">

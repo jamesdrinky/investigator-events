@@ -123,37 +123,6 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
-      {/* ── Prominent showcase video — promoted above the hero image when the
-          event has at least one video. Orientation-agnostic (portrait or
-          landscape) via a centered black container with no forced aspect
-          ratio. When there's no video, the hero image stays the top element. ── */}
-      {eventVideos.length > 0 && (
-        <div className="container-shell relative pt-20 sm:pt-24">
-          <video
-            src={`/api/video/${eventVideos[0].id}`}
-            poster={eventVideos[0].thumbnailUrl ?? undefined}
-            controls
-            playsInline
-            preload="metadata"
-            className="mx-auto w-auto max-w-full max-h-[70vh] rounded-2xl bg-black"
-          />
-          <div className="mx-auto mt-2.5 flex max-w-full flex-wrap items-center justify-between gap-2">
-            <div className="min-w-0">
-              {eventVideos[0].title && <p className="truncate text-sm font-bold text-slate-900">{eventVideos[0].title}</p>}
-              <p className="text-xs text-slate-500">{eventVideos[0].submitterName}</p>
-            </div>
-            {videoSubmissionsEnabled && (
-              <Link
-                href={`/events/${event.slug}/submit-video` as Route}
-                className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
-              >
-                + Add a video
-              </Link>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* ── Hero — full-width cover image with futuristic accents ── */}
       <div className="relative h-[22rem] w-full overflow-hidden sm:h-[36rem] lg:h-[40rem]">
         <Image src={imageSrc} alt={title} fill className="object-cover" priority />
@@ -166,6 +135,22 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
         {logoSrc && (
           <div className="absolute right-3 top-16 flex h-10 w-10 items-center justify-center rounded-xl border border-white/30 bg-white/90 p-1.5 shadow-[0_8px_30px_-10px_rgba(0,0,0,0.5)] backdrop-blur-sm sm:right-8 sm:top-24 sm:h-16 sm:w-16 sm:rounded-2xl sm:p-2">
             <Image src={logoSrc} alt={organiser} width={48} height={48} className={`h-auto max-h-10 w-auto max-w-10 object-contain sm:max-h-12 sm:max-w-12 ${invertLogo ? 'brightness-0' : ''}`} />
+          </div>
+        )}
+
+        {/* Showcase video — overlaid on the right of the hero image (desktop),
+            filling the space to the right of the title. Portrait & landscape
+            both fit via max-height + auto width. */}
+        {eventVideos.length > 0 && (
+          <div className="absolute bottom-12 right-8 z-10 hidden lg:block">
+            <video
+              src={`/api/video/${eventVideos[0].id}`}
+              poster={eventVideos[0].thumbnailUrl ?? undefined}
+              controls
+              playsInline
+              preload="metadata"
+              className="max-h-[26rem] w-auto max-w-[42vw] rounded-2xl bg-black shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] ring-1 ring-white/20"
+            />
           </div>
         )}
 
@@ -193,6 +178,27 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
           </div>
         </div>
       </div>
+
+      {/* Showcase video — stacked below the hero on mobile/tablet (no room to overlay) */}
+      {eventVideos.length > 0 && (
+        <div className="container-shell pt-6 lg:hidden">
+          <video
+            src={`/api/video/${eventVideos[0].id}`}
+            poster={eventVideos[0].thumbnailUrl ?? undefined}
+            controls
+            playsInline
+            preload="metadata"
+            className="mx-auto max-h-[70vh] w-auto max-w-full rounded-2xl bg-black"
+          />
+          {videoSubmissionsEnabled && (
+            <div className="mt-2 text-right">
+              <Link href={`/events/${event.slug}/submit-video` as Route} className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
+                + Add a video
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── Content ── */}
       <div className="container-shell relative py-8 sm:py-12">

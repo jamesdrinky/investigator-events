@@ -74,7 +74,7 @@ export default async function AdminVideosPage() {
             {pending.map((v) => (
               <div key={v.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
                 <video
-                  src={v.videoUrl}
+                  src={`/api/video/${v.id}`}
                   poster={v.thumbnailUrl ?? undefined}
                   controls
                   playsInline

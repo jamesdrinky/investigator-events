@@ -6,6 +6,7 @@ import type { Route } from 'next';
 import Image from 'next/image';
 import { Calendar, MapPin, Users, Globe, ShieldCheck, ExternalLink, ArrowRight, Award, Briefcase, Clock, Mail, MessageCircle, Heart, Video, Plus } from 'lucide-react';
 import { UserAvatar } from '@/components/UserAvatar';
+import { VideoPlayer } from '@/components/VideoPlayer';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 
 /* ── Types ── */
@@ -183,13 +184,11 @@ export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past,
                 key={v.id}
                 className="overflow-hidden rounded-[1.25rem] border border-white/80 bg-white shadow-[0_24px_54px_-36px_rgba(15,23,42,0.18)]"
               >
-                <video
-                  src={`/api/video/${v.id}`}
-                  poster={v.thumbnailUrl ?? undefined}
-                  controls
-                  playsInline
-                  preload="metadata"
-                  className="aspect-video w-full bg-black object-contain"
+                <VideoPlayer
+                  id={v.id}
+                  poster={v.thumbnailUrl}
+                  className="aspect-video w-full"
+                  videoClassName="h-full w-full bg-black object-contain"
                 />
                 <figcaption className="px-4 py-3.5">
                   {v.title && <h3 className="line-clamp-2 text-sm font-bold text-slate-900">{v.title}</h3>}

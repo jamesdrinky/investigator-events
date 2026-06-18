@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { ArrowLeft, CheckCircle2, XCircle, Film, Clock, ToggleLeft, ToggleRight } from 'lucide-react';
 import { hasValidAdminSessionCookie } from '@/lib/admin/session';
 import { fetchPendingVideos } from '@/lib/data/association-videos';
+import { VideoPlayer } from '@/components/VideoPlayer';
 import { isFeatureEnabled, VIDEO_SUBMISSIONS_FLAG } from '@/lib/data/feature-flags';
 import { approveVideoAction, rejectVideoAction, setVideoSubmissionsEnabledAction } from './actions';
 
@@ -73,13 +74,11 @@ export default async function AdminVideosPage() {
           <div className="mt-8 space-y-6">
             {pending.map((v) => (
               <div key={v.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <video
-                  src={`/api/video/${v.id}`}
-                  poster={v.thumbnailUrl ?? undefined}
-                  controls
-                  playsInline
-                  preload="metadata"
-                  className="aspect-video w-full bg-black object-contain"
+                <VideoPlayer
+                  id={v.id}
+                  poster={v.thumbnailUrl}
+                  className="aspect-video w-full"
+                  videoClassName="h-full w-full bg-black object-contain"
                 />
                 <div className="p-5">
                   <div className="flex flex-wrap items-center gap-2">

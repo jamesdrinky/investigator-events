@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { EventCard } from '@/components/event-card';
+import { VideoPlayer } from '@/components/VideoPlayer';
 import { Reveal } from '@/components/motion/reveal';
 import { SaveDateLinks } from '@/components/save-date-links';
 import { fetchAllEvents, fetchEventBySlug } from '@/lib/data/events';
@@ -143,13 +144,12 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
             both fit via max-height + auto width. */}
         {eventVideos.length > 0 && (
           <div className="absolute bottom-12 right-8 z-10 hidden lg:block">
-            <video
-              src={`/api/video/${eventVideos[0].id}`}
-              poster={eventVideos[0].thumbnailUrl ?? undefined}
-              controls
-              playsInline
-              preload="metadata"
-              className="max-h-[26rem] w-auto max-w-[42vw] rounded-2xl bg-black shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] ring-1 ring-white/20"
+            <VideoPlayer
+              id={eventVideos[0].id}
+              poster={eventVideos[0].thumbnailUrl}
+              label={eventVideos[0].title || eventVideos[0].submitterName}
+              className="inline-block max-h-[26rem] max-w-[42vw] rounded-2xl shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] ring-1 ring-white/20"
+              videoClassName="max-h-[26rem] w-auto max-w-[42vw] bg-black"
             />
           </div>
         )}
@@ -182,13 +182,11 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
       {/* Showcase video — stacked below the hero on mobile/tablet (no room to overlay) */}
       {eventVideos.length > 0 && (
         <div className="container-shell pt-6 lg:hidden">
-          <video
-            src={`/api/video/${eventVideos[0].id}`}
-            poster={eventVideos[0].thumbnailUrl ?? undefined}
-            controls
-            playsInline
-            preload="metadata"
-            className="mx-auto max-h-[70vh] w-auto max-w-full rounded-2xl bg-black"
+          <VideoPlayer
+            id={eventVideos[0].id}
+            poster={eventVideos[0].thumbnailUrl}
+            className="mx-auto block w-fit max-h-[70vh] max-w-full rounded-2xl"
+            videoClassName="max-h-[70vh] w-auto max-w-full bg-black"
           />
           {videoSubmissionsEnabled && (
             <div className="mt-2 text-right">
@@ -252,13 +250,11 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                       {eventVideos.slice(1).map((v) => (
                         <figure key={v.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                          <video
-                            src={`/api/video/${v.id}`}
-                            poster={v.thumbnailUrl ?? undefined}
-                            controls
-                            playsInline
-                            preload="metadata"
-                            className="aspect-video w-full bg-black object-contain"
+                          <VideoPlayer
+                            id={v.id}
+                            poster={v.thumbnailUrl}
+                            className="aspect-video w-full"
+                            videoClassName="h-full w-full bg-black object-contain"
                           />
                           {v.title && <figcaption className="line-clamp-1 px-2.5 py-2 text-[11px] font-semibold text-slate-700">{v.title}</figcaption>}
                         </figure>

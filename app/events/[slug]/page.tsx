@@ -147,7 +147,9 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
             <VideoPlayer
               id={eventVideos[0].id}
               poster={eventVideos[0].thumbnailUrl}
+              logo={logoSrc}
               label={eventVideos[0].title || eventVideos[0].submitterName}
+              description={eventVideos[0].description}
               className="inline-block max-h-[26rem] max-w-[42vw] rounded-2xl shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] ring-1 ring-white/20"
               videoClassName="max-h-[26rem] w-auto max-w-[42vw] bg-black"
             />
@@ -185,6 +187,9 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
           <VideoPlayer
             id={eventVideos[0].id}
             poster={eventVideos[0].thumbnailUrl}
+            logo={logoSrc}
+            label={eventVideos[0].title || eventVideos[0].submitterName}
+            description={eventVideos[0].description}
             className="mx-auto block w-fit max-h-[70vh] max-w-full rounded-2xl"
             videoClassName="max-h-[70vh] w-auto max-w-full bg-black"
           />

@@ -187,6 +187,7 @@ export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past,
                 <VideoPlayer
                   id={v.id}
                   poster={v.thumbnailUrl}
+                  logo={logoSrc}
                   className="aspect-video w-full"
                   videoClassName="h-full w-full bg-black object-contain"
                 />

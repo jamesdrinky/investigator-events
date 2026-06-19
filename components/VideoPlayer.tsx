@@ -8,10 +8,10 @@ import { Play } from 'lucide-react';
  * so every video on the site reads as a video before you click — no per-video
  * design needed.
  *
- * - The still is a real frame from the video itself: we append `#t=0.1` to the
- *   source so the browser seeks ~0.1s in and paints that frame (instead of a
- *   black box). A server-rendered `poster` is used when present.
- * - A play-button overlay + soft scrim sits on top until playback starts, so
+ * - The still is a server-generated poster frame, served from the stable
+ *   /api/video/<id>/poster route (auto-created for every video in the transcode
+ *   pipeline), so it shows a real frame instead of a black box.
+ * - A play-button overlay + light scrim sits on top until playback starts, so
  *   it's unmistakably a video. Clicking it (or the video) plays.
  *
  * `className` styles the wrapper (control the box: aspect/size/rounding);
@@ -38,7 +38,7 @@ export function VideoPlayer({
     <div className={`relative overflow-hidden ${className ?? ''}`}>
       <video
         ref={ref}
-        src={`/api/video/${id}#t=0.1`}
+        src={`/api/video/${id}`}
         poster={`/api/video/${id}/poster`}
         controls
         playsInline
@@ -54,7 +54,7 @@ export function VideoPlayer({
           type="button"
           onClick={() => ref.current?.play()}
           aria-label="Play video"
-          className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/45 via-black/10 to-black/20 transition hover:from-black/55"
+          className="absolute inset-0 flex items-center justify-center bg-black/15 transition hover:bg-black/25"
         >
           <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 shadow-[0_8px_30px_-6px_rgba(0,0,0,0.6)] ring-1 ring-white/40 backdrop-blur transition group-hover:scale-105">
             <Play className="ml-1 h-7 w-7 fill-slate-900 text-slate-900" />

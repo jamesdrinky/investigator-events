@@ -325,7 +325,7 @@ function statPill(value: string | number, label: string) {
 }
 
 export function buildWeeklyNewsletterHtml({
-  upcoming, newlyAdded, featured, recentlyPast = [], unsubscribeToken, appPush, globalLaunchBanner,
+  upcoming, newlyAdded, featured, recentlyPast = [], unsubscribeToken, appPush, globalLaunchBanner, preheader,
 }: {
   upcoming: EventItem[];
   newlyAdded: EventItem[];
@@ -334,6 +334,7 @@ export function buildWeeklyNewsletterHtml({
   unsubscribeToken?: string;
   appPush?: { size: AppPushSize; region?: AppPushRegion } | null;
   globalLaunchBanner?: boolean;
+  preheader?: string;
 }): string {
   const displayUpcoming = mergeBearstoneNewsletterEvents(upcoming);
   const displayNewlyAdded = mergeBearstoneNewsletterEvents(newlyAdded);
@@ -341,6 +342,12 @@ export function buildWeeklyNewsletterHtml({
   const weekOf = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   const countries = new Set([...displayUpcoming, ...displayNewlyAdded].map(e => e.country)).size;
   const hero = displayFeatured[0] ?? displayUpcoming[0];
+  // Inbox preview snippet (hidden in the body). Built from the week's content
+  // unless an explicit one is passed.
+  const preheaderText = (preheader && preheader.trim())
+    || (displayNewlyAdded.length > 0
+      ? `${displayNewlyAdded.length} just added · ${displayUpcoming.length} upcoming across ${countries} countries — see what's on`
+      : `${displayUpcoming.length} upcoming investigator events across ${countries} countries`);
   const appHeroBanner = appPush?.size === 'hero' ? buildAppPushBanner({ size: 'hero', region: appPush.region ?? 'available' }) : '';
   const appCompactBanner = appPush?.size === 'compact' ? buildAppPushBanner({ size: 'compact', region: appPush.region ?? 'available' }) : '';
   const globalLaunchHtml = globalLaunchBanner ? buildGlobalLaunchBanner() : '';
@@ -415,7 +422,7 @@ export function buildWeeklyNewsletterHtml({
 <div id="wrapper" style="background-color:#ffffff;">
 
 <!-- Preheader -->
-<div style="display:none;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:#ffffff;">${isAppHero ? 'The Investigator Events iOS app is live in 175 countries; EU rollout is expected next week.' : `${displayUpcoming.length} upcoming event${displayUpcoming.length !== 1 ? 's' : ''} across ${countries} countr${countries !== 1 ? 'ies' : 'y'}`} &middot; investigatorevents.com &#847; &#847; &#847; &#847; &#847;</div>
+<div style="display:none;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:#ffffff;">${isAppHero ? 'The Investigator Events iOS app is live in 175 countries; EU rollout is expected next week.' : preheaderText} &middot; investigatorevents.com &#847; &#847; &#847; &#847; &#847;</div>
 
 <table width="100%" cellpadding="0" cellspacing="0" class="outer" style="background-color:#ffffff;">
 <tr><td align="center" class="outer-wrap" style="padding:16px;">

@@ -48,15 +48,21 @@ async function buildTemplate(template: TemplateName, region: AppLaunchRegion) {
     case 'monday-newsletter': {
       const events = await fetchAllEvents();
       const { upcoming, newlyAdded, featured, recentlyPast } = getWeeklyCollections(events);
+      // Mirror the cron's standard edition: content-driven subject + compact app strip.
+      const heroEvent = featured[0] ?? upcoming[0];
+      const countries = new Set([...upcoming, ...newlyAdded].map((e) => e.country)).size;
+      const subject = heroEvent
+        ? `${heroEvent.title} + ${Math.max(0, upcoming.length + newlyAdded.length - 1)} more — Weekly Briefing`
+        : `Weekly Briefing — ${upcoming.length} event${upcoming.length !== 1 ? 's' : ''} across ${countries} countries`;
       return {
-        subject: 'Investigator Events is live on the App Store — Weekly Briefing',
+        subject,
         html: buildWeeklyNewsletterHtml({
           upcoming,
           newlyAdded,
           featured,
           recentlyPast,
           unsubscribeToken: 'preview-token',
-          appPush: { size: 'hero', region: region === 'eu-pending' ? 'eu-pending' : 'available' },
+          appPush: { size: 'compact', region: region === 'eu-pending' ? 'eu-pending' : 'available' },
         }),
       };
     }

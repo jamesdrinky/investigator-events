@@ -387,6 +387,7 @@ export function MessageInbox({ initialUserId }: { initialUserId?: string }) {
     } catch (err) {
       setMessages((prev) => prev.filter((m) => m.id !== tempId));
       setNewMsg(savedText);
+      persistDraft(activeChat, savedText);
       setPendingAttachment(savedAttachment);
       const message = err instanceof Error ? err.message : 'Failed to send message';
       setAttachError(message);

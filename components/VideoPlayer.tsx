@@ -61,7 +61,7 @@ export function VideoPlayer({
           type="button"
           onClick={() => ref.current?.play()}
           aria-label="Play video"
-          className="absolute inset-0 flex items-center justify-center bg-black/15 transition hover:bg-black/25"
+          className="group absolute inset-0 flex items-center justify-center bg-black/15 transition hover:bg-black/25"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {logo && (

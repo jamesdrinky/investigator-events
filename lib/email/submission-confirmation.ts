@@ -16,6 +16,7 @@ const C = {
 };
 
 export function buildSubmissionConfirmationEmail(eventName: string): string {
+  const safeName = escapeHtml(eventName);
   return `<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
@@ -54,7 +55,7 @@ export function buildSubmissionConfirmationEmail(eventName: string): string {
             Event received
           </p>
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.6;">
-            Thank you for submitting <strong>${eventName}</strong> to Investigator Events.
+            Thank you for submitting <strong>${safeName}</strong> to Investigator Events.
           </p>
           <p style="margin:12px 0 0;font-size:15px;color:${C.body};line-height:1.6;">
             We’ll review your submission and get back to you shortly. Most events are approved within 24 hours.

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
+import { hasValidAdminSessionCookie } from '@/lib/admin/session';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -12,12 +13,17 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
 
   const { data } = await admin
     .from('association_videos')
-    .select('thumbnail_url')
+    .select('thumbnail_url, status')
     .eq('id', params.id)
     .single();
 
   const path = data?.thumbnail_url as string | undefined;
   if (!path) return new NextResponse('Not found', { status: 404 });
+
+  // Match the video route: approved posters are public; unapproved only to admins.
+  if (data?.status !== 'approved' && !(await hasValidAdminSessionCookie())) {
+    return new NextResponse('Not found', { status: 404 });
+  }
 
   let target: string;
   if (/^https?:\/\//i.test(path)) {

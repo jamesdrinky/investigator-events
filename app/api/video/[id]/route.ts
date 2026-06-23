@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
+import { hasValidAdminSessionCookie } from '@/lib/admin/session';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -14,12 +15,18 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
   const { data } = await admin
     .from('association_videos')
-    .select('video_url')
+    .select('video_url, status')
     .eq('id', params.id)
     .single();
 
   const path = data?.video_url as string | undefined;
   if (!path) return new NextResponse('Not found', { status: 404 });
+
+  // Only approved videos are public. Unapproved ones (pending/rejected) are
+  // streamable only to a signed-in admin (for the moderation preview queue).
+  if (data?.status !== 'approved' && !(await hasValidAdminSessionCookie())) {
+    return new NextResponse('Not found', { status: 404 });
+  }
 
   // Resolve to a fetchable URL: pass full URLs straight through (e.g. Blob),
   // otherwise mint a fresh signed URL for the private storage object.

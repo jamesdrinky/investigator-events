@@ -40,7 +40,6 @@ const NETWORK_LOGOS: Array<{ src: string; name: string }> = [
   { src: '/associations/budeg.png', name: 'BuDEG' },
   { src: '/associations/cali.png', name: 'CALI' },
   { src: '/associations/fali.png', name: 'FALI' },
-  { src: '/associations/federpol.png', name: 'Federpol' },
   { src: '/associations/intellenet.png', name: 'Intellenet' },
   { src: '/associations/ikd.png', name: 'IKD' },
   { src: '/associations/nciss.png', name: 'NCISS' },

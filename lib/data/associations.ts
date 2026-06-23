@@ -122,16 +122,6 @@ export const associationRecords: AssociationRecord[] = [
     logoFileName: 'ibpi.png'
   },
   {
-    slug: 'federpol',
-    shortName: 'FEDERPOL',
-    name: 'FEDERPOL',
-    country: 'Italy',
-    region: 'Europe',
-    website: 'https://www.federpol.it/',
-    aliases: ['FEDERPOL'],
-    logoFileName: 'federpol.png'
-  },
-  {
     slug: 'biznesa-drosiba',
     shortName: 'Biznesa Drosiba',
     name: 'Biznesa Drosiba',

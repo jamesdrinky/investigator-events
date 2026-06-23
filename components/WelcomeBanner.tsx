@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import Image from 'next/image';
 
 const LOGOS = [
-  'abi.png', 'wad.png', 'ikd.png', 'cii.png', 'intellenet.png', 'federpol.png',
+  'abi.png', 'wad.png', 'ikd.png', 'cii.png', 'intellenet.png',
   'budeg.png', 'eurodet.png', 'fapi.png', 'nciss.png', 'tali.png', 'fali.png',
 ];
 

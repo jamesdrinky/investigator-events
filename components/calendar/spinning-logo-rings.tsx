@@ -4,7 +4,7 @@ import Image from 'next/image';
 
 const RING_1 = [
   '/associations/abi.png', '/associations/wad.png', '/associations/cii.png',
-  '/associations/ikd.png', '/associations/federpol.png', '/associations/intellenet.png',
+  '/associations/ikd.png', '/associations/intellenet.png',
   '/associations/eurodet.png', '/associations/budeg.png',
 ];
 const RING_2 = [

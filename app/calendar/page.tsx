@@ -33,7 +33,7 @@ export default async function CalendarPage({
   const { data: { user } } = await supabase.auth.getUser();
 
   // Auto-include the user's associations' secondary events when filtering by
-  // 'Main' — so if you're a FEDERPOL member you see FEDERPOL secondaries
+  // 'Main' — so if you're a member of an association you see that association's secondaries
   // alongside global mains, without having to flip to 'All'.
   const userAssociations = user
     ? ((await supabase.from('user_associations').select('association_name').eq('user_id', user.id)).data ?? [])

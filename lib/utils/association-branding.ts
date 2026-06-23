@@ -18,7 +18,7 @@ const associationBrandingRecords: AssociationBrandingRecord[] = [
   {
     name: 'IKD',
     shortName: 'IKD',
-    aliases: ['IKD', 'Internationale Kommission der Detektiv-Verbande', 'Internationale Kommission der Detektiv-Verbände', 'IKD / FEDERPOL'],
+    aliases: ['IKD', 'Internationale Kommission der Detektiv-Verbande', 'Internationale Kommission der Detektiv-Verbände'],
     logoFileName: 'ikd.png'
   },
   { name: 'ODV', shortName: 'ODV', aliases: ['ODV', 'ÖDV', 'OEDV'], logoFileName: 'oedv.png' },
@@ -31,7 +31,6 @@ const associationBrandingRecords: AssociationBrandingRecord[] = [
   { name: 'BuDEG', shortName: 'BuDEG', aliases: ['BuDEG', 'BUDEG'], logoFileName: 'budeg.png' },
   { name: 'Hungarian Detective Association', shortName: 'HDA', aliases: ['Hungarian Detective Association', 'HDA'], logoFileName: 'hda.png' },
   { name: 'IBPI', shortName: 'IBPI', aliases: ['IBPI', 'IPI'], logoFileName: 'ibpi.png' },
-  { name: 'FEDERPOL', shortName: 'FEDERPOL', aliases: ['FEDERPOL'], logoFileName: 'federpol.png' },
   { name: 'Biznesa Drosiba', shortName: 'Biznesa Drosiba', aliases: ['Biznesa Drosiba', 'Biznesa Drošība', 'Single Member'], logoFileName: 'biznesa-drosiba.png' },
   { name: 'NFES', shortName: 'NFES', aliases: ['NFES'], logoFileName: 'nfes.png' },
   { name: 'PSLD', shortName: 'PSLD', aliases: ['PSLD'], logoFileName: 'psld.png' },

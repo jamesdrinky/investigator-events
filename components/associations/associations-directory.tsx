@@ -27,7 +27,6 @@ const GLOW_COLORS: Record<string, string> = {
   'budeg':                         '37,99,235',    // deep blue
   'hungarian-detective-association': '234,179,8',   // gold
   'ibpi':                          '37,99,235',    // blue
-  'federpol':                      '220,38,38',    // red
   'biznesa-drosiba':               '14,165,233',   // sky
   'nfes':                          '37,99,235',    // blue
   'psld':                          '220,38,38',    // red

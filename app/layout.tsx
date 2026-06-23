@@ -32,6 +32,9 @@ export const metadata: Metadata = {
     template: '%s | Investigator Events'
   },
   description: 'Confirmed conferences, AGMs, training events, and association meetings across the private investigations sector.',
+  verification: {
+    google: 'Vj_ZF8a5DWfphzgTPoRQ-Ad7ktItkNsQFmSlf5cuu-M',
+  },
   openGraph: {
     title: 'Investigator Events',
     description: 'Confirmed conferences, AGMs, training events, and association meetings across the private investigations sector.',

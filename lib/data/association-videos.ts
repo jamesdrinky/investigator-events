@@ -209,3 +209,74 @@ export async function fetchPendingVideos(): Promise<AssociationVideoItem[]> {
     ),
   );
 }
+
+// ---- Video-invite email composer ------------------------------------------
+
+export interface VideoPickerOption {
+  id: string;
+  title: string;
+  kind: string;
+  /** Event title or association name — shown as context in the picker. */
+  contextLabel: string | null;
+  /** Path on the platform where the video is watchable (event or association page). */
+  watchPath: string;
+}
+
+function watchPathFor(row: { event_slug?: string | null; association_slug?: string | null }): string {
+  if (row.event_slug) return `/events/${row.event_slug}`;
+  if (row.association_slug) return `/associations/${row.association_slug}`;
+  return '/';
+}
+
+/** All approved, ready videos — for the admin video-invite picker dropdown. */
+export async function fetchApprovedVideosForPicker(): Promise<VideoPickerOption[]> {
+  const supabase = createSupabaseAdminServerClient();
+  const { data, error } = await supabase
+    .from('association_videos' as any)
+    .select('*')
+    .eq('status', 'approved')
+    .eq('transcode_status', 'ready')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('fetchApprovedVideosForPicker failed:', error.message);
+    return [];
+  }
+
+  const rows = (data ?? []) as any[];
+  const [names, eventTitles] = await Promise.all([
+    fetchAssociationNames(supabase, rows.map((r) => r.association_slug)),
+    fetchEventTitles(supabase, rows.map((r) => r.event_slug)),
+  ]);
+
+  return rows.map((row) => {
+    const eventTitle = row.event_slug ? eventTitles.get(row.event_slug) ?? null : null;
+    const assocName = row.association_slug ? names.get(row.association_slug) ?? null : null;
+    return {
+      id: row.id,
+      title: row.title,
+      kind: row.kind,
+      contextLabel: eventTitle ?? assocName,
+      watchPath: watchPathFor(row),
+    };
+  });
+}
+
+/** Minimal metadata for embedding one video in an email. Returns null unless approved. */
+export async function fetchVideoEmailMeta(id: string): Promise<{ id: string; title: string; watchPath: string } | null> {
+  const supabase = createSupabaseAdminServerClient();
+  const { data, error } = await supabase
+    .from('association_videos' as any)
+    .select('id, title, status, event_slug, association_slug')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (error) {
+    console.error('fetchVideoEmailMeta failed:', error.message);
+    return null;
+  }
+  const row = data as any;
+  if (!row || row.status !== 'approved') return null;
+
+  return { id: row.id, title: row.title, watchPath: watchPathFor(row) };
+}

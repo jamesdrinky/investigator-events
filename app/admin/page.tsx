@@ -18,7 +18,7 @@ import {
   adminAddAssociationAction,
   adminRemoveAssociationAction
 } from '@/app/admin/actions';
-import { Calendar, Users, FileText, Megaphone, Globe, MapPin, Tag, ExternalLink, CheckCircle2, XCircle, Plus, Trash2, ShieldCheck, AlertTriangle, Mail, Send, Archive, RotateCcw } from 'lucide-react';
+import { Calendar, Users, FileText, Megaphone, Globe, MapPin, Tag, ExternalLink, CheckCircle2, XCircle, Plus, Trash2, ShieldCheck, AlertTriangle, Mail, Send, Film, Archive, RotateCcw } from 'lucide-react';
 import { VerificationCodeManager } from '@/components/admin/VerificationCodeManager';
 import { ModerationPanel } from '@/components/admin/ModerationPanel';
 import { QuickAddEvent } from '@/components/admin/QuickAddEvent';
@@ -26,6 +26,7 @@ import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { associationRecords } from '@/lib/data/associations';
 import { ImageDropZone } from '@/components/admin/ImageDropZone';
 import { OutreachManager } from '@/components/admin/OutreachManager';
+import { VideoInviteComposer } from '@/components/admin/VideoInviteComposer';
 import { ReengageSender } from '@/components/admin/ReengageSender';
 import { ReengageSampleSender } from '@/components/admin/ReengageSampleSender';
 import { getProfileCompletion } from '@/lib/utils/profile-completion';
@@ -363,6 +364,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
             { id: 'verification', label: 'Verification Codes', icon: ShieldCheck },
             { id: 'moderation', label: 'Moderation', icon: AlertTriangle },
             { id: 'outreach', label: 'Outreach', icon: Send },
+            { id: 'video-invite', label: 'Video Invite', icon: Film },
             { id: 'reengage', label: 'Re-engage', icon: Send },
           ].map((tab) => (
             <a
@@ -1472,6 +1474,14 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
               <h2 className="mb-1 text-lg font-bold text-slate-900">Association Outreach</h2>
               <p className="mb-4 text-sm text-slate-500">Send introduction emails to associations. Preview before sending.</p>
               <OutreachManager />
+            </div>
+          )}
+
+          {activeTab === 'video-invite' && (
+            <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
+              <h2 className="mb-1 text-lg font-bold text-slate-900">Video Invite</h2>
+              <p className="mb-4 text-sm text-slate-500">Personally invite an association to feature a promo video on the platform. Paste their details, pick a video to show as an example, choose who it&apos;s from, and send. Live preview on the right.</p>
+              <VideoInviteComposer />
             </div>
           )}
 

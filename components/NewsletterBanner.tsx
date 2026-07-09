@@ -26,7 +26,7 @@ export function NewsletterBanner() {
 
     // SYNCHRONOUS auth-cookie check first. Previously the only auth check
     // was an async supabase.auth.getUser() — during the 50-200ms it takes
-    // to resolve on a fresh page load, the 4s timer would already be set,
+    // to resolve on a fresh page load, the delay timer would already be set,
     // and any error in getUser() (network blip, race) meant the banner
     // popped up even for logged-in users. Cookie presence proves there's
     // a session in flight; skip the banner immediately.
@@ -54,8 +54,10 @@ export function NewsletterBanner() {
         }
       } catch {}
 
-      // Only show to anonymous visitors
-      timer = setTimeout(() => setVisible(true), 4000);
+      // Only show to anonymous visitors — after 30s of browsing (the sweet
+      // spot: long enough to not be in-your-face, short enough to still catch
+      // engaged visitors before they leave), not straight away.
+      timer = setTimeout(() => setVisible(true), 30000);
     };
 
     check();

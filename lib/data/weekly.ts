@@ -12,7 +12,10 @@ function createdAtTime(event: EventItem): number {
 export function getWeeklyCollections(events: EventItem[], now = new Date()) {
   const start = startOfDay(now);
   const past7 = start.getTime() - 7 * 24 * 60 * 60 * 1000;
-  const next30 = start.getTime() + 30 * 24 * 60 * 60 * 1000;
+  // "Upcoming" looks 60 days ahead — a two-month briefing. 30 days left the
+  // summer editions near-empty while the autumn wave (CII, WAD, GSX…) sat just
+  // past the cutoff; 60 days keeps the list healthy year-round.
+  const next60 = start.getTime() + 60 * 24 * 60 * 60 * 1000;
 
   const newlyAdded = [...events]
     .filter((event) => createdAtTime(event) >= past7)
@@ -22,7 +25,7 @@ export function getWeeklyCollections(events: EventItem[], now = new Date()) {
   const upcoming = [...events]
     .filter((event) => {
       const time = parseDate(event.date).getTime();
-      return time >= start.getTime() && time <= next30;
+      return time >= start.getTime() && time <= next60;
     })
     .sort((a, b) => parseDate(a.date).getTime() - parseDate(b.date).getTime())
     .slice(0, 8);

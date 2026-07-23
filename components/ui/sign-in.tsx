@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { MeshGradient } from '@paper-design/shaders-react';
+import { AdaptiveMeshGradient } from '@/components/ui/adaptive-mesh-gradient';
 
 const GoogleIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 48 48">
@@ -418,9 +418,7 @@ export function AuthPage({
         >
           {/* Shader background */}
           <div className="absolute inset-0">
-            <MeshGradient
-              width="100%"
-              height="100%"
+            <AdaptiveMeshGradient
               colors={['#000000', '#0a0a1a', '#1668ff', '#ffffff']}
               speed={0.4}
               distortion={0.4}

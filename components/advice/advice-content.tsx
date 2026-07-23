@@ -7,7 +7,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { CheckCircle2, XCircle, ArrowRight, Sparkles } from 'lucide-react';
 import { Reveal } from '@/components/motion/reveal';
 import { useEffect, useRef, useState } from 'react';
-import { MeshGradient } from '@paper-design/shaders-react';
+import { AdaptiveMeshGradient } from '@/components/ui/adaptive-mesh-gradient';
 
 /* ── Data ── */
 
@@ -347,9 +347,7 @@ export function AdviceContent() {
       <div ref={heroRef} className="relative overflow-hidden bg-[#04070f] pb-14 pt-20 sm:pb-28 sm:pt-36">
         {/* Shader background */}
         <div className="absolute inset-0">
-          <MeshGradient
-            width="100%"
-            height="100%"
+          <AdaptiveMeshGradient
             colors={['#000000', '#0a0a1a', '#1668ff', '#ffffff']}
             speed={0.8}
             distortion={0.4}
@@ -482,9 +480,7 @@ export function AdviceContent() {
          ══════════════════════════════════════════ */}
       <div className="relative overflow-hidden bg-[#080f1e]">
         <div className="absolute inset-0">
-          <MeshGradient
-            width="100%"
-            height="100%"
+          <AdaptiveMeshGradient
             colors={['#000000', '#0a0a1a', '#6c3aff', '#ffffff']}
             speed={0.6}
             distortion={0.35}
@@ -636,9 +632,7 @@ export function AdviceContent() {
          ══════════════════════════════════════════ */}
       <div className="relative overflow-hidden bg-[#04070f] py-20 sm:py-28">
         <div className="absolute inset-0">
-          <MeshGradient
-            width="100%"
-            height="100%"
+          <AdaptiveMeshGradient
             colors={['#000000', '#0a0a1a', '#1668ff', '#ffffff']}
             speed={0.5}
             distortion={0.3}

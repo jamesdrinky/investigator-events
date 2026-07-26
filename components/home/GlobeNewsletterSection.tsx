@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { NewsletterSignupForm } from '@/components/newsletter-signup-form';
+import { isNativeApp } from '@/lib/capacitor';
 
 import type { COBEOptions } from 'cobe';
 
@@ -43,6 +44,12 @@ function CobeGlobe({ className = '' }: { className?: string }) {
 
   useEffect(() => {
     if (!canvasRef.current) return;
+    // The globe is `hidden lg:block` — never visible in the native app (always
+    // phone-width). Skip createGlobe there so it doesn't allocate a WebGL
+    // context: the Android WebView caps live WebGL contexts, and every avoided
+    // one lowers the renderer-crash risk on low-end devices. The empty canvas
+    // still renders (display:none on mobile), so hydration is unaffected.
+    if (isNativeApp) return;
     const w = canvasRef.current.offsetWidth;
     let globe: ReturnType<typeof import('cobe')['default']> extends Promise<infer T> ? T : any;
     let frame: number;

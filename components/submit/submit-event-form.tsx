@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
 import {
   CheckCircle2, MapPin, Calendar, Clock, Globe, FileText, Mail, User, Building2,
@@ -169,17 +169,29 @@ export function SubmitEventForm({
 
   /* ── Per-step validation ────────────────────────────────────────────── */
   const emailOk = /\S+@\S+\.\S+/.test(contactEmail);
-  const step0Valid = !!(eventName.trim() && selectedRegion && country && city.trim() && organiser.trim() && emailOk && website.trim() && category);
-  const step1Valid = !!startDate;
+  const step0Missing = [
+    !eventName.trim() && 'Event name',
+    !selectedRegion && 'Region',
+    !country && 'Country',
+    !city.trim() && 'City',
+    !organiser.trim() && 'Organiser name',
+    !emailOk && 'Contact email',
+    !website.trim() && 'Website',
+    !category && 'Category',
+  ].filter(Boolean) as string[];
+  const step1Missing = [!startDate && 'Start date'].filter(Boolean) as string[];
+  const stepMissing = step === 0 ? step0Missing : step === 1 ? step1Missing : [];
+
+  const rootRef = useRef<HTMLDivElement>(null);
+  const scrollToTop = () => rootRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   const goNext = () => {
-    const valid = step === 0 ? step0Valid : step === 1 ? step1Valid : true;
-    if (!valid) { setShowErrors(true); return; }
+    if (stepMissing.length > 0) { setShowErrors(true); scrollToTop(); return; }
     setShowErrors(false);
     setStep((s) => Math.min(2, s + 1));
-    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollToTop();
   };
-  const goBack = () => { setShowErrors(false); setStep((s) => Math.max(0, s - 1)); };
+  const goBack = () => { setShowErrors(false); setStep((s) => Math.max(0, s - 1)); scrollToTop(); };
 
   const errRing = (bad: boolean) => (showErrors && bad ? 'ring-2 ring-rose-300' : '');
 
@@ -208,7 +220,7 @@ export function SubmitEventForm({
   }
 
   return (
-    <div className="min-w-0">
+    <div className="min-w-0" ref={rootRef}>
       {/* Header + stepper */}
       <div className="mb-6">
         <h2 className="text-xl font-bold tracking-[-0.02em] text-slate-950 sm:text-2xl">Publish your event</h2>
@@ -248,6 +260,14 @@ export function SubmitEventForm({
         <input type="text" name="companyWebsite" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
         <input type="hidden" name="issuedAt" value={issuedAt} />
         <input type="hidden" name="formToken" value={formToken} />
+
+        {/* Missing-fields notice — makes a blocked "Continue" obvious */}
+        {showErrors && stepMissing.length > 0 && (
+          <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
+            <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-rose-500" />
+            <p className="text-sm text-rose-700"><span className="font-semibold">Still needed:</span> {stepMissing.join(', ')}.</p>
+          </div>
+        )}
 
         {/* ══ STEP 1 — DETAILS ══ */}
         <div className={step === 0 ? 'space-y-4' : 'hidden'}>
@@ -463,7 +483,7 @@ export function SubmitEventForm({
           <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)]">
             <div className="flex gap-4 p-4">
               <div className="relative flex h-24 w-24 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[linear-gradient(135deg,#1668ff_0%,#6c3aff_100%)]">
-                <span className="absolute left-2 top-2 rounded-md bg-white/20 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-white backdrop-blur-sm">Your event</span>
+                <span className="absolute left-2 top-2 rounded-md bg-black/25 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-white">Your event</span>
                 <MapPin className="h-8 w-8 text-white/70" />
               </div>
               <div className="min-w-0 flex-1">
@@ -508,9 +528,6 @@ export function SubmitEventForm({
             <div className="flex-1"><SubmitButton /></div>
           )}
         </div>
-        {showErrors && step < 2 && (
-          <p className="mt-2 text-right text-xs text-rose-500">Please complete the highlighted fields.</p>
-        )}
       </form>
     </div>
   );

@@ -19,7 +19,7 @@ export function MobileBackButton() {
       type="button"
       onClick={() => router.back()}
       className="fixed left-3 z-[51] flex h-9 w-9 items-center justify-center rounded-full border border-slate-200/80 bg-white/95 shadow-md backdrop-blur-sm transition active:scale-90 lg:hidden"
-      style={{ top: 'calc(3.75rem + env(safe-area-inset-top, 0px))' }}
+      style={{ top: 'calc(3.75rem + var(--safe-top, 0px))' }}
       aria-label="Go back"
     >
       <ChevronLeft className="h-5 w-5 text-slate-700" />

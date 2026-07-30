@@ -2,9 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── iOS safe areas (notch, home indicator) ── */
+/* ── Safe areas (notch, home indicator) ──
+   iOS + new Android WebViews report the top inset via env(); older Android
+   WebViews can't (crbug 40699457, fixed in Chromium 140), so the native
+   Android shell measures the status-bar/cutout height itself and injects
+   --native-safe-top. max() takes whichever mechanism knows the answer. */
 :root {
-  --safe-top: env(safe-area-inset-top, 0px);
+  --native-safe-top: 0px;
+  --safe-top: max(env(safe-area-inset-top, 0px), var(--native-safe-top));
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
@@ -20,7 +25,7 @@ html, body { overscroll-behavior: none; overflow-x: hidden; }
 /* Lock viewport on mobile — only inner content scrolls, not the webview itself */
 @media (max-width: 1023px) {
   :root {
-    --app-header-height: calc(3.25rem + env(safe-area-inset-top, 0px));
+    --app-header-height: calc(3.25rem + var(--safe-top));
     --app-bottom-nav-height: calc(4.75rem + env(safe-area-inset-bottom, 0px));
   }
   html, body { height: 100%; overflow: hidden; }
@@ -46,7 +51,7 @@ html, body { overscroll-behavior: none; overflow-x: hidden; }
 
 @media (min-width: 640px) and (max-width: 767px) {
   :root {
-    --app-header-height: calc(4rem + env(safe-area-inset-top, 0px));
+    --app-header-height: calc(4rem + var(--safe-top));
   }
   [data-app-content] {
     padding-top: var(--app-header-height);
@@ -55,7 +60,7 @@ html, body { overscroll-behavior: none; overflow-x: hidden; }
 
 @media (min-width: 768px) and (max-width: 1023px) {
   :root {
-    --app-header-height: calc(4.75rem + env(safe-area-inset-top, 0px));
+    --app-header-height: calc(4.75rem + var(--safe-top));
   }
   [data-app-content] {
     padding-top: var(--app-header-height);

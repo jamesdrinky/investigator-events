@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Reconnecting…</title>
+<style>
+  :root { color-scheme: dark; }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: radial-gradient(120% 120% at 50% 0%, #16264d 0%, #0b1220 55%, #050913 100%);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    padding: 32px; text-align: center;
+    min-height: 100%;
+  }
+  .card { max-width: 380px; width: 100%; }
+  .logo {
+    width: 72px; height: 72px; margin: 0 auto 28px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #1e6bff, #3fb0ff);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 30px; letter-spacing: -1px;
+    box-shadow: 0 12px 40px rgba(40,120,255,.45);
+  }
+  h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 12px; }
+  p { font-size: 16px; line-height: 1.5; color: #aebfdb; margin-bottom: 28px; }
+  .spinner {
+    width: 26px; height: 26px; margin: 0 auto 22px;
+    border: 3px solid rgba(174,191,219,.25);
+    border-top-color: #4ea3ff;
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  button {
+    appearance: none; border: none; cursor: pointer;
+    background: linear-gradient(135deg, #1e6bff, #3fb0ff);
+    color: #fff; font-size: 16px; font-weight: 600;
+    padding: 15px 28px; border-radius: 100px; width: 100%;
+    box-shadow: 0 8px 28px rgba(40,120,255,.4);
+    transition: transform .12s ease, opacity .12s ease;
+  }
+  button:active { transform: scale(0.97); opacity: .9; }
+  .status { margin-top: 18px; font-size: 13px; color: #7d8fb3; min-height: 18px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">ie</div>
+    <div class="spinner" id="spinner"></div>
+    <h1>You're offline</h1>
+    <p>Investigator Events needs an internet connection. We'll reconnect you automatically as soon as you're back online.</p>
+    <button id="retry" type="button">Try again</button>
+    <div class="status" id="status">Waiting for connection…</div>
+  </div>
+
+<script>
+  var SITE = "https://www.investigatorevents.com/";
+  var statusEl = document.getElementById("status");
+  var attempting = false;
+
+  function reconnect() {
+    if (attempting) return;
+    attempting = true;
+    statusEl.textContent = "Reconnecting…";
+    // Re-load the live site. Persisted cookies/localStorage keep the user's
+    // session, so they land back where they were — still signed in. If the
+    // site is still unreachable, the native layer simply re-shows this page,
+    // so this is self-correcting rather than a one-shot.
+    window.location.replace(SITE);
+  }
+
+  document.getElementById("retry").addEventListener("click", function () {
+    // Manual retry always attempts, regardless of the online flag.
+    attempting = false;
+    reconnect();
+  });
+
+  // Auto-recover using the WebView's own connectivity state — no dependency
+  // on any specific URL existing (a 404 probe was the earlier bug).
+  window.addEventListener("online", reconnect);
+  setInterval(function () {
+    if (navigator.onLine) {
+      reconnect();
+    } else {
+      statusEl.textContent = "Waiting for connection…";
+    }
+  }, 3000);
+
+  // If we already have connectivity when this page shows (e.g. a server-side
+  // error rather than a dropped connection), retry shortly.
+  setTimeout(function () { if (navigator.onLine) reconnect(); }, 2000);
+</script>
+</body>
+</html>

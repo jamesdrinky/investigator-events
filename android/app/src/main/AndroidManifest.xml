@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -47,10 +48,15 @@
     <!-- Push notifications. Required from Android 13 (API 33) onward. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-    <!-- File uploads (avatar / banner / post images) via the WebView's file
-         chooser. CAMERA for "Take photo", READ_MEDIA_* for "Choose photo"
-         on Android 13+, READ_EXTERNAL_STORAGE for older devices. -->
+    <!-- Photo handling. "Take photo" needs CAMERA. Choosing an existing photo
+         goes through the permissionless Android Photo Picker (WebView file
+         chooser + Capacitor Camera's Prompt/Photos source on API 33+), so we do
+         NOT hold the broad media permissions. The READ_MEDIA_* / legacy storage
+         permissions are explicitly stripped from the merged manifest to comply
+         with Google Play's Photo and Video Permissions policy — this removes any
+         copy a dependency manifest might otherwise merge in. -->
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" tools:node="remove" />
 </manifest>

@@ -15,6 +15,14 @@ let pushListenersAttached = false;
 export async function registerPushNotifications(supabase: any) {
   if (!isNativeApp) return;
 
+  // iOS only. The Android build has no Firebase config (google-services.json),
+  // so PushNotifications.register() throws IllegalStateException on the native
+  // plugin thread — which a JS try/catch cannot intercept — and kills the app.
+  // On Android ≤12 notification permission is auto-granted, so register() runs
+  // (and crashes) on every fresh sign-in. Remove this guard only once FCM is
+  // set up end-to-end (google-services.json + server-side FCM sending).
+  if (currentPlatform !== 'ios') return;
+
   try {
     const { PushNotifications } = await import('@capacitor/push-notifications');
 

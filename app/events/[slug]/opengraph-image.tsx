@@ -1,12 +1,8 @@
-import { readFile } from 'node:fs/promises';
-import path from 'node:path';
 import { ImageResponse } from 'next/og';
 import { fetchEventBySlug } from '@/lib/data/events';
 import { formatEventDate } from '@/lib/utils/date';
 import { getCountryFlag } from '@/lib/utils/location';
 
-// nodejs (not edge) so we can read the brand font + logo + local event
-// photos straight from the repo instead of fetching them over HTTP.
 export const runtime = 'nodejs';
 export const alt = 'Event preview';
 export const size = { width: 1200, height: 630 };
@@ -14,8 +10,29 @@ export const contentType = 'image/png';
 
 const NAVY = 'rgba(5, 11, 27,';
 
-function loadAsset(relPath: string) {
-  return readFile(path.join(process.cwd(), relPath));
+// Assets are fetched from the site's own CDN rather than read from disk:
+// fs paths that work in dev silently aren't traced into the serverless
+// bundle on Vercel (this exact route 500'd in production because of it).
+const ASSET_BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.investigatorevents.com';
+
+async function fetchAsset(pathname: string): Promise<Buffer> {
+  const res = await fetch(`${ASSET_BASE}${pathname}`, { signal: AbortSignal.timeout(15000) });
+  if (!res.ok) throw new Error(`asset ${pathname}: ${res.status}`);
+  return Buffer.from(await res.arrayBuffer());
+}
+
+// Fonts + logo never change within a deployment — cache per instance.
+let staticAssets: Promise<[Buffer, Buffer, Buffer]> | null = null;
+function loadStaticAssets() {
+  staticAssets ??= Promise.all([
+    fetchAsset('/og-assets/plus-jakarta-sans-v12-latin-600.ttf'),
+    fetchAsset('/og-assets/plus-jakarta-sans-v12-latin-800.ttf'),
+    fetchAsset('/icon.png'),
+  ]).catch((err) => {
+    staticAssets = null; // don't cache a transient failure
+    throw err;
+  });
+  return staticAssets;
 }
 
 /** Resolve the event's photo to something satori can render. Many of the
@@ -27,14 +44,13 @@ async function resolveBackdrop(imagePath?: string, coverImage?: string): Promise
     (imagePath && /^(\/(cities|events|images)\/|https?:\/\/)/.test(imagePath) ? imagePath : coverImage) ?? null;
   if (!candidate) return null;
   try {
-    let raw: Buffer;
-    if (candidate.startsWith('http')) {
-      const res = await fetch(candidate, { signal: AbortSignal.timeout(8000) });
-      if (!res.ok) return null;
-      raw = Buffer.from(await res.arrayBuffer());
-    } else {
-      raw = await loadAsset(path.join('public', candidate));
-    }
+    const raw = candidate.startsWith('http')
+      ? await (async () => {
+          const res = await fetch(candidate, { signal: AbortSignal.timeout(8000) });
+          if (!res.ok) throw new Error(`backdrop ${res.status}`);
+          return Buffer.from(await res.arrayBuffer());
+        })()
+      : await fetchAsset(candidate);
     const { default: sharp } = await import('sharp');
     const jpeg = await sharp(raw).resize(1200, 630, { fit: 'cover' }).jpeg({ quality: 72 }).toBuffer();
     return `data:image/jpeg;base64,${jpeg.toString('base64')}`;
@@ -44,11 +60,9 @@ async function resolveBackdrop(imagePath?: string, coverImage?: string): Promise
 }
 
 export default async function OGImage({ params }: { params: { slug: string } }) {
-  const [event, semiBold, extraBold, logoData] = await Promise.all([
+  const [event, [semiBold, extraBold, logoData]] = await Promise.all([
     fetchEventBySlug(params.slug),
-    loadAsset('assets/og/plus-jakarta-sans-v12-latin-600.ttf'),
-    loadAsset('assets/og/plus-jakarta-sans-v12-latin-800.ttf'),
-    loadAsset('app/icon.png'),
+    loadStaticAssets(),
   ]);
 
   const fonts = [

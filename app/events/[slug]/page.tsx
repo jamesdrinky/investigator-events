@@ -15,6 +15,7 @@ import { AttendeeAvatars } from '@/components/AttendeeAvatars';
 import { StickyGoingBar } from '@/components/StickyGoingBar';
 import { EventShareButtons } from '@/components/EventShareButtons';
 import { InlineAdminEdit } from '@/components/admin/InlineAdminEdit';
+import { OrganizerShareKit } from '@/components/admin/OrganizerShareKit';
 import type { Route } from 'next';
 import { hasValidAdminSessionCookie } from '@/lib/admin/session';
 import { fetchApprovedVideosForEvent } from '@/lib/data/association-videos';
@@ -393,6 +394,18 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
 
       {/* Sticky mobile "I'm going" bar */}
       <StickyGoingBar eventId={event.id} eventTitle={title} />
+
+      {/* Admin share kit — organizer outreach templates + OG card preview */}
+      {isAdmin && (
+        <OrganizerShareKit
+          slug={slug}
+          title={title}
+          dateLine={eventDate}
+          city={city}
+          country={country}
+          organiser={organiser}
+        />
+      )}
 
       {/* Admin inline edit — only visible when admin session is active */}
       {isAdmin && (

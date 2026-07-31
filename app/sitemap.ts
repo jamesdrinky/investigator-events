@@ -3,6 +3,12 @@ import { fetchAllEvents } from '@/lib/data/events';
 
 const BASE_URL = 'https://www.investigatorevents.com';
 
+// Regenerate hourly at runtime. Without this the sitemap is frozen at build
+// time, where the events fetch has been coming back empty in production —
+// the live sitemap served only the static pages and Google never saw the
+// event pages at all.
+export const revalidate = 3600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const events = await fetchAllEvents();
 

@@ -3,11 +3,13 @@ import { fetchAllEvents } from '@/lib/data/events';
 
 const BASE_URL = 'https://www.investigatorevents.com';
 
-// Regenerate hourly at runtime. Without this the sitemap is frozen at build
-// time, where the events fetch has been coming back empty in production —
-// the live sitemap served only the static pages and Google never saw the
-// event pages at all.
-export const revalidate = 3600;
+// Render per-request at runtime. The events fetch comes back empty during
+// the production build (error swallowed to [] in fetchRawEvents), so a
+// build-time sitemap ships with zero event pages — and `revalidate` on a
+// metadata route turned out not to regenerate it (verified live: still 15
+// URLs an hour after deploy). Crawlers hit this rarely and the events data
+// is cached for 60s, so per-request rendering is effectively free.
+export const dynamic = 'force-dynamic';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const events = await fetchAllEvents();

@@ -5,6 +5,7 @@ import { Check, Plus } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { UserAvatar } from '@/components/UserAvatar';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
+import { trackEvent } from '@/lib/analytics';
 
 type MiniAttendee = { user_id: string | null; avatar_url: string | null; full_name: string | null };
 
@@ -89,6 +90,7 @@ export function EventCardAttendees({ eventId }: { eventId: string }) {
     } else {
       await supabase.from('event_attendees').insert({ user_id: userId, event_id: eventId, is_going: true });
       setIsGoing(true);
+      trackEvent('event_rsvp', { eventId });
       setTotal((t) => t + 1);
       setAttendees((prev) => [{ user_id: userId, avatar_url: userAvatar, full_name: userName }, ...prev].slice(0, 4));
     }

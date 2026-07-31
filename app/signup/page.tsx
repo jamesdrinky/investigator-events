@@ -4,6 +4,7 @@ import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthPage } from '@/components/ui/sign-in';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
+import { trackEvent } from '@/lib/analytics';
 
 const testimonials = [
   { avatarSrc: '/faces/mike2.png', name: 'Mike LaCorte', role: 'Founder, Investigator Events', text: 'The front door to the profession. We connect investigators — associations elevate them.' },
@@ -49,6 +50,8 @@ function SignUpPageInner() {
         setError(result.error || 'Failed to create account.');
         return;
       }
+
+      trackEvent('signup_completed', { newsletterOptIn: Boolean(newsletterOptIn) });
 
       // Subscribe to newsletter if opted in
       if (newsletterOptIn) {

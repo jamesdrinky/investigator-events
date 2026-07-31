@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { Check, Copy } from 'lucide-react';
+import { trackEvent } from '@/lib/analytics';
 
 interface CountryOption {
   slug: string;
@@ -31,6 +32,7 @@ export function WidgetBuilder({ countries }: { countries: CountryOption[] }) {
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(snippet);
+      trackEvent('widget_snippet_copied', { country: country || 'global', theme });
       setCopied(true);
       setTimeout(() => setCopied(false), 1600);
     } catch {

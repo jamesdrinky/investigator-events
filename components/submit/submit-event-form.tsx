@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
+import { trackEvent } from '@/lib/analytics';
 import { getCountriesForRegion } from '@/lib/forms/event-form-options';
 
 /* ── Date helpers ─────────────────────────────────────────────────────── */
@@ -69,6 +70,10 @@ export function SubmitEventForm({
 }: SubmitEventFormProps) {
   const [step, setStep] = useState(0); // 0 Details · 1 Dates · 2 Review
   const [showErrors, setShowErrors] = useState(false);
+
+  useEffect(() => {
+    if (isSuccess) trackEvent('event_submitted');
+  }, [isSuccess]);
 
   // Controlled fields (needed for validation, clash/dup checks, and the review preview)
   const [eventName, setEventName] = useState('');

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import Script from 'next/script';
+import { trackEvent } from '@/lib/analytics';
 
 type NewsletterFormState = {
   status: 'idle' | 'loading' | 'success' | 'error';
@@ -129,6 +130,7 @@ export function NewsletterSignupForm() {
         return;
       }
 
+      trackEvent('newsletter_subscribed');
       setState({
         status: 'success',
         message: payload?.message ?? 'Subscribed successfully'

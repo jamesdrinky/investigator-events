@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { ThumbsUp, X } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { hapticMedium, hapticSuccess } from '@/lib/capacitor';
+import { trackEvent } from '@/lib/analytics';
 
 export function StickyGoingBar({ eventId, eventTitle }: { eventId: string; eventTitle: string }) {
   const [userId, setUserId] = useState<string | null>(null);
@@ -44,6 +45,7 @@ export function StickyGoingBar({ eventId, eventTitle }: { eventId: string; event
     } else {
       await supabase.from('event_attendees').insert({ user_id: userId, event_id: eventId, is_going: true });
       setIsGoing(true);
+      trackEvent('event_rsvp', { event: eventTitle });
       hapticSuccess();
     }
     setToggling(false);

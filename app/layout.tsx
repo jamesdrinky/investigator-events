@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Cormorant_Garamond, Plus_Jakarta_Sans } from 'next/font/google';
 import { CookieBanner } from '@/components/CookieBanner';
 import { Footer } from '@/components/footer';
+import { Analytics } from '@vercel/analytics/react';
 import { Navbar } from '@/components/navbar';
 import { NewsletterBanner } from '@/components/NewsletterBanner';
 import { BackToTop } from '@/components/BackToTop';
@@ -101,6 +102,7 @@ export default function RootLayout({
             className="flex-1"
             style={{ paddingBottom: 'calc(var(--app-bottom-nav-height, 0px) + 96px)' }}
           ><PageTransition>{children}</PageTransition></main>
+        <Analytics />
           <Footer className="hidden lg:block" />
         </div>
         <MobileBackButton />

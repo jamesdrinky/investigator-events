@@ -5,6 +5,7 @@ import { Share2, Copy, Check, Send, Users, MessageCircle, X } from 'lucide-react
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { UserAvatar } from '@/components/UserAvatar';
 import { isNativeApp, nativeShare } from '@/lib/capacitor';
+import { trackEvent } from '@/lib/analytics';
 
 export function EventShareButtons({ eventTitle, eventSlug }: { eventTitle: string; eventSlug: string }) {
   const [copied, setCopied] = useState(false);
@@ -53,6 +54,7 @@ export function EventShareButtons({ eventTitle, eventSlug }: { eventTitle: strin
   const togglePanel = () => {
     // On native app, use the OS share sheet instead of custom dropdown
     if (isNativeApp) {
+      trackEvent('event_shared', { event: eventSlug, channel: 'native-sheet' });
       nativeShare({ title: eventTitle, text: `${eventTitle} — details on Investigator Events`, url });
       return;
     }
@@ -151,7 +153,10 @@ export function EventShareButtons({ eventTitle, eventSlug }: { eventTitle: strin
                     href={ch.href}
                     target="_blank"
                     rel="noreferrer"
-                    onClick={() => setOpen(false)}
+                    onClick={() => {
+                      trackEvent('event_shared', { event: eventSlug, channel: ch.name });
+                      setOpen(false);
+                    }}
                     className="flex flex-col items-center gap-1.5 rounded-xl p-2.5 transition hover:bg-slate-50"
                   >
                     <div className="flex h-10 w-10 items-center justify-center rounded-full text-white" style={{ background: ch.color }}>
@@ -168,7 +173,10 @@ export function EventShareButtons({ eventTitle, eventSlug }: { eventTitle: strin
                     href={ch.href}
                     target="_blank"
                     rel="noreferrer"
-                    onClick={() => setOpen(false)}
+                    onClick={() => {
+                      trackEvent('event_shared', { event: eventSlug, channel: ch.name });
+                      setOpen(false);
+                    }}
                     className="flex flex-col items-center gap-1.5 rounded-xl p-2.5 transition hover:bg-slate-50"
                   >
                     <div className="flex h-10 w-10 items-center justify-center rounded-full text-white" style={{ background: ch.color }}>

@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { fetchAllEvents } from '@/lib/data/events';
+import { groupEventsByCountry } from '@/lib/utils/country-pages';
 
 const BASE_URL = 'https://www.investigatorevents.com';
 
@@ -28,6 +29,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/jobs`, changeFrequency: 'weekly', priority: 0.6 },
     { url: `${BASE_URL}/resources`, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${BASE_URL}/why-join-an-association`, changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${BASE_URL}/widget`, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${BASE_URL}/signin`, changeFrequency: 'monthly', priority: 0.3 },
     { url: `${BASE_URL}/signup`, changeFrequency: 'monthly', priority: 0.3 },
   ];
@@ -40,5 +42,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     }));
 
-  return [...staticPages, ...eventPages];
+  const countryPages: MetadataRoute.Sitemap = groupEventsByCountry(events).map((g) => ({
+    url: `${BASE_URL}/events/country/${g.slug}`,
+    changeFrequency: 'daily' as const,
+    priority: 0.7,
+  }));
+
+  return [...staticPages, ...eventPages, ...countryPages];
 }

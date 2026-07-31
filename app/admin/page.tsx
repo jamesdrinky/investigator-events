@@ -341,6 +341,12 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
           >
             🎬 Video verification
           </a>
+          <a
+            href="/admin/outreach"
+            className="inline-flex items-center gap-1.5 rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-xs font-medium text-violet-700 transition hover:bg-violet-100"
+          >
+            📣 Organizer outreach
+          </a>
         </div>
 
         {/* Stats */}

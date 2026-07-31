@@ -43,7 +43,10 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: '/:path*',
+        // Everything except /embed — the embeddable widget must be frameable
+        // by partner sites, and multiple CSP headers intersect (a second
+        // permissive header can't undo frame-ancestors 'none').
+        source: '/((?!embed).*)',
         headers: [
           { key: 'Content-Security-Policy', value: contentSecurityPolicy },
           { key: 'X-Frame-Options', value: 'DENY' },
@@ -52,6 +55,21 @@ const nextConfig = {
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
           { key: 'Cross-Origin-Opener-Policy', value: 'same-origin-allow-popups' },
           ...(isProd ? [{ key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains; preload' }] : [])
+        ]
+      },
+      {
+        // The widget: frameable anywhere, but keep the rest of the policy tight.
+        source: '/embed/:path*',
+        headers: [
+          { key: 'Content-Security-Policy', value: [
+            "default-src 'self'",
+            "frame-ancestors *",
+            "img-src 'self' data: https:",
+            "style-src 'unsafe-inline'",
+            "script-src 'none'",
+          ].join('; ') },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
         ]
       },
       // Cache static assets aggressively — faster repeat page loads

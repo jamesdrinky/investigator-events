@@ -56,6 +56,42 @@ export type Database = {
         }
         Relationships: []
       }
+      app_launch_sends: {
+        Row: {
+          campaign: string
+          error: string | null
+          id: string
+          recipient_email: string
+          resend_id: string | null
+          sent_at: string
+          source: string
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          campaign?: string
+          error?: string | null
+          id?: string
+          recipient_email: string
+          resend_id?: string | null
+          sent_at?: string
+          source: string
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          campaign?: string
+          error?: string | null
+          id?: string
+          recipient_email?: string
+          resend_id?: string | null
+          sent_at?: string
+          source?: string
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       association_admins: {
         Row: {
           association_page_id: string
@@ -254,6 +290,84 @@ export type Database = {
           },
         ]
       }
+      association_videos: {
+        Row: {
+          association_page_id: string | null
+          association_slug: string | null
+          created_at: string
+          description: string | null
+          duration_seconds: number | null
+          event_id: string | null
+          event_slug: string | null
+          event_submission_id: string | null
+          id: string
+          is_paid: boolean
+          kind: string
+          payment_status: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          status: string
+          stripe_session_id: string | null
+          submitter_email: string
+          submitter_name: string
+          submitter_user_id: string | null
+          thumbnail_url: string | null
+          title: string
+          transcode_status: string
+          video_url: string
+        }
+        Insert: {
+          association_page_id?: string | null
+          association_slug?: string | null
+          created_at?: string
+          description?: string | null
+          duration_seconds?: number | null
+          event_id?: string | null
+          event_slug?: string | null
+          event_submission_id?: string | null
+          id?: string
+          is_paid?: boolean
+          kind?: string
+          payment_status?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          status?: string
+          stripe_session_id?: string | null
+          submitter_email: string
+          submitter_name: string
+          submitter_user_id?: string | null
+          thumbnail_url?: string | null
+          title: string
+          transcode_status?: string
+          video_url: string
+        }
+        Update: {
+          association_page_id?: string | null
+          association_slug?: string | null
+          created_at?: string
+          description?: string | null
+          duration_seconds?: number | null
+          event_id?: string | null
+          event_slug?: string | null
+          event_submission_id?: string | null
+          id?: string
+          is_paid?: boolean
+          kind?: string
+          payment_status?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          status?: string
+          stripe_session_id?: string | null
+          submitter_email?: string
+          submitter_name?: string
+          submitter_user_id?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          transcode_status?: string
+          video_url?: string
+        }
+        Relationships: []
+      }
       clash_checks: {
         Row: {
           clashing_events: Json | null
@@ -305,6 +419,33 @@ export type Database = {
           id?: string
           requester_id?: string | null
           status?: string | null
+        }
+        Relationships: []
+      }
+      device_tokens: {
+        Row: {
+          created_at: string
+          id: string
+          platform: string
+          token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          platform: string
+          token: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          platform?: string
+          token?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -385,6 +526,44 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_outreach: {
+        Row: {
+          contact_email: string | null
+          contact_name: string | null
+          event_id: string
+          last_contacted_at: string | null
+          notes: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          contact_email?: string | null
+          contact_name?: string | null
+          event_id: string
+          last_contacted_at?: string | null
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          contact_email?: string | null
+          contact_name?: string | null
+          event_id?: string
+          last_contacted_at?: string | null
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_outreach_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: true
+            referencedRelation: "events"
             referencedColumns: ["id"]
           },
         ]
@@ -661,6 +840,24 @@ export type Database = {
           timezone?: string | null
           title?: string
           website?: string
+        }
+        Relationships: []
+      }
+      feature_flags: {
+        Row: {
+          enabled: boolean
+          key: string
+          updated_at: string
+        }
+        Insert: {
+          enabled?: boolean
+          key: string
+          updated_at?: string
+        }
+        Update: {
+          enabled?: boolean
+          key?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -946,6 +1143,41 @@ export type Database = {
             columns: ["sender_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      newsletter_send_recipients: {
+        Row: {
+          email: string
+          error: string | null
+          id: string
+          send_id: string
+          sent_at: string
+          status: string
+        }
+        Insert: {
+          email: string
+          error?: string | null
+          id?: string
+          send_id: string
+          sent_at?: string
+          status: string
+        }
+        Update: {
+          email?: string
+          error?: string | null
+          id?: string
+          send_id?: string
+          sent_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "newsletter_send_recipients_send_id_fkey"
+            columns: ["send_id"]
+            isOneToOne: false
+            referencedRelation: "newsletter_sends"
             referencedColumns: ["id"]
           },
         ]
@@ -1316,6 +1548,7 @@ export type Database = {
           bio: string | null
           country: string | null
           created_at: string | null
+          email_verified_for_public: boolean
           full_name: string | null
           headline: string | null
           id: string
@@ -1343,6 +1576,7 @@ export type Database = {
           bio?: string | null
           country?: string | null
           created_at?: string | null
+          email_verified_for_public?: boolean
           full_name?: string | null
           headline?: string | null
           id: string
@@ -1370,6 +1604,7 @@ export type Database = {
           bio?: string | null
           country?: string | null
           created_at?: string | null
+          email_verified_for_public?: boolean
           full_name?: string | null
           headline?: string | null
           id?: string
@@ -1387,6 +1622,45 @@ export type Database = {
           tos_accepted_at?: string | null
           username?: string | null
           website?: string | null
+        }
+        Relationships: []
+      }
+      reengagement_sends: {
+        Row: {
+          campaign: string
+          completion_score: number | null
+          error: string | null
+          id: string
+          is_linkedin_verified: boolean | null
+          recipient_email: string
+          sent_at: string
+          status: string
+          user_id: string
+          variant: string
+        }
+        Insert: {
+          campaign?: string
+          completion_score?: number | null
+          error?: string | null
+          id?: string
+          is_linkedin_verified?: boolean | null
+          recipient_email: string
+          sent_at?: string
+          status?: string
+          user_id: string
+          variant: string
+        }
+        Update: {
+          campaign?: string
+          completion_score?: number | null
+          error?: string | null
+          id?: string
+          is_linkedin_verified?: boolean | null
+          recipient_email?: string
+          sent_at?: string
+          status?: string
+          user_id?: string
+          variant?: string
         }
         Relationships: []
       }
@@ -1610,6 +1884,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      delete_user_data: { Args: { target_user_id: string }; Returns: undefined }
       get_user_email: { Args: { uid: string }; Returns: string }
     }
     Enums: {

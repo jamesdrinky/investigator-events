@@ -2,6 +2,11 @@
 
 import { useState } from 'react';
 import { Check, Copy, Megaphone, X } from 'lucide-react';
+import {
+  buildOutreachEmail,
+  buildOutreachEmailSubject,
+  buildShareTemplates,
+} from '@/lib/outreach/templates';
 
 interface OrganizerShareKitProps {
   slug: string;
@@ -22,39 +27,14 @@ export function OrganizerShareKit({ slug, title, dateLine, city, country, organi
   const [open, setOpen] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
-  const url = `https://www.investigatorevents.com/events/${slug}`;
-  const where = [city, country].filter(Boolean).join(', ');
-
-  const templates: { key: string; label: string; hint: string; text: string }[] = [
-    {
-      key: 'organizer-announce',
-      label: 'Organizer post — announcement',
-      hint: 'For the organizer to share with their audience',
-      text: `We're delighted that ${title} is featured on Investigator Events — the global calendar for the investigations profession.\n\nFull event details, and who else is attending, here:\n${url}\n\nSee you in ${city || where} — ${dateLine}.\n\n#privateinvestigator #investigations #networking`,
-    },
-    {
-      key: 'organizer-countdown',
-      label: 'Organizer post — countdown',
-      hint: 'Closer to the event date',
-      text: `${title} is coming to ${city || where} — ${dateLine}.\n\nSee the programme, connect with fellow attendees before the day, and let colleagues know you're going:\n${url}\n\n#investigations #${(country || 'events').replace(/\s+/g, '')}`,
-    },
-    {
-      key: 'organizer-community',
-      label: 'Organizer post — who else is going?',
-      hint: 'Social-proof angle',
-      text: `Who else is going? ${title} has a live page on Investigator Events — the industry's shared events calendar.\n\nSee who's attending and say hello before ${city || 'the event'}:\n${url}`,
-    },
-    {
-      key: 'ie-voice',
-      label: 'IE post — for Mike / IE channels',
-      hint: 'Our own voice',
-      text: `Spotlight: ${title} — ${where}, ${dateLine}.\n\nOne of the events we're tracking on Investigator Events, the global calendar for the investigations profession. Details, attendees, and discussion:\n${url}`,
-    },
+  const info = { slug, title, dateLine, city, country };
+  const templates = [
+    ...buildShareTemplates(info),
     {
       key: 'outreach-email',
       label: 'Outreach email — to the organizer (from Mike)',
-      hint: 'Subject: ' + `${title} is featured on Investigator Events`,
-      text: `Hi [name],\n\nI'm Mike LaCorte, one of the founders of Investigator Events — the global events calendar for the investigations profession, used by investigators across 18+ countries.\n\n${title} is now featured on the platform:\n${url}\n\nThree quick things, all free:\n\n1. Claim your page — reply to this email and we'll make sure the details, programme and imagery are exactly as you want them.\n\n2. Share it with your attendees — when the link is posted on LinkedIn it renders a full event card automatically. There's a ready-made post below you're welcome to copy.\n\n3. Partner with us — if you'd like to offer our members a discount code, we'll feature ${title} in our weekly newsletter and on the homepage in return.\n\nReady-made post:\n---\nWe're delighted that ${title} is featured on Investigator Events — the global calendar for the investigations profession. Full event details, and who else is attending: ${url}\n---\n\nWarm regards,\nMike LaCorte\nInvestigator Events · investigatorevents.com`,
+      hint: `Subject: ${buildOutreachEmailSubject(info)}`,
+      text: buildOutreachEmail(info),
     },
   ];
 

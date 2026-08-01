@@ -6,7 +6,8 @@ const contentSecurityPolicy = [
   "frame-ancestors 'none'",
   "form-action 'self' https://accounts.google.com https://www.linkedin.com",
   "object-src 'none'",
-  "frame-src https://accounts.google.com https://www.linkedin.com",
+  // 'self' so /widget can preview our own /embed iframe.
+  "frame-src 'self' https://accounts.google.com https://www.linkedin.com",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data: https://fonts.gstatic.com",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",

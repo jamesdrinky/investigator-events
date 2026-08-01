@@ -20,6 +20,22 @@ export default async function WidgetPage() {
     upcoming: g.upcoming.length,
   }));
 
+  // Associations with at least one upcoming event, for the "just yours" filter.
+  const now = Date.now();
+  const assocCounts = new Map<string, { name: string; upcoming: number }>();
+  for (const e of events) {
+    const name = e.association?.trim();
+    if (!name || e.eventScope !== 'main') continue;
+    if (new Date(e.date).getTime() < now) continue;
+    const key = name.toLowerCase();
+    const existing = assocCounts.get(key);
+    if (existing) existing.upcoming += 1;
+    else assocCounts.set(key, { name, upcoming: 1 });
+  }
+  const associations = [...assocCounts.entries()]
+    .map(([key, v]) => ({ key, name: v.name, upcoming: v.upcoming }))
+    .sort((a, b) => b.upcoming - a.upcoming || a.name.localeCompare(b.name));
+
   return (
     <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
       <header className="mb-10 max-w-2xl">
@@ -34,7 +50,7 @@ export default async function WidgetPage() {
         </p>
       </header>
 
-      <WidgetBuilder countries={countries} />
+      <WidgetBuilder countries={countries} associations={associations} />
     </main>
   );
 }

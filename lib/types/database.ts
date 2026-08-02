@@ -124,6 +124,36 @@ export type Database = {
           },
         ]
       }
+      association_outreach: {
+        Row: {
+          association_slug: string
+          contact_email: string | null
+          contact_name: string | null
+          last_contacted_at: string | null
+          notes: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          association_slug: string
+          contact_email?: string | null
+          contact_name?: string | null
+          last_contacted_at?: string | null
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          association_slug?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          last_contacted_at?: string | null
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       association_pages: {
         Row: {
           contact_email: string | null
@@ -1380,6 +1410,42 @@ export type Database = {
           sent_at?: string
           status?: string
           subject?: string | null
+        }
+        Relationships: []
+      }
+      partner_requests: {
+        Row: {
+          association_name: string
+          association_slug: string
+          contact_email: string
+          contact_name: string
+          created_at: string
+          id: string
+          message: string | null
+          status: string
+          webmaster_email: string | null
+        }
+        Insert: {
+          association_name: string
+          association_slug: string
+          contact_email: string
+          contact_name: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          status?: string
+          webmaster_email?: string | null
+        }
+        Update: {
+          association_name?: string
+          association_slug?: string
+          contact_email?: string
+          contact_name?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          status?: string
+          webmaster_email?: string | null
         }
         Relationships: []
       }

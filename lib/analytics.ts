@@ -12,7 +12,8 @@ export type FunnelEvent =
   | 'newsletter_subscribed'
   | 'event_submitted'
   | 'event_shared'
-  | 'widget_snippet_copied';
+  | 'widget_snippet_copied'
+  | 'partner_request_submitted';
 
 export function trackEvent(name: FunnelEvent, props?: Record<string, string | number | boolean>) {
   try {

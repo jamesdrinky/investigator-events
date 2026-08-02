@@ -9,6 +9,9 @@ import { assertSameOriginRequest } from '@/lib/security/server';
 const STATUSES = ['not_started', 'sent', 'replied', 'shared', 'partner', 'declined'] as const;
 export type OutreachStatus = (typeof STATUSES)[number];
 
+const ASSOC_STATUSES = ['not_started', 'sent', 'replied', 'widget_live', 'partner', 'declined'] as const;
+export type AssociationOutreachStatus = (typeof ASSOC_STATUSES)[number];
+
 async function ensureAdmin() {
   if (!(await hasValidAdminSessionCookie())) {
     redirect('/admin?error=auth');
@@ -41,6 +44,35 @@ export async function updateOutreachAction(formData: FormData) {
     updated_at: new Date().toISOString(),
   });
   if (error) throw new Error(`Outreach update failed: ${error.message}`);
+
+  revalidatePath('/admin/outreach');
+}
+
+export async function updateAssociationOutreachAction(formData: FormData) {
+  assertSameOriginRequest();
+  await ensureAdmin();
+
+  const slug = String(formData.get('associationSlug') ?? '').trim();
+  if (!slug) throw new Error('Missing associationSlug');
+
+  const status = String(formData.get('status') ?? '').trim();
+  if (!ASSOC_STATUSES.includes(status as AssociationOutreachStatus)) throw new Error('Invalid status');
+
+  const contactName = String(formData.get('contactName') ?? '').trim() || null;
+  const contactEmail = String(formData.get('contactEmail') ?? '').trim() || null;
+  const notes = String(formData.get('notes') ?? '').trim() || null;
+
+  const supabase = createSupabaseAdminServerClient();
+  const { error } = await supabase.from('association_outreach').upsert({
+    association_slug: slug,
+    status,
+    contact_name: contactName,
+    contact_email: contactEmail,
+    notes,
+    ...(status === 'sent' ? { last_contacted_at: new Date().toISOString() } : {}),
+    updated_at: new Date().toISOString(),
+  });
+  if (error) throw new Error(`Association outreach update failed: ${error.message}`);
 
   revalidatePath('/admin/outreach');
 }

@@ -54,6 +54,45 @@ export function buildShareTemplates(e: OutreachEventInfo): OutreachTemplate[] {
   ];
 }
 
+export function buildAssociationPitchSubject(associationName: string) {
+  return `We built ${associationName} a live events calendar — it's ready`;
+}
+
+/**
+ * The magic-link association pitch: the email leads with a URL where the
+ * association sees their OWN calendar already built. Demo first, ask second.
+ */
+export function buildAssociationPitchEmail(
+  associationName: string,
+  partnerUrl: string,
+  upcomingCount: number,
+  contactName?: string
+) {
+  const greeting = contactName?.trim() ? `Hi ${contactName.trim()},` : 'Hi [name],';
+  const eventsLine =
+    upcomingCount > 0
+      ? `We already track ${upcomingCount} of your upcoming ${upcomingCount === 1 ? 'event' : 'events'} (plus the wider industry calendar), so it's populated from day one.`
+      : `It shows the industry calendar for your region today, and your own events the moment they're listed — listing them is free.`;
+
+  return `${greeting}
+
+I'm Mike LaCorte, one of the founders of Investigator Events — the global events calendar for the investigations profession.
+
+We've built ${associationName} a live events calendar for your website. It already exists — this link shows it running on a page styled like yours:
+
+${partnerUrl}
+
+${eventsLine}
+
+What it gives your members: an always-current events page that updates itself — dates, venues, who's attending — with zero maintenance for your team, free, forever.
+
+Getting it live takes one line of code. You don't need to touch it: reply with your web person's email address and we'll sort everything with them directly. Or if you'd rather see it in your colours first, the link above lets you customise it live.
+
+Warm regards,
+Mike LaCorte
+Investigator Events · investigatorevents.com`;
+}
+
 export function buildOutreachEmailSubject(e: OutreachEventInfo) {
   return `${e.title} is featured on Investigator Events`;
 }

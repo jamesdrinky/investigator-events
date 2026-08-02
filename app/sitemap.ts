@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { fetchAllEvents } from '@/lib/data/events';
 import { groupEventsByCountry } from '@/lib/utils/country-pages';
+import { buildAssociationDirectory } from '@/lib/data/associations';
 
 const BASE_URL = 'https://www.investigatorevents.com';
 
@@ -48,5 +49,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...eventPages, ...countryPages];
+  const partnerPages: MetadataRoute.Sitemap = buildAssociationDirectory(events).map((a) => ({
+    url: `${BASE_URL}/partners/${a.slug}`,
+    changeFrequency: 'weekly' as const,
+    priority: 0.5,
+  }));
+
+  return [...staticPages, ...eventPages, ...countryPages, ...partnerPages];
 }

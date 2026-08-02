@@ -21,12 +21,15 @@ export function PartnerLiveDemo({
   shortName,
   fakeDomain,
   embedFilter,
+  defaultAccent = '1e3a5f',
 }: {
   shortName: string;
   fakeDomain: string;
   embedFilter: string;
+  /** Detected from their logo server-side — the page loads already in their colour. */
+  defaultAccent?: string;
 }) {
-  const [accent, setAccent] = useState('1e3a5f');
+  const [accent, setAccent] = useState(defaultAccent);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   const src = useMemo(() => {

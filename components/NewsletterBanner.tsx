@@ -13,9 +13,15 @@ export function NewsletterBanner() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    // Don't show in native app or admin pages
+    // Don't show in native app, admin pages, or the partner/widget pitch
+    // pages — interrupting an association president mid-pitch with a
+    // subscribe modal (which also traps scroll on mobile) kills the sale.
     if (isNativeApp) return;
-    if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) return;
+    if (
+      typeof window !== 'undefined' &&
+      ['/admin', '/partners', '/widget', '/embed'].some((p) => window.location.pathname.startsWith(p))
+    )
+      return;
 
     const dismissed = localStorage.getItem(STORAGE_KEY);
     if (dismissed === 'subscribed') return;

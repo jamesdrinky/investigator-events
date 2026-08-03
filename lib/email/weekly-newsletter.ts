@@ -112,12 +112,17 @@ function heroCard(ev: EventItem) {
   </table>`;
 }
 
+const GREEN = '#059669';
+const GREEN_LIGHT = '#d1fae5';
+
 /* ── Event card (with image) ── */
-function eventCardWithImage(ev: EventItem, img: string, lg: string | null, idx: number) {
+function eventCardWithImage(ev: EventItem, img: string, lg: string | null, idx: number, markNew = false) {
   const url = `${SITE}/events/${ev.slug}`;
   const host = hostName(ev);
   const days = daysUntil(ev.date);
-  const badge = days <= 0 ? 'Now' : days <= 7 ? `${days}d` : '';
+  const badge = markNew ? 'NEW' : days <= 0 ? 'Now' : days <= 7 ? `${days}d` : '';
+  const badgeBg = markNew ? GREEN_LIGHT : days <= 0 ? C.redLight : C.blueLight;
+  const badgeFg = markNew ? GREEN : days <= 0 ? C.red : C.blue;
 
   return `
   <tr><td style="padding:${idx === 0 ? '0' : '8px'} 0 8px;">
@@ -135,7 +140,7 @@ function eventCardWithImage(ev: EventItem, img: string, lg: string | null, idx: 
             <!--<![endif]-->
           </td>
           <td style="vertical-align:middle;padding:10px 14px;">
-            <p style="margin:0;font-size:14px;font-weight:600;color:${C.dark};line-height:1.3;">${ev.title}${badge ? ` ${pill(badge, days <= 0 ? C.redLight : C.blueLight, days <= 0 ? C.red : C.blue)}` : ''}</p>
+            <p style="margin:0;font-size:14px;font-weight:600;color:${C.dark};line-height:1.3;">${ev.title}${badge ? ` ${pill(badge, badgeBg, badgeFg)}` : ''}</p>
             <p style="margin:5px 0 0;font-size:12px;color:${C.muted};">${fmtDate(ev.date)} &middot; ${ev.city}, ${ev.country}</p>
             ${lg ? `<table cellpadding="0" cellspacing="0" style="margin-top:4px;"><tr><td style="padding-right:5px;vertical-align:middle;"><img src="${lg}" alt="" width="14" height="14" style="display:block;width:14px;height:14px;border-radius:4px;" /></td><td style="vertical-align:middle;"><span style="font-size:11px;color:${C.faint};">${host}</span></td></tr></table>` : `<p style="margin:3px 0 0;font-size:11px;color:${C.faint};">${host}</p>`}
           </td>
@@ -146,20 +151,22 @@ function eventCardWithImage(ev: EventItem, img: string, lg: string | null, idx: 
 }
 
 /* ── Event card (text only — no image) ── */
-function eventCardTextOnly(ev: EventItem, lg: string | null, idx: number) {
+function eventCardTextOnly(ev: EventItem, lg: string | null, idx: number, markNew = false) {
   const url = `${SITE}/events/${ev.slug}`;
   const host = hostName(ev);
   const days = daysUntil(ev.date);
-  const badge = days <= 0 ? 'Now' : days <= 7 ? `${days}d` : '';
+  const badge = markNew ? 'NEW' : days <= 0 ? 'Now' : days <= 7 ? `${days}d` : '';
+  const badgeBg = markNew ? GREEN_LIGHT : days <= 0 ? C.redLight : C.blueLight;
+  const badgeFg = markNew ? GREEN : days <= 0 ? C.red : C.blue;
 
   return `
   <tr><td style="padding:${idx === 0 ? '0' : '8px'} 0 8px;">
     <a href="${url}" style="text-decoration:none;color:inherit;display:block;">
       <table width="100%" cellpadding="0" cellspacing="0" class="ev-card" style="border:1px solid ${C.border};border-radius:12px;overflow:hidden;background-color:${C.white};">
         <tr>
-          <td width="4" class="accent-bar" style="background-color:${C.blue};font-size:0;line-height:0;">&nbsp;</td>
+          <td width="4" class="accent-bar" style="background-color:${markNew ? GREEN : C.blue};font-size:0;line-height:0;">&nbsp;</td>
           <td style="padding:14px 16px;">
-            <p style="margin:0;font-size:14px;font-weight:600;color:${C.dark};line-height:1.3;">${ev.title}${badge ? ` ${pill(badge, days <= 0 ? C.redLight : C.blueLight, days <= 0 ? C.red : C.blue)}` : ''}</p>
+            <p style="margin:0;font-size:14px;font-weight:600;color:${C.dark};line-height:1.3;">${ev.title}${badge ? ` ${pill(badge, badgeBg, badgeFg)}` : ''}</p>
             <p style="margin:5px 0 0;font-size:12px;color:${C.muted};">${fmtDate(ev.date)} &middot; ${ev.city}, ${ev.country}</p>
             ${lg ? `<table cellpadding="0" cellspacing="0" style="margin-top:4px;"><tr><td style="padding-right:5px;vertical-align:middle;"><img src="${lg}" alt="" width="14" height="14" style="display:block;width:14px;height:14px;border-radius:4px;" /></td><td style="vertical-align:middle;"><span style="font-size:11px;color:${C.faint};">${host}</span></td></tr></table>` : `<p style="margin:3px 0 0;font-size:11px;color:${C.faint};">${host}</p>`}
           </td>
@@ -170,31 +177,31 @@ function eventCardTextOnly(ev: EventItem, lg: string | null, idx: number) {
 }
 
 /* ── Event row (picks card style based on image availability) ── */
-function eventRow(ev: EventItem, idx: number) {
+function eventRow(ev: EventItem, idx: number, markNew = false) {
   const img = eventCover(ev);
   const lg = assocLogo(ev);
-  if (img) return eventCardWithImage(ev, img, lg, idx);
-  return eventCardTextOnly(ev, lg, idx);
+  if (img) return eventCardWithImage(ev, img, lg, idx, markNew);
+  return eventCardTextOnly(ev, lg, idx, markNew);
 }
 
 /* ── Section header ── */
-function sectionHeader(title: string) {
+function sectionHeader(title: string, accent = C.blue) {
   return `
   <tr><td style="padding-bottom:14px;">
     <table cellpadding="0" cellspacing="0"><tr>
-      <td width="3" style="background-color:${C.blue};border-radius:2px;font-size:0;line-height:0;">&nbsp;</td>
+      <td width="3" style="background-color:${accent};border-radius:2px;font-size:0;line-height:0;">&nbsp;</td>
       <td style="padding-left:10px;vertical-align:middle;"><p style="margin:0;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:${C.muted};">${title}</p></td>
     </tr></table>
   </td></tr>`;
 }
 
 /* ── Section ── */
-function section(title: string, events: EventItem[]) {
+function section(title: string, events: EventItem[], opts: { accent?: string; markNew?: boolean } = {}) {
   if (!events.length) return '';
   return `
   <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:40px;">
-    ${sectionHeader(title)}
-    ${events.map((ev, i) => eventRow(ev, i)).join('')}
+    ${sectionHeader(title, opts.accent)}
+    ${events.map((ev, i) => eventRow(ev, i, opts.markNew)).join('')}
   </table>`;
 }
 
@@ -395,9 +402,14 @@ export function buildWeeklyNewsletterHtml({
   const weekOf = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   const countries = new Set([...displayUpcoming, ...displayNewlyAdded].map(e => e.country)).size;
   const hero = displayFeatured[0] ?? displayUpcoming[0];
-  // Inbox preview snippet (hidden in the body). Built from the week's content
-  // unless an explicit one is passed.
+  // Inbox preview snippet (hidden in the body). The hand-written intro makes
+  // the best preview; otherwise build one from the week's content.
+  const introFirstSentence = editorial?.introText
+    ?.trim()
+    .split(/(?<=[.!?])\s/)[0]
+    ?.slice(0, 140);
   const preheaderText = (preheader && preheader.trim())
+    || introFirstSentence
     || (displayNewlyAdded.length > 0
       ? `${displayNewlyAdded.length} just added · ${displayUpcoming.length} upcoming across ${countries} countries — see what's on`
       : `${displayUpcoming.length} upcoming investigator events across ${countries} countries`);
@@ -543,7 +555,7 @@ export function buildWeeklyNewsletterHtml({
   ${section('Upcoming Events', displayUpcoming.filter(e => e.id !== hero?.id))}
 
   <!-- Just added -->
-  ${section('Just Added', displayNewlyAdded.filter(e => e.id !== hero?.id))}
+  ${section('Just Added', displayNewlyAdded.filter(e => e.id !== hero?.id), { accent: GREEN, markNew: true })}
 
   <!-- Weekly spotlight (rotating feature slot) -->
   ${editorial ? spotlightCard(editorial) : ''}
@@ -599,6 +611,13 @@ export function buildWeeklyNewsletterHtml({
     </td></tr>
     <tr><td align="center" style="padding-top:12px;">
       <a href="${SITE}/submit-event" style="font-size:12px;color:${C.blue};text-decoration:none;font-weight:600;">Submit an event for free &rarr;</a>
+    </td></tr>
+  </table>
+
+  <!-- Forward it on -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:28px;">
+    <tr><td align="center" style="padding:14px 16px;border-top:1px solid ${C.border};">
+      <p style="margin:0;font-size:12px;color:${C.muted};line-height:1.5;">Know an investigator who'd want this? <strong style="color:${C.dark};">Forward it on.</strong><br />Got it from a colleague? <a href="${SITE}" style="color:${C.blue};text-decoration:none;font-weight:600;">Subscribe free at investigatorevents.com</a></p>
     </td></tr>
   </table>
 

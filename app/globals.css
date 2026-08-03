@@ -139,6 +139,19 @@ body.keyboard-open body::after { display: none !important; }
 /* Keyboard height CSS variable for layout adjustments */
 :root { --keyboard-height: 0px; }
 
+/* Partner-page hero entrance — pure CSS so content can never be stranded
+   invisible waiting for JS (unlike observer-based reveals). */
+@media (prefers-reduced-motion: no-preference) {
+  .pr-rise {
+    opacity: 0;
+    animation: pr-rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+  }
+  @keyframes pr-rise {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
 /* Thin scrollbar — visible but unobtrusive */
 html { scrollbar-width: thin; scrollbar-color: rgba(148,163,184,0.3) transparent; }
 html::-webkit-scrollbar { width: 6px; }

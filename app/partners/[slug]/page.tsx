@@ -9,7 +9,6 @@ import { countrySlug } from '@/lib/utils/country-pages';
 import { parseDate } from '@/lib/utils/date';
 import { PartnerRequestForm } from '@/components/partners/PartnerRequestForm';
 import { PartnerLiveDemo } from '@/components/partners/PartnerLiveDemo';
-import { Reveal } from '@/components/motion/reveal';
 import { detectBrandColor } from '@/lib/utils/brand-color';
 
 export const revalidate = 3600;
@@ -80,6 +79,11 @@ const FAQS = [
   },
 ];
 
+/** Pure-CSS staggered entrance (no JS dependency — see .pr-rise). */
+function rise(step: number) {
+  return { className: 'pr-rise', style: { animationDelay: `${step * 90}ms` } };
+}
+
 export default async function PartnerPage({ params }: { params: { slug: string } }) {
   const resolved = await resolveAssociation(params.slug);
   if (!resolved) notFound();
@@ -105,7 +109,7 @@ export default async function PartnerPage({ params }: { params: { slug: string }
           }}
         />
         <div className="relative">
-          <Reveal y={16}>
+          <div {...rise(0)}>
             <div className="mb-6 flex items-center justify-center gap-4">
               {assoc.logoSrc && (
                 <span className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-white p-2 shadow-lg">
@@ -117,18 +121,18 @@ export default async function PartnerPage({ params }: { params: { slug: string }
                 <Image src="/icon.png" alt="Investigator Events" width={56} height={56} className="object-contain" />
               </span>
             </div>
-          </Reveal>
+          </div>
 
-          <Reveal y={16} delay={80}>
+          <div {...rise(1)}>
             <div className="mx-auto mb-5 inline-flex items-center gap-2.5 rounded-full border border-white/20 bg-white/10 px-5 py-2">
               <span className="h-2 w-2 rounded-full bg-gradient-to-r from-sky-400 to-violet-500" />
               <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-blue-100">
                 Built for {assoc.shortName} — already live
               </span>
             </div>
-          </Reveal>
+          </div>
 
-          <Reveal y={20} delay={140}>
+          <div {...rise(2)}>
             <h1 className="mx-auto max-w-3xl text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl">
               {assoc.shortName}&apos;s events calendar.
               <br />
@@ -137,9 +141,9 @@ export default async function PartnerPage({ params }: { params: { slug: string }
                 Done for you.
               </span>
             </h1>
-          </Reveal>
+          </div>
 
-          <Reveal y={20} delay={220}>
+          <div {...rise(3)}>
             <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-slate-300">
               {upcoming > 0 ? (
                 <>
@@ -156,9 +160,9 @@ export default async function PartnerPage({ params }: { params: { slug: string }
                 </>
               )}
             </p>
-          </Reveal>
+          </div>
 
-          <Reveal y={20} delay={300}>
+          <div {...rise(4)}>
             <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
               {[
                 upcoming > 0 ? `${upcoming} ${assoc.shortName} events tracked` : `${assoc.country} events covered`,
@@ -173,9 +177,9 @@ export default async function PartnerPage({ params }: { params: { slug: string }
                 </span>
               ))}
             </div>
-          </Reveal>
+          </div>
 
-          <Reveal y={20} delay={380}>
+          <div {...rise(5)}>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
               <a
                 href="#get-started"
@@ -185,168 +189,146 @@ export default async function PartnerPage({ params }: { params: { slug: string }
               </a>
               <span className="text-xs font-medium text-slate-400">One line of code · live the same day</span>
             </div>
-          </Reveal>
+          </div>
         </div>
       </section>
 
       {/* ── Interactive demo ── */}
       <section className="mx-auto mt-16 max-w-3xl">
-        <Reveal>
-          <div className="mb-6 text-center">
-            <p className="text-xs font-bold uppercase tracking-widest text-blue-600">Live preview — real data</p>
-            <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-900">
-              This is your calendar. Make it look like {assoc.shortName}.
-            </h2>
-            <p className="mx-auto mt-2 max-w-lg text-sm leading-relaxed text-slate-500">
-              Everything below is live from the Investigator Events calendar — it loads in a colour picked from your
-              own logo, and you can change every detail. What you see is exactly what your members would see.
-            </p>
-          </div>
-        </Reveal>
-        <Reveal delay={120}>
-          <PartnerLiveDemo
-            shortName={assoc.shortName}
-            fakeDomain={fakeDomain}
-            embedFilter={embedFilter}
-            defaultAccent={brandAccent}
-          />
-        </Reveal>
+        <div className="mb-6 text-center">
+          <p className="text-xs font-bold uppercase tracking-widest text-blue-600">Live preview — real data</p>
+          <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-900">
+            This is your calendar. Make it look like {assoc.shortName}.
+          </h2>
+          <p className="mx-auto mt-2 max-w-lg text-sm leading-relaxed text-slate-500">
+            Everything below is live from the Investigator Events calendar — it loads in a colour picked from your
+            own logo, and you can change every detail. What you see is exactly what your members would see.
+          </p>
+        </div>
+        <PartnerLiveDemo
+          shortName={assoc.shortName}
+          fakeDomain={fakeDomain}
+          embedFilter={embedFilter}
+          defaultAccent={brandAccent}
+        />
       </section>
 
       {/* ── Their share card ── */}
       {nextEvent && (
         <section className="mx-auto mt-20 grid max-w-4xl items-center gap-8 sm:grid-cols-2">
-          <Reveal x={-20}>
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-blue-600">There&apos;s more</p>
-              <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-900">
-                Your events, presented properly — everywhere
-              </h2>
-              <p className="mt-3 text-sm leading-relaxed text-slate-600">
-                Every {assoc.shortName} event gets a full page on Investigator Events — details, attendee list,
-                reviews — and when anyone shares the link on LinkedIn or WhatsApp, it renders a designed card like
-                this one. Automatically. That&apos;s <b>{nextEvent.title}</b>&apos;s card, generated from your live
-                listing.
-              </p>
-            </div>
-          </Reveal>
-          <Reveal x={20} delay={120}>
-            <div>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={`/events/${nextEvent.slug}/opengraph-image`}
-                alt={`Share card for ${nextEvent.title}`}
-                className="w-full rounded-2xl border border-slate-200 shadow-xl"
-              />
-            </div>
-          </Reveal>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-blue-600">There&apos;s more</p>
+            <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-900">
+              Your events, presented properly — everywhere
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-slate-600">
+              Every {assoc.shortName} event gets a full page on Investigator Events — details, attendee list,
+              reviews — and when anyone shares the link on LinkedIn or WhatsApp, it renders a designed card like
+              this one. Automatically. That&apos;s <b>{nextEvent.title}</b>&apos;s card, generated from your live
+              listing.
+            </p>
+          </div>
+          <div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`/events/${nextEvent.slug}/opengraph-image`}
+              alt={`Share card for ${nextEvent.title}`}
+              className="w-full rounded-2xl border border-slate-200 shadow-xl"
+            />
+          </div>
         </section>
       )}
 
       {/* ── How it goes live ── */}
       <section className="mx-auto mt-20 max-w-3xl">
-        <Reveal>
-          <h2 className="text-center text-2xl font-extrabold tracking-tight text-slate-900">How it goes live</h2>
-        </Reveal>
+        <h2 className="text-center text-2xl font-extrabold tracking-tight text-slate-900">How it goes live</h2>
         <div className="mt-8 grid gap-6 sm:grid-cols-3">
           {[
             { n: '1', t: 'You say yes', d: 'The form below takes 30 seconds. No commitment, nothing signed.' },
             { n: '2', t: 'We sort it with your web person', d: 'We send them one line of code and stay on hand until it’s live — usually the same day.' },
             { n: '3', t: 'Done — forever', d: 'Your members always see what’s on. Nobody at your association ever maintains it.' },
-          ].map((s, i) => (
-            <Reveal key={s.n} delay={i * 110}>
-              <div className="relative h-full rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
-                <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-violet-600 text-sm font-extrabold text-white">
-                  {s.n}
-                </span>
-                <p className="mt-3 text-sm font-bold text-slate-900">{s.t}</p>
-                <p className="mt-1.5 text-xs leading-relaxed text-slate-500">{s.d}</p>
-              </div>
-            </Reveal>
+          ].map((s) => (
+            <div key={s.n} className="relative rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+              <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-violet-600 text-sm font-extrabold text-white">
+                {s.n}
+              </span>
+              <p className="mt-3 text-sm font-bold text-slate-900">{s.t}</p>
+              <p className="mt-1.5 text-xs leading-relaxed text-slate-500">{s.d}</p>
+            </div>
           ))}
         </div>
       </section>
 
       {/* ── What members get ── */}
       <section className="mx-auto mt-20 max-w-4xl">
-        <Reveal>
-          <h2 className="text-center text-2xl font-extrabold tracking-tight text-slate-900">What your members get</h2>
-        </Reveal>
+        <h2 className="text-center text-2xl font-extrabold tracking-tight text-slate-900">What your members get</h2>
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           {[
             { icon: CalendarCheck, t: 'Every event, one place', d: 'Conferences, AGMs, regionals and training — yours and the wider industry’s, always current.' },
             { icon: Users, t: 'See who’s going', d: 'Members RSVP, see colleagues attending, and connect before the event.' },
             { icon: MessageSquareQuote, t: 'Honest reviews', d: 'Real feedback from investigators who attended — so members pick the right events.' },
             { icon: BellRing, t: 'Never miss a date', d: 'Add-to-calendar buttons and a weekly events newsletter, free to every member.' },
-          ].map((f, i) => (
-            <Reveal key={f.t} delay={(i % 2) * 110}>
-              <div className="flex h-full gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50">
-                  <f.icon className="h-5 w-5 text-blue-600" />
-                </span>
-                <div>
-                  <p className="text-sm font-bold text-slate-900">{f.t}</p>
-                  <p className="mt-1 text-xs leading-relaxed text-slate-500">{f.d}</p>
-                </div>
+          ].map((f) => (
+            <div key={f.t} className="flex gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50">
+                <f.icon className="h-5 w-5 text-blue-600" />
+              </span>
+              <div>
+                <p className="text-sm font-bold text-slate-900">{f.t}</p>
+                <p className="mt-1 text-xs leading-relaxed text-slate-500">{f.d}</p>
               </div>
-            </Reveal>
+            </div>
           ))}
         </div>
       </section>
 
       {/* ── FAQ ── */}
       <section className="mx-auto mt-20 max-w-2xl">
-        <Reveal>
-          <h2 className="text-center text-2xl font-extrabold tracking-tight text-slate-900">Fair questions</h2>
-        </Reveal>
+        <h2 className="text-center text-2xl font-extrabold tracking-tight text-slate-900">Fair questions</h2>
         <div className="mt-7 space-y-3">
-          {FAQS.map((f, i) => (
-            <Reveal key={f.q} delay={Math.min(i * 60, 240)}>
-              <details className="group rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-sm font-bold text-slate-900 [&::-webkit-details-marker]:hidden">
-                  {f.q}
-                  <span className="text-slate-400 transition-transform group-open:rotate-45">+</span>
-                </summary>
-                <p className="border-t border-slate-100 px-5 py-4 text-sm leading-relaxed text-slate-600">{f.a}</p>
-              </details>
-            </Reveal>
+          {FAQS.map((f) => (
+            <details key={f.q} className="group rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-sm font-bold text-slate-900 [&::-webkit-details-marker]:hidden">
+                {f.q}
+                <span className="text-slate-400 transition-transform group-open:rotate-45">+</span>
+              </summary>
+              <p className="border-t border-slate-100 px-5 py-4 text-sm leading-relaxed text-slate-600">{f.a}</p>
+            </details>
           ))}
         </div>
       </section>
 
       {/* ── CTA ── */}
       <section id="get-started" className="mx-auto mt-20 max-w-xl scroll-mt-24">
-        <Reveal>
-          <div className="rounded-3xl border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-7 shadow-xl sm:p-9">
-            <h2 className="text-center text-xl font-extrabold text-slate-900">
-              Get it on {assoc.shortName}&apos;s site
-            </h2>
-            <p className="mt-2 text-center text-sm leading-relaxed text-slate-500">
-              Leave your details and we&apos;ll handle everything with your web person — usually live the same day.
+        <div className="rounded-3xl border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-7 shadow-xl sm:p-9">
+          <h2 className="text-center text-xl font-extrabold text-slate-900">
+            Get it on {assoc.shortName}&apos;s site
+          </h2>
+          <p className="mt-2 text-center text-sm leading-relaxed text-slate-500">
+            Leave your details and we&apos;ll handle everything with your web person — usually live the same day.
+          </p>
+          <PartnerRequestForm associationSlug={assoc.slug} associationName={assoc.name} />
+          <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4">
+            <p className="text-xs leading-relaxed text-slate-600">
+              &ldquo;We built this because our profession deserves one proper calendar. Putting it on{' '}
+              {assoc.shortName}&apos;s site costs you nothing and gives your members something genuinely useful —
+              if it&apos;s ever not right for you, one line removes it.&rdquo;
             </p>
-            <PartnerRequestForm associationSlug={assoc.slug} associationName={assoc.name} />
-            <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4">
-              <p className="text-xs leading-relaxed text-slate-600">
-                &ldquo;We built this because our profession deserves one proper calendar. Putting it on{' '}
-                {assoc.shortName}&apos;s site costs you nothing and gives your members something genuinely useful —
-                if it&apos;s ever not right for you, one line removes it.&rdquo;
-              </p>
-              <p className="mt-2 text-xs font-bold text-slate-900">
-                Mike LaCorte <span className="font-medium text-slate-400">· Co-founder, Investigator Events</span>
-              </p>
-            </div>
-            <p className="mt-4 text-center text-xs text-slate-400">
-              Prefer email?{' '}
-              <a href="mailto:info@investigatorevents.com" className="font-semibold text-blue-600 hover:underline">
-                info@investigatorevents.com
-              </a>{' '}
-              · Or{' '}
-              <Link href="/widget" className="font-semibold text-blue-600 hover:underline">
-                grab the code yourself
-              </Link>
+            <p className="mt-2 text-xs font-bold text-slate-900">
+              Mike LaCorte <span className="font-medium text-slate-400">· Co-founder, Investigator Events</span>
             </p>
           </div>
-        </Reveal>
+          <p className="mt-4 text-center text-xs text-slate-400">
+            Prefer email?{' '}
+            <a href="mailto:info@investigatorevents.com" className="font-semibold text-blue-600 hover:underline">
+              info@investigatorevents.com
+            </a>{' '}
+            · Or{' '}
+            <Link href="/widget" className="font-semibold text-blue-600 hover:underline">
+              grab the code yourself
+            </Link>
+          </p>
+        </div>
       </section>
     </main>
   );

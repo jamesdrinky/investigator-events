@@ -4,7 +4,8 @@ import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { fetchAllEvents } from '@/lib/data/events';
 import { getWeeklyCollections } from '@/lib/data/weekly';
 import { buildWeeklyNewsletterHtml } from '@/lib/email/weekly-newsletter';
-import { getWeeklyNewsletterAppPush, getWeeklyNewsletterEdition, getWeeklyNewsletterSubject } from '@/lib/email/newsletter-editions';
+import { buildRotatingWeeklySubject, getWeeklyNewsletterAppPush, getWeeklyNewsletterEdition, getWeeklyNewsletterSubject } from '@/lib/email/newsletter-editions';
+import { fetchCurrentEditorial } from '@/lib/email/weekly-editorial';
 import { verifyCronSecret } from '@/lib/security/server';
 
 const BATCH_SIZE = 50;
@@ -41,9 +42,21 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const edition = getWeeklyNewsletterEdition(searchParams.get('edition'));
-  const fallbackSubject = heroEvent
-    ? `${heroEvent.title} + ${Math.max(0, upcoming.length + newlyAdded.length - 1)} more — Weekly Briefing`
-    : `Weekly Briefing — ${upcoming.length} event${upcoming.length !== 1 ? 's' : ''} across ${countries} countries`;
+  const editorial = await fetchCurrentEditorial(supabase);
+  const heroDaysAway = heroEvent
+    ? Math.ceil((new Date(`${heroEvent.date}T00:00:00Z`).getTime() - Date.now()) / 86400000)
+    : undefined;
+  const fallbackSubject = buildRotatingWeeklySubject(
+    {
+      heroTitle: heroEvent?.title,
+      heroDaysAway,
+      otherCount: Math.max(0, upcoming.length + newlyAdded.length - 1),
+      cities: [...new Set(upcoming.map((e) => e.city).filter(Boolean))] as string[],
+      countries,
+      upcomingCount: upcoming.length,
+    },
+    editorial?.subjectOverride
+  );
   const subject = getWeeklyNewsletterSubject(edition, fallbackSubject);
   const appPush = getWeeklyNewsletterAppPush(edition);
 
@@ -96,6 +109,7 @@ export async function GET(request: Request) {
             recentlyPast,
             unsubscribeToken: sub.unsubscribe_token,
             appPush,
+            editorial,
           }),
         }))
       );

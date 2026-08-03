@@ -3,6 +3,7 @@ import { findAssociationBranding } from '@/lib/utils/association-branding';
 import { getEventImage, getCityHeroImageUrl } from '@/lib/utils/city-media';
 import { slugifyEventTitle } from '@/lib/utils/event-slugs';
 import { buildAppPushBanner, buildGlobalLaunchBanner, type AppPushSize, type AppPushRegion } from './app-push-banner';
+import type { WeeklyEditorial } from './weekly-editorial';
 
 const SITE = 'https://investigatorevents.com';
 const LOGO = `${SITE}/logo/ielogo1.PNG`;
@@ -67,7 +68,15 @@ function heroCard(ev: EventItem) {
   const lg = assocLogo(ev);
   const host = hostName(ev);
   const days = daysUntil(ev.date);
-  const badge = days <= 0 ? 'HAPPENING NOW' : days <= 7 ? `IN ${days} DAYS` : days <= 14 ? `IN ${days} DAYS` : 'FEATURED';
+  // Always count down — the ticking number is what makes the same featured
+  // event read differently week after week.
+  const badge = days <= 0
+    ? 'HAPPENING NOW'
+    : days <= 14
+      ? `IN ${days} DAYS`
+      : days <= 70
+        ? `${Math.round(days / 7)} WEEKS TO GO`
+        : 'FEATURED';
   const urgent = days <= 7;
 
   return `
@@ -315,6 +324,49 @@ function howToSection() {
   </table>`;
 }
 
+/* ── Editorial intro — the hand-written "This week" note ── */
+function escapeHtml(s: string) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function editorialIntro(ed: WeeklyEditorial) {
+  if (!ed.introText?.trim()) return '';
+  const paragraphs = ed.introText
+    .trim()
+    .split(/\n\s*\n/)
+    .map((p) => `<p style="margin:0 0 12px;font-size:14px;color:${C.body};line-height:1.65;">${escapeHtml(p.trim())}</p>`)
+    .join('');
+  return `
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:28px;">
+    <tr><td class="bg-soft" style="padding:20px 22px;background-color:${C.bgSoft};border-left:3px solid ${C.blue};border-radius:0 12px 12px 0;">
+      <p style="margin:0 0 10px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:${C.blue};">This week</p>
+      ${paragraphs}
+      ${ed.introByline ? `<p style="margin:4px 0 0;font-size:13px;color:${C.muted};">— ${escapeHtml(ed.introByline)}</p>` : ''}
+    </td></tr>
+  </table>`;
+}
+
+/* ── Weekly spotlight — rotating feature slot (association, member, review…) ── */
+function spotlightCard(ed: WeeklyEditorial) {
+  if (!ed.spotlightTitle?.trim() || !ed.spotlightBody?.trim()) return '';
+  const img = ed.spotlightImageUrl;
+  const cta = ed.spotlightCtaUrl && ed.spotlightCtaLabel;
+  return `
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:40px;">
+    <tr><td style="padding:24px 22px;background:linear-gradient(135deg,#f5f3ff,#eff6ff);background-color:#f5f3ff;border:1px solid #ddd6fe;border-radius:16px;">
+      <p style="margin:0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:${C.purple};">${escapeHtml(ed.spotlightKicker || 'Spotlight')}</p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:12px;"><tr>
+        ${img ? `<td width="56" style="vertical-align:top;padding-right:14px;"><img src="${img}" alt="" width="56" height="56" style="display:block;width:56px;height:56px;border-radius:14px;border:1px solid ${C.border};background-color:${C.white};" /></td>` : ''}
+        <td style="vertical-align:top;">
+          <p style="margin:0;font-size:17px;font-weight:800;color:${C.dark};line-height:1.25;">${escapeHtml(ed.spotlightTitle)}</p>
+          <p style="margin:8px 0 0;font-size:13px;color:${C.body};line-height:1.6;">${escapeHtml(ed.spotlightBody)}</p>
+          ${cta ? `<p style="margin:14px 0 0;"><a href="${ed.spotlightCtaUrl}" style="display:inline-block;padding:9px 20px;border-radius:99px;font-size:12px;font-weight:700;color:${C.white};background-color:${C.purple};text-decoration:none;">${escapeHtml(ed.spotlightCtaLabel!)} &rarr;</a></p>` : ''}
+        </td>
+      </tr></table>
+    </td></tr>
+  </table>`;
+}
+
 /* ── Stat pill for hero ── */
 function statPill(value: string | number, label: string) {
   return `
@@ -325,7 +377,7 @@ function statPill(value: string | number, label: string) {
 }
 
 export function buildWeeklyNewsletterHtml({
-  upcoming, newlyAdded, featured, recentlyPast = [], unsubscribeToken, appPush, globalLaunchBanner, preheader,
+  upcoming, newlyAdded, featured, recentlyPast = [], unsubscribeToken, appPush, globalLaunchBanner, preheader, editorial,
 }: {
   upcoming: EventItem[];
   newlyAdded: EventItem[];
@@ -335,6 +387,7 @@ export function buildWeeklyNewsletterHtml({
   appPush?: { size: AppPushSize; region?: AppPushRegion } | null;
   globalLaunchBanner?: boolean;
   preheader?: string;
+  editorial?: WeeklyEditorial | null;
 }): string {
   const displayUpcoming = mergeBearstoneNewsletterEvents(upcoming);
   const displayNewlyAdded = mergeBearstoneNewsletterEvents(newlyAdded);
@@ -473,6 +526,9 @@ export function buildWeeklyNewsletterHtml({
     <td width="33%" style="height:3px;background-color:${C.pink};font-size:0;line-height:0;">&nbsp;</td>
   </tr></table>
 
+  <!-- Hand-written weekly note (falls away when no editorial row exists) -->
+  ${editorial ? editorialIntro(editorial) : ''}
+
   <!-- Global launch banner -->
   ${globalLaunchHtml}
 
@@ -488,6 +544,9 @@ export function buildWeeklyNewsletterHtml({
 
   <!-- Just added -->
   ${section('Just Added', displayNewlyAdded.filter(e => e.id !== hero?.id))}
+
+  <!-- Weekly spotlight (rotating feature slot) -->
+  ${editorial ? spotlightCard(editorial) : ''}
 
   <!-- App push compact (subsequent weeks) -->
   ${appCompactBanner}

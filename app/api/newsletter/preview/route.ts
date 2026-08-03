@@ -3,7 +3,8 @@ import { Resend } from 'resend';
 import { fetchAllEvents } from '@/lib/data/events';
 import { getWeeklyCollections } from '@/lib/data/weekly';
 import { buildWeeklyNewsletterHtml } from '@/lib/email/weekly-newsletter';
-import { getWeeklyNewsletterAppPush, getWeeklyNewsletterEdition, getWeeklyNewsletterSubject } from '@/lib/email/newsletter-editions';
+import { buildRotatingWeeklySubject, getWeeklyNewsletterAppPush, getWeeklyNewsletterEdition, getWeeklyNewsletterSubject } from '@/lib/email/newsletter-editions';
+import { fetchCurrentEditorial } from '@/lib/email/weekly-editorial';
 import { verifyCronSecret } from '@/lib/security/server';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 
@@ -43,6 +44,8 @@ export async function GET(request: Request) {
     : appPushParam === 'compact' ? { size: 'compact', region }
     : getWeeklyNewsletterAppPush(edition);
 
+  const editorial = await fetchCurrentEditorial(createSupabaseAdminServerClient());
+
   const html = buildWeeklyNewsletterHtml({
     upcoming,
     newlyAdded,
@@ -50,6 +53,7 @@ export async function GET(request: Request) {
     recentlyPast,
     unsubscribeToken: 'preview-token',
     appPush,
+    editorial,
   });
 
   const sendTo = searchParams.get('send');
@@ -68,9 +72,20 @@ export async function GET(request: Request) {
     const resend = new Resend(resendKey);
     const heroEvent = featured[0] ?? upcoming[0];
     const countries = new Set([...upcoming, ...newlyAdded].map(e => e.country)).size;
-    const fallbackSubject = heroEvent
-      ? `${heroEvent.title} + ${Math.max(0, upcoming.length + newlyAdded.length - 1)} more — Weekly Briefing`
-      : `Weekly Briefing — ${upcoming.length} event${upcoming.length !== 1 ? 's' : ''} across ${countries} countries`;
+    const heroDaysAway = heroEvent
+      ? Math.ceil((new Date(`${heroEvent.date}T00:00:00Z`).getTime() - Date.now()) / 86400000)
+      : undefined;
+    const fallbackSubject = buildRotatingWeeklySubject(
+      {
+        heroTitle: heroEvent?.title,
+        heroDaysAway,
+        otherCount: Math.max(0, upcoming.length + newlyAdded.length - 1),
+        cities: [...new Set(upcoming.map((e) => e.city).filter(Boolean))] as string[],
+        countries,
+        upcomingCount: upcoming.length,
+      },
+      editorial?.subjectOverride
+    );
     const subject = getWeeklyNewsletterSubject(edition, fallbackSubject);
 
     await resend.emails.send({

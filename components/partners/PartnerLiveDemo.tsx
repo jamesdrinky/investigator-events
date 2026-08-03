@@ -22,23 +22,29 @@ export function PartnerLiveDemo({
   fakeDomain,
   embedFilter,
   defaultAccent = '1e3a5f',
+  eventCount = 4,
 }: {
   shortName: string;
   fakeDomain: string;
   embedFilter: string;
   /** Detected from their logo server-side — the page loads already in their colour. */
   defaultAccent?: string;
+  /** How many events the filter actually yields — sizes the frame to fit. */
+  eventCount?: number;
 }) {
   const [accent, setAccent] = useState(defaultAccent);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
+  const limit = Math.min(4, Math.max(1, eventCount));
+  const frameHeight = limit * 98 + 64;
+
   const src = useMemo(() => {
     const params = new URLSearchParams();
-    params.set('limit', '4');
+    params.set('limit', String(limit));
     if (theme === 'dark') params.set('theme', 'dark');
     if (accent !== '2563eb') params.set('accent', accent);
     return `/embed/upcoming?${embedFilter}&${params.toString()}`;
-  }, [embedFilter, theme, accent]);
+  }, [embedFilter, theme, accent, limit]);
 
   return (
     <div>
@@ -109,7 +115,7 @@ export function PartnerLiveDemo({
             key={src}
             src={src}
             width="100%"
-            height={456}
+            height={frameHeight}
             style={{ border: 0, borderRadius: 16 }}
             title={`Upcoming ${shortName} events`}
           />

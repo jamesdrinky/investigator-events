@@ -210,6 +210,7 @@ export default async function PartnerPage({ params }: { params: { slug: string }
           fakeDomain={fakeDomain}
           embedFilter={embedFilter}
           defaultAccent={brandAccent}
+          eventCount={upcoming > 0 ? upcoming : 4}
         />
       </section>
 

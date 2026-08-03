@@ -16,7 +16,9 @@ const cityImageMap: Record<string, string> = {
   'Venice': 'venice.jpg',
   'Cannes': 'cannes.jpg',
   'Paris': 'paris.jpg',
-  'Colombo': 'srilanka.jpg',
+  // colombo.jpg is a copy of srilanka.jpg under a fresh name — the original
+  // URL 404'd before its first deploy and email/image proxies cached the miss.
+  'Colombo': 'colombo.jpg',
   'Budapest': 'budapest.jpg',
   'Carolina Beach': 'beach.jpg',
   'Carolina Beach, NC': 'beach.jpg',

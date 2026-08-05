@@ -68,6 +68,13 @@ export function SubmitVideoForm({
   const [pendingSubmit, setPendingSubmit] = useState(false);
   const [lastAttempt, setLastAttempt] = useState<string[] | null>(null);
   const [status, setStatus] = useState<string | null>(null);
+  const [isIOS, setIsIOS] = useState(false);
+
+  useEffect(() => {
+    // iOS copies the chosen asset out of Photos before the page sees it, and
+    // gives up on very large videos — worth saying so before they try.
+    setIsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent));
+  }, []);
 
   // Surface an interrupted previous attempt (tab killed, phone locked, etc.).
   useEffect(() => {
@@ -318,10 +325,12 @@ export function SubmitVideoForm({
             <UploadCloud className="h-8 w-8 text-slate-400" />
             <span className="text-sm font-medium text-slate-700">Tap to choose a video</span>
             <span className="text-xs text-slate-400">MP4, MOV or WebM · up to 500 MB</span>
-            <span className="mt-1 max-w-xs text-[11px] leading-relaxed text-slate-400">
-              On iPhone: if the clip lives in iCloud, open it in Photos first so it downloads to the
-              device — otherwise the picker can stall.
-            </span>
+            {isIOS && (
+              <span className="mt-1 max-w-xs text-[11px] leading-relaxed text-slate-400">
+                Uploading from iPhone? Clips over ~150 MB often fail to leave the camera roll — iOS
+                limitation. Upload big files from a computer, or email us and we&apos;ll add it.
+              </span>
+            )}
           </button>
         ) : (
           <div className="mt-2 space-y-3">

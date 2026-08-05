@@ -15,6 +15,30 @@ const ACCEPTED = ['video/mp4', 'video/quicktime', 'video/webm'];
 // "just stop". Big files get a plain file card instead.
 const PREVIEW_MAX_BYTES = 40 * 1024 * 1024;
 
+// Upload breadcrumbs. If the browser kills the tab mid-upload (iOS does this
+// silently under memory pressure) nothing can report the failure — but
+// localStorage survives the reload, so the next page load can tell us exactly
+// which step was reached. Cleared on success.
+const DIAG_KEY = 'ie-upload-diag';
+
+function diag(step: string) {
+  try {
+    const prev = JSON.parse(localStorage.getItem(DIAG_KEY) || '[]') as string[];
+    const line = `${new Date().toISOString().slice(11, 19)} ${step}`;
+    localStorage.setItem(DIAG_KEY, JSON.stringify([...prev, line].slice(-12)));
+  } catch {
+    /* private mode / storage full — diagnostics are best-effort */
+  }
+}
+
+function clearDiag() {
+  try {
+    localStorage.removeItem(DIAG_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 // Shared between association member clips and event showcase videos. `action`
 // is the server action to submit to. `maxSeconds` is an optional length cap
 // (client-side soft check + label); pass null for no length limit (size only).
@@ -42,6 +66,18 @@ export function SubmitVideoForm({
   const [submitting, setSubmitting] = useState(false);
   const [uploadPct, setUploadPct] = useState<number | null>(null);
   const [pendingSubmit, setPendingSubmit] = useState(false);
+  const [lastAttempt, setLastAttempt] = useState<string[] | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
+
+  // Surface an interrupted previous attempt (tab killed, phone locked, etc.).
+  useEffect(() => {
+    try {
+      const prev = JSON.parse(localStorage.getItem(DIAG_KEY) || 'null') as string[] | null;
+      if (prev && prev.length) setLastAttempt(prev);
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   const readDuration = (f: File) =>
     new Promise<number>((resolve, reject) => {
@@ -104,6 +140,8 @@ export function SubmitVideoForm({
   const uploadToStorage = async (f: File): Promise<string> => {
     const origin = window.location.origin;
     const contentType = f.type || 'video/mp4';
+    diag(`start ${(f.size / 1048576).toFixed(0)}MB type=${f.type || 'none'}`);
+    setStatus('Preparing upload…');
 
     // The presign route still gates the upload (auth, feature flag, rate
     // limit) and mints the object path; the transfer itself authenticates as
@@ -116,17 +154,25 @@ export function SubmitVideoForm({
     });
     if (!presignRes.ok) {
       const body = await presignRes.json().catch(() => null);
+      diag(`presign FAILED ${presignRes.status}`);
       throw new Error(body?.error || `Upload could not start (${presignRes.status})`);
     }
     const presign = (await presignRes.json()) as { path?: string };
     if (!presign.path) {
+      diag('presign returned no path');
       throw new Error('Upload could not start.');
     }
     const path = presign.path;
+    diag('presign ok');
 
     const { data: sessionData } = await supabase.auth.getSession();
     const accessToken = sessionData.session?.access_token;
-    if (!accessToken) throw new Error('Please sign in again to upload.');
+    if (!accessToken) {
+      diag('no session token');
+      throw new Error('Please sign in again to upload.');
+    }
+    diag('session ok');
+    setStatus('Uploading…');
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 
@@ -158,7 +204,10 @@ export function SubmitVideoForm({
           cacheControl: '3600',
         },
         onProgress: (sent, total) => {
-          setUploadPct(Math.round((sent / total) * 100));
+          const pct = Math.round((sent / total) * 100);
+          setUploadPct(pct);
+          // Breadcrumb every 10% — enough to locate a silent death.
+          if (pct % 10 === 0) diag(`progress ${pct}%`);
         },
         onError: (err) => {
           // Surface the server's own words when there are any — a silent
@@ -166,6 +215,7 @@ export function SubmitVideoForm({
           const res = (err as { originalResponse?: { getStatus: () => number; getBody: () => string } })
             .originalResponse;
           const detail = res ? `${res.getStatus()} ${String(res.getBody()).slice(0, 120)}` : err.message;
+          diag(`tus error: ${String(detail).slice(0, 80)}`);
           reject(new Error(`Upload failed: ${detail || 'connection lost'}`));
         },
         onSuccess: () => resolve(),
@@ -185,6 +235,8 @@ export function SubmitVideoForm({
       }
     }
 
+    diag('upload complete');
+    setStatus('Finishing…');
     setUploadPct(null);
     return path; // private bucket: submit the object path
   };
@@ -211,13 +263,19 @@ export function SubmitVideoForm({
     }
     setSubmitting(true);
     setFileError(null);
+    setLastAttempt(null);
+    clearDiag();
     uploadToStorage(file)
       .then((path) => {
+        clearDiag();
         setUploadedUrl(path);
         setPendingSubmit(true);
       })
       .catch((err) => {
-        setFileError(err instanceof Error ? err.message : 'Upload failed. Please try again.');
+        const msg = err instanceof Error ? err.message : 'Upload failed. Please try again.';
+        diag(`caught: ${msg.slice(0, 80)}`);
+        setFileError(msg);
+        setStatus(null);
         setSubmitting(false);
       });
   };
@@ -328,6 +386,31 @@ export function SubmitVideoForm({
         Every video is reviewed by our team before it appears on the {targetName} page.
         You’ll get an email once it’s approved. It’s free to submit.
       </div>
+
+      {lastAttempt && !submitting && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+          <p className="text-xs font-bold text-amber-900">
+            Your last upload didn&apos;t finish — here&apos;s how far it got:
+          </p>
+          <pre className="mt-1.5 whitespace-pre-wrap break-words font-mono text-[11px] leading-relaxed text-amber-800">
+            {lastAttempt.join('\n')}
+          </pre>
+          <button
+            type="button"
+            onClick={() => {
+              clearDiag();
+              setLastAttempt(null);
+            }}
+            className="mt-2 text-[11px] font-semibold text-amber-900 underline underline-offset-2"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {status && uploadPct === null && (
+        <p className="text-xs font-semibold text-slate-600">{status}</p>
+      )}
 
       {uploadPct !== null && (
         <div>

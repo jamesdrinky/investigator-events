@@ -142,6 +142,8 @@ export function SubmitVideoForm({
     const contentType = f.type || 'video/mp4';
     diag(`start ${(f.size / 1048576).toFixed(0)}MB type=${f.type || 'none'}`);
     setStatus('Preparing upload…');
+    // Tell AppUpdater not to reload the page out from under an upload.
+    (window as { __ieBusy?: boolean }).__ieBusy = true;
 
     // The presign route still gates the upload (auth, feature flag, rate
     // limit) and mints the object path; the transfer itself authenticates as
@@ -228,6 +230,7 @@ export function SubmitVideoForm({
         });
       });
     } finally {
+      (window as { __ieBusy?: boolean }).__ieBusy = false;
       try {
         await wakeLock?.release();
       } catch {

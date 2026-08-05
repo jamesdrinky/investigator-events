@@ -19,6 +19,12 @@ const contentSecurityPolicy = [
 
 const nextConfig = {
   poweredByHeader: false,
+  // Bake the deployed commit into the client bundle so the running app can
+  // tell whether it's stale (see components/AppUpdater.tsx).
+  env: {
+    NEXT_PUBLIC_BUILD_SHA:
+      process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) ?? 'dev',
+  },
   experimental: {
     typedRoutes: true,
     // Keep ffmpeg-static out of the webpack bundle so its binary path resolves

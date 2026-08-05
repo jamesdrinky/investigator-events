@@ -299,7 +299,12 @@ export function SubmitVideoForm({
         <input
           ref={fileInputRef}
           type="file"
-          accept="video/mp4,video/quicktime,video/webm"
+          // MUST stay the generic wildcard. Listing concrete types makes iOS
+          // transcode the clip out of Photos before handing it over, which for
+          // a large 4K/HEVC video spins in the picker and then silently
+          // cancels — the file never reaches the page at all. `video/*` lets
+          // iOS pass the original straight through.
+          accept="video/*"
           className="hidden"
           onChange={(e) => onPick(e.target.files?.[0] ?? null)}
         />
@@ -313,6 +318,10 @@ export function SubmitVideoForm({
             <UploadCloud className="h-8 w-8 text-slate-400" />
             <span className="text-sm font-medium text-slate-700">Tap to choose a video</span>
             <span className="text-xs text-slate-400">MP4, MOV or WebM · up to 500 MB</span>
+            <span className="mt-1 max-w-xs text-[11px] leading-relaxed text-slate-400">
+              On iPhone: if the clip lives in iCloud, open it in Photos first so it downloads to the
+              device — otherwise the picker can stall.
+            </span>
           </button>
         ) : (
           <div className="mt-2 space-y-3">

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import * as tus from 'tus-js-client';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { UploadCloud, Film, Loader2, AlertCircle } from 'lucide-react';
 
@@ -32,6 +33,7 @@ export function SubmitVideoForm({
 
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadPct, setUploadPct] = useState<number | null>(null);
   const [pendingSubmit, setPendingSubmit] = useState(false);
 
   const readDuration = (f: File) =>
@@ -84,10 +86,16 @@ export function SubmitVideoForm({
     setPreviewUrl(URL.createObjectURL(f));
   };
 
+  // Resumable TUS upload in 6 MB chunks. A single PUT dies at ~100 MB at the
+  // storage edge (Cloudflare request cap), so anything "up to 500 MB" MUST be
+  // chunked. Bonus: retries survive flaky wifi, and we get real progress.
   const uploadToStorage = async (f: File): Promise<string> => {
     const origin = window.location.origin;
     const contentType = f.type || 'video/mp4';
 
+    // The presign route still gates the upload (auth, feature flag, rate
+    // limit) and mints the object path; the transfer itself authenticates as
+    // the signed-in user (RLS: insert-only into their own folder).
     const presignRes = await fetch(`${origin}/api/upload-video/presign`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -98,16 +106,49 @@ export function SubmitVideoForm({
       const body = await presignRes.json().catch(() => null);
       throw new Error(body?.error || `Upload could not start (${presignRes.status})`);
     }
-    const presign = (await presignRes.json()) as { token?: string; path?: string };
-    if (!presign.token || !presign.path) {
+    const presign = (await presignRes.json()) as { path?: string };
+    if (!presign.path) {
       throw new Error('Upload could not start.');
     }
+    const path = presign.path;
 
-    const { error } = await supabase.storage
-      .from('event-videos')
-      .uploadToSignedUrl(presign.path, presign.token, f, { contentType });
-    if (error) throw new Error(error.message);
-    return presign.path; // private bucket: submit the object path
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData.session?.access_token;
+    if (!accessToken) throw new Error('Please sign in again to upload.');
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+
+    await new Promise<void>((resolve, reject) => {
+      const upload = new tus.Upload(f, {
+        endpoint: `${supabaseUrl}/storage/v1/upload/resumable`,
+        retryDelays: [0, 3000, 5000, 10000, 20000],
+        chunkSize: 6 * 1024 * 1024, // Supabase requires exactly 6 MB chunks
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+          'x-upsert': 'false',
+        },
+        metadata: {
+          bucketName: 'event-videos',
+          objectName: path,
+          contentType,
+          cacheControl: '3600',
+        },
+        onProgress: (sent, total) => {
+          setUploadPct(Math.round((sent / total) * 100));
+        },
+        onError: (err) => reject(new Error(`Upload failed: ${err.message || 'connection error'}`)),
+        onSuccess: () => resolve(),
+      });
+
+      // Resume a previous attempt of the same file if one exists.
+      void upload.findPreviousUploads().then((previous) => {
+        if (previous.length > 0) upload.resumeFromPreviousUpload(previous[0]);
+        upload.start();
+      });
+    });
+
+    setUploadPct(null);
+    return path; // private bucket: submit the object path
   };
 
   // One button: if the file isn't uploaded yet, upload it, then re-submit the
@@ -233,13 +274,35 @@ export function SubmitVideoForm({
         You’ll get an email once it’s approved. It’s free to submit.
       </div>
 
+      {uploadPct !== null && (
+        <div>
+          <div className="mb-1.5 flex items-center justify-between text-xs font-semibold text-slate-600">
+            <span>Uploading your video…</span>
+            <span>{uploadPct}%</span>
+          </div>
+          <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-blue-500 to-violet-500 transition-[width] duration-300"
+              style={{ width: `${uploadPct}%` }}
+            />
+          </div>
+          <p className="mt-1.5 text-[11px] text-slate-400">
+            Large files can take a few minutes — if your connection drops, we pick up where it left off.
+          </p>
+        </div>
+      )}
+
       <button
         type="submit"
         disabled={!file || submitting}
         className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-blue-600 px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
       >
         {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-        {submitting ? 'Submitting…' : 'Submit for review'}
+        {submitting
+          ? uploadPct !== null
+            ? `Uploading ${uploadPct}%…`
+            : 'Submitting…'
+          : 'Submit for review'}
       </button>
       {!file && (
         <p className="text-xs text-slate-400">Choose a video, then submit — it uploads automatically.</p>

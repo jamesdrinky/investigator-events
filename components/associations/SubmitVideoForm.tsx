@@ -8,6 +8,13 @@ import { UploadCloud, Film, Loader2, AlertCircle } from 'lucide-react';
 const MAX_BYTES = 500 * 1024 * 1024; // 500 MB ceiling (matches the storage bucket)
 const ACCEPTED = ['video/mp4', 'video/quicktime', 'video/webm'];
 
+// Above this we never hand the file to a <video> element — not for the inline
+// preview, not to read its duration. Decoding a several-hundred-MB local file
+// exhausts the per-tab media memory on iOS Safari, which kills the tab with NO
+// error event: the page simply reloads mid-upload and the user sees the form
+// "just stop". Big files get a plain file card instead.
+const PREVIEW_MAX_BYTES = 40 * 1024 * 1024;
+
 // Shared between association member clips and event showcase videos. `action`
 // is the server action to submit to. `maxSeconds` is an optional length cap
 // (client-side soft check + label); pass null for no length limit (size only).
@@ -60,7 +67,10 @@ export function SubmitVideoForm({
 
     if (!f) return;
 
-    if (!ACCEPTED.includes(f.type)) {
+    // Some iOS exports arrive with an empty or odd MIME type; fall back to the
+    // extension rather than rejecting a perfectly good video.
+    const extOk = /\.(mp4|mov|m4v|webm)$/i.test(f.name);
+    if (!ACCEPTED.includes(f.type) && !extOk) {
       setFileError('Please choose an MP4, MOV, or WebM video.');
       return;
     }
@@ -69,12 +79,14 @@ export function SubmitVideoForm({
       return;
     }
 
-    // Read the duration when we can (for display) — but never block on it.
+    // Only touch a <video> element for small files (see PREVIEW_MAX_BYTES).
     let secs: number | null = null;
-    try {
-      secs = await readDuration(f);
-    } catch {
-      secs = null;
+    if (f.size <= PREVIEW_MAX_BYTES) {
+      try {
+        secs = await readDuration(f);
+      } catch {
+        secs = null;
+      }
     }
     if (maxSeconds != null && secs != null && secs > maxSeconds + 1) {
       setFileError(`Videos must be ${maxSeconds} seconds or less. Yours is ${Math.round(secs)}s.`);
@@ -83,7 +95,7 @@ export function SubmitVideoForm({
 
     setFile(f);
     setDuration(secs);
-    setPreviewUrl(URL.createObjectURL(f));
+    setPreviewUrl(f.size <= PREVIEW_MAX_BYTES ? URL.createObjectURL(f) : null);
   };
 
   // Resumable TUS upload in 6 MB chunks. A single PUT dies at ~100 MB at the
@@ -118,7 +130,19 @@ export function SubmitVideoForm({
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 
-    await new Promise<void>((resolve, reject) => {
+    // Phones lock the screen mid-upload and suspend the transfer. Hold a wake
+    // lock for the duration where the browser supports it (iOS 16.4+).
+    let wakeLock: { release: () => Promise<void> } | null = null;
+    try {
+      wakeLock = await (navigator as Navigator & {
+        wakeLock?: { request: (t: 'screen') => Promise<{ release: () => Promise<void> }> };
+      }).wakeLock?.request('screen') ?? null;
+    } catch {
+      /* unsupported or denied — upload still works, screen may sleep */
+    }
+
+    try {
+      await new Promise<void>((resolve, reject) => {
       const upload = new tus.Upload(f, {
         endpoint: `${supabaseUrl}/storage/v1/upload/resumable`,
         retryDelays: [0, 3000, 5000, 10000, 20000],
@@ -136,16 +160,30 @@ export function SubmitVideoForm({
         onProgress: (sent, total) => {
           setUploadPct(Math.round((sent / total) * 100));
         },
-        onError: (err) => reject(new Error(`Upload failed: ${err.message || 'connection error'}`)),
+        onError: (err) => {
+          // Surface the server's own words when there are any — a silent
+          // failure is the one outcome we can't debug from a user's phone.
+          const res = (err as { originalResponse?: { getStatus: () => number; getBody: () => string } })
+            .originalResponse;
+          const detail = res ? `${res.getStatus()} ${String(res.getBody()).slice(0, 120)}` : err.message;
+          reject(new Error(`Upload failed: ${detail || 'connection lost'}`));
+        },
         onSuccess: () => resolve(),
       });
 
-      // Resume a previous attempt of the same file if one exists.
-      void upload.findPreviousUploads().then((previous) => {
-        if (previous.length > 0) upload.resumeFromPreviousUpload(previous[0]);
-        upload.start();
+        // Resume a previous attempt of the same file if one exists.
+        void upload.findPreviousUploads().then((previous) => {
+          if (previous.length > 0) upload.resumeFromPreviousUpload(previous[0]);
+          upload.start();
+        });
       });
-    });
+    } finally {
+      try {
+        await wakeLock?.release();
+      } catch {
+        /* nothing to do */
+      }
+    }
 
     setUploadPct(null);
     return path; // private bucket: submit the object path
@@ -205,7 +243,7 @@ export function SubmitVideoForm({
           onChange={(e) => onPick(e.target.files?.[0] ?? null)}
         />
 
-        {!previewUrl ? (
+        {!file ? (
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
@@ -217,11 +255,28 @@ export function SubmitVideoForm({
           </button>
         ) : (
           <div className="mt-2 space-y-3">
-            <video src={previewUrl} controls playsInline className="aspect-video w-full rounded-2xl bg-black object-contain" />
+            {previewUrl ? (
+              <video src={previewUrl} controls playsInline className="aspect-video w-full rounded-2xl bg-black object-contain" />
+            ) : (
+              // Large file: deliberately no <video> element (memory).
+              <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-5">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-100">
+                  <Film className="h-5 w-5 text-blue-600" />
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-slate-800">{file.name}</p>
+                  <p className="text-xs text-slate-500">
+                    {(file.size / (1024 * 1024)).toFixed(0)} MB · ready to upload
+                  </p>
+                </div>
+              </div>
+            )}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
-              <span className="inline-flex items-center gap-1 font-medium text-slate-700">
-                <Film className="h-3.5 w-3.5" /> {file?.name}
-              </span>
+              {previewUrl && (
+                <span className="inline-flex items-center gap-1 font-medium text-slate-700">
+                  <Film className="h-3.5 w-3.5" /> {file.name}
+                </span>
+              )}
               {duration !== null && <span>{Math.round(duration)}s</span>}
               <button
                 type="button"

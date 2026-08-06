@@ -116,7 +116,18 @@ export function SubmitVideoForm({
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(null);
 
-    if (!f) return;
+    // Record what the picker actually produced — including nothing at all,
+    // which is what iOS does when its export from Photos gives up. Without
+    // this the failure leaves no trace anywhere.
+    if (!f) {
+      diag('picker returned NO file (iOS export failed or cancelled)');
+      setLastAttempt(JSON.parse(localStorage.getItem(DIAG_KEY) || '[]'));
+      setFileError(
+        'Your phone didn’t hand the video over. This usually means iOS couldn’t prepare that clip — try “Paste a link” instead.'
+      );
+      return;
+    }
+    diag(`picked ${(f.size / 1048576).toFixed(1)}MB type=${f.type || 'none'} name=${f.name.slice(0, 40)}`);
 
     // Some iOS exports arrive with an empty or odd MIME type; fall back to the
     // extension rather than rejecting a perfectly good video.

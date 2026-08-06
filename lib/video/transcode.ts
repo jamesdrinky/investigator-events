@@ -10,9 +10,14 @@ import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 const run = promisify(execFile);
 const BUCKET = 'event-videos';
 
-// Auto-convert up to this size; bigger ones go to the manual queue (serverless
-// time/disk limits make huge transcodes unreliable).
-const MAX_AUTO_BYTES = 200 * 1024 * 1024;
+// Auto-convert up to this size. Phone footage is .MOV and routinely 300MB+ —
+// the old 200MB ceiling meant those uploaded fine and then silently never
+// appeared (flagged needs_manual). Files are streamed to disk rather than
+// buffered in memory, so size costs disk, not RAM.
+const MAX_AUTO_BYTES = 600 * 1024 * 1024;
+// Anything past this gets faster/smaller encode settings so a big clip still
+// finishes inside the function's time budget.
+const BIG_INPUT_BYTES = 150 * 1024 * 1024;
 const FFMPEG_TIMEOUT_MS = 240_000;
 
 function ffmpegBin(): string {
@@ -29,6 +34,22 @@ async function setStatus(admin: any, id: string, status: string, videoUrl?: stri
 
 async function cleanup(...files: string[]) {
   for (const f of files) { try { await fsp.unlink(f); } catch {} }
+}
+
+/**
+ * Stream an object out of storage onto local disk. Deliberately avoids
+ * `download()` → `arrayBuffer()` → Buffer, which would hold a whole
+ * several-hundred-MB video in function memory.
+ */
+async function downloadToFile(admin: any, storagePath: string, destPath: string): Promise<boolean> {
+  const { data, error } = await admin.storage.from(BUCKET).createSignedUrl(storagePath, 600);
+  if (error || !data?.signedUrl) return false;
+  const res = await fetch(data.signedUrl);
+  if (!res.ok || !res.body) return false;
+  const { Readable } = await import('node:stream');
+  const { pipeline } = await import('node:stream/promises');
+  await pipeline(Readable.fromWeb(res.body as any), fs.createWriteStream(destPath));
+  return true;
 }
 
 // Extract a still frame (~1s in) as the video's poster, upload it next to the
@@ -67,13 +88,11 @@ async function processOne(admin: any, row: Row) {
     // a poster so it has a guaranteed thumbnail.
     if (ext === 'mp4') {
       try {
-        const { data: blob } = await admin.storage.from(BUCKET).download(srcPath);
-        if (blob) {
-          const tmp = path.join(os.tmpdir(), `mp4-${id}.mp4`);
-          await fsp.writeFile(tmp, Buffer.from(await blob.arrayBuffer()));
+        const tmp = path.join(os.tmpdir(), `mp4-${id}.mp4`);
+        if (await downloadToFile(admin, srcPath, tmp)) {
           await generatePoster(admin, id, tmp, srcPath);
-          await cleanup(tmp);
         }
+        await cleanup(tmp);
       } catch { /* poster best-effort */ }
       await setStatus(admin, id, 'ready');
       return { id, action: 'already-mp4' };
@@ -87,20 +106,29 @@ async function processOne(admin: any, row: Row) {
     const size = Number(listed?.[0]?.metadata?.size ?? 0);
     if (size > MAX_AUTO_BYTES) { await setStatus(admin, id, 'needs_manual'); return { id, action: 'too-big', size }; }
 
-    // Download → transcode → upload.
-    const { data: blob, error: dlErr } = await admin.storage.from(BUCKET).download(srcPath);
-    if (dlErr || !blob) { await setStatus(admin, id, 'needs_manual'); return { id, action: 'download-failed' }; }
-    const inBuf = Buffer.from(await blob.arrayBuffer());
-
+    // Download → transcode → upload. Streamed to disk: a 400MB clip must not
+    // become a 400MB Buffer in a serverless function.
     const tmpIn = path.join(os.tmpdir(), `in-${id}.${ext || 'mov'}`);
     const tmpOut = path.join(os.tmpdir(), `out-${id}.mp4`);
-    await fsp.writeFile(tmpIn, inBuf);
+
+    const got = await downloadToFile(admin, srcPath, tmpIn);
+    if (!got) {
+      await cleanup(tmpIn);
+      await setStatus(admin, id, 'needs_manual');
+      return { id, action: 'download-failed' };
+    }
+
+    // Big inputs (typically 4K phone footage) get a faster preset and a 720p
+    // cap so the encode still lands inside the function's time budget.
+    const isBig = size > BIG_INPUT_BYTES;
 
     try {
       await run(ffmpegBin(), [
         '-i', tmpIn,
-        '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '23',
-        '-vf', "scale='min(1280,iw)':-2",
+        '-c:v', 'libx264',
+        '-preset', isBig ? 'ultrafast' : 'veryfast',
+        '-crf', isBig ? '26' : '23',
+        '-vf', isBig ? "scale='min(1280,iw)':-2" : "scale='min(1280,iw)':-2",
         '-c:a', 'aac', '-b:a', '128k',
         '-movflags', '+faststart', '-pix_fmt', 'yuv420p',
         '-y', tmpOut,

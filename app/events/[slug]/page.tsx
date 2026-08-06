@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { EventCard } from '@/components/event-card';
-import { VideoPlayer } from '@/components/VideoPlayer';
+import { EventVideo } from '@/components/EventVideo';
 import { Reveal } from '@/components/motion/reveal';
 import { SaveDateLinks } from '@/components/save-date-links';
 import { fetchAllEvents, fetchEventBySlug } from '@/lib/data/events';
@@ -145,9 +145,9 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
             both fit via max-height + auto width. */}
         {eventVideos.length > 0 && (
           <div className="absolute bottom-12 right-8 z-10 hidden lg:block">
-            <VideoPlayer
+            <EventVideo
               id={eventVideos[0].id}
-              poster={eventVideos[0].thumbnailUrl}
+              videoUrl={eventVideos[0].videoUrl}
               logo={logoSrc}
               label={eventVideos[0].title || eventVideos[0].submitterName}
               description={eventVideos[0].description}
@@ -185,9 +185,9 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
       {/* Showcase video — stacked below the hero on mobile/tablet (no room to overlay) */}
       {eventVideos.length > 0 && (
         <div className="container-shell pt-6 lg:hidden">
-          <VideoPlayer
+          <EventVideo
             id={eventVideos[0].id}
-            poster={eventVideos[0].thumbnailUrl}
+            videoUrl={eventVideos[0].videoUrl}
             logo={logoSrc}
             label={eventVideos[0].title || eventVideos[0].submitterName}
             description={eventVideos[0].description}
@@ -256,9 +256,9 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                       {eventVideos.slice(1).map((v) => (
                         <figure key={v.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                          <VideoPlayer
+                          <EventVideo
                             id={v.id}
-                            poster={v.thumbnailUrl}
+                            videoUrl={v.videoUrl}
                             className="aspect-video w-full"
                             videoClassName="h-full w-full bg-black object-contain"
                           />

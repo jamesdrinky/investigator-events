@@ -8,6 +8,7 @@ import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { assertSameOriginRequest, enforceRateLimitAsync, escapeHtml } from '@/lib/security/server';
 import { buildAdminAlertEmail, ADMIN_ALERT_INBOX } from '@/lib/email/admin-alert';
 import { isFeatureEnabled, VIDEO_SUBMISSIONS_FLAG } from '@/lib/data/feature-flags';
+import { isSupportedVideoUrl } from '@/lib/utils/video-embed';
 
 function clean(value: string, maxLength: number) {
   return value.replace(/\s+/g, ' ').trim().slice(0, maxLength);
@@ -52,10 +53,16 @@ export async function submitEventVideoAction(formData: FormData) {
     const videoPath = String(formData.get('videoUrl') ?? '').trim();
     const durationRaw = Number(formData.get('durationSeconds') ?? 0);
 
-    const pathOk =
-      videoPath.startsWith(`${user.id}/`) &&
-      !videoPath.includes('..') &&
-      /\.(mp4|mov|webm)$/i.test(videoPath);
+    // Two ways in: a file uploaded to our private bucket (path scoped to the
+    // submitter's own folder), or an external link (YouTube/Vimeo/direct file)
+    // — the latter is the only workable route for the big clips iOS refuses to
+    // hand over to a web upload.
+    const isExternal = /^https?:\/\//i.test(videoPath);
+    const pathOk = isExternal
+      ? isSupportedVideoUrl(videoPath)
+      : videoPath.startsWith(`${user.id}/`) &&
+        !videoPath.includes('..') &&
+        /\.(mp4|mov|webm)$/i.test(videoPath);
     if (!pathOk) {
       redirect(`/events/${slug}/submit-video?status=error&reason=video`);
     }
@@ -84,7 +91,8 @@ export async function submitEventVideoAction(formData: FormData) {
       video_url: videoPath,
       duration_seconds: durationSeconds,
       status: 'pending',
-      transcode_status: 'pending',
+      // External links are already playable — nothing for the transcoder to do.
+      transcode_status: isExternal ? 'done' : 'pending',
       is_paid: false,
       payment_status: 'none',
     });

@@ -6,9 +6,13 @@ const contentSecurityPolicy = [
   "frame-ancestors 'none'",
   "form-action 'self' https://accounts.google.com https://www.linkedin.com",
   "object-src 'none'",
-  // 'self' so /widget can preview our own /embed iframe.
-  "frame-src 'self' https://accounts.google.com https://www.linkedin.com",
+  // 'self' so /widget can preview our own /embed iframe; the video hosts so
+  // submitted YouTube/Vimeo links can play (see lib/utils/video-embed).
+  "frame-src 'self' https://accounts.google.com https://www.linkedin.com https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com",
   "img-src 'self' data: blob: https:",
+  // Submitted direct-file video links (Dropbox/Drive/CDN) play in a <video>;
+  // blob: covers the local preview of a freshly picked file.
+  "media-src 'self' data: blob: https:",
   "font-src 'self' data: https://fonts.gstatic.com",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   `script-src 'self' 'unsafe-inline' https://accounts.google.com${isProd ? '' : " 'unsafe-eval'"}`,
@@ -39,6 +43,8 @@ const nextConfig = {
       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
       { protocol: 'https', hostname: 'cdn1.iconfinder.com' },
       { protocol: 'https', hostname: 'dbeyznsxcetpwfcicimz.supabase.co' },
+      // YouTube thumbnails for submitted video links.
+      { protocol: 'https', hostname: 'i.ytimg.com' },
     ],
     // Default cache TTL is 60s — far too aggressive re-optimisation. Bump to
     // 24h so association logos, city images, avatars, and event covers don't

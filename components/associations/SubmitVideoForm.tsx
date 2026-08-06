@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import * as tus from 'tus-js-client';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
-import { UploadCloud, Film, Loader2, AlertCircle } from 'lucide-react';
+import { UploadCloud, Film, Link2, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { parseVideoUrl } from '@/lib/utils/video-embed';
 
 const MAX_BYTES = 500 * 1024 * 1024; // 500 MB ceiling (matches the storage bucket)
 const ACCEPTED = ['video/mp4', 'video/quicktime', 'video/webm'];
@@ -69,6 +70,9 @@ export function SubmitVideoForm({
   const [lastAttempt, setLastAttempt] = useState<string[] | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [isIOS, setIsIOS] = useState(false);
+  const [mode, setMode] = useState<'upload' | 'link'>('upload');
+  const [linkValue, setLinkValue] = useState('');
+  const linkEmbed = linkValue.trim() ? parseVideoUrl(linkValue) : null;
 
   useEffect(() => {
     // iOS copies the chosen asset out of Photos before the page sees it, and
@@ -261,6 +265,16 @@ export function SubmitVideoForm({
   }, [pendingSubmit, uploadedUrl]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    // Link mode: nothing to upload, the URL itself is the value.
+    if (mode === 'link') {
+      if (!linkEmbed) {
+        e.preventDefault();
+        setFileError('Paste a YouTube, Vimeo, or direct video link.');
+        return;
+      }
+      setSubmitting(true);
+      return;
+    }
     if (uploadedUrl) {
       // Already uploaded — let the native form action submit.
       setSubmitting(true);
@@ -293,7 +307,11 @@ export function SubmitVideoForm({
   return (
     <form ref={formRef} action={action} onSubmit={handleSubmit} className="space-y-6">
       <input type="hidden" name="slug" value={slug} />
-      <input type="hidden" name="videoUrl" value={uploadedUrl ?? ''} />
+      <input
+        type="hidden"
+        name="videoUrl"
+        value={mode === 'link' ? linkValue.trim() : uploadedUrl ?? ''}
+      />
       <input type="hidden" name="durationSeconds" value={duration ?? ''} />
       {/* Step 1 — choose the file */}
       <div>
@@ -302,6 +320,31 @@ export function SubmitVideoForm({
             ? `Your video (max ${maxSeconds >= 60 ? `${Math.round(maxSeconds / 60)} min` : `${maxSeconds}s`})`
             : 'Your video'}
         </label>
+
+        {/* Upload vs link. A link is the reliable route for big clips — iOS
+            won't release large videos from Photos to a web upload. */}
+        <div className="mt-2 flex gap-2">
+          {([
+            { key: 'upload' as const, label: 'Upload a file', Icon: UploadCloud },
+            { key: 'link' as const, label: 'Paste a link', Icon: Link2 },
+          ]).map(({ key, label, Icon }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => {
+                setMode(key);
+                setFileError(null);
+              }}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-semibold transition ${
+                mode === key
+                  ? 'border-blue-400 bg-blue-50 text-blue-700'
+                  : 'border-slate-200 text-slate-500 hover:bg-slate-50'
+              }`}
+            >
+              <Icon className="h-4 w-4" /> {label}
+            </button>
+          ))}
+        </div>
 
         <input
           ref={fileInputRef}
@@ -316,7 +359,36 @@ export function SubmitVideoForm({
           onChange={(e) => onPick(e.target.files?.[0] ?? null)}
         />
 
-        {!file ? (
+        {mode === 'link' ? (
+          <div className="mt-3 space-y-2">
+            <input
+              type="url"
+              inputMode="url"
+              value={linkValue}
+              onChange={(e) => {
+                setLinkValue(e.target.value);
+                setFileError(null);
+              }}
+              placeholder="https://youtube.com/watch?v=…"
+              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+            />
+            {linkEmbed ? (
+              <p className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                {linkEmbed.kind === 'youtube'
+                  ? 'YouTube video recognised'
+                  : linkEmbed.kind === 'vimeo'
+                    ? 'Vimeo video recognised'
+                    : 'Video link recognised'}
+              </p>
+            ) : (
+              <p className="text-xs leading-relaxed text-slate-500">
+                Paste a YouTube, Vimeo, Dropbox or direct video link. No size limit, works from any
+                device — ideal for long or high-resolution conference footage.
+              </p>
+            )}
+          </div>
+        ) : !file ? (
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
@@ -453,7 +525,7 @@ export function SubmitVideoForm({
 
       <button
         type="submit"
-        disabled={!file || submitting}
+        disabled={submitting || (mode === 'link' ? !linkEmbed : !file)}
         className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-blue-600 px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
       >
         {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
@@ -463,7 +535,7 @@ export function SubmitVideoForm({
             : 'Submitting…'
           : 'Submit for review'}
       </button>
-      {!file && (
+      {mode === 'upload' && !file && (
         <p className="text-xs text-slate-400">Choose a video, then submit — it uploads automatically.</p>
       )}
     </form>

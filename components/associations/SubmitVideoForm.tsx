@@ -75,9 +75,13 @@ export function SubmitVideoForm({
   const linkEmbed = linkValue.trim() ? parseVideoUrl(linkValue) : null;
 
   useEffect(() => {
-    // iOS copies the chosen asset out of Photos before the page sees it, and
-    // gives up on very large videos — worth saying so before they try.
-    setIsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent));
+    // iOS exports the chosen asset out of Photos before the page can see it,
+    // and that export fails on long/high-bitrate clips regardless of file size
+    // — so phones start on the link tab, which always works. Desktop keeps
+    // upload as the default, where 500MB is fine.
+    const ios = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    setIsIOS(ios);
+    if (ios) setMode('link');
   }, []);
 
   // Surface an interrupted previous attempt (tab killed, phone locked, etc.).
@@ -383,8 +387,9 @@ export function SubmitVideoForm({
               </p>
             ) : (
               <p className="text-xs leading-relaxed text-slate-500">
-                Paste a YouTube, Vimeo, Dropbox or direct video link. No size limit, works from any
-                device — ideal for long or high-resolution conference footage.
+                {isIOS
+                  ? 'Paste a YouTube, Vimeo, Dropbox or direct video link — the easiest way to send a video from a phone, with no size or length limit. Prefer to upload the file itself? Short clips work well; long ones are best from a computer.'
+                  : 'Paste a YouTube, Vimeo, Dropbox or direct video link. No size limit, works from any device — ideal for long or high-resolution conference footage.'}
               </p>
             )}
           </div>
@@ -399,8 +404,8 @@ export function SubmitVideoForm({
             <span className="text-xs text-slate-400">MP4, MOV or WebM · up to 500 MB</span>
             {isIOS && (
               <span className="mt-1 max-w-xs text-[11px] leading-relaxed text-slate-400">
-                Uploading from iPhone? Clips over ~150 MB often fail to leave the camera roll — iOS
-                limitation. Upload big files from a computer, or email us and we&apos;ll add it.
+                Long or high-resolution clips can fail to leave an iPhone&apos;s camera roll — if this
+                stalls, use &ldquo;Paste a link&rdquo; instead.
               </span>
             )}
           </button>

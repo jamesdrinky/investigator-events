@@ -68,6 +68,8 @@ export async function PATCH(request: Request) {
 
   const updates: Record<string, unknown> = {};
   if (typeof body.active === 'boolean') updates.active = body.active;
+  // "I've looked at this one" — clears the changed badge until it changes again.
+  if (body.markReviewed === true) updates.last_reviewed_at = new Date().toISOString();
   if (Object.keys(updates).length === 0) {
     return NextResponse.json({ error: 'Nothing to update' }, { status: 400 });
   }

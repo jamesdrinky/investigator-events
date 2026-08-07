@@ -70,6 +70,28 @@ export function htmlToText(html: string): string {
     .trim();
 }
 
+/** Fetch a source page. Sites that block bots but allow browsers get one
+ *  retry with a browser user-agent. */
+async function fetchPage(url: string): Promise<string> {
+  const attempt = async (userAgent: string) => {
+    const res = await fetch(url, {
+      headers: { 'User-Agent': userAgent },
+      signal: AbortSignal.timeout(15_000),
+      cache: 'no-store',
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.text();
+  };
+  try {
+    return await attempt('InvestigatorEventsBot/1.0 (+https://www.investigatorevents.com)');
+  } catch (err) {
+    if (err instanceof Error && /HTTP 40[13]/.test(err.message)) {
+      return attempt('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36');
+    }
+    throw err;
+  }
+}
+
 async function extractEvents(pageText: string, source: SourceRow): Promise<ExtractedEvent[]> {
   const client = new Anthropic();
   const today = new Date().toISOString().slice(0, 10);
@@ -138,13 +160,7 @@ export async function scanSource(source: SourceRow): Promise<ScanResult> {
 
   let html: string;
   try {
-    const res = await fetch(source.url, {
-      headers: { 'User-Agent': 'InvestigatorEventsBot/1.0 (+https://www.investigatorevents.com)' },
-      signal: AbortSignal.timeout(15_000),
-      cache: 'no-store',
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    html = await res.text();
+    html = await fetchPage(source.url);
   } catch (err) {
     return finish({ ...base, status: 'fetch_error', error: err instanceof Error ? err.message : 'fetch failed' });
   }
@@ -210,6 +226,113 @@ export async function scanSource(source: SourceRow): Promise<ScanResult> {
   }
 
   return finish({ ...base, status: 'ok' });
+}
+
+// ---------------------------------------------------------------------------
+// Zero-cost sweep: fetch + diff, no AI. The nightly cron sweeps every active
+// source; the admin sweep view then shows only pages that changed since the
+// admin last marked them reviewed, with the new date-ish lines highlighted.
+// ---------------------------------------------------------------------------
+
+/** Lines worth surfacing to a human: mention a year, month, or event word. */
+const DATEISH =
+  /\b(20\d{2}|jan(uary)?|feb(ruary)?|mar(ch)?|apr(il)?|may|jun[e]?|jul[y]?|aug(ust)?|sep(t|tember)?|oct(ober)?|nov(ember)?|dec(ember)?|conference|seminar|training|summit|expo|agm|symposium|webinar|annual|register|save the date)\b/i;
+
+function pageLines(text: string): string[] {
+  return text
+    .split('\n')
+    .map((line) => line.trim().replace(/\s{2,}/g, ' '))
+    .filter((line) => line.length >= 12 && line.length <= 400);
+}
+
+async function sha256(text: string): Promise<string> {
+  const { createHash } = await import('node:crypto');
+  return createHash('sha256').update(text).digest('hex');
+}
+
+export interface SweepResult {
+  sourceId: string;
+  name: string;
+  status: 'changed' | 'unchanged' | 'first_fetch' | 'fetch_error';
+  newSnippets: string[];
+  error?: string;
+}
+
+/** Fetch one source, diff against the stored snapshot, persist the result. */
+export async function sweepSource(source: SourceRow): Promise<SweepResult> {
+  const supabase = createSupabaseAdminServerClient();
+  const now = new Date().toISOString();
+
+  let html: string;
+  try {
+    html = await fetchPage(source.url);
+  } catch (err) {
+    const error = err instanceof Error ? err.message : 'fetch failed';
+    await (supabase.from('event_sources' as any) as any)
+      .update({ last_scanned_at: now, last_status: 'fetch_error', last_error: error })
+      .eq('id', source.id);
+    return { sourceId: source.id, name: source.name, status: 'fetch_error', newSnippets: [], error };
+  }
+
+  const lines = pageLines(htmlToText(html));
+  const contentText = lines.join('\n').slice(0, 150_000);
+  const contentHash = await sha256(contentText);
+
+  const { data: stored } = await (supabase
+    .from('event_sources' as any)
+    .select('content_text, content_hash')
+    .eq('id', source.id)
+    .single() as any);
+
+  if (stored?.content_hash === contentHash) {
+    await (supabase.from('event_sources' as any) as any)
+      .update({ last_scanned_at: now, last_status: 'unchanged', last_error: null })
+      .eq('id', source.id);
+    return { sourceId: source.id, name: source.name, status: 'unchanged', newSnippets: [] };
+  }
+
+  const isFirst = !stored?.content_text;
+  const oldLines = new Set<string>(isFirst ? [] : (stored.content_text as string).split('\n'));
+  const newSnippets = lines
+    .filter((line) => !oldLines.has(line) && DATEISH.test(line))
+    .slice(0, 20);
+
+  await (supabase.from('event_sources' as any) as any)
+    .update({
+      content_text: contentText,
+      content_hash: contentHash,
+      last_scanned_at: now,
+      // The first fetch is a baseline, not a change worth reviewing.
+      ...(isFirst ? {} : { last_changed_at: now }),
+      last_changes: newSnippets,
+      last_status: isFirst ? 'first_fetch' : 'changed',
+      last_error: null,
+    })
+    .eq('id', source.id);
+
+  return {
+    sourceId: source.id,
+    name: source.name,
+    status: isFirst ? 'first_fetch' : 'changed',
+    newSnippets,
+  };
+}
+
+/** Sweep every active source (fetch + diff only — free, so no rationing). */
+export async function sweepAllSources(limit = 30): Promise<SweepResult[]> {
+  const supabase = createSupabaseAdminServerClient();
+  const { data: sources } = await (supabase
+    .from('event_sources' as any)
+    .select('id, name, url, association, country_hint, region_hint')
+    .eq('active', true)
+    .order('last_scanned_at', { ascending: true, nullsFirst: true })
+    .limit(limit) as any);
+
+  const results: SweepResult[] = [];
+  for (const source of (sources ?? []) as SourceRow[]) {
+    results.push(await sweepSource(source));
+  }
+  return results;
 }
 
 /** Scan sources that are due (never scanned, or scanned over 6 days ago). */

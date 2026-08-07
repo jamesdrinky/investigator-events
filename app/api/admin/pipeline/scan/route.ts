@@ -2,10 +2,10 @@ import { NextResponse } from 'next/server';
 import { hasValidAdminSessionCookie } from '@/lib/admin/session';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { assertSameOriginRequest } from '@/lib/security/server';
-import { scanSource, type SourceRow } from '@/lib/pipeline/scan';
+import { scanSource, sweepSource, type SourceRow } from '@/lib/pipeline/scan';
 
-// "Scan now" — run the pipeline for one source on demand from the admin
-// panel, without waiting for the daily cron.
+// "Check now" — sweep one source on demand (fetch + diff, free). If an
+// Anthropic key is configured AND the page changed, also run AI extraction.
 export const maxDuration = 300;
 
 export async function POST(request: Request) {
@@ -26,6 +26,12 @@ export async function POST(request: Request) {
 
   if (error || !source) return NextResponse.json({ error: 'Source not found' }, { status: 404 });
 
-  const result = await scanSource(source as SourceRow);
-  return NextResponse.json({ ok: result.status === 'ok', result });
+  const sweep = await sweepSource(source as SourceRow);
+
+  let extraction = null;
+  if (process.env.ANTHROPIC_API_KEY && (sweep.status === 'changed' || sweep.status === 'first_fetch')) {
+    extraction = await scanSource(source as SourceRow).catch(() => null);
+  }
+
+  return NextResponse.json({ ok: sweep.status !== 'fetch_error', sweep, extraction });
 }

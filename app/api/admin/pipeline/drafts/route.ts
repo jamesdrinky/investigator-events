@@ -40,11 +40,46 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const id = body?.id;
   const action = body?.action;
-  if (!id || !['approve', 'reject'].includes(action)) {
+  if (!['approve', 'reject', 'create'].includes(action) || (action !== 'create' && !id)) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
   }
 
   const supabase = createSupabaseAdminServerClient();
+
+  // Manual quick-draft from the weekly sweep: spot an event on a source page,
+  // click "Draft event", fill in the fields in the same review queue.
+  if (action === 'create') {
+    let sourceDefaults: Record<string, unknown> = {};
+    if (body.sourceId) {
+      const { data: source } = await (supabase
+        .from('event_sources' as any)
+        .select('id, association, country_hint, region_hint, url')
+        .eq('id', body.sourceId)
+        .single() as any);
+      if (source) {
+        sourceDefaults = {
+          source_id: source.id,
+          association: source.association,
+          organiser: source.association,
+          country: source.country_hint,
+          region: source.region_hint,
+          website: source.url,
+        };
+      }
+    }
+    const { randomUUID } = await import('node:crypto');
+    const { data: created, error } = await (supabase.from('event_drafts' as any) as any)
+      .insert({
+        title: body.title?.trim() || 'New event',
+        confidence: 'high',
+        dedupe_key: `manual-${randomUUID()}`,
+        ...sourceDefaults,
+      })
+      .select('*, event_sources(name)')
+      .single();
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: true, draft: created });
+  }
 
   if (action === 'reject') {
     const { error } = await (supabase.from('event_drafts' as any) as any)

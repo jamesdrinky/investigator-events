@@ -1,26 +1,47 @@
 import { NextResponse } from 'next/server';
 import { verifyCronSecret } from '@/lib/security/server';
-import { scanDueSources } from '@/lib/pipeline/scan';
+import { scanSource, sweepAllSources } from '@/lib/pipeline/scan';
 
-// Daily scan of monitored event sources. Each source is rescanned roughly
-// weekly (3 per day, oldest first), so adding more sources spreads the load
-// automatically. Extraction uses Claude, so runs need ANTHROPIC_API_KEY.
+// Nightly source check, cheapest-first:
+// 1. Sweep every active source — fetch + diff against last snapshot. Free,
+//    so no rationing. Changed pages get flagged for the admin's weekly
+//    manual sweep with the new date-ish lines already extracted.
+// 2. If ANTHROPIC_API_KEY is configured, ALSO run AI extraction — but only
+//    on pages that actually changed tonight (up to 3), so tokens are never
+//    spent re-reading an unchanged page.
 export const maxDuration = 300;
 
 export async function GET(request: Request) {
   const authError = verifyCronSecret(request);
   if (authError) return authError;
 
-  const results = await scanDueSources(3).catch((err) => {
-    console.error('Source scan failed:', err);
+  const sweep = await sweepAllSources().catch((err) => {
+    console.error('Source sweep failed:', err);
     return [];
   });
 
+  const changed = sweep.filter((r) => r.status === 'changed' || r.status === 'first_fetch');
+
+  let extracted: unknown[] = [];
+  if (process.env.ANTHROPIC_API_KEY && changed.length > 0) {
+    const { createSupabaseAdminServerClient } = await import('@/lib/supabase/admin');
+    const supabase = createSupabaseAdminServerClient();
+    const { data: sources } = await (supabase
+      .from('event_sources' as any)
+      .select('id, name, url, association, country_hint, region_hint')
+      .in('id', changed.slice(0, 3).map((r) => r.sourceId)) as any);
+
+    for (const source of (sources ?? []) as any[]) {
+      extracted.push(await scanSource(source).catch((err) => ({ sourceId: source.id, error: String(err) })));
+    }
+  }
+
   return NextResponse.json({
     ok: true,
-    scanned: results.length,
-    queued: results.reduce((sum, r) => sum + r.queued, 0),
-    results,
+    swept: sweep.length,
+    changed: changed.length,
+    sweep,
+    extracted,
     timestamp: new Date().toISOString(),
   });
 }

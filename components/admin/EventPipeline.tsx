@@ -1,10 +1,17 @@
 'use client';
 
-// Admin "Pipeline" tab: manage monitored sources and review AI-drafted
-// events before they go live. Approve publishes straight to the calendar.
+// Admin "Pipeline" tab — the weekly sweep workflow:
+// 1. The nightly cron fetches every monitored page (free) and diffs it
+//    against last night's snapshot.
+// 2. Sources whose pages changed since you last reviewed them float to the
+//    top with the new date-ish lines already pulled out.
+// 3. Spot an event → "Draft event" prefills a draft from the source; fill in
+//    the fields and approve — it publishes straight to the calendar.
+// If ANTHROPIC_API_KEY is configured, changed pages also get AI-extracted
+// into ready-made drafts automatically.
 
 import { useCallback, useEffect, useState } from 'react';
-import { Check, Globe, Loader2, Plus, RefreshCw, Trash2, X } from 'lucide-react';
+import { Check, ChevronDown, Eye, FilePlus2, Globe, Loader2, Plus, RefreshCw, Trash2, X } from 'lucide-react';
 
 const REGIONS = ['Europe', 'North America', 'Asia-Pacific', 'Middle East', 'Latin America', 'Africa'];
 const CATEGORIES = [
@@ -31,6 +38,9 @@ interface Source {
   last_scanned_at: string | null;
   last_status: string | null;
   last_error: string | null;
+  last_changed_at: string | null;
+  last_reviewed_at: string | null;
+  last_changes: string[] | null;
   drafts_found_total: number;
 }
 
@@ -50,6 +60,17 @@ interface Draft {
   confidence: string | null;
   created_at: string;
   event_sources: { name: string } | null;
+}
+
+function needsReview(source: Source): boolean {
+  if (!source.last_changed_at) return false;
+  if (!source.last_reviewed_at) return true;
+  return source.last_changed_at > source.last_reviewed_at;
+}
+
+function shortDate(iso: string | null): string {
+  if (!iso) return '';
+  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 }
 
 const inputCls =
@@ -113,7 +134,7 @@ function DraftCard({ draft, onDone }: { draft: Draft; onDone: (id: string) => vo
           </span>
         )}
         <span className="ml-auto text-[11px] text-slate-400">
-          found {new Date(draft.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+          added {shortDate(draft.created_at)}
         </span>
       </div>
 
@@ -194,7 +215,7 @@ function DraftCard({ draft, onDone }: { draft: Draft; onDone: (id: string) => vo
           className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-4 py-2 text-xs font-bold text-slate-500 transition hover:bg-slate-50 disabled:opacity-50"
         >
           {busy === 'reject' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5" />}
-          Reject
+          Discard
         </button>
         {fields.website && (
           <a
@@ -207,6 +228,127 @@ function DraftCard({ draft, onDone }: { draft: Draft; onDone: (id: string) => vo
           </a>
         )}
       </div>
+    </div>
+  );
+}
+
+function SourceRow({
+  source,
+  busy,
+  onCheck,
+  onReviewed,
+  onDraft,
+  onToggle,
+  onRemove,
+}: {
+  source: Source;
+  busy: string | null;
+  onCheck: (id: string) => void;
+  onReviewed: (id: string) => void;
+  onDraft: (source: Source) => void;
+  onToggle: (source: Source) => void;
+  onRemove: (id: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const changed = needsReview(source);
+  const snippets = source.last_changes ?? [];
+
+  return (
+    <div
+      className={`rounded-xl border bg-white shadow-sm transition ${
+        changed ? 'border-amber-300/80' : 'border-slate-200/60'
+      } ${source.active ? '' : 'opacity-55'}`}
+    >
+      <div className="flex flex-wrap items-center gap-3 px-4 py-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="truncate text-sm font-semibold text-slate-900">{source.name}</p>
+            {changed ? (
+              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700">
+                changed {shortDate(source.last_changed_at)}{snippets.length > 0 ? ` · ${snippets.length} new line${snippets.length === 1 ? '' : 's'}` : ''}
+              </span>
+            ) : source.last_status === 'fetch_error' ? (
+              <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-rose-600">
+                couldn&apos;t fetch
+              </span>
+            ) : source.last_scanned_at ? (
+              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                no changes
+              </span>
+            ) : (
+              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                not checked yet
+              </span>
+            )}
+          </div>
+          <a href={source.url} target="_blank" rel="noopener noreferrer" className="block truncate text-xs text-blue-600 hover:underline">
+            {source.url}
+          </a>
+          <p className="mt-0.5 text-[11px] text-slate-400">
+            {source.last_scanned_at ? `Checked ${shortDate(source.last_scanned_at)}` : 'Waiting for first check'}
+            {source.last_reviewed_at ? ` · you reviewed ${shortDate(source.last_reviewed_at)}` : ''}
+            {source.last_error ? ` · ${source.last_error}` : ''}
+          </p>
+        </div>
+
+        {changed && snippets.length > 0 && (
+          <button
+            onClick={() => setOpen((o) => !o)}
+            className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-[11px] font-bold text-amber-700 transition hover:bg-amber-100"
+          >
+            <ChevronDown className={`h-3 w-3 transition-transform ${open ? 'rotate-180' : ''}`} />
+            What&apos;s new
+          </button>
+        )}
+        <button
+          onClick={() => onDraft(source)}
+          className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-[11px] font-bold text-slate-600 transition hover:bg-slate-50"
+          title="Start a draft event from this source"
+        >
+          <FilePlus2 className="h-3 w-3" /> Draft event
+        </button>
+        {changed && (
+          <button
+            onClick={() => onReviewed(source.id)}
+            className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-1.5 text-[11px] font-bold text-white transition hover:bg-emerald-500"
+            title="Clear the changed flag until the page changes again"
+          >
+            <Eye className="h-3 w-3" /> Reviewed
+          </button>
+        )}
+        <button
+          onClick={() => onCheck(source.id)}
+          disabled={busy !== null}
+          className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-[11px] font-bold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+        >
+          {busy === source.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+          Check now
+        </button>
+        <button
+          onClick={() => onToggle(source)}
+          className={`rounded-full px-3 py-1.5 text-[11px] font-bold transition ${
+            source.active ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+          }`}
+        >
+          {source.active ? 'Active' : 'Paused'}
+        </button>
+        <button onClick={() => onRemove(source.id)} className="rounded-full p-1.5 text-slate-300 transition hover:bg-rose-50 hover:text-rose-500">
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
+      </div>
+
+      {open && snippets.length > 0 && (
+        <div className="border-t border-amber-100 bg-amber-50/40 px-4 py-3">
+          <p className="text-[11px] font-bold uppercase tracking-wide text-amber-700">New lines mentioning dates or events</p>
+          <ul className="mt-2 space-y-1.5">
+            {snippets.map((line, i) => (
+              <li key={i} className="rounded-lg bg-white/80 px-3 py-1.5 font-mono text-[12px] leading-relaxed text-slate-700">
+                {line}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
@@ -254,7 +396,7 @@ export function EventPipeline() {
     }
   };
 
-  const scanNow = async (id: string) => {
+  const checkNow = async (id: string) => {
     setScanning(id);
     try {
       await fetch('/api/admin/pipeline/scan', {
@@ -265,6 +407,28 @@ export function EventPipeline() {
       await load();
     } finally {
       setScanning(null);
+    }
+  };
+
+  const markReviewed = async (id: string) => {
+    await fetch('/api/admin/pipeline/sources', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, markReviewed: true }),
+    });
+    await load();
+  };
+
+  const draftFromSource = async (source: Source) => {
+    const res = await fetch('/api/admin/pipeline/drafts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'create', sourceId: source.id }),
+    });
+    if (res.ok) {
+      const { draft } = await res.json();
+      setDrafts((d) => [draft, ...d]);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -295,6 +459,9 @@ export function EventPipeline() {
     );
   }
 
+  const changedCount = sources.filter(needsReview).length;
+  const sorted = [...sources].sort((a, b) => Number(needsReview(b)) - Number(needsReview(a)));
+
   return (
     <div className="space-y-8">
       {/* Review queue */}
@@ -303,7 +470,7 @@ export function EventPipeline() {
           Drafts awaiting review {drafts.length > 0 && <span className="text-blue-600">({drafts.length})</span>}
         </h2>
         <p className="mt-0.5 text-sm text-slate-500">
-          Events the scanner found on monitored pages. Tidy the fields if needed, then approve to publish instantly.
+          Fill in or fix the fields, then approve to publish straight onto the calendar.
         </p>
         <div className="mt-4 space-y-4">
           {drafts.length === 0 ? (
@@ -318,15 +485,41 @@ export function EventPipeline() {
         </div>
       </div>
 
-      {/* Sources */}
+      {/* Weekly sweep */}
       <div>
-        <h2 className="text-lg font-bold text-slate-900">Monitored sources</h2>
+        <h2 className="text-lg font-bold text-slate-900">
+          Weekly sweep{' '}
+          {changedCount > 0 && <span className="text-amber-600">({changedCount} changed)</span>}
+        </h2>
         <p className="mt-0.5 text-sm text-slate-500">
-          Pages the scanner checks weekly (3 per night). Add association event pages, conference sites, anywhere events get announced.
+          Every page is fetched nightly and compared with the last visit — free, no AI. Only look at the
+          ones flagged <span className="font-semibold text-amber-600">changed</span>: open &ldquo;What&apos;s new&rdquo;,
+          and either draft the event or hit Reviewed. Unchanged pages need zero attention.
         </p>
 
+        <div className="mt-4 space-y-2">
+          {sorted.map((source) => (
+            <SourceRow
+              key={source.id}
+              source={source}
+              busy={scanning}
+              onCheck={checkNow}
+              onReviewed={markReviewed}
+              onDraft={draftFromSource}
+              onToggle={toggleActive}
+              onRemove={removeSource}
+            />
+          ))}
+          {sources.length === 0 && (
+            <p className="rounded-2xl border border-dashed border-slate-200 py-10 text-center text-sm text-slate-400">
+              No sources yet — add the association pages you want watched.
+            </p>
+          )}
+        </div>
+
         <div className="mt-4 rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <p className="text-sm font-bold text-slate-900">Add a source</p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             <input className={inputCls} placeholder="Name (e.g. WAD events page)" value={newSource.name} onChange={(e) => setNewSource((s) => ({ ...s, name: e.target.value }))} />
             <input className={inputCls} placeholder="https://…" value={newSource.url} onChange={(e) => setNewSource((s) => ({ ...s, url: e.target.value }))} />
             <input className={inputCls} placeholder="Association (optional)" value={newSource.association} onChange={(e) => setNewSource((s) => ({ ...s, association: e.target.value }))} />
@@ -349,50 +542,6 @@ export function EventPipeline() {
             {adding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
             Add source
           </button>
-        </div>
-
-        <div className="mt-4 space-y-2">
-          {sources.map((source) => (
-            <div key={source.id} className={`flex flex-wrap items-center gap-3 rounded-xl border border-slate-200/60 bg-white px-4 py-3 shadow-sm ${source.active ? '' : 'opacity-55'}`}>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-slate-900">{source.name}</p>
-                <a href={source.url} target="_blank" rel="noopener noreferrer" className="block truncate text-xs text-blue-600 hover:underline">
-                  {source.url}
-                </a>
-                <p className="mt-0.5 text-[11px] text-slate-400">
-                  {source.last_scanned_at
-                    ? `Last scan ${new Date(source.last_scanned_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} — ${source.last_status}${source.last_error ? ` (${source.last_error})` : ''}`
-                    : 'Not scanned yet'}
-                  {' · '}
-                  {source.drafts_found_total} draft{source.drafts_found_total === 1 ? '' : 's'} found
-                </p>
-              </div>
-              <button
-                onClick={() => scanNow(source.id)}
-                disabled={scanning !== null}
-                className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-[11px] font-bold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
-              >
-                {scanning === source.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
-                Scan now
-              </button>
-              <button
-                onClick={() => toggleActive(source)}
-                className={`rounded-full px-3 py-1.5 text-[11px] font-bold transition ${
-                  source.active ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
-                }`}
-              >
-                {source.active ? 'Active' : 'Paused'}
-              </button>
-              <button onClick={() => removeSource(source.id)} className="rounded-full p-1.5 text-slate-300 transition hover:bg-rose-50 hover:text-rose-500">
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          ))}
-          {sources.length === 0 && (
-            <p className="rounded-2xl border border-dashed border-slate-200 py-10 text-center text-sm text-slate-400">
-              No sources yet — add the association pages you want watched.
-            </p>
-          )}
         </div>
       </div>
     </div>

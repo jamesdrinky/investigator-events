@@ -50,11 +50,15 @@ const PROFILE_BADGES = [
   { id: 'innovator', label: 'Innovator', icon: Sparkles, color: '#6366f1' },
 ];
 
-const ALL_ASSOCIATIONS = [
+// Fallback only — the live list comes from /api/associations (the association
+// pages registry), so the dropdown can't drift from the site again.
+const FALLBACK_ASSOCIATIONS = [
   'ABI','WAD','IKD','CII','Intellenet','BuDEG','SNARP','EURODET','ODV','CKDS','FDDE',
   'SYL','IBPI','NFES','PSLD','LIDEPPE','ANDR','PDPR','ARD','SAD','DeZRS','HDA',
   'APDPE','APDU','CODPCAT','FAPI','FSPD','IAIACE','SFPP','CALI','FALI','FEWA','NCAPI','NCISS','TALI','NALI','ALDONYS','WAPI','SPI',
-];
+].map((a) => ({ slug: a.toLowerCase(), name: a }));
+
+type AssociationOption = { slug: string; name: string };
 
 type UserAssociation = { id?: string; association_name: string; association_slug: string; role: string; member_since: string };
 
@@ -185,6 +189,16 @@ export default function EditProfilePage() {
 
   // Associations
   const [associations, setAssociations] = useState<UserAssociation[]>([]);
+  const [associationOptions, setAssociationOptions] = useState<AssociationOption[]>(FALLBACK_ASSOCIATIONS);
+
+  useEffect(() => {
+    fetch('/api/associations')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (json?.associations?.length) setAssociationOptions(json.associations);
+      })
+      .catch(() => {});
+  }, []);
   const [newAssoc, setNewAssoc] = useState('');
   const [newRole, setNewRole] = useState('');
   const [newYear, setNewYear] = useState('');
@@ -305,9 +319,11 @@ export default function EditProfilePage() {
 
   const addAssociation = () => {
     if (!newAssoc) return;
-    const slug = newAssoc.toLowerCase().replace(/\s+/g, '-');
+    const record = associationOptions.find((a) => a.slug === newAssoc);
+    const slug = record?.slug ?? newAssoc.toLowerCase().replace(/\s+/g, '-');
+    const name = record?.name ?? newAssoc;
     if (associations.some((a) => a.association_slug === slug)) return;
-    setAssociations((prev) => [...prev, { association_name: newAssoc, association_slug: slug, role: newRole, member_since: newYear }]);
+    setAssociations((prev) => [...prev, { association_name: name, association_slug: slug, role: newRole, member_since: newYear }]);
     setNewAssoc(''); setNewRole(''); setNewYear('');
   };
 
@@ -753,9 +769,11 @@ export default function EditProfilePage() {
             <div className="mt-4 grid gap-3 sm:grid-cols-4">
               <select className="field-input sm:col-span-1" value={newAssoc} onChange={(e) => setNewAssoc(e.target.value)}>
                 <option value="">Association</option>
-                {ALL_ASSOCIATIONS.filter((a) => !associations.some((ua) => ua.association_name === a)).map((a) => (
-                  <option key={a} value={a}>{a}</option>
-                ))}
+                {associationOptions
+                  .filter((a) => !associations.some((ua) => ua.association_slug === a.slug || ua.association_name === a.name))
+                  .map((a) => (
+                    <option key={a.slug} value={a.slug}>{a.name}</option>
+                  ))}
               </select>
               <input className="field-input" value={newRole} onChange={(e) => setNewRole(e.target.value)} placeholder="Role" />
               <input className="field-input" value={newYear} onChange={(e) => setNewYear(e.target.value)} placeholder="Year joined" />

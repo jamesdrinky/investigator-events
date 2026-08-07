@@ -66,9 +66,9 @@ export function WidgetBuilder({
   const webcalUrl = feedUrl.replace(/^https:/, 'webcal:');
   const googleCalUrl = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(webcalUrl)}`;
 
-  // ~98px per photo row (78 compact, no thumbnail) + footer + body padding.
+  // Standard = full-bleed photo cards (~136px incl. gap); compact = text rows.
   // Slightly generous — spare background is invisible, clipping isn't.
-  const height = limit * (view === 'compact' ? 78 : 98) + 68;
+  const height = limit * (view === 'compact' ? 78 : 138) + 68;
 
   const snippet =
     embedType === 'script'

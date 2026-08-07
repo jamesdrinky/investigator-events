@@ -70,6 +70,19 @@ export async function GET(request: NextRequest) {
 
   const utm = 'utm_source=widget&utm_medium=embed';
 
+  /** "THIS WEEK" / "IN 12 DAYS" / "IN 4 WEEKS" — the pulse that makes cards feel live. */
+  const countdown = (date: string): string | null => {
+    const days = Math.round((parseDate(date).getTime() - now) / 86_400_000);
+    if (days < 0) return null;
+    if (days === 0) return 'TODAY';
+    if (days <= 7) return 'THIS WEEK';
+    if (days <= 21) return `IN ${days} DAYS`;
+    if (days <= 56) return `IN ${Math.round(days / 7)} WEEKS`;
+    // Far out: the month reads better than "IN 30 WEEKS".
+    const d = parseDate(date);
+    return d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' }).toUpperCase();
+  };
+
   // Subscribe link mirrors the widget's own filters, so "add to calendar"
   // from a WAD widget subscribes to the WAD feed.
   const icsParams = new URLSearchParams();
@@ -83,19 +96,34 @@ export async function GET(request: NextRequest) {
       const flag = getCountryFlag(e.country ?? '');
       const where = [e.city, e.country].filter(Boolean).join(', ');
       const thumb = thumbUrl(e.image_path, e.coverImage);
-      const media = compact
-        ? ''
-        : thumb
-          ? `<img class="thumb" src="${esc(thumb)}" alt="" loading="lazy">`
-          : `<span class="thumb thumb-fallback">${esc((e.title || 'E').charAt(0).toUpperCase())}</span>`;
-      return `<a class="ev" href="${BASE_URL}/events/${esc(e.slug)}?${utm}" target="_blank" rel="noopener">
-        ${media}
+      const soon = e.date ? countdown(e.date) : null;
+
+      if (compact) {
+        return `<a class="ev" href="${BASE_URL}/events/${esc(e.slug)}?${utm}" target="_blank" rel="noopener">
         <span class="body">
           <span class="date">${esc(e.date ? formatEventDate(e) : 'Date TBC')}</span>
           <span class="title">${esc(e.title)}</span>
           <span class="loc">${flag ? `<span class="flag">${flag}</span>` : ''}${esc(where)}</span>
         </span>
         <svg class="arrow" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>`;
+      }
+
+      // Standard view: the photo IS the card — dark scrim, white type,
+      // accent date chip. Reads premium on any host site.
+      const media = thumb
+        ? `<img class="card-bg" src="${esc(thumb)}" alt="">`
+        : `<span class="card-bg card-bg-fallback"></span>`;
+      return `<a class="card" href="${BASE_URL}/events/${esc(e.slug)}?${utm}" target="_blank" rel="noopener">
+        ${media}
+        <span class="card-scrim"></span>
+        ${soon ? `<span class="card-soon">${soon}</span>` : ''}
+        <span class="card-body">
+          <span class="card-date">${esc(e.date ? formatEventDate(e) : 'Date TBC')}</span>
+          <span class="card-title">${esc(e.title)}</span>
+          <span class="card-loc">${flag ? `<span class="flag">${flag}</span>` : ''}${esc(where)}</span>
+        </span>
+        <svg class="card-arrow" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>`;
     })
     .join('\n');
@@ -117,18 +145,20 @@ export async function GET(request: NextRequest) {
   body { background: ${c.bg}; font-family: 'Jakarta', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 14px; max-width: 780px; margin: 0 auto; }
   @media (min-width: 640px) {
     .ev { padding: 15px 18px; gap: 18px; }
-    .thumb { width: 86px; height: 86px; border-radius: 14px; }
     .date { font-size: 11.5px; }
-    .title { font-size: 17px; }
+    .title { font-size: 16px; }
     .loc { font-size: 13px; }
-    .arrow { width: 18px; height: 18px; }
+    .card { min-height: 148px; }
+    .card-title { font-size: 21px; }
+    .card-date { font-size: 11.5px; }
+    .card-loc { font-size: 13.5px; }
+    .card-body { padding: 18px 52px 17px 22px; }
   }
+  /* Compact rows */
   .ev { position: relative; display: flex; align-items: center; gap: 14px; background: ${c.card}; border: 1px solid ${c.border}; border-radius: 16px; padding: 12px; margin-bottom: 10px; text-decoration: none; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; overflow: hidden; }
   .ev::before { content: ''; position: absolute; left: 0; top: 12px; bottom: 12px; width: 3.5px; border-radius: 99px; background: ${accent}; opacity: 0; transition: opacity .18s ease; }
   .ev:hover { transform: translateY(-2px); border-color: ${accent}55; box-shadow: ${c.shadow}; background: ${c.cardHover}; }
   .ev:hover::before { opacity: 1; }
-  .thumb { width: 64px; height: 64px; flex-shrink: 0; border-radius: 12px; object-fit: cover; background: ${c.border}; }
-  .thumb-fallback { display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; color: #fff; background: linear-gradient(135deg, ${accent}, ${accent}99); }
   .body { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 3px; }
   .date { font-size: 10.5px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; color: ${accent}; }
   .title { font-size: 14.5px; font-weight: 800; color: ${c.text}; line-height: 1.3; letter-spacing: -0.01em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -136,6 +166,21 @@ export async function GET(request: NextRequest) {
   .flag { margin-right: 5px; }
   .arrow { width: 16px; height: 16px; flex-shrink: 0; color: ${c.sub}; opacity: .55; transition: transform .18s ease, color .18s ease, opacity .18s ease; }
   .ev:hover .arrow { transform: translateX(3px); color: ${accent}; opacity: 1; }
+
+  /* Standard view: full-bleed photo cards */
+  .card { position: relative; display: flex; align-items: flex-end; min-height: 124px; border-radius: 18px; margin-bottom: 12px; overflow: hidden; text-decoration: none; background: #0a1120; box-shadow: 0 8px 22px -14px rgba(5,11,27,0.45); transition: transform .22s ease, box-shadow .22s ease; }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 16px 32px -14px rgba(5,11,27,0.55); }
+  .card-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease; }
+  .card:hover .card-bg { transform: scale(1.05); }
+  .card-bg-fallback { position: absolute; inset: 0; background: radial-gradient(circle at 85% 20%, ${accent}59, transparent 55%), radial-gradient(circle at 10% 110%, ${accent}40, transparent 50%), linear-gradient(135deg, #0b132b 0%, #131c3d 100%); }
+  .card-scrim { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(5,11,27,0.92) 0%, rgba(5,11,27,0.62) 52%, rgba(5,11,27,0.22) 100%); }
+  .card-soon { position: absolute; top: 12px; right: 12px; padding: 5px 12px; border-radius: 99px; background: ${accent}; color: #fff; font-size: 10px; font-weight: 800; letter-spacing: .1em; box-shadow: 0 4px 12px -4px rgba(5,11,27,0.5); }
+  .card-body { position: relative; min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 4px; padding: 16px 44px 15px 18px; }
+  .card-date { font-size: 10.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: color-mix(in srgb, ${accent} 45%, #ffffff); }
+  .card-title { font-size: 17px; font-weight: 800; color: #ffffff; line-height: 1.25; letter-spacing: -0.015em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-shadow: 0 1px 8px rgba(5,11,27,0.5); }
+  .card-loc { font-size: 12.5px; font-weight: 600; color: rgba(226,232,240,0.92); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-arrow { position: absolute; right: 16px; bottom: 18px; width: 18px; height: 18px; color: rgba(255,255,255,0.75); transition: transform .22s ease, color .22s ease; }
+  .card:hover .card-arrow { transform: translateX(3px); color: #ffffff; }
   .empty { color: ${c.sub}; font-size: 13px; font-weight: 600; padding: 10px 4px; }
   .powered { display: flex; align-items: center; gap: 7px; font-size: 11.5px; font-weight: 600; color: ${c.sub}; text-decoration: none; min-width: 0; }
   .powered b { color: ${c.text}; font-weight: 800; }

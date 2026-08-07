@@ -192,7 +192,7 @@ export const DEFAULT_VIDEO_INVITE_BODY = `Dear {name},
 
 I hope this finds you well. I'm reaching out from Investigator Events — the free global calendar and community platform for the private investigations profession.
 
-We recently worked with Phillip Ryfell to feature a promotional video for the World Association of Detectives 2026 conference on our platform. It's had a fantastic response, and we share these videos across our channels — the website, weekly newsletter and LinkedIn — to help promote the event to investigators worldwide.
+We recently worked with Philip Ryffel to feature a promotional video for the World Association of Detectives 2026 conference on our platform. It's had a fantastic response, and we share these videos across our channels — the website, weekly newsletter and LinkedIn — to help promote the event to investigators worldwide.
 
 {video}
 

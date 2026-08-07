@@ -102,10 +102,10 @@ export async function rejectVideoAction(formData: FormData) {
   const admin = createSupabaseAdminServerClient();
 
   // Grab the stored object path so we can delete the file — a rejected clip
-  // shouldn't linger in storage.
+  // shouldn't linger in storage — plus the submitter details for the notice email.
   const { data: row } = await admin
     .from('association_videos' as any)
-    .select('video_url')
+    .select('video_url, title, submitter_name, submitter_email, association_slug, event_slug')
     .eq('id', id)
     .single();
 
@@ -127,6 +127,30 @@ export async function rejectVideoAction(formData: FormData) {
     if (removeError) {
       console.error('rejectVideoAction storage cleanup failed:', removeError.message);
     }
+  }
+
+  // Let the submitter know it wasn't accepted, and why (fire-and-forget).
+  const video = row as any;
+  const resendKey = process.env.RESEND_API_KEY;
+  if (resendKey && video?.submitter_email) {
+    const resend = new Resend(resendKey);
+    const safeName = escapeHtml(video.submitter_name || 'there');
+    const safeTitle = escapeHtml(video.title ?? '');
+    const reasonBlock = reason
+      ? `<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#334155"><strong>Reason:</strong> ${escapeHtml(reason)}</p>`
+      : '';
+    resend.emails.send({
+      from: 'Investigator Events <info@investigatorevents.com>',
+      to: video.submitter_email,
+      subject: `About your video — ${video.title}`,
+      html: `<div style="font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#0f172a">
+        <h2 style="margin:0 0 12px;font-size:20px">About your video submission</h2>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#334155">Hi ${safeName} — thanks for submitting <strong>"${safeTitle}"</strong>. After a review, we're not able to publish this one as it is.</p>
+        ${reasonBlock}
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#334155">You're very welcome to make a change and submit again, and if you'd like a hand just reply to this email — we're happy to help.</p>
+        <p style="margin:24px 0 0;font-size:12px;color:#94a3b8">Investigator Events · The global PI conference calendar.</p>
+      </div>`,
+    }).catch((err) => console.error('Rejection email failed:', err));
   }
 
   revalidatePath('/admin/videos');

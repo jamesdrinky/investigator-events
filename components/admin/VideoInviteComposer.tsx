@@ -111,7 +111,7 @@ export function VideoInviteComposer() {
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
             <label className={labelClass}>Recipient name</label>
-            <input className={inputClass} value={recipientName} onChange={e => { setRecipientName(e.target.value); setSent(false); }} placeholder="Phillip Ryfell" />
+            <input className={inputClass} value={recipientName} onChange={e => { setRecipientName(e.target.value); setSent(false); }} placeholder="Philip Ryffel" />
           </div>
           <div>
             <label className={labelClass}>Recipient email</label>

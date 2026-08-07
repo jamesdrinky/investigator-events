@@ -293,9 +293,12 @@ export async function sweepSource(source: SourceRow): Promise<SweepResult> {
 
   const isFirst = !stored?.content_text;
   const oldLines = new Set<string>(isFirst ? [] : (stored.content_text as string).split('\n'));
-  const newSnippets = lines
-    .filter((line) => !oldLines.has(line) && DATEISH.test(line))
-    .slice(0, 20);
+  // Date-ish lines lead, but keep other new text too — a change with no
+  // date-mentioning lines is still a change worth glancing at.
+  const newLines = lines.filter((line) => !oldLines.has(line));
+  const dateish = newLines.filter((line) => DATEISH.test(line));
+  const others = newLines.filter((line) => !DATEISH.test(line));
+  const newSnippets = [...dateish, ...others].slice(0, 14);
 
   await (supabase.from('event_sources' as any) as any)
     .update({

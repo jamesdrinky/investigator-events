@@ -237,6 +237,7 @@ function SourceRow({
   busy,
   onCheck,
   onReviewed,
+  onUnreview,
   onDraft,
   onToggle,
   onRemove,
@@ -245,12 +246,14 @@ function SourceRow({
   busy: string | null;
   onCheck: (id: string) => void;
   onReviewed: (id: string) => void;
+  onUnreview: (id: string) => void;
   onDraft: (source: Source) => void;
   onToggle: (source: Source) => void;
   onRemove: (id: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const changed = needsReview(source);
+  const reviewedRecently = !changed && source.last_changed_at !== null && source.last_reviewed_at !== null;
   const snippets = source.last_changes ?? [];
 
   return (
@@ -266,6 +269,13 @@ function SourceRow({
             {changed ? (
               <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700">
                 changed {shortDate(source.last_changed_at)}{snippets.length > 0 ? ` · ${snippets.length} new line${snippets.length === 1 ? '' : 's'}` : ''}
+              </span>
+            ) : reviewedRecently ? (
+              <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-600">
+                reviewed{' '}
+                <button onClick={() => onUnreview(source.id)} className="normal-case underline decoration-emerald-300 hover:text-emerald-800" title="Restore the changed flag">
+                  undo
+                </button>
               </span>
             ) : source.last_status === 'fetch_error' ? (
               <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-rose-600">
@@ -291,7 +301,7 @@ function SourceRow({
           </p>
         </div>
 
-        {changed && snippets.length > 0 && (
+        {changed && (
           <button
             onClick={() => setOpen((o) => !o)}
             className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-[11px] font-bold text-amber-700 transition hover:bg-amber-100"
@@ -337,16 +347,29 @@ function SourceRow({
         </button>
       </div>
 
-      {open && snippets.length > 0 && (
+      {open && (
         <div className="border-t border-amber-100 bg-amber-50/40 px-4 py-3">
-          <p className="text-[11px] font-bold uppercase tracking-wide text-amber-700">New lines mentioning dates or events</p>
-          <ul className="mt-2 space-y-1.5">
-            {snippets.map((line, i) => (
-              <li key={i} className="rounded-lg bg-white/80 px-3 py-1.5 font-mono text-[12px] leading-relaxed text-slate-700">
-                {line}
-              </li>
-            ))}
-          </ul>
+          {snippets.length > 0 ? (
+            <>
+              <p className="text-[11px] font-bold uppercase tracking-wide text-amber-700">New text since the last check</p>
+              <ul className="mt-2 space-y-1.5">
+                {snippets.map((line, i) => (
+                  <li key={i} className="rounded-lg bg-white/80 px-3 py-1.5 font-mono text-[12px] leading-relaxed text-slate-700">
+                    {line}
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <p className="text-xs text-slate-500">
+              The page changed but no readable new text was captured (likely formatting shifts or removed
+              content) —{' '}
+              <a href={source.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-blue-600 hover:underline">
+                open the page
+              </a>{' '}
+              for a quick look.
+            </p>
+          )}
         </div>
       )}
     </div>
@@ -415,6 +438,15 @@ export function EventPipeline() {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, markReviewed: true }),
+    });
+    await load();
+  };
+
+  const markUnreviewed = async (id: string) => {
+    await fetch('/api/admin/pipeline/sources', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, markUnreviewed: true }),
     });
     await load();
   };
@@ -505,6 +537,7 @@ export function EventPipeline() {
               busy={scanning}
               onCheck={checkNow}
               onReviewed={markReviewed}
+              onUnreview={markUnreviewed}
               onDraft={draftFromSource}
               onToggle={toggleActive}
               onRemove={removeSource}

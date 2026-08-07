@@ -365,34 +365,77 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
           <StatCard icon={Mail} label="Newsletter subs" value={subscriberCountResult.count ?? 0} color="#ec4899" />
         </div>
 
-        {/* Tab navigation */}
-        <div className="mt-8 flex gap-1 overflow-x-auto rounded-xl border border-slate-200/60 bg-white p-1 shadow-sm">
+        {/* Tab navigation — grouped by job, ordered by how often each matters.
+            Wraps instead of scrolling; badge counts surface what needs attention. */}
+        <div className="mt-8 space-y-3 rounded-2xl border border-slate-200/60 bg-white p-4 shadow-sm">
           {[
-            { id: 'overview', label: 'Create Event', icon: Plus },
-            { id: 'submissions', label: `Submissions (${pendingSubmissions.length})`, icon: FileText },
-            { id: 'events', label: `All Events (${events.length})`, icon: Calendar },
-            { id: 'inquiries', label: `Inquiries (${advertiserLeads.length})`, icon: Megaphone },
-            { id: 'newsletter', label: `Newsletter (${subscriberCountResult.count ?? 0})`, icon: Mail },
-            { id: 'users', label: `Users (${allUsers.length})`, icon: Users },
-            { id: 'verification', label: 'Verification Codes', icon: ShieldCheck },
-            { id: 'moderation', label: 'Moderation', icon: AlertTriangle },
-            { id: 'outreach', label: 'Outreach', icon: Send },
-            { id: 'video-invite', label: 'Video Invite', icon: Film },
-            { id: 'pipeline', label: `Pipeline (${pendingDraftsResult?.count ?? 0})`, icon: Radar },
-            { id: 'reengage', label: 'Re-engage', icon: Send },
-          ].map((tab) => (
-            <a
-              key={tab.id}
-              href={`/admin?tab=${tab.id}`}
-              className={`flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-medium transition ${
-                activeTab === tab.id
-                  ? 'bg-slate-900 text-white shadow-sm'
-                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
-              }`}
-            >
-              <tab.icon className="h-4 w-4" />
-              {tab.label}
-            </a>
+            {
+              group: 'The daily loop',
+              tabs: [
+                { id: 'pipeline', label: 'Pipeline', icon: Radar, count: pendingDraftsResult?.count ?? 0, alert: (pendingDraftsResult?.count ?? 0) > 0 },
+                { id: 'submissions', label: 'Submissions', icon: FileText, count: pendingSubmissions.length, alert: pendingSubmissions.length > 0 },
+                { id: 'video-invite', label: 'Video invites', icon: Film, count: null, alert: false },
+              ],
+            },
+            {
+              group: 'Calendar & content',
+              tabs: [
+                { id: 'events', label: 'All events', icon: Calendar, count: events.length, alert: false },
+                { id: 'overview', label: 'Create event', icon: Plus, count: null, alert: false },
+                { id: 'newsletter', label: 'Newsletter', icon: Mail, count: subscriberCountResult.count ?? 0, alert: false },
+              ],
+            },
+            {
+              group: 'Growth',
+              tabs: [
+                { id: 'outreach', label: 'Outreach', icon: Send, count: null, alert: false },
+                { id: 'reengage', label: 'Re-engage', icon: Send, count: null, alert: false },
+                { id: 'inquiries', label: 'Ad inquiries', icon: Megaphone, count: advertiserLeads.length, alert: false },
+              ],
+            },
+            {
+              group: 'People & trust',
+              tabs: [
+                { id: 'users', label: 'Users', icon: Users, count: allUsers.length, alert: false },
+                { id: 'verification', label: 'Verification & managers', icon: ShieldCheck, count: null, alert: false },
+                { id: 'moderation', label: 'Moderation', icon: AlertTriangle, count: null, alert: false },
+              ],
+            },
+          ].map((section) => (
+            <div key={section.group} className="flex flex-wrap items-center gap-x-3 gap-y-2">
+              <span className="w-32 shrink-0 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                {section.group}
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {section.tabs.map((tab) => (
+                  <a
+                    key={tab.id}
+                    href={`/admin?tab=${tab.id}`}
+                    className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-2 text-[13px] font-semibold transition ${
+                      activeTab === tab.id
+                        ? 'bg-slate-900 text-white shadow-sm'
+                        : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    <tab.icon className={`h-3.5 w-3.5 ${activeTab === tab.id ? '' : 'text-slate-400'}`} />
+                    {tab.label}
+                    {tab.count !== null && (
+                      <span
+                        className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold tabular-nums ${
+                          activeTab === tab.id
+                            ? 'bg-white/20 text-white'
+                            : tab.alert
+                              ? 'bg-amber-100 text-amber-700'
+                              : 'bg-slate-100 text-slate-500'
+                        }`}
+                      >
+                        {tab.count}
+                      </span>
+                    )}
+                  </a>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
 

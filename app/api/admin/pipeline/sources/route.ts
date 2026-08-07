@@ -70,6 +70,8 @@ export async function PATCH(request: Request) {
   if (typeof body.active === 'boolean') updates.active = body.active;
   // "I've looked at this one" — clears the changed badge until it changes again.
   if (body.markReviewed === true) updates.last_reviewed_at = new Date().toISOString();
+  // Undo an accidental Reviewed click — restores the changed badge.
+  if (body.markUnreviewed === true) updates.last_reviewed_at = null;
   if (Object.keys(updates).length === 0) {
     return NextResponse.json({ error: 'Nothing to update' }, { status: 400 });
   }

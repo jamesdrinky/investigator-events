@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
   const country = searchParams.get('country')?.trim().toLowerCase() || null;
   const association = searchParams.get('association')?.trim().toLowerCase() || null;
   const limit = Math.min(Math.max(parseInt(searchParams.get('limit') ?? '5', 10) || 5, 1), 20);
+  const compact = searchParams.get('view') === 'compact';
   const dark = searchParams.get('theme') === 'dark';
   // Custom accent: strict 6-hex-digit sanitization — this goes into CSS.
   const accentParam = (searchParams.get('accent') ?? '').replace(/^#/, '');
@@ -69,14 +70,24 @@ export async function GET(request: NextRequest) {
 
   const utm = 'utm_source=widget&utm_medium=embed';
 
+  // Subscribe link mirrors the widget's own filters, so "add to calendar"
+  // from a WAD widget subscribes to the WAD feed.
+  const icsParams = new URLSearchParams();
+  if (country) icsParams.set('country', country);
+  if (association) icsParams.set('association', association);
+  const icsQs = icsParams.toString();
+  const webcalUrl = `webcal://www.investigatorevents.com/api/ics${icsQs ? `?${icsQs}` : ''}`;
+
   const items = events
     .map((e) => {
       const flag = getCountryFlag(e.country ?? '');
       const where = [e.city, e.country].filter(Boolean).join(', ');
       const thumb = thumbUrl(e.image_path, e.coverImage);
-      const media = thumb
-        ? `<img class="thumb" src="${esc(thumb)}" alt="" loading="lazy">`
-        : `<span class="thumb thumb-fallback">${esc((e.title || 'E').charAt(0).toUpperCase())}</span>`;
+      const media = compact
+        ? ''
+        : thumb
+          ? `<img class="thumb" src="${esc(thumb)}" alt="" loading="lazy">`
+          : `<span class="thumb thumb-fallback">${esc((e.title || 'E').charAt(0).toUpperCase())}</span>`;
       return `<a class="ev" href="${BASE_URL}/events/${esc(e.slug)}?${utm}" target="_blank" rel="noopener">
         ${media}
         <span class="body">
@@ -116,15 +127,35 @@ export async function GET(request: NextRequest) {
   .arrow { width: 16px; height: 16px; flex-shrink: 0; color: ${c.sub}; opacity: .55; transition: transform .18s ease, color .18s ease, opacity .18s ease; }
   .ev:hover .arrow { transform: translateX(3px); color: ${accent}; opacity: 1; }
   .empty { color: ${c.sub}; font-size: 13px; font-weight: 600; padding: 10px 4px; }
-  .powered { display: flex; align-items: center; gap: 7px; padding: 10px 4px 2px; font-size: 11.5px; font-weight: 600; color: ${c.sub}; text-decoration: none; }
+  .powered { display: flex; align-items: center; gap: 7px; font-size: 11.5px; font-weight: 600; color: ${c.sub}; text-decoration: none; min-width: 0; }
   .powered b { color: ${c.text}; font-weight: 800; }
   .powered img { width: 17px; height: 17px; border-radius: 999px; }
+  .footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 4px 2px; }
+  .subscribe { flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: ${accent}; text-decoration: none; border: 1px solid ${accent}44; border-radius: 999px; padding: 4px 10px; transition: background-color .18s ease; }
+  .subscribe:hover { background-color: ${accent}14; }
+  ${compact ? `.ev { padding: 9px 12px; margin-bottom: 8px; border-radius: 12px; } .ev::before { top: 9px; bottom: 9px; } .title { font-size: 13px; -webkit-line-clamp: 1; } .date { font-size: 10px; } .body { gap: 2px; }` : ''}
 </style>
 </head><body>
 ${items || empty}
-<a class="powered" href="${BASE_URL}/?${utm}" target="_blank" rel="noopener">
-  <img src="${BASE_URL}/icon.png" alt=""> Powered by <b>Investigator Events</b>&nbsp;— the global PI events calendar
-</a>
+<div class="footer">
+  <a class="powered" href="${BASE_URL}/?${utm}" target="_blank" rel="noopener">
+    <img src="${BASE_URL}/icon.png" alt=""> Powered by <b>Investigator Events</b>
+  </a>
+  <a class="subscribe" href="${webcalUrl}" title="Subscribe to these events in your own calendar app">&#128197;&nbsp;Subscribe</a>
+</div>
+<script>
+  // Auto-resize support for the script embed (/widget.js). Plain iframe
+  // embeds simply ignore these messages.
+  (function () {
+    var post = function () {
+      try {
+        parent.postMessage({ source: 'ie-widget', height: document.documentElement.scrollHeight }, '*');
+      } catch (e) {}
+    };
+    window.addEventListener('load', post);
+    if (window.ResizeObserver) new ResizeObserver(post).observe(document.body);
+  })();
+</script>
 </body></html>`;
 
   return new NextResponse(html, {

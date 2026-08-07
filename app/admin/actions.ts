@@ -181,14 +181,20 @@ export async function adminLoginAction(formData: FormData) {
     redirect('/admin?error=config');
   }
 
+  // Carry the tab the admin was originally heading to through the login
+  // round-trip (e.g. /admin?tab=pipeline → login → back to that tab).
+  const nextTabRaw = String(formData.get('next_tab') ?? '');
+  const nextTab = /^[a-z0-9-]{1,40}$/.test(nextTabRaw) ? nextTabRaw : '';
+  const tabSuffix = nextTab ? `&tab=${nextTab}` : '';
+
   const a = Buffer.from(submittedPassword);
   const b = Buffer.from(expectedPassword);
   if (a.length !== b.length || !timingSafeEqual(a, b)) {
-    redirect('/admin?error=invalid');
+    redirect(`/admin?error=invalid${tabSuffix}`);
   }
 
   await setAdminSessionCookie(createAdminSessionToken());
-  redirect('/admin');
+  redirect(nextTab ? `/admin?tab=${nextTab}` : '/admin');
 }
 
 export async function adminLogoutAction() {

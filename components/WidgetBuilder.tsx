@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Check, Copy, Globe, Moon, Sun } from 'lucide-react';
+import { CalendarPlus, Check, Copy, Globe, LayoutList, Moon, Rows3, Sun } from 'lucide-react';
 import { trackEvent } from '@/lib/analytics';
 
 interface CountryOption {
@@ -38,7 +38,10 @@ export function WidgetBuilder({
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [accent, setAccent] = useState('2563eb');
   const [limit, setLimit] = useState(4);
+  const [view, setView] = useState<'standard' | 'compact'>('standard');
+  const [embedType, setEmbedType] = useState<'iframe' | 'script'>('iframe');
   const [copied, setCopied] = useState(false);
+  const [copiedFeed, setCopiedFeed] = useState(false);
 
   const src = useMemo(() => {
     const params = new URLSearchParams();
@@ -47,13 +50,30 @@ export function WidgetBuilder({
     if (theme === 'dark') params.set('theme', 'dark');
     if (accent.toLowerCase() !== '2563eb') params.set('accent', accent);
     if (limit !== 5) params.set('limit', String(limit));
+    if (view === 'compact') params.set('view', 'compact');
     const qs = params.toString();
     return `https://www.investigatorevents.com/embed/upcoming${qs ? `?${qs}` : ''}`;
-  }, [assoc, country, theme, accent, limit]);
+  }, [assoc, country, theme, accent, limit, view]);
 
-  // ~98px per photo row + powered-by footer + body padding.
-  const height = limit * 98 + 64;
-  const snippet = `<iframe src="${src}" width="100%" height="${height}" frameborder="0" style="border:0;border-radius:16px;" title="Upcoming investigator events"></iframe>`;
+  // Matching calendar feed for the current filter.
+  const feedUrl = useMemo(() => {
+    const params = new URLSearchParams();
+    if (assoc) params.set('association', assoc);
+    else if (country) params.set('country', country);
+    const qs = params.toString();
+    return `https://www.investigatorevents.com/api/ics${qs ? `?${qs}` : ''}`;
+  }, [assoc, country]);
+  const webcalUrl = feedUrl.replace(/^https:/, 'webcal:');
+  const googleCalUrl = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(webcalUrl)}`;
+
+  // ~98px per photo row (78 compact, no thumbnail) + footer + body padding.
+  // Slightly generous — spare background is invisible, clipping isn't.
+  const height = limit * (view === 'compact' ? 78 : 98) + 68;
+
+  const snippet =
+    embedType === 'script'
+      ? `<script src="https://www.investigatorevents.com/widget.js" async data-ie-widget${assoc ? ` data-association="${assoc}"` : ''}${!assoc && country ? ` data-country="${country}"` : ''}${theme === 'dark' ? ' data-theme="dark"' : ''}${accent.toLowerCase() !== '2563eb' ? ` data-accent="${accent}"` : ''}${limit !== 5 ? ` data-limit="${limit}"` : ''}${view === 'compact' ? ' data-view="compact"' : ''}></script>`
+      : `<iframe src="${src}" width="100%" height="${height}" frameborder="0" style="border:0;border-radius:16px;" title="Upcoming investigator events"></iframe>`;
 
   const fakeDomain =
     siteName
@@ -64,9 +84,20 @@ export function WidgetBuilder({
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(snippet);
-      trackEvent('widget_snippet_copied', { filter: assoc || country || 'global', theme, accent });
+      trackEvent('widget_snippet_copied', { filter: assoc || country || 'global', theme, accent, view, embedType });
       setCopied(true);
       setTimeout(() => setCopied(false), 1600);
+    } catch {
+      /* manual selection still works */
+    }
+  };
+
+  const copyFeed = async () => {
+    try {
+      await navigator.clipboard.writeText(feedUrl);
+      trackEvent('calendar_feed_copied', { filter: assoc || country || 'global' });
+      setCopiedFeed(true);
+      setTimeout(() => setCopiedFeed(false), 1600);
     } catch {
       /* manual selection still works */
     }
@@ -161,6 +192,30 @@ export function WidgetBuilder({
             </label>
           </div>
 
+          <label className="mt-4 block text-xs font-semibold uppercase tracking-wide text-slate-500">Layout</label>
+          <div className="mt-1.5 flex gap-2">
+            <button
+              onClick={() => setView('standard')}
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-semibold transition ${
+                view === 'standard'
+                  ? 'border-blue-400 bg-blue-50 text-blue-700'
+                  : 'border-slate-200 text-slate-500 hover:bg-slate-50'
+              }`}
+            >
+              <LayoutList className="h-3.5 w-3.5" /> Standard
+            </button>
+            <button
+              onClick={() => setView('compact')}
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-semibold transition ${
+                view === 'compact'
+                  ? 'border-blue-400 bg-blue-50 text-blue-700'
+                  : 'border-slate-200 text-slate-500 hover:bg-slate-50'
+              }`}
+            >
+              <Rows3 className="h-3.5 w-3.5" /> Compact
+            </button>
+          </div>
+
           <div className="mt-4 grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500">Theme</label>
@@ -207,6 +262,22 @@ export function WidgetBuilder({
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm font-bold text-slate-900">The code for your web person</p>
+            <div className="flex rounded-full border border-slate-200 p-0.5 text-[11px] font-semibold">
+              <button
+                onClick={() => setEmbedType('iframe')}
+                className={`rounded-full px-2.5 py-1 transition ${embedType === 'iframe' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-700'}`}
+                title="Fixed-height iframe — works everywhere"
+              >
+                Simple
+              </button>
+              <button
+                onClick={() => setEmbedType('script')}
+                className={`rounded-full px-2.5 py-1 transition ${embedType === 'script' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-700'}`}
+                title="Script embed — automatically resizes to fit its content"
+              >
+                Auto-resize
+              </button>
+            </div>
             <button
               onClick={copy}
               className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold transition ${
@@ -229,6 +300,48 @@ export function WidgetBuilder({
             </a>{' '}
             with your web person&apos;s address and we&apos;ll sort everything with them directly.
           </p>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between gap-3">
+            <p className="flex items-center gap-2 text-sm font-bold text-slate-900">
+              <CalendarPlus className="h-4 w-4 text-blue-600" />
+              Calendar feed for your members
+            </p>
+            <button
+              onClick={copyFeed}
+              className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold transition ${
+                copiedFeed ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-900 text-white hover:bg-slate-700'
+              }`}
+            >
+              {copiedFeed ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+              {copiedFeed ? 'Copied' : 'Copy URL'}
+            </button>
+          </div>
+          <p className="mt-2 text-xs leading-relaxed text-slate-500">
+            The same events as a live calendar subscription — every event
+            {assoc || country ? ' in this selection' : ''} lands in members&apos; own calendars and stays up to
+            date automatically. Share the URL, or use the one-click links:
+          </p>
+          <pre className="mt-3 overflow-x-auto whitespace-pre-wrap break-all rounded-xl bg-slate-950 px-4 py-3 text-[11.5px] leading-relaxed text-slate-200">
+            {feedUrl}
+          </pre>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <a
+              href={googleCalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full border border-slate-200 px-3.5 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
+            >
+              Add to Google Calendar
+            </a>
+            <a
+              href={webcalUrl}
+              className="rounded-full border border-slate-200 px-3.5 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
+            >
+              Apple / Outlook
+            </a>
+          </div>
         </div>
       </div>
 

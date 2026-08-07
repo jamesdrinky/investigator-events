@@ -18,7 +18,7 @@ import {
   adminAddAssociationAction,
   adminRemoveAssociationAction
 } from '@/app/admin/actions';
-import { Calendar, Users, FileText, Megaphone, Globe, MapPin, Tag, ExternalLink, CheckCircle2, XCircle, Plus, Trash2, ShieldCheck, AlertTriangle, Mail, Send, Film, Archive, RotateCcw } from 'lucide-react';
+import { Calendar, Users, FileText, Megaphone, Globe, MapPin, Tag, ExternalLink, CheckCircle2, XCircle, Plus, Trash2, ShieldCheck, AlertTriangle, Mail, Send, Film, Archive, RotateCcw, Radar } from 'lucide-react';
 import { VerificationCodeManager } from '@/components/admin/VerificationCodeManager';
 import { ModerationPanel } from '@/components/admin/ModerationPanel';
 import { QuickAddEvent } from '@/components/admin/QuickAddEvent';
@@ -28,6 +28,7 @@ import { ImageDropZone } from '@/components/admin/ImageDropZone';
 import { OutreachManager } from '@/components/admin/OutreachManager';
 import { VideoInviteComposer } from '@/components/admin/VideoInviteComposer';
 import { ReengageSender } from '@/components/admin/ReengageSender';
+import { EventPipeline } from '@/components/admin/EventPipeline';
 import { ReengageSampleSender } from '@/components/admin/ReengageSampleSender';
 import { getProfileCompletion } from '@/lib/utils/profile-completion';
 
@@ -188,6 +189,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
             )}
 
             <form action={adminLoginAction} className="mt-6 space-y-4">
+              <input type="hidden" name="next_tab" value={searchParams?.tab ?? ''} />
               <div>
                 <label htmlFor="admin-password" className="text-xs font-medium uppercase tracking-wider text-slate-500">Password</label>
                 <input id="admin-password" type="password" name="password" required autoFocus className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20" />
@@ -201,7 +203,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
   }
 
   const admin = createSupabaseAdminServerClient();
-  const [events, pendingSubmissions, archivedSubmissions, advertiserLeads, assocPagesResult, assocSuggestionsResult, subscriberCountResult, newsletterSendsResult, recentSubscribersResult, allUsersResult] = await Promise.all([
+  const [events, pendingSubmissions, archivedSubmissions, advertiserLeads, assocPagesResult, assocSuggestionsResult, subscriberCountResult, newsletterSendsResult, recentSubscribersResult, allUsersResult, pendingDraftsResult] = await Promise.all([
     fetchAllEvents(),
     fetchPendingEventSubmissions(),
     fetchArchivedEventSubmissions(),
@@ -212,6 +214,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
     admin.from('newsletter_sends' as never).select('*').order('sent_at', { ascending: false }).limit(5) as any,
     admin.from('newsletter_subscribers' as never).select('email, status, region, created_at, confirmed_at').order('created_at', { ascending: false }).limit(500) as any,
     admin.from('profiles' as never).select('*').order('created_at', { ascending: false }).limit(200) as any,
+    admin.from('event_drafts' as never).select('id', { count: 'exact', head: true }).eq('status', 'pending') as any,
   ]);
   const associationPages = (assocPagesResult.data ?? []) as { id: string; name: string; slug: string }[];
   const assocSuggestions = (assocSuggestionsResult.data ?? []) as unknown as { id: string; name: string; country: string | null; website: string | null; created_at: string }[];
@@ -307,7 +310,10 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
   const reengageEligibleCount = allUsers.filter((u) => newsletterEligibleSet.has(u.id) && !reengageMap[u.id] && !isTierC(u.id)).length;
   const reengageTierCSkipCount = allUsers.filter((u) => newsletterEligibleSet.has(u.id) && !reengageMap[u.id] && isTierC(u.id)).length;
   const reengageIneligibleCount = allUsers.filter((u) => !newsletterEligibleSet.has(u.id)).length;
-  const activeTab = searchParams?.tab ?? 'overview';
+  // Unknown tab (stale link, not-yet-deployed feature) falls back to overview
+  // instead of rendering an empty content area.
+  const knownTabs = ['overview', 'submissions', 'events', 'inquiries', 'newsletter', 'users', 'verification', 'moderation', 'outreach', 'video-invite', 'pipeline', 'reengage'];
+  const activeTab = knownTabs.includes(searchParams?.tab ?? '') ? (searchParams!.tab as string) : 'overview';
   const countries = new Set(events.map((e) => e.country));
   const mainEvents = events.filter((e) => e.eventScope === 'main');
   const featuredEvents = events.filter((e) => e.featured);
@@ -371,6 +377,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
             { id: 'moderation', label: 'Moderation', icon: AlertTriangle },
             { id: 'outreach', label: 'Outreach', icon: Send },
             { id: 'video-invite', label: 'Video Invite', icon: Film },
+            { id: 'pipeline', label: `Pipeline (${pendingDraftsResult?.count ?? 0})`, icon: Radar },
             { id: 'reengage', label: 'Re-engage', icon: Send },
           ].map((tab) => (
             <a
@@ -1480,6 +1487,14 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
               <h2 className="mb-1 text-lg font-bold text-slate-900">Association Outreach</h2>
               <p className="mb-4 text-sm text-slate-500">Send introduction emails to associations. Preview before sending.</p>
               <OutreachManager />
+            </div>
+          )}
+
+          {activeTab === 'pipeline' && (
+            <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm sm:p-8">
+              <h2 className="mb-1 text-lg font-bold text-slate-900">Event Pipeline</h2>
+              <p className="mb-4 text-sm text-slate-500">The scanner watches association and conference pages, drafts any events it finds, and queues them here. Review, tweak, approve.</p>
+              <EventPipeline />
             </div>
           )}
 

@@ -13,7 +13,11 @@ export type FunnelEvent =
   | 'event_submitted'
   | 'event_shared'
   | 'widget_snippet_copied'
-  | 'partner_request_submitted';
+  | 'partner_request_submitted'
+  | 'calendar_feed_copied'
+  | 'clash_check_run'
+  | 'clash_check_watch_saved'
+  | 'clash_check_submit_cta';
 
 export function trackEvent(name: FunnelEvent, props?: Record<string, string | number | boolean>) {
   try {

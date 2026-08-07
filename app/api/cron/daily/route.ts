@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   const authError = verifyCronSecret(request);
   if (authError) return authError;
 
-  const [outreach, digest, reviewPrompts] = await Promise.all([
+  const [outreach, digest, reviewPrompts, dateWatch] = await Promise.all([
     processOutreachQueue().catch((err) => {
       console.error('Outreach queue failed:', err);
       return { sent: 0, failed: 0, error: true };
@@ -20,6 +20,10 @@ export async function GET(request: Request) {
       console.error('Event review prompts failed:', err);
       return { pushed: 0, skipped: 0, error: true };
     }),
+    runDateWatchAlerts().catch((err) => {
+      console.error('Date watch alerts failed:', err);
+      return { sent: 0, error: true };
+    }),
   ]);
 
   return NextResponse.json({
@@ -27,6 +31,7 @@ export async function GET(request: Request) {
     outreach,
     digest,
     reviewPrompts,
+    dateWatch,
     timestamp: new Date().toISOString(),
   });
 }
@@ -121,6 +126,90 @@ async function runEventReviewPrompts() {
   }
 
   return { pushed, skipped, eventsChecked: allEnded.length };
+}
+
+/**
+ * Date-watch alerts for the clash checker: organisers who left an email get
+ * told the moment a newly added event overlaps their proposed dates. Each
+ * watch fires at most once (notified_at) and expires once the proposed end
+ * date has passed.
+ */
+async function runDateWatchAlerts() {
+  const { Resend } = await import('resend');
+  const { createSupabaseAdminServerClient } = await import('@/lib/supabase/admin');
+
+  const resendKey = process.env.RESEND_API_KEY;
+  if (!resendKey) return { sent: 0, reason: 'no api key' };
+
+  const supabase = createSupabaseAdminServerClient();
+  const today = new Date().toISOString().slice(0, 10);
+
+  const { data: watches } = await (supabase.from('clash_checks') as any)
+    .select('id, email, event_name, region, proposed_start, proposed_end')
+    .eq('notify', true)
+    .is('notified_at', null)
+    .gte('proposed_end', today);
+
+  if (!watches?.length) return { sent: 0, reason: 'no active watches' };
+
+  // Events added in the last 2 days (so a missed run still catches up).
+  const since = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString();
+  const { data: newEvents } = await (supabase
+    .from('events')
+    .select('id, title, slug, start_date, end_date, city, country, region, created_at')
+    .eq('approved', true)
+    .eq('event_scope', 'main')
+    .gte('created_at', since) as any);
+
+  if (!newEvents?.length) return { sent: 0, reason: 'no new events' };
+
+  const resend = new Resend(resendKey);
+  let sent = 0;
+
+  // event_name is organiser-supplied free text — escape before interpolating into HTML.
+  const esc = (s: string) =>
+    s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+  for (const watch of watches as any[]) {
+    const clashes = (newEvents as any[]).filter((e) => {
+      if (!e.start_date) return false;
+      if (watch.region && e.region !== watch.region) return false;
+      const eEnd = e.end_date ?? e.start_date;
+      return e.start_date <= watch.proposed_end && eEnd >= watch.proposed_start;
+    });
+    if (clashes.length === 0) continue;
+
+    const rows = clashes
+      .map(
+        (e) =>
+          `<li style="margin-bottom:8px;"><a href="https://www.investigatorevents.com/events/${e.slug}" style="color:#2563eb;font-weight:600;">${esc(e.title)}</a><br/><span style="color:#64748b;font-size:13px;">${e.start_date}${e.end_date ? ` – ${e.end_date}` : ''} · ${esc(e.city)}, ${esc(e.country)}</span></li>`
+      )
+      .join('');
+
+    const { error } = await resend.emails.send({
+      from: 'Investigator Events <info@investigatorevents.com>',
+      to: watch.email,
+      subject: `Heads up — a new event clashes with your dates (${watch.proposed_start})`,
+      html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#334155;font-size:15px;line-height:1.7;">
+        <p>Hi,</p>
+        <p>You asked us to watch <strong>${watch.proposed_start} – ${watch.proposed_end}</strong>${watch.event_name ? ` for <strong>${esc(watch.event_name)}</strong>` : ''} on the Investigator Events date clash checker.</p>
+        <p>${clashes.length === 1 ? 'A new event has just been listed that overlaps those dates' : `${clashes.length} new events have just been listed that overlap those dates`}:</p>
+        <ul style="padding-left:18px;">${rows}</ul>
+        <p><a href="https://www.investigatorevents.com/clash-checker" style="color:#2563eb;font-weight:600;">Re-run your check</a> to see the full picture, or reply to this email if we can help.</p>
+        <p style="color:#94a3b8;font-size:12px;margin-top:24px;">Investigator Events — the global PI conference calendar.</p>
+      </div>`,
+      tags: [{ name: 'type', value: 'date-watch' }],
+    });
+
+    if (!error) {
+      sent += 1;
+      await (supabase.from('clash_checks') as any).update({ notified_at: new Date().toISOString() }).eq('id', watch.id);
+    }
+
+    await new Promise((r) => setTimeout(r, 220));
+  }
+
+  return { sent, watches: watches.length };
 }
 
 async function runDigest() {

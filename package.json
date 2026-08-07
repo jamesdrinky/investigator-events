@@ -14,6 +14,7 @@
     "cap:open": "npx cap open ios"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.115.0",
     "@capacitor/android": "^8.3.1",
     "@capacitor/browser": "^8.0.3",
     "@capacitor/camera": "^8.2.0",
@@ -55,7 +56,8 @@
     "topojson-client": "^3.1.0",
     "tus-js-client": "^4.3.1",
     "vitest": "^4.1.5",
-    "world-atlas": "^2.0.2"
+    "world-atlas": "^2.0.2",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/d3-geo": "^3.1.0",

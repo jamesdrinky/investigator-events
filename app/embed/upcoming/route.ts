@@ -100,7 +100,9 @@ export async function GET(request: NextRequest) {
     })
     .join('\n');
 
-  const empty = `<p class="empty">No upcoming events listed${country || association ? ' for this selection' : ''} right now.</p>`;
+  const empty = association
+    ? `<p class="empty">No upcoming events listed yet — new ones appear here the moment they're verified.</p>`
+    : `<p class="empty">No upcoming events listed${country ? ' for this country' : ''} right now.</p>`;
 
   const html = `<!doctype html>
 <html lang="en"><head>

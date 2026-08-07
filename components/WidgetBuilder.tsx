@@ -141,21 +141,21 @@ export function WidgetBuilder({
             }}
             className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20"
           >
-            <option value="">🌍 All events (global)</option>
-            <optgroup label="Just one association">
+            <optgroup label="Your association's events">
               {associations.map((a) => (
                 <option key={a.key} value={`a:${a.key}`}>
                   {a.name} ({a.upcoming} upcoming)
                 </option>
               ))}
             </optgroup>
-            <optgroup label="Just one country">
+            <optgroup label="A country's events">
               {countries.map((c) => (
                 <option key={c.slug} value={`c:${c.slug}`}>
                   {c.name} ({c.upcoming} upcoming)
                 </option>
               ))}
             </optgroup>
+            <option value="">The full global calendar</option>
           </select>
 
           <label className="mt-4 block text-xs font-semibold uppercase tracking-wide text-slate-500">

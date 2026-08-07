@@ -29,6 +29,7 @@ import { OutreachManager } from '@/components/admin/OutreachManager';
 import { VideoInviteComposer } from '@/components/admin/VideoInviteComposer';
 import { ReengageSender } from '@/components/admin/ReengageSender';
 import { EventPipeline } from '@/components/admin/EventPipeline';
+import { AssociationAdminManager } from '@/components/admin/AssociationAdminManager';
 import { ReengageSampleSender } from '@/components/admin/ReengageSampleSender';
 import { getProfileCompletion } from '@/lib/utils/profile-completion';
 
@@ -817,6 +818,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
           {/* Advertising Inquiries */}
           {activeTab === 'verification' && (
             <div className="space-y-6">
+              <AssociationAdminManager associations={associationPages.map((a) => ({ id: a.id, name: a.name }))} />
               {/* Association suggestions from users */}
               {assocSuggestions.length > 0 && (
                 <div className="rounded-2xl border border-amber-200/60 bg-amber-50/30 p-6 shadow-sm sm:p-8">

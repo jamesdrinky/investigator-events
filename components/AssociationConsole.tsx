@@ -1,0 +1,402 @@
+'use client';
+
+// Client side of the Association Console: add events (into IE review),
+// see what's live and what's pending, request edits/removals.
+
+import { useState } from 'react';
+import { Calendar, CheckCircle2, Clock, ExternalLink, Loader2, MapPin, Pencil, Plus, Send, Trash2 } from 'lucide-react';
+
+const REGIONS = ['Europe', 'North America', 'Asia-Pacific', 'Middle East', 'Latin America', 'Africa'];
+const CATEGORIES = [
+  'Conference',
+  'Annual Conference',
+  'Association Meeting',
+  'Regional Meeting',
+  'Seminar',
+  'Training',
+  'Summit',
+  'Expo',
+  'Networking',
+  'AGM',
+];
+
+const inputCls =
+  'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20';
+
+interface LiveEvent {
+  id: string;
+  title: string;
+  slug: string;
+  date: string;
+  endDate: string | null;
+  city: string;
+  country: string;
+  upcoming: boolean;
+}
+
+interface PendingSubmission {
+  id: string;
+  event_name: string;
+  start_date: string;
+  end_date: string | null;
+  city: string;
+  country: string;
+  created_at: string;
+}
+
+function formatRange(start: string, end: string | null): string {
+  const s = new Date(`${start}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  if (!end || end === start) return s;
+  const e = new Date(`${end}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  return `${s} – ${e}`;
+}
+
+export function RequestAccessCard({ slug, name }: { slug: string; name: string }) {
+  const [note, setNote] = useState('');
+  const [state, setState] = useState<'idle' | 'sending' | 'sent'>('idle');
+
+  const send = async () => {
+    setState('sending');
+    try {
+      const res = await fetch('/api/association-console', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'request-access', slug, note }),
+      });
+      if (res.ok) setState('sent');
+      else setState('idle');
+    } catch {
+      setState('idle');
+    }
+  };
+
+  return (
+    <div className="w-full max-w-md rounded-2xl border border-slate-200/60 bg-white p-8 shadow-lg">
+      {state === 'sent' ? (
+        <div className="text-center">
+          <CheckCircle2 className="mx-auto h-9 w-9 text-emerald-500" />
+          <h1 className="mt-3 text-xl font-bold text-slate-900">Request sent</h1>
+          <p className="mt-2 text-sm text-slate-500">
+            The Investigator Events team will verify you with {name} and switch on your access — usually within a day.
+          </p>
+        </div>
+      ) : (
+        <>
+          <h1 className="text-xl font-bold text-slate-900">Manage {name}</h1>
+          <p className="mt-2 text-sm text-slate-500">
+            Your account isn&apos;t a manager of {name} yet. Request access and we&apos;ll verify you with the association.
+          </p>
+          <textarea
+            className={`${inputCls} mt-4 min-h-[80px]`}
+            placeholder={`Your role at ${name} (e.g. "Events secretary — you can confirm with our president")`}
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            maxLength={500}
+          />
+          <button onClick={send} disabled={state === 'sending'} className="btn-primary mt-4 w-full py-2.5 text-sm disabled:opacity-50">
+            {state === 'sending' ? 'Sending…' : 'Request manager access'}
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
+function ChangeRequestButton({ slug, eventTitle, kind }: { slug: string; eventTitle: string; kind: 'edit' | 'remove' }) {
+  const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState('');
+  const [state, setState] = useState<'idle' | 'sending' | 'sent'>('idle');
+
+  const send = async () => {
+    setState('sending');
+    try {
+      const res = await fetch('/api/association-console', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'change-request', slug, eventTitle, kind, message }),
+      });
+      if (res.ok) setState('sent');
+      else setState('idle');
+    } catch {
+      setState('idle');
+    }
+  };
+
+  if (state === 'sent') {
+    return <span className="text-[11px] font-bold text-emerald-600">Request sent ✓</span>;
+  }
+
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-2.5 py-1 text-[11px] font-bold text-slate-500 transition hover:bg-slate-50"
+      >
+        {kind === 'edit' ? <Pencil className="h-3 w-3" /> : <Trash2 className="h-3 w-3" />}
+        {kind === 'edit' ? 'Request edit' : 'Request removal'}
+      </button>
+    );
+  }
+
+  return (
+    <span className="flex w-full items-center gap-2">
+      <input
+        className="flex-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs outline-none focus:border-blue-400"
+        placeholder={kind === 'edit' ? 'What should change?' : 'Why remove it?'}
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        maxLength={1000}
+        autoFocus
+      />
+      <button
+        onClick={send}
+        disabled={!message.trim() || state === 'sending'}
+        className="inline-flex items-center gap-1 rounded-full bg-slate-900 px-3 py-1.5 text-[11px] font-bold text-white disabled:opacity-50"
+      >
+        {state === 'sending' ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
+        Send
+      </button>
+    </span>
+  );
+}
+
+export function AssociationConsole({
+  slug,
+  name,
+  logoUrl,
+  liveEvents,
+  pendingSubmissions,
+}: {
+  slug: string;
+  name: string;
+  logoUrl: string | null;
+  liveEvents: LiveEvent[];
+  pendingSubmissions: PendingSubmission[];
+}) {
+  const [showForm, setShowForm] = useState(liveEvents.length === 0 && pendingSubmissions.length === 0);
+  const [fields, setFields] = useState({
+    eventName: '',
+    startDate: '',
+    endDate: '',
+    city: '',
+    country: '',
+    region: '',
+    category: 'Conference',
+    website: '',
+    notes: '',
+  });
+  const [pending, setPending] = useState<PendingSubmission[]>(pendingSubmissions);
+  const [state, setState] = useState<'idle' | 'sending'>('idle');
+  const [error, setError] = useState('');
+  const [justSubmitted, setJustSubmitted] = useState(false);
+
+  const set = (key: keyof typeof fields) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
+    setFields((f) => ({ ...f, [key]: e.target.value }));
+
+  const submit = async () => {
+    setState('sending');
+    setError('');
+    try {
+      const res = await fetch('/api/association-console', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'submit-event', slug, fields }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? 'Could not submit');
+      setPending((p) => [
+        {
+          id: `local-${Date.now()}`,
+          event_name: fields.eventName,
+          start_date: fields.startDate,
+          end_date: fields.endDate || null,
+          city: fields.city,
+          country: fields.country,
+          created_at: new Date().toISOString(),
+        },
+        ...p,
+      ]);
+      setFields({ eventName: '', startDate: '', endDate: '', city: '', country: '', region: '', category: 'Conference', website: '', notes: '' });
+      setJustSubmitted(true);
+      setShowForm(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not submit');
+    } finally {
+      setState('idle');
+    }
+  };
+
+  const canSubmit = fields.eventName && fields.startDate && fields.city && fields.country && fields.region && fields.website;
+
+  return (
+    <div className="mx-auto max-w-3xl">
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        {logoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={logoUrl} alt="" className="h-14 w-14 rounded-2xl border border-slate-200 object-contain" />
+        ) : null}
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-blue-600">Event console</p>
+          <h1 className="text-2xl font-bold text-slate-900">{name}</h1>
+          <p className="text-sm text-slate-500">
+            Add an event once — after Investigator Events verifies it, it appears on your website widget, the
+            global calendar, and every member&apos;s subscribed calendar automatically.
+          </p>
+        </div>
+      </div>
+
+      {justSubmitted && (
+        <div className="mt-6 flex items-center gap-3 rounded-2xl border border-emerald-200/70 bg-emerald-50/60 p-4 text-sm text-emerald-700">
+          <CheckCircle2 className="h-5 w-5 shrink-0" />
+          Submitted — it goes live everywhere as soon as the Investigator Events team verifies it (usually same day).
+        </div>
+      )}
+
+      {/* Add event */}
+      <div className="mt-8 rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm">
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-bold text-slate-900">Add an event</h2>
+          {!showForm && (
+            <button onClick={() => setShowForm(true)} className="btn-primary inline-flex items-center gap-1.5 px-4 py-2 text-xs">
+              <Plus className="h-3.5 w-3.5" /> New event
+            </button>
+          )}
+        </div>
+
+        {showForm && (
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Event name</label>
+              <input className={inputCls} value={fields.eventName} onChange={set('eventName')} placeholder="e.g. Annual Conference 2027" />
+            </div>
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Start date</label>
+              <input type="date" className={inputCls} value={fields.startDate} onChange={set('startDate')} />
+            </div>
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">End date (optional)</label>
+              <input type="date" className={inputCls} value={fields.endDate} onChange={set('endDate')} />
+            </div>
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">City</label>
+              <input className={inputCls} value={fields.city} onChange={set('city')} />
+            </div>
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Country</label>
+              <input className={inputCls} value={fields.country} onChange={set('country')} />
+            </div>
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Region</label>
+              <select className={inputCls} value={fields.region} onChange={set('region')}>
+                <option value="">Select region…</option>
+                {REGIONS.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Type</label>
+              <select className={inputCls} value={fields.category} onChange={set('category')}>
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="sm:col-span-2">
+              <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Event website</label>
+              <input className={inputCls} value={fields.website} onChange={set('website')} placeholder="https://…" />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Anything else (optional)</label>
+              <textarea className={`${inputCls} min-h-[70px]`} value={fields.notes} onChange={set('notes')} placeholder="Description, speakers, pricing — we'll use it on the event page." />
+            </div>
+            {error && <p className="text-sm font-medium text-rose-600 sm:col-span-2">{error}</p>}
+            <div className="sm:col-span-2">
+              <button onClick={submit} disabled={!canSubmit || state === 'sending'} className="btn-primary inline-flex items-center gap-2 px-6 py-2.5 text-sm disabled:opacity-50">
+                {state === 'sending' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                Submit for verification
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Pending */}
+      {pending.length > 0 && (
+        <div className="mt-6">
+          <h2 className="text-base font-bold text-slate-900">In review</h2>
+          <div className="mt-3 space-y-2">
+            {pending.map((s) => (
+              <div key={s.id} className="flex items-center gap-3 rounded-xl border border-amber-200/70 bg-amber-50/50 px-4 py-3">
+                <Clock className="h-4 w-4 shrink-0 text-amber-500" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-slate-900">{s.event_name}</p>
+                  <p className="text-xs text-slate-500">
+                    {formatRange(s.start_date, s.end_date)} · {s.city}, {s.country}
+                  </p>
+                </div>
+                <span className="rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-amber-700">
+                  awaiting verification
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Live events */}
+      <div className="mt-6">
+        <h2 className="text-base font-bold text-slate-900">Your events on Investigator Events</h2>
+        <div className="mt-3 space-y-2">
+          {liveEvents.length === 0 ? (
+            <p className="rounded-2xl border border-dashed border-slate-200 py-8 text-center text-sm text-slate-400">
+              Nothing listed yet — add your first event above.
+            </p>
+          ) : (
+            liveEvents.map((e) => (
+              <div key={e.id} className={`rounded-xl border border-slate-200/60 bg-white px-4 py-3 shadow-sm ${e.upcoming ? '' : 'opacity-60'}`}>
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-slate-900">{e.title}</p>
+                    <p className="flex flex-wrap items-center gap-x-3 text-xs text-slate-500">
+                      <span className="inline-flex items-center gap-1">
+                        <Calendar className="h-3 w-3" /> {formatRange(e.date, e.endDate)}
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <MapPin className="h-3 w-3" /> {e.city}, {e.country}
+                      </span>
+                      {!e.upcoming && <span className="font-semibold text-slate-400">past</span>}
+                    </p>
+                  </div>
+                  <a
+                    href={`/events/${e.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-2.5 py-1 text-[11px] font-bold text-blue-600 transition hover:bg-blue-50"
+                  >
+                    <ExternalLink className="h-3 w-3" /> View
+                  </a>
+                  <ChangeRequestButton slug={slug} eventTitle={e.title} kind="edit" />
+                  <ChangeRequestButton slug={slug} eventTitle={e.title} kind="remove" />
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      <p className="mt-8 text-center text-xs text-slate-400">
+        Need your events on your own website too? The free widget shows exactly this list, always up to date —{' '}
+        <a href="/widget" className="font-semibold text-blue-600 hover:underline">
+          get the embed code
+        </a>
+        .
+      </p>
+    </div>
+  );
+}

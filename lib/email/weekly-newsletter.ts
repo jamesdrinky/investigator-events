@@ -616,12 +616,12 @@ export function buildWeeklyNewsletterHtml({
     </td></tr>
   </table>
 
-  <!-- Forward it on -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:28px;">
+  <!-- Forward it on (suppressed when the stronger referral card is active — one ask, not two) -->
+  ${referralBlock ? '' : `<table width="100%" cellpadding="0" cellspacing="0" style="margin-top:28px;">
     <tr><td align="center" style="padding:14px 16px;border-top:1px solid ${C.border};">
       <p style="margin:0;font-size:12px;color:${C.muted};line-height:1.5;">Know an investigator who'd want this? <strong style="color:${C.dark};">Forward it on.</strong><br />Got it from a colleague? <a href="${SITE}" style="color:${C.blue};text-decoration:none;font-weight:600;">Subscribe free at investigatorevents.com</a></p>
     </td></tr>
-  </table>
+  </table>`}
 
   <div style="height:36px;"></div>
 </td></tr>
@@ -642,6 +642,7 @@ ${referralBlock ? `
     <tr><td style="padding:18px 22px;text-align:center;">
       <p style="margin:0;font-size:15px;font-weight:700;color:#0c1526;">Know one colleague who'd use this?</p>
       <p style="margin:6px 0 0;font-size:13px;color:#5d6d88;line-height:1.6;">Most investigators still find out about conferences by accident. Forward this email — or send them <a href="${SITE}/?utm_source=newsletter&utm_medium=referral" style="color:#2563eb;font-weight:700;text-decoration:none;">investigatorevents.com</a> — and they'll never miss one again.</p>
+      <p style="margin:10px 0 0;font-size:11.5px;color:#93a3bd;">Got this from a colleague? <a href="${SITE}/?utm_source=newsletter&utm_medium=referral" style="color:#2563eb;font-weight:700;text-decoration:none;">Subscribe free</a> — it takes ten seconds.</p>
     </td></tr>
   </table>
 </td></tr>` : ''}

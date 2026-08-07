@@ -79,7 +79,7 @@ export async function POST(request: Request) {
   const { error } = await (supabase.from('association_admins' as any) as any).insert({
     user_id: user.id,
     association_page_id: associationPageId,
-    role: 'manager',
+    role: 'admin',
   });
   if (error) {
     const message = error.code === '23505' ? 'Already a manager of that association' : error.message;

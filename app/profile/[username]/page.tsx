@@ -14,6 +14,7 @@ import { ReportButton } from '@/components/ReportButton';
 import { ShareProfileButton } from '@/components/ShareProfileButton';
 import { VerifiedBadges } from '@/components/VerifiedBadges';
 import { ProfileCompletion } from '@/components/ProfileCompletion';
+import { MyCalendarSync } from '@/components/MyCalendarSync';
 
 export const dynamic = 'force-dynamic';
 
@@ -332,6 +333,13 @@ export default async function PublicProfilePage({ params }: { params: { username
                 >
                   View
                 </a>
+              </div>
+            )}
+
+            {/* Own profile: subscribe to every event from your associations */}
+            {isOwner && hasAssociations && (
+              <div className="mt-4">
+                <MyCalendarSync />
               </div>
             )}
 

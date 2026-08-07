@@ -33,7 +33,7 @@ export function WidgetBuilder({
   associations: AssociationOption[];
 }) {
   const [siteName, setSiteName] = useState('Your Association');
-  const [assoc, setAssoc] = useState('');
+  const [assoc, setAssoc] = useState(associations[0]?.key ?? '');
   const [country, setCountry] = useState('');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [accent, setAccent] = useState('2563eb');
@@ -155,7 +155,6 @@ export function WidgetBuilder({
                 </option>
               ))}
             </optgroup>
-            <option value="">The full global calendar</option>
           </select>
 
           <label className="mt-4 block text-xs font-semibold uppercase tracking-wide text-slate-500">

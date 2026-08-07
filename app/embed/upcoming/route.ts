@@ -114,7 +114,15 @@ export async function GET(request: NextRequest) {
   @font-face { font-family: 'Jakarta'; src: url('${BASE_URL}/og-assets/plus-jakarta-sans-v12-latin-600.ttf') format('truetype'); font-weight: 600; font-display: swap; }
   @font-face { font-family: 'Jakarta'; src: url('${BASE_URL}/og-assets/plus-jakarta-sans-v12-latin-800.ttf') format('truetype'); font-weight: 800; font-display: swap; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: ${c.bg}; font-family: 'Jakarta', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 14px; }
+  body { background: ${c.bg}; font-family: 'Jakarta', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 14px; max-width: 780px; margin: 0 auto; }
+  @media (min-width: 640px) {
+    .ev { padding: 15px 18px; gap: 18px; }
+    .thumb { width: 86px; height: 86px; border-radius: 14px; }
+    .date { font-size: 11.5px; }
+    .title { font-size: 17px; }
+    .loc { font-size: 13px; }
+    .arrow { width: 18px; height: 18px; }
+  }
   .ev { position: relative; display: flex; align-items: center; gap: 14px; background: ${c.card}; border: 1px solid ${c.border}; border-radius: 16px; padding: 12px; margin-bottom: 10px; text-decoration: none; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; overflow: hidden; }
   .ev::before { content: ''; position: absolute; left: 0; top: 12px; bottom: 12px; width: 3.5px; border-radius: 99px; background: ${accent}; opacity: 0; transition: opacity .18s ease; }
   .ev:hover { transform: translateY(-2px); border-color: ${accent}55; box-shadow: ${c.shadow}; background: ${c.cardHover}; }

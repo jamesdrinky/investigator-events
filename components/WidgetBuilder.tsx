@@ -141,6 +141,7 @@ export function WidgetBuilder({
             }}
             className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20"
           >
+            {associations.length === 0 && countries.length === 0 && <option value="">Loading events…</option>}
             <optgroup label="Your association's events">
               {associations.map((a) => (
                 <option key={a.key} value={`a:${a.key}`}>

@@ -4,7 +4,10 @@ import { groupEventsByCountry } from '@/lib/utils/country-pages';
 import { WidgetBuilder } from '@/components/WidgetBuilder';
 import { ArrowRight, CalendarCheck2, Palette, RefreshCw } from 'lucide-react';
 
-export const revalidate = 3600;
+// Rendered at request time — the build-time events fetch is empty in
+// production (same as the country pages), which left the association
+// picker blank on the statically-built version.
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Your Events, On Your Website — Free Widget | Investigator Events',

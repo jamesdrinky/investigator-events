@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Investigator Events — Growth Plan</title>
+<style>
+  :root {
+    --bg: #f4f7fc;
+    --card: #ffffff;
+    --ink: #0c1526;
+    --body: #33415c;
+    --muted: #5d6d88;
+    --faint: #93a3bd;
+    --line: rgba(13, 28, 56, 0.09);
+    --accent: #2563eb;
+    --accent-soft: rgba(37, 99, 235, 0.09);
+    --purple: #7c3aed;
+    --cyan: #06b6d4;
+    --warn: #b45309;
+    --warn-soft: rgba(180, 83, 9, 0.09);
+    --good: #047857;
+    --good-soft: rgba(4, 120, 87, 0.09);
+    --bar: #2563eb;
+    --bar-dim: rgba(37, 99, 235, 0.28);
+    --shadow: 0 10px 28px -18px rgba(13, 28, 56, 0.35);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0a1120;
+      --card: #101a30;
+      --ink: #f4f7fc;
+      --body: #c3cfe4;
+      --muted: #8fa3c4;
+      --faint: #5d6d88;
+      --line: rgba(255, 255, 255, 0.09);
+      --accent: #60a5fa;
+      --accent-soft: rgba(96, 165, 250, 0.12);
+      --purple: #a78bfa;
+      --cyan: #22d3ee;
+      --warn: #fbbf24;
+      --warn-soft: rgba(251, 191, 36, 0.1);
+      --good: #34d399;
+      --good-soft: rgba(52, 211, 153, 0.1);
+      --bar: #60a5fa;
+      --bar-dim: rgba(96, 165, 250, 0.3);
+      --shadow: 0 10px 28px -18px rgba(0, 0, 0, 0.6);
+    }
+  }
+  :root[data-theme='dark'] {
+    --bg: #0a1120; --card: #101a30; --ink: #f4f7fc; --body: #c3cfe4; --muted: #8fa3c4;
+    --faint: #5d6d88; --line: rgba(255,255,255,0.09); --accent: #60a5fa;
+    --accent-soft: rgba(96,165,250,0.12); --purple: #a78bfa; --cyan: #22d3ee;
+    --warn: #fbbf24; --warn-soft: rgba(251,191,36,0.1); --good: #34d399;
+    --good-soft: rgba(52,211,153,0.1); --bar: #60a5fa; --bar-dim: rgba(96,165,250,0.3);
+    --shadow: 0 10px 28px -18px rgba(0,0,0,0.6);
+  }
+  :root[data-theme='light'] {
+    --bg: #f4f7fc; --card: #ffffff; --ink: #0c1526; --body: #33415c; --muted: #5d6d88;
+    --faint: #93a3bd; --line: rgba(13,28,56,0.09); --accent: #2563eb;
+    --accent-soft: rgba(37,99,235,0.09); --purple: #7c3aed; --cyan: #06b6d4;
+    --warn: #b45309; --warn-soft: rgba(180,83,9,0.09); --good: #047857;
+    --good-soft: rgba(4,120,87,0.09); --bar: #2563eb; --bar-dim: rgba(37,99,235,0.28);
+    --shadow: 0 10px 28px -18px rgba(13,28,56,0.35);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--body);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.65;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 24px 96px; }
+
+  /* Brand bar — the same tri-gradient as the IE emails */
+  .brandbar { display: flex; height: 4px; }
+  .brandbar span { flex: 1; }
+  .brandbar span:nth-child(1) { background: #2563eb; }
+  .brandbar span:nth-child(2) { background: #7c3aed; }
+  .brandbar span:nth-child(3) { background: #06b6d4; }
+
+  header.top { padding: 56px 0 8px; }
+  .kicker {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 14px;
+  }
+  h1 {
+    margin: 0; color: var(--ink); font-size: clamp(30px, 5.4vw, 46px);
+    line-height: 1.08; letter-spacing: -0.03em; font-weight: 800; text-wrap: balance;
+  }
+  .lede { margin: 18px 0 0; max-width: 60ch; font-size: 17px; color: var(--muted); }
+
+  /* Progress */
+  .progress {
+    position: sticky; top: 0; z-index: 10; margin: 32px -24px 0; padding: 12px 24px;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; gap: 14px;
+  }
+  .progress .count {
+    font-variant-numeric: tabular-nums; font-weight: 800; color: var(--ink); font-size: 14px;
+    white-space: nowrap;
+  }
+  .progress .track { flex: 1; height: 6px; border-radius: 99px; background: var(--line); overflow: hidden; }
+  .progress .fill {
+    height: 100%; width: 0%; border-radius: 99px;
+    background: linear-gradient(90deg, #2563eb, #7c3aed, #06b6d4);
+    transition: width 0.4s ease;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .progress .fill { transition: none; }
+  }
+
+  section { margin-top: 64px; }
+  .sec-label { display: flex; align-items: baseline; gap: 12px; }
+  .sec-num {
+    font-size: 12px; font-weight: 800; letter-spacing: 0.14em; color: var(--faint);
+    font-variant-numeric: tabular-nums;
+  }
+  h2 {
+    margin: 0; color: var(--ink); font-size: 25px; font-weight: 800;
+    letter-spacing: -0.02em; text-wrap: balance;
+  }
+  .sec-sub { margin: 10px 0 0; color: var(--muted); max-width: 62ch; }
+
+  /* Stat tiles */
+  .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 24px; }
+  @media (max-width: 640px) { .tiles { grid-template-columns: 1fr; } }
+  .tile {
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    padding: 18px 18px 14px; box-shadow: var(--shadow);
+  }
+  .tile .t-label { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .tile .t-delta {
+    display: flex; align-items: baseline; gap: 8px; margin-top: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .tile .t-then { font-size: 20px; font-weight: 700; color: var(--faint); text-decoration: line-through; text-decoration-thickness: 2px; }
+  .tile .t-now { font-size: 30px; font-weight: 800; color: var(--ink); letter-spacing: -0.02em; }
+  .tile .t-unit { font-size: 12px; color: var(--muted); }
+  .chart { display: flex; align-items: flex-end; gap: 5px; height: 74px; margin-top: 14px; }
+  .chart .col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; height: 100%; position: relative; }
+  .chart .bar { width: 100%; border-radius: 4px 4px 0 0; background: var(--bar-dim); min-height: 3px; }
+  .chart .col.last .bar { background: var(--warn); }
+  .chart .val { font-size: 11px; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; line-height: 1; }
+  .chart .col.last .val { color: var(--warn); }
+  .months { display: flex; gap: 5px; margin-top: 6px; }
+  .months span { flex: 1; text-align: center; font-size: 10px; color: var(--faint); letter-spacing: 0.04em; }
+  .readout {
+    margin: 22px 0 0; padding: 14px 18px; border-radius: 14px; background: var(--accent-soft);
+    color: var(--body); font-size: 15px;
+  }
+  .readout strong { color: var(--ink); }
+
+  /* Checklist cards */
+  .cards { display: flex; flex-direction: column; gap: 14px; margin-top: 24px; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    padding: 20px 22px; box-shadow: var(--shadow); display: flex; gap: 16px;
+  }
+  .card.done { opacity: 0.62; }
+  .card.done .c-title { text-decoration: line-through; text-decoration-thickness: 2px; text-decoration-color: var(--faint); }
+  .tick {
+    flex-shrink: 0; width: 26px; height: 26px; margin-top: 2px; border-radius: 8px;
+    border: 2px solid var(--faint); background: transparent; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; padding: 0;
+  }
+  .tick svg { width: 15px; height: 15px; stroke: #fff; stroke-width: 3; fill: none; opacity: 0; }
+  .card.done .tick { background: var(--good); border-color: var(--good); }
+  .card.done .tick svg { opacity: 1; }
+  .tick:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .c-body { min-width: 0; }
+  .c-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .c-title { font-size: 17px; font-weight: 800; color: var(--ink); letter-spacing: -0.01em; }
+  .chip {
+    font-size: 10.5px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 3px 9px; border-radius: 99px;
+  }
+  .chip.live { background: var(--good-soft); color: var(--good); }
+  .chip.decide { background: var(--warn-soft); color: var(--warn); }
+  .c-what { margin: 6px 0 0; font-size: 15px; }
+  .c-why { margin: 8px 0 0; font-size: 14px; color: var(--muted); }
+  .c-why strong { color: var(--body); font-weight: 700; }
+  .c-ask {
+    margin: 12px 0 0; padding: 10px 14px; border-radius: 10px; font-size: 14px;
+    background: var(--accent-soft); color: var(--body);
+  }
+  .c-ask b { color: var(--accent); font-weight: 800; }
+
+  /* Demo links */
+  .c-links { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; }
+  .demo-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: 99px; font-size: 13px; font-weight: 700;
+    text-decoration: none; color: #fff;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+  }
+  .demo-btn:hover { filter: brightness(1.12); }
+  .demo-btn.secondary { background: none; color: var(--accent); border: 1.5px solid var(--accent); }
+  .demo-btn .arrow { font-size: 12px; }
+  .deploy-note {
+    display: inline-flex; align-items: center; padding: 6px 10px; font-size: 11px;
+    font-weight: 700; color: var(--warn); background: var(--warn-soft); border-radius: 99px;
+  }
+
+  /* Who does what */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 24px; }
+  @media (max-width: 640px) { .split { grid-template-columns: 1fr; } }
+  .who {
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    padding: 20px 22px; box-shadow: var(--shadow);
+  }
+  .who h3 { margin: 0; font-size: 16px; font-weight: 800; color: var(--ink); }
+  .who .role { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .who ul { margin: 14px 0 0; padding: 0 0 0 2px; list-style: none; display: flex; flex-direction: column; gap: 9px; }
+  .who li { font-size: 14.5px; padding-left: 22px; position: relative; }
+  .who li::before {
+    content: ''; position: absolute; left: 0; top: 7px; width: 8px; height: 8px;
+    border-radius: 99px; background: var(--accent);
+  }
+  .who.mike-col li::before { background: var(--purple); }
+  .who .time { margin-top: 14px; font-size: 13px; font-weight: 700; color: var(--muted); }
+
+  footer {
+    margin-top: 72px; padding-top: 24px; border-top: 1px solid var(--line);
+    font-size: 13px; color: var(--faint); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+</style>
+</head>
+<body>
+
+<div class="brandbar" aria-hidden="true"><span></span><span></span><span></span></div>
+<div class="wrap">
+  <header class="top">
+    <p class="kicker">Investigator Events · James &amp; Mike · August 2026</p>
+    <h1>The plan to get IE growing again</h1>
+    <p class="lede">
+      One page for this call. The honest numbers, what's already built (with live demos), and the
+      decisions we need to make — tick each item as we cover it.
+    </p>
+  </header>
+
+  <div class="progress" role="status">
+    <span class="count" id="progress-count">0 of 8 covered</span>
+    <div class="track"><div class="fill" id="progress-fill"></div></div>
+  </div>
+
+  <!-- ───────────────────────── 1. Where we are ───────────────────────── -->
+  <section>
+    <div class="sec-label"><span class="sec-num">1 / 5</span><h2>Where we are — the honest numbers</h2></div>
+    <p class="sec-sub">April to August, straight from the database. Amber is this month so far.</p>
+
+    <div class="tiles">
+      <div class="tile">
+        <p class="t-label">New signups / month</p>
+        <div class="t-delta"><span class="t-then">57</span><span class="t-now">3</span><span class="t-unit">in Aug</span></div>
+        <div class="chart" role="img" aria-label="Signups by month: April 57, May 47, June 33, July 18, August 3">
+          <div class="col"><span class="val">57</span><div class="bar" style="height:100%"></div></div>
+          <div class="col"><div class="bar" style="height:82%"></div></div>
+          <div class="col"><div class="bar" style="height:58%"></div></div>
+          <div class="col"><div class="bar" style="height:32%"></div></div>
+          <div class="col last"><span class="val">3</span><div class="bar" style="height:6%"></div></div>
+        </div>
+        <div class="months"><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span></div>
+      </div>
+
+      <div class="tile">
+        <p class="t-label">Newsletter subs / month</p>
+        <div class="t-delta"><span class="t-then">103</span><span class="t-now">4</span><span class="t-unit">in Aug</span></div>
+        <div class="chart" role="img" aria-label="Newsletter subscribers by month: April 97, May 103, June 84, July 20, August 4">
+          <div class="col"><div class="bar" style="height:94%"></div></div>
+          <div class="col"><span class="val">103</span><div class="bar" style="height:100%"></div></div>
+          <div class="col"><div class="bar" style="height:82%"></div></div>
+          <div class="col"><div class="bar" style="height:19%"></div></div>
+          <div class="col last"><span class="val">4</span><div class="bar" style="height:5%"></div></div>
+        </div>
+        <div class="months"><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span></div>
+      </div>
+
+      <div class="tile">
+        <p class="t-label">Events added / month</p>
+        <div class="t-delta"><span class="t-then">30</span><span class="t-now">2</span><span class="t-unit">in Aug</span></div>
+        <div class="chart" role="img" aria-label="Events added by month: April 17, May 30, June 9, July 3, August 2">
+          <div class="col"><div class="bar" style="height:57%"></div></div>
+          <div class="col"><span class="val">30</span><div class="bar" style="height:100%"></div></div>
+          <div class="col"><div class="bar" style="height:30%"></div></div>
+          <div class="col"><div class="bar" style="height:10%"></div></div>
+          <div class="col last"><span class="val">2</span><div class="bar" style="height:7%"></div></div>
+        </div>
+        <div class="months"><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span></div>
+      </div>
+    </div>
+
+    <p class="readout">
+      <strong>The read:</strong> growth tracked our activity almost one-to-one. When outreach and posting
+      stopped in June, everything stopped with it. Nothing is wrong with the product —
+      <strong>the fix is making the loops run without needing our spare time.</strong>
+    </p>
+  </section>
+
+  <!-- ───────────────────────── 2. Already built ───────────────────────── -->
+  <section>
+    <div class="sec-label"><span class="sec-num">2 / 5</span><h2>Built this week — click anything to demo it</h2></div>
+    <p class="sec-sub">Four things that work while we sleep. Nothing here needs Mike's time.</p>
+
+    <div class="cards">
+      <div class="card" data-key="pipeline">
+        <button class="tick" aria-label="Mark 'Event scanner' as covered"><svg viewBox="0 0 24 24"><path d="M4 12l6 6L20 6"/></svg></button>
+        <div class="c-body">
+          <div class="c-top"><span class="c-title">The weekly sweep</span><span class="chip live">Built</span></div>
+          <p class="c-what">Every night the system fetches every association and conference page we watch and compares it with the night before — costs nothing to run. Pages that changed float to the top of the admin panel with the new date-mentioning lines already pulled out. Spot an event, click Draft, approve — it's on the calendar.</p>
+          <p class="c-why"><strong>Why it matters:</strong> the calendar is the product, and we were adding 30 events a month in May vs 2 in August. Checking every site used to be the chore; now unchanged sites need zero attention, so the weekly sweep is minutes. 42 sources now monitored (every association website we know, discovered automatically) — it already caught TALI's annual conference announcement on its first pass.</p>
+          <p class="c-ask"><b>On the call:</b> which other associations and conference sites should we watch? Mike's list here is gold.</p>
+          <div class="c-links">
+            <a class="demo-btn" href="https://www.investigatorevents.com/admin?tab=pipeline" target="_blank" rel="noopener">Open the review queue <span class="arrow">&#8599;</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" data-key="feeds">
+        <button class="tick" aria-label="Mark 'Calendar feeds' as covered"><svg viewBox="0 0 24 24"><path d="M4 12l6 6L20 6"/></svg></button>
+        <div class="c-body">
+          <div class="c-top"><span class="c-title">Live calendar subscriptions</span><span class="chip live">Built</span></div>
+          <p class="c-what">Anyone can now add our events to their own Google, Apple or Outlook calendar with one click — the whole calendar, one country, or one association. It updates itself forever.</p>
+          <p class="c-why"><strong>Why it matters:</strong> once an investigator subscribes, every event we list lands in their personal calendar automatically. They never need to remember to visit the site — we're just there.</p>
+          <div class="c-links">
+            <a class="demo-btn" href="https://www.investigatorevents.com/api/ics" target="_blank" rel="noopener">The raw feed <span class="arrow">&#8599;</span></a>
+            <a class="demo-btn secondary" href="https://www.investigatorevents.com/widget" target="_blank" rel="noopener">One-click subscribe links <span class="arrow">&#8599;</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" data-key="widget">
+        <button class="tick" aria-label="Mark 'Widget upgrade' as covered"><svg viewBox="0 0 24 24"><path d="M4 12l6 6L20 6"/></svg></button>
+        <div class="c-body">
+          <div class="c-top"><span class="c-title">The widget — their events, on their site, powered by us</span><span class="chip live">Built</span></div>
+          <p class="c-what">Each association embeds a live events section showing <strong>their own events</strong> — their colours, compact or full layout, resizes itself, with a "Subscribe" button that puts their calendar in members' pockets. One line of code, maintains itself forever.</p>
+          <p class="c-why"><strong>Why it matters:</strong> their website runs on our data. Every association that embeds it is structurally dependent on our calendar being right — and a permanent referral source.</p>
+          <div class="c-links">
+            <a class="demo-btn" href="https://www.investigatorevents.com/widget" target="_blank" rel="noopener">Widget builder <span class="arrow">&#8599;</span></a>
+            <a class="demo-btn secondary" href="https://www.investigatorevents.com/embed/upcoming?limit=4" target="_blank" rel="noopener">The widget itself <span class="arrow">&#8599;</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" data-key="console">
+        <button class="tick" aria-label="Mark 'Event Console' as covered"><svg viewBox="0 0 24 24"><path d="M4 12l6 6L20 6"/></svg></button>
+        <div class="c-body">
+          <div class="c-top"><span class="c-title">The Association Event Console</span><span class="chip live">Built</span></div>
+          <p class="c-what">The big one: each association's own admin gets a console where they add an event <strong>once</strong>. After our verification it appears simultaneously on their website widget, our global calendar, and every member's subscribed calendar. Edit and removal requests come through us too.</p>
+          <p class="c-why"><strong>Why it matters:</strong> associations stop maintaining their own events pages and run them through us instead. They get an easier, better-looking system for free; we get the market data and become the rails their events run on. We grant and revoke manager access from the admin panel.</p>
+          <p class="c-ask"><b>On the call:</b> which associations do we onboard first, and who's the contact who runs each one's events?</p>
+          <div class="c-links">
+            <a class="demo-btn" href="https://www.investigatorevents.com/associations/wad/manage" target="_blank" rel="noopener">A console (WAD's) <span class="arrow">&#8599;</span></a>
+            <a class="demo-btn secondary" href="https://www.investigatorevents.com/admin?tab=verification" target="_blank" rel="noopener">Grant access (admin) <span class="arrow">&#8599;</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" data-key="clash">
+        <button class="tick" aria-label="Mark 'Clash checker' as covered"><svg viewBox="0 0 24 24"><path d="M4 12l6 6L20 6"/></svg></button>
+        <div class="c-body">
+          <div class="c-top"><span class="c-title">Date clash checker + date watch</span><span class="chip live">Built</span></div>
+          <p class="c-what">Organisers planning a conference check their dates against every event we know about — including near misses the week either side. They can leave an email and we alert them if anything clashing gets announced later.</p>
+          <p class="c-why"><strong>Why it matters:</strong> this makes organisers <strong>depend</strong> on our calendar being complete — and every check hands us a warm organiser lead with their event name and dates.</p>
+          <div class="c-links">
+            <a class="demo-btn" href="https://www.investigatorevents.com/clash-checker" target="_blank" rel="noopener">Try the clash checker <span class="arrow">&#8599;</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────────────────── 3. Decisions ───────────────────────── -->
+  <section>
+    <div class="sec-label"><span class="sec-num">3 / 5</span><h2>What we do next — decisions for this call</h2></div>
+    <p class="sec-sub">Four moves, in rough order of impact. Each one just needs a yes and a date.</p>
+
+    <div class="cards">
+      <div class="card" data-key="video">
+        <button class="tick" aria-label="Mark 'Video invites' as covered"><svg viewBox="0 0 24 24"><path d="M4 12l6 6L20 6"/></svg></button>
+        <div class="c-body">
+          <div class="c-top"><span class="c-title">Video invites to every upcoming event</span><span class="chip decide">Decide</span></div>
+          <p class="c-what">The free promo-video offer already works — WAD did it, TALI's coming through now. Proposal: systematically invite the organiser of all 36 upcoming events, a few per week, from the composer we already have.</p>
+          <p class="c-why"><strong>Why it matters:</strong> every video we host gets promoted by the organiser to their own audience. That's distribution we don't pay for — and every conference ends up owing us a favour.</p>
+          <p class="c-ask"><b>Decide:</b> pace (e.g. 5/week?) and which ones get Mike's personal touch vs. the standard invite.</p>
+          <div class="c-links">
+            <a class="demo-btn" href="https://www.investigatorevents.com/admin?tab=video-invite" target="_blank" rel="noopener">Open the invite composer <span class="arrow">&#8599;</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" data-key="embed-outreach">
+        <button class="tick" aria-label="Mark 'Association embed outreach' as covered"><svg viewBox="0 0 24 24"><path d="M4 12l6 6L20 6"/></svg></button>
+        <div class="c-body">
+          <div class="c-top"><span class="c-title">Get the widget onto association sites</span><span class="chip decide">Decide</span></div>
+          <p class="c-what">The pitch queue is loaded: a fresh "run your events through us" email and a follow-up for associations we've contacted before — the system flags anyone we've ever emailed so nobody gets cold-pitched twice. Mike approves the wording, then it's copy-paste per association.</p>
+          <p class="c-why"><strong>Why it matters:</strong> this is the "structurally mingled into the industry" move — their websites carrying our calendar is reliance, not marketing.</p>
+          <p class="c-ask"><b>Decide:</b> first five associations to pitch — warm ones where Mike knows the board.</p>
+          <div class="c-links">
+            <a class="demo-btn" href="https://www.investigatorevents.com/widget" target="_blank" rel="noopener">The pitch asset <span class="arrow">&#8599;</span></a>
+            <a class="demo-btn secondary" href="https://www.investigatorevents.com/embed/upcoming?limit=4&association=wad" target="_blank" rel="noopener">What WAD's site would show <span class="arrow">&#8599;</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" data-key="android">
+        <button class="tick" aria-label="Mark 'Android launch' as covered"><svg viewBox="0 0 24 24"><path d="M4 12l6 6L20 6"/></svg></button>
+        <div class="c-body">
+          <div class="c-top"><span class="c-title">Android launch as a moment</span><span class="chip decide">Decide</span></div>
+          <p class="c-what">The Android app is nearly through Play review. When it lands we announce properly: email to the full list, LinkedIn from both of us, and a nudge to the 158 existing members to grab it.</p>
+          <p class="c-why"><strong>Why it matters:</strong> a legitimate, non-salesy reason to touch every contact we have — and re-engage members who've gone quiet.</p>
+          <p class="c-ask"><b>Decide:</b> hold the announcement for a strong week, or ship the moment it's approved?</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────────────────── 4. Who does what ───────────────────────── -->
+  <section>
+    <div class="sec-label"><span class="sec-num">4 / 5</span><h2>Who does what</h2></div>
+    <p class="sec-sub">The whole point: the machine does the heavy lifting, and busy weeks can't stall it again.</p>
+
+    <div class="split">
+      <div class="who">
+        <h3>James</h3>
+        <p class="role">Builds and runs the machine</p>
+        <ul>
+          <li>Event scanner — review queue, keep sources fresh</li>
+          <li>LinkedIn graphics engine + draft queue</li>
+          <li>Widget / feed support for associations' web people</li>
+          <li>Android release &amp; site deploys</li>
+        </ul>
+        <p class="time">Ongoing — it's the dev seat.</p>
+      </div>
+      <div class="who mike-col">
+        <h3>Mike</h3>
+        <p class="role">The face and the door-opener</p>
+        <ul>
+          <li>Approve drafted posts &amp; events — from a phone</li>
+          <li>Reshare the big posts on his personal LinkedIn</li>
+          <li>Warm intros: association boards, conference organisers</li>
+          <li>Personal-touch video invites where it counts</li>
+        </ul>
+        <p class="time">Target: ~20 minutes a week, batched.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────────────────── 5. Backlog ───────────────────────── -->
+  <section>
+    <div class="sec-label"><span class="sec-num">5 / 5</span><h2>Just built — shipping on sign-off</h2></div>
+    <p class="sec-sub">Already built this week, held for a final polish check before they go live. One yes and they ship.</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="c-body" style="margin-left:0">
+          <ul style="margin:0; padding-left:18px; display:flex; flex-direction:column; gap:10px; font-size:14.5px;">
+            <li><strong style="color:var(--ink)">Console numbers</strong> — associations see upcoming events, members on IE, and RSVPs inside their console. <em>Built — in James's review queue.</em></li>
+            <li><strong style="color:var(--ink)">"Who's going"</strong> — event pages show "11 going · 3 you follow" with faces you know first. <em>Built — in review.</em></li>
+            <li><strong style="color:var(--ink)">Rated-event badges</strong> — organisers embed "Rated 5.0 by investigators" on their own sites; social proof for them, permanent backlinks for us. <em>Built — in review.</em></li>
+            <li><strong style="color:var(--ink)">Month pages for Google</strong> — "PI conferences September 2026" pages generated from the calendar. <em>Built — in review.</em></li>
+            <li><strong style="color:var(--ink)">Newsletter referral</strong> — "Know one colleague who'd use this?" block, held behind a switch until the wording is approved. <em>Built — awaiting approval.</em></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Investigator Events — the global PI conference calendar.</span>
+    <span>Ticks save automatically on this device.</span>
+  </footer>
+</div>
+
+<script>
+  (function () {
+    var KEY = 'ie-growth-plan-ticks-v1';
+    var cards = Array.prototype.slice.call(document.querySelectorAll('.card[data-key]'));
+    var fill = document.getElementById('progress-fill');
+    var count = document.getElementById('progress-count');
+    var total = cards.length;
+
+    var saved = {};
+    try { saved = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
+
+    function render() {
+      var done = 0;
+      cards.forEach(function (card) {
+        var isDone = !!saved[card.getAttribute('data-key')];
+        card.classList.toggle('done', isDone);
+        if (isDone) done++;
+      });
+      fill.style.width = (total ? (done / total) * 100 : 0) + '%';
+      count.textContent = done + ' of ' + total + ' covered';
+    }
+
+    cards.forEach(function (card) {
+      var btn = card.querySelector('.tick');
+      btn.addEventListener('click', function () {
+        var key = card.getAttribute('data-key');
+        saved[key] = !saved[key];
+        try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) {}
+        render();
+      });
+    });
+
+    render();
+  })();
+</script>
+
+</body>
+</html>

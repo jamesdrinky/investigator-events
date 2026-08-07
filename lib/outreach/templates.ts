@@ -93,6 +93,80 @@ Mike LaCorte
 Investigator Events · investigatorevents.com`;
 }
 
+// ---------------------------------------------------------------------------
+// Console-era association pitches (drafted Aug 2026 — James/Mike to approve
+// wording before use). Two variants: a fresh pitch leading with the Event
+// Console, and a follow-up for associations we already emailed.
+// ---------------------------------------------------------------------------
+
+export function buildConsolePitchSubject(associationName: string) {
+  return `${associationName}'s events — add them once, they go everywhere`;
+}
+
+export function buildConsolePitchEmail(
+  associationName: string,
+  partnerUrl: string,
+  consoleUrl: string,
+  upcomingCount: number,
+  contactName?: string
+) {
+  const greeting = contactName?.trim() ? `Hi ${contactName.trim()},` : 'Hi [name],';
+  const eventsLine =
+    upcomingCount > 0
+      ? `We already list ${upcomingCount} of your upcoming ${upcomingCount === 1 ? 'event' : 'events'}, so everything below works today.`
+      : `Your calendar is ready to take its first event today.`;
+
+  return `${greeting}
+
+I'm Mike LaCorte, one of the founders of Investigator Events — the global events calendar for the investigations profession.
+
+We've built ${associationName} something I think your events secretary will actually enjoy using: a free console where you manage your own events, once, in one place:
+
+${consoleUrl}
+
+Add an event there and — after our team verifies it — it appears simultaneously on:
+• your own website (a live events section we host for you — one line of code, zero maintenance),
+• the global industry calendar thousands of investigators check,
+• and the personal calendars of every member who subscribes (one click, Google/Apple/Outlook).
+
+${eventsLine} You can see the website piece already running in your colours here: ${partnerUrl}
+
+All of it is free — our platform simply gets stronger the more complete the calendar is. If you'd like it switched on, reply with the name and email of whoever runs your events and we'll set them up the same day.
+
+Warm regards,
+Mike LaCorte
+Investigator Events · investigatorevents.com`;
+}
+
+export function buildConsoleFollowUpSubject(associationName: string) {
+  return `Since I last wrote — ${associationName} can now run its events through us`;
+}
+
+export function buildConsoleFollowUpEmail(
+  associationName: string,
+  partnerUrl: string,
+  consoleUrl: string,
+  contactName?: string
+) {
+  const greeting = contactName?.trim() ? `Hi ${contactName.trim()},` : 'Hi [name],';
+
+  return `${greeting}
+
+Mike LaCorte again from Investigator Events — I wrote a while back about the live events calendar we built for ${associationName} (${partnerUrl}).
+
+Quick note because we've since launched the piece that makes it genuinely useful day-to-day: an Event Console for associations.
+
+${consoleUrl}
+
+Your events secretary adds an event once — we verify it — and it's instantly on your website, the global industry calendar, and the personal calendars of every member who's subscribed. No more updating three places, and the website section maintains itself.
+
+Still free, still one line of code for your site. If you'd like it switched on, just reply with the email of whoever runs your events and we'll sort them out the same day.
+
+Warm regards,
+Mike LaCorte
+Investigator Events · investigatorevents.com`;
+}
+
 export function buildOutreachEmailSubject(e: OutreachEventInfo) {
   return `${e.title} is featured on Investigator Events`;
 }

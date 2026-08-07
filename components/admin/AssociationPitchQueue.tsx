@@ -4,7 +4,14 @@ import { useMemo, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { Check, ChevronDown, ChevronUp, Copy, ExternalLink, Link2, Loader2, Mail } from 'lucide-react';
 import { updateAssociationOutreachAction } from '@/app/admin/outreach/actions';
-import { buildAssociationPitchEmail, buildAssociationPitchSubject } from '@/lib/outreach/templates';
+import {
+  buildAssociationPitchEmail,
+  buildAssociationPitchSubject,
+  buildConsoleFollowUpEmail,
+  buildConsoleFollowUpSubject,
+  buildConsolePitchEmail,
+  buildConsolePitchSubject,
+} from '@/lib/outreach/templates';
 
 export interface AssociationPitchRow {
   slug: string;
@@ -19,6 +26,8 @@ export interface AssociationPitchRow {
   contactEmail: string;
   notes: string;
   lastContactedAt: string | null;
+  hasConsolePage: boolean;
+  priorSendAt: string | null;
 }
 
 const STATUS_META: Record<AssociationPitchRow['status'], { label: string; classes: string }> = {
@@ -40,6 +49,7 @@ const STATUS_ORDER: AssociationPitchRow['status'][] = [
 ];
 
 type Filter = 'todo' | AssociationPitchRow['status'] | 'all';
+type TemplateKey = 'console' | 'followup' | 'original';
 
 export function AssociationPitchQueue({ rows }: { rows: AssociationPitchRow[] }) {
   const [filter, setFilter] = useState<Filter>('todo');
@@ -116,7 +126,29 @@ function PitchRow({ row, expanded, onToggle }: { row: AssociationPitchRow; expan
   const [copied, setCopied] = useState<string | null>(null);
 
   const partnerUrl = `https://www.investigatorevents.com/partners/${row.slug}`;
+  const consoleUrl = `https://www.investigatorevents.com/associations/${row.slug}/manage`;
   const meta = STATUS_META[row.status];
+
+  // Steer the template: already-contacted associations (tracker status OR a
+  // send in the outreach ledger) get the follow-up; fresh ones get the
+  // console pitch; associations without a console page fall back to the
+  // original widget pitch.
+  const alreadyContacted = row.priorSendAt !== null || row.status === 'sent' || row.status === 'replied';
+  const defaultTemplate: TemplateKey = !row.hasConsolePage ? 'original' : alreadyContacted ? 'followup' : 'console';
+  const [template, setTemplate] = useState<TemplateKey>(defaultTemplate);
+
+  const templateSubject =
+    template === 'console'
+      ? buildConsolePitchSubject(row.name)
+      : template === 'followup'
+        ? buildConsoleFollowUpSubject(row.name)
+        : buildAssociationPitchSubject(row.name);
+  const templateBody =
+    template === 'console'
+      ? buildConsolePitchEmail(row.name, partnerUrl, consoleUrl, row.upcomingCount, contactName)
+      : template === 'followup'
+        ? buildConsoleFollowUpEmail(row.name, partnerUrl, consoleUrl, contactName)
+        : buildAssociationPitchEmail(row.name, partnerUrl, row.upcomingCount, contactName);
 
   const save = (status: AssociationPitchRow['status']) => {
     const fd = new FormData();
@@ -185,6 +217,11 @@ function PitchRow({ row, expanded, onToggle }: { row: AssociationPitchRow; expan
                 Last pitched {new Date(row.lastContactedAt).toLocaleDateString('en-GB')}
               </span>
             )}
+            {row.priorSendAt && (
+              <span className="rounded-full bg-amber-50 px-2.5 py-1 font-semibold text-amber-600">
+                emailed before ({new Date(row.priorSendAt).toLocaleDateString('en-GB')}) — follow-up preselected
+              </span>
+            )}
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
@@ -211,17 +248,34 @@ function PitchRow({ row, expanded, onToggle }: { row: AssociationPitchRow; expan
           />
 
           <div className="flex flex-wrap items-center gap-2">
+            <div className="flex rounded-full border border-slate-200 p-0.5 text-[11px] font-semibold">
+              {(
+                [
+                  row.hasConsolePage && ['console', 'Console pitch'],
+                  row.hasConsolePage && ['followup', 'Follow-up'],
+                  ['original', 'Original'],
+                ].filter(Boolean) as [TemplateKey, string][]
+              ).map(([key, label]) => (
+                <button
+                  key={key}
+                  onClick={() => setTemplate(key)}
+                  className={`rounded-full px-2.5 py-1 transition ${template === key ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
             <button
-              onClick={() => copy('email', buildAssociationPitchEmail(row.name, partnerUrl, row.upcomingCount, contactName))}
+              onClick={() => copy('email', templateBody)}
               className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold transition ${
                 copied === 'email' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-900 text-white hover:bg-slate-700'
               }`}
             >
               {copied === 'email' ? <Check className="h-3.5 w-3.5" /> : <Mail className="h-3.5 w-3.5" />}
-              {copied === 'email' ? 'Email copied' : "Copy Mike's pitch"}
+              {copied === 'email' ? 'Email copied' : "Copy Mike's email"}
             </button>
             <button
-              onClick={() => copy('subject', buildAssociationPitchSubject(row.name))}
+              onClick={() => copy('subject', templateSubject)}
               className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-xs font-semibold transition ${
                 copied === 'subject'
                   ? 'border-emerald-200 bg-emerald-100 text-emerald-700'

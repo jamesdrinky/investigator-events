@@ -15,7 +15,7 @@ export async function GET(request: Request) {
   const authError = verifyCronSecret(request);
   if (authError) return authError;
 
-  const sweep = await sweepAllSources().catch((err) => {
+  const sweep = await sweepAllSources(60).catch((err) => {
     console.error('Source sweep failed:', err);
     return [];
   });

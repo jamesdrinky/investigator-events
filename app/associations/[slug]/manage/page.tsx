@@ -41,7 +41,7 @@ export default async function ManageAssociationPage({ params }: { params: { slug
           <p className="mt-2 text-sm text-slate-500">
             Sign in to your Investigator Events account to manage this association&apos;s events.
           </p>
-          <Link href={`/signin?redirect=/associations/${page.slug}/manage`} className="btn-primary mt-5 inline-block px-6 py-2.5 text-sm">
+          <Link href={`/signin?next=${encodeURIComponent(`/associations/${page.slug}/manage`)}`} className="btn-primary mt-5 inline-block px-6 py-2.5 text-sm">
             Sign in
           </Link>
         </div>

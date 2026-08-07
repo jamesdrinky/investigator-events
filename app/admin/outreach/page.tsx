@@ -62,6 +62,18 @@ export default async function OutreachAdminPage({
       supabase.from('association_pages').select('slug, contact_email'),
       supabase.from('partner_requests').select('*').order('created_at', { ascending: false }),
     ]);
+  // Every email address we've EVER sent outreach to (any campaign), so the
+  // queue can steer toward the follow-up template instead of re-pitching cold.
+  const { data: sentRows } = await (supabase
+    .from('outreach_sends')
+    .select('recipient_email, sent_at')
+    .not('sent_at', 'is', null) as any);
+  const lastSendByEmail = new Map<string, string>();
+  for (const row of (sentRows ?? []) as { recipient_email: string; sent_at: string }[]) {
+    const key = row.recipient_email.trim().toLowerCase();
+    const prev = lastSendByEmail.get(key);
+    if (!prev || row.sent_at > prev) lastSendByEmail.set(key, row.sent_at);
+  }
   const partnerRequests = (partnerRows ?? []) as PartnerRequestRow[];
   const newRequests = partnerRequests.filter((r) => r.status === 'new').length;
 
@@ -118,6 +130,7 @@ export default async function OutreachAdminPage({
             (label) => label && a.aliases.some((al) => al.toLowerCase() === label.trim().toLowerCase())
           )
       ).length;
+      const contactEmail = rec?.contact_email ?? contactBySlug.get(a.slug) ?? '';
       return {
         slug: a.slug,
         name: a.name,
@@ -128,9 +141,11 @@ export default async function OutreachAdminPage({
         upcomingCount,
         status: (rec?.status ?? 'not_started') as AssociationPitchRow['status'],
         contactName: rec?.contact_name ?? '',
-        contactEmail: rec?.contact_email ?? contactBySlug.get(a.slug) ?? '',
+        contactEmail,
         notes: rec?.notes ?? '',
         lastContactedAt: rec?.last_contacted_at ?? null,
+        hasConsolePage: contactBySlug.has(a.slug),
+        priorSendAt: contactEmail ? (lastSendByEmail.get(contactEmail.trim().toLowerCase()) ?? null) : null,
       };
     })
     .sort((a, b) => b.upcomingCount - a.upcomingCount || a.name.localeCompare(b.name));

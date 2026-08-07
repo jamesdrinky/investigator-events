@@ -238,6 +238,13 @@ export default async function AssociationPage({ params }: { params: { slug: stri
         platformMembers={totalMemberCount}
         verifiedCount={verifiedSet.size}
       />
+      <p className="pb-10 text-center text-xs text-slate-400">
+        Run {page.name}?{' '}
+        <a href={`/associations/${page.slug}/manage`} className="font-semibold text-blue-600 hover:underline">
+          Manage your events here
+        </a>{' '}
+        — free, verified by Investigator Events.
+      </p>
     </main>
   );
 }

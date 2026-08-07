@@ -384,7 +384,7 @@ function statPill(value: string | number, label: string) {
 }
 
 export function buildWeeklyNewsletterHtml({
-  upcoming, newlyAdded, featured, recentlyPast = [], unsubscribeToken, appPush, globalLaunchBanner, preheader, editorial,
+  upcoming, newlyAdded, featured, recentlyPast = [], unsubscribeToken, appPush, globalLaunchBanner, preheader, editorial, referralBlock = false,
 }: {
   upcoming: EventItem[];
   newlyAdded: EventItem[];
@@ -395,6 +395,8 @@ export function buildWeeklyNewsletterHtml({
   globalLaunchBanner?: boolean;
   preheader?: string;
   editorial?: WeeklyEditorial | null;
+  /** Gated on the newsletter_referral feature flag — OFF until approved. */
+  referralBlock?: boolean;
 }): string {
   const displayUpcoming = mergeBearstoneNewsletterEvents(upcoming);
   const displayNewlyAdded = mergeBearstoneNewsletterEvents(newlyAdded);
@@ -632,6 +634,17 @@ export function buildWeeklyNewsletterHtml({
     <td width="33%" style="height:3px;background-color:${C.pink};font-size:0;line-height:0;">&nbsp;</td>
   </tr></table>
 </td></tr>
+
+${referralBlock ? `
+<!-- Referral: the 308 recruiting the next 308 -->
+<tr><td style="padding:20px 32px 4px;">
+  <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="border-radius:14px;background-color:#eef3fd;border:1px solid #dbe6fb;">
+    <tr><td style="padding:18px 22px;text-align:center;">
+      <p style="margin:0;font-size:15px;font-weight:700;color:#0c1526;">Know one colleague who'd use this?</p>
+      <p style="margin:6px 0 0;font-size:13px;color:#5d6d88;line-height:1.6;">Most investigators still find out about conferences by accident. Forward this email — or send them <a href="${SITE}/?utm_source=newsletter&utm_medium=referral" style="color:#2563eb;font-weight:700;text-decoration:none;">investigatorevents.com</a> — and they'll never miss one again.</p>
+    </td></tr>
+  </table>
+</td></tr>` : ''}
 
 <!-- Footer -->
 <tr><td style="padding:24px 8px 12px;text-align:center;">

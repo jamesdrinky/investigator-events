@@ -48,6 +48,20 @@ export function AttendeeAvatars({ eventId }: { eventId: string }) {
     setIsGoing(attendees.some((a) => a.user_id === userId));
   }, [userId, attendees]);
 
+  // Who does the viewer follow? Powers "· N you follow" social proof.
+  const [followedIds, setFollowedIds] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    if (!userId) return;
+    const supabase = createSupabaseBrowserClient();
+    supabase
+      .from('followers')
+      .select('following_id')
+      .eq('follower_id', userId)
+      .then(({ data }) => {
+        setFollowedIds(new Set((data ?? []).map((r: any) => r.following_id).filter(Boolean)));
+      });
+  }, [userId]);
+
   // Lock background scroll while the expanded attendee modal is open.
   useEffect(() => {
     if (!showAll) return;
@@ -86,7 +100,11 @@ export function AttendeeAvatars({ eventId }: { eventId: string }) {
     setToggling(false);
   };
 
-  const shown = attendees.slice(0, 5);
+  const followedGoing = attendees.filter((a) => followedIds.has(a.user_id) && a.user_id !== userId);
+  const ordered = [...attendees].sort(
+    (a, b) => Number(followedIds.has(b.user_id)) - Number(followedIds.has(a.user_id))
+  );
+  const shown = ordered.slice(0, 5);
   const extra = total - shown.length;
 
   return (
@@ -142,7 +160,8 @@ export function AttendeeAvatars({ eventId }: { eventId: string }) {
               <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">+{extra}</span>
             )}
             <span className="flex items-center gap-1 text-xs font-medium text-slate-400 transition group-hover:text-blue-600">
-              {total} going {showAll ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+              {total} going{followedGoing.length > 0 ? ` · ${followedGoing.length} you follow` : ''}{' '}
+              {showAll ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
             </span>
           </button>
         </div>
@@ -203,6 +222,11 @@ export function AttendeeAvatars({ eventId }: { eventId: string }) {
                         <p className="truncate text-sm font-medium text-slate-900">{a.full_name ?? 'Investigator'}</p>
                         {a.specialisation && <p className="truncate text-[11px] text-slate-400">{a.specialisation}</p>}
                       </div>
+                    )}
+                    {followedIds.has(a.user_id) && !isMe && (
+                      <span className="flex-shrink-0 rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-600">
+                        You follow
+                      </span>
                     )}
                     {userId && !isMe && (
                       <Link

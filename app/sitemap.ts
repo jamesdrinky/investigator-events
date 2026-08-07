@@ -55,5 +55,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }));
 
-  return [...staticPages, ...eventPages, ...countryPages, ...partnerPages];
+  // Month pages exist only for months with events (matching the route's 404 rule).
+  const monthKeys = [...new Set(events.filter((e) => e.eventScope === 'main').map((e) => e.date.slice(0, 7)))].sort();
+  const monthPages: MetadataRoute.Sitemap = monthKeys.map((key) => ({
+    url: `${BASE_URL}/events/month/${key}`,
+    changeFrequency: 'daily' as const,
+    priority: 0.7,
+  }));
+
+  return [...staticPages, ...eventPages, ...countryPages, ...partnerPages, ...monthPages];
 }

@@ -4,7 +4,7 @@
 // see what's live and what's pending, request edits/removals.
 
 import { useState } from 'react';
-import { Calendar, CheckCircle2, Clock, ExternalLink, Loader2, MapPin, Pencil, Plus, Send, Trash2 } from 'lucide-react';
+import { BadgeCheck, Calendar, CheckCircle2, Clock, Copy, ExternalLink, Loader2, MapPin, Pencil, Plus, Send, Star, Trash2, Users } from 'lucide-react';
 
 const REGIONS = ['Europe', 'North America', 'Asia-Pacific', 'Middle East', 'Latin America', 'Africa'];
 const CATEGORIES = [
@@ -32,6 +32,15 @@ interface LiveEvent {
   city: string;
   country: string;
   upcoming: boolean;
+  going: number;
+  rating: number | null;
+  reviewCount: number;
+}
+
+interface ConsoleStats {
+  upcoming: number;
+  members: number;
+  totalGoing: number;
 }
 
 interface PendingSubmission {
@@ -160,18 +169,48 @@ function ChangeRequestButton({ slug, eventTitle, kind }: { slug: string; eventTi
   );
 }
 
+function BadgeSnippetButton({ eventSlug, rated }: { eventSlug: string; rated: boolean }) {
+  const [copied, setCopied] = useState(false);
+  const snippet = `<a href="https://www.investigatorevents.com/events/${eventSlug}" target="_blank" rel="noopener"><img src="https://www.investigatorevents.com/api/badge/${eventSlug}" alt="${rated ? 'Rated by investigators on' : 'Listed on'} Investigator Events" height="52" style="height:52px"></a>`;
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(snippet);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  return (
+    <button
+      onClick={copy}
+      title="Copy the badge embed code for your event website"
+      className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-bold transition ${
+        copied ? 'border-emerald-200 bg-emerald-50 text-emerald-600' : 'border-slate-200 text-slate-500 hover:bg-slate-50'
+      }`}
+    >
+      {copied ? <CheckCircle2 className="h-3 w-3" /> : <BadgeCheck className="h-3 w-3" />}
+      {copied ? 'Copied' : rated ? 'Rating badge' : 'Badge'}
+    </button>
+  );
+}
+
 export function AssociationConsole({
   slug,
   name,
   logoUrl,
   liveEvents,
   pendingSubmissions,
+  stats,
 }: {
   slug: string;
   name: string;
   logoUrl: string | null;
   liveEvents: LiveEvent[];
   pendingSubmissions: PendingSubmission[];
+  stats: ConsoleStats;
 }) {
   const [showForm, setShowForm] = useState(liveEvents.length === 0 && pendingSubmissions.length === 0);
   const [fields, setFields] = useState({
@@ -243,6 +282,22 @@ export function AssociationConsole({
             Add an event once — after Investigator Events verifies it, it appears on your website widget, the
             global calendar, and every member&apos;s subscribed calendar automatically.
           </p>
+        </div>
+      </div>
+
+      {/* The numbers */}
+      <div className="mt-6 grid grid-cols-3 gap-3">
+        <div className="rounded-2xl border border-slate-200/60 bg-white p-4 text-center shadow-sm">
+          <p className="text-2xl font-bold tabular-nums text-slate-900">{stats.upcoming}</p>
+          <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-400">Upcoming events</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200/60 bg-white p-4 text-center shadow-sm">
+          <p className="text-2xl font-bold tabular-nums text-slate-900">{stats.members}</p>
+          <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-400">Members on IE</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200/60 bg-white p-4 text-center shadow-sm">
+          <p className="text-2xl font-bold tabular-nums text-slate-900">{stats.totalGoing}</p>
+          <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-400">RSVPs across events</p>
         </div>
       </div>
 
@@ -363,13 +418,23 @@ export function AssociationConsole({
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-slate-900">{e.title}</p>
-                    <p className="flex flex-wrap items-center gap-x-3 text-xs text-slate-500">
+                    <p className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-slate-500">
                       <span className="inline-flex items-center gap-1">
                         <Calendar className="h-3 w-3" /> {formatRange(e.date, e.endDate)}
                       </span>
                       <span className="inline-flex items-center gap-1">
                         <MapPin className="h-3 w-3" /> {e.city}, {e.country}
                       </span>
+                      {e.going > 0 && (
+                        <span className="inline-flex items-center gap-1 font-semibold text-blue-600">
+                          <Users className="h-3 w-3" /> {e.going} going
+                        </span>
+                      )}
+                      {e.rating !== null && (
+                        <span className="inline-flex items-center gap-1 font-semibold text-amber-600">
+                          <Star className="h-3 w-3 fill-amber-400 text-amber-400" /> {e.rating.toFixed(1)} ({e.reviewCount})
+                        </span>
+                      )}
                       {!e.upcoming && <span className="font-semibold text-slate-400">past</span>}
                     </p>
                   </div>
@@ -383,6 +448,7 @@ export function AssociationConsole({
                   </a>
                   <ChangeRequestButton slug={slug} eventTitle={e.title} kind="edit" />
                   <ChangeRequestButton slug={slug} eventTitle={e.title} kind="remove" />
+                  <BadgeSnippetButton eventSlug={e.slug} rated={e.rating !== null} />
                 </div>
               </div>
             ))

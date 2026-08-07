@@ -60,9 +60,10 @@ export default async function ManageAssociationPage({ params }: { params: { slug
   }
 
   // Their live events + their submissions still in review.
+  const adminDb = createSupabaseAdminServerClient();
   const [allEvents, pendingResult] = await Promise.all([
     fetchAllEvents(),
-    (createSupabaseAdminServerClient()
+    (adminDb
       .from('event_submissions')
       .select('id, event_name, start_date, end_date, city, country, status, created_at')
       .eq('organiser', page.name)
@@ -71,19 +72,60 @@ export default async function ManageAssociationPage({ params }: { params: { slug
   ]);
 
   const now = Date.now();
-  const liveEvents = allEvents
-    .filter((e) => eventMatchesAssociation(e, page))
-    .map((e) => ({
-      id: e.id,
-      title: e.title,
-      slug: e.slug,
-      date: e.date,
-      endDate: e.endDate ?? null,
-      city: e.city,
-      country: e.country,
-      upcoming: new Date(`${e.endDate ?? e.date}T23:59:59Z`).getTime() >= now,
-    }))
+  const matched = allEvents.filter((e) => eventMatchesAssociation(e, page));
+  const eventIds = matched.map((e) => e.id);
+
+  // The numbers: RSVPs and ratings per event, members on the platform.
+  const [attendeesResult, reviewsResult, membersResult] = await Promise.all([
+    eventIds.length
+      ? (adminDb.from('event_attendees').select('event_id').eq('is_going', true).in('event_id', eventIds) as any)
+      : Promise.resolve({ data: [] }),
+    eventIds.length
+      ? (adminDb.from('event_reviews').select('event_id, rating').in('event_id', eventIds) as any)
+      : Promise.resolve({ data: [] }),
+    (adminDb
+      .from('user_associations')
+      .select('id', { count: 'exact', head: true })
+      .or(`association_slug.eq.${page.slug},association_name.ilike.%${page.name}%`) as any),
+  ]);
+
+  const goingByEvent = new Map<string, number>();
+  for (const row of (attendeesResult.data ?? []) as { event_id: string }[]) {
+    goingByEvent.set(row.event_id, (goingByEvent.get(row.event_id) ?? 0) + 1);
+  }
+  const ratingsByEvent = new Map<string, { sum: number; count: number }>();
+  for (const row of (reviewsResult.data ?? []) as { event_id: string; rating: number | null }[]) {
+    if (typeof row.rating !== 'number') continue;
+    const agg = ratingsByEvent.get(row.event_id) ?? { sum: 0, count: 0 };
+    agg.sum += row.rating;
+    agg.count += 1;
+    ratingsByEvent.set(row.event_id, agg);
+  }
+
+  const liveEvents = matched
+    .map((e) => {
+      const ratings = ratingsByEvent.get(e.id);
+      return {
+        id: e.id,
+        title: e.title,
+        slug: e.slug,
+        date: e.date,
+        endDate: e.endDate ?? null,
+        city: e.city,
+        country: e.country,
+        upcoming: new Date(`${e.endDate ?? e.date}T23:59:59Z`).getTime() >= now,
+        going: goingByEvent.get(e.id) ?? 0,
+        rating: ratings && ratings.count > 0 ? Math.round((ratings.sum / ratings.count) * 10) / 10 : null,
+        reviewCount: ratings?.count ?? 0,
+      };
+    })
     .sort((a, b) => (a.date < b.date ? 1 : -1));
+
+  const stats = {
+    upcoming: liveEvents.filter((e) => e.upcoming).length,
+    members: membersResult.count ?? 0,
+    totalGoing: [...goingByEvent.values()].reduce((sum, n) => sum + n, 0),
+  };
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-white">
@@ -94,6 +136,7 @@ export default async function ManageAssociationPage({ params }: { params: { slug
           logoUrl={page.logo_url}
           liveEvents={liveEvents}
           pendingSubmissions={(pendingResult.data ?? []) as any[]}
+          stats={stats}
         />
       </div>
     </main>

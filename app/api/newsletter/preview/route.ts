@@ -3,6 +3,7 @@ import { Resend } from 'resend';
 import { fetchAllEvents } from '@/lib/data/events';
 import { getWeeklyCollections } from '@/lib/data/weekly';
 import { buildWeeklyNewsletterHtml } from '@/lib/email/weekly-newsletter';
+import { isFeatureEnabled } from '@/lib/data/feature-flags';
 import { buildRotatingWeeklySubject, getWeeklyNewsletterAppPush, getWeeklyNewsletterEdition, getWeeklyNewsletterSubject } from '@/lib/email/newsletter-editions';
 import { fetchCurrentEditorial } from '@/lib/email/weekly-editorial';
 import { verifyCronSecret } from '@/lib/security/server';
@@ -46,6 +47,8 @@ export async function GET(request: Request) {
 
   const editorial = await fetchCurrentEditorial(createSupabaseAdminServerClient());
 
+  // ?referral=1 forces the block on so it can be reviewed before the flag flips.
+  const referralBlock = searchParams.get('referral') === '1' || (await isFeatureEnabled('newsletter_referral', false));
   const html = buildWeeklyNewsletterHtml({
     upcoming,
     newlyAdded,
@@ -54,6 +57,7 @@ export async function GET(request: Request) {
     unsubscribeToken: 'preview-token',
     appPush,
     editorial,
+    referralBlock,
   });
 
   const sendTo = searchParams.get('send');

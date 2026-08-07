@@ -4,6 +4,7 @@ import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { fetchAllEvents } from '@/lib/data/events';
 import { getWeeklyCollections } from '@/lib/data/weekly';
 import { buildWeeklyNewsletterHtml } from '@/lib/email/weekly-newsletter';
+import { isFeatureEnabled } from '@/lib/data/feature-flags';
 import { buildRotatingWeeklySubject, getWeeklyNewsletterAppPush, getWeeklyNewsletterEdition, getWeeklyNewsletterSubject } from '@/lib/email/newsletter-editions';
 import { fetchCurrentEditorial } from '@/lib/email/weekly-editorial';
 import { verifyCronSecret } from '@/lib/security/server';
@@ -57,6 +58,8 @@ export async function GET(request: Request) {
     },
     editorial?.subjectOverride
   );
+  // OFF by default — flip the newsletter_referral flag once wording is approved.
+  const referralBlock = await isFeatureEnabled('newsletter_referral', false);
   const subject = getWeeklyNewsletterSubject(edition, fallbackSubject);
   const appPush = getWeeklyNewsletterAppPush(edition);
 
@@ -110,6 +113,7 @@ export async function GET(request: Request) {
             unsubscribeToken: sub.unsubscribe_token,
             appPush,
             editorial,
+            referralBlock,
           }),
         }))
       );

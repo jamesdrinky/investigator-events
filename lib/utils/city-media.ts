@@ -11,6 +11,11 @@ const cityImageMap: Record<string, string> = {
   'Philadelphia, Pennsylvania': 'filly.jpg',
   'Orlando': 'orlando.jpg',
   'Orlando, FL': 'orlando.jpg',
+  // Tampa has no dedicated shot yet — the Florida gulf-coast aerial reads right.
+  'Tampa': 'bonitasprings.jpg',
+  'Tampa, FL': 'bonitasprings.jpg',
+  // Some events list just "Florida" as the city.
+  'Florida': 'orlando.jpg',
   'San Antonio': 'sanantonio.jpg',
   'San Antonio, TX': 'sanantonio.jpg',
   'Venice': 'venice.jpg',

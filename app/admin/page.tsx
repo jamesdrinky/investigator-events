@@ -124,7 +124,7 @@ function EventFields({
       </div>
       <div className="sm:col-span-2">
         <label htmlFor={`${idPrefix}-description`} className="text-xs font-medium uppercase tracking-wider text-slate-500">Description</label>
-        <textarea id={`${idPrefix}-description`} name="description" rows={3} required defaultValue={defaults?.description ?? ''} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20" />
+        <textarea id={`${idPrefix}-description`} name="description" rows={3} placeholder="Optional — leave blank and a description is generated from the event details" defaultValue={defaults?.description ?? ''} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20" />
       </div>
       <div className="sm:col-span-2">
         <label htmlFor={`${idPrefix}-website`} className="text-xs font-medium uppercase tracking-wider text-slate-500">Website</label>

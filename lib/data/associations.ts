@@ -244,6 +244,15 @@ export const associationRecords: AssociationRecord[] = [
   },
   // ── Additional European ──
   {
+    slug: 'codega',
+    shortName: 'CODEGA',
+    name: 'Colegio Profesional de Detectives Privados de Galicia',
+    country: 'Spain',
+    region: 'Europe',
+    website: 'https://www.codega.es',
+    aliases: ['CODEGA', 'Colegio Profesional de Detectives Privados de Galicia', 'Colegio de Detectives de Galicia'],
+  },
+  {
     slug: 'codpcat',
     shortName: 'CODPCAT',
     name: "Col·legi Oficial de Detectius Privats de Catalunya",

@@ -354,6 +354,15 @@ export const associationRecords: AssociationRecord[] = [
     logoFileName: 'fali.png'
   },
   {
+    slug: 'pali',
+    shortName: 'PALI',
+    name: 'Pennsylvania Association of Licensed Investigators',
+    country: 'United States',
+    region: 'North America',
+    website: 'https://www.pali.org',
+    aliases: ['PALI', 'Pennsylvania Association of Licensed Investigators'],
+  },
+  {
     slug: 'cali',
     shortName: 'CALI',
     name: 'California Association of Licensed Investigators',

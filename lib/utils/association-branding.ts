@@ -8,6 +8,12 @@ type AssociationBrandingRecord = {
 
 const associationBrandingRecords: AssociationBrandingRecord[] = [
   {
+    name: 'Pennsylvania Association of Licensed Investigators',
+    shortName: 'PALI',
+    aliases: ['PALI', 'Pennsylvania Association of Licensed Investigators'],
+    logoFileName: 'pali.jpg'
+  },
+  {
     name: 'Association of British Investigators',
     shortName: 'ABI',
     aliases: ['Association of British Investigators', 'Association of British Investigators (ABI)', 'ABI'],

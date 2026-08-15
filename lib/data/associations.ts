@@ -361,6 +361,7 @@ export const associationRecords: AssociationRecord[] = [
     region: 'North America',
     website: 'https://www.pali.org',
     aliases: ['PALI', 'Pennsylvania Association of Licensed Investigators'],
+    logoFileName: 'pali.jpg'
   },
   {
     slug: 'cali',

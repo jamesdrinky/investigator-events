@@ -4,7 +4,7 @@
 // see what's live and what's pending, request edits/removals.
 
 import { useState } from 'react';
-import { BadgeCheck, Calendar, CalendarPlus, CheckCircle2, Clock, Copy, ExternalLink, Globe, LayoutPanelTop, Loader2, MapPin, Pencil, Plus, Send, Star, Trash2, Users } from 'lucide-react';
+import { BadgeCheck, Calendar, CalendarPlus, Check, CheckCircle2, Clock, Copy, ExternalLink, Globe, LayoutPanelTop, Loader2, MapPin, Pencil, Plus, Send, Star, Trash2, Users } from 'lucide-react';
 
 const REGIONS = ['Europe', 'North America', 'Asia-Pacific', 'Middle East', 'Latin America', 'Africa'];
 const CATEGORIES = [
@@ -31,6 +31,10 @@ interface LiveEvent {
   endDate: string | null;
   city: string;
   country: string;
+  region: string;
+  category: string;
+  description: string;
+  website: string;
   upcoming: boolean;
   going: number;
   rating: number | null;
@@ -166,6 +170,130 @@ function ChangeRequestButton({ slug, eventTitle, kind }: { slug: string; eventTi
         Send
       </button>
     </span>
+  );
+}
+
+function EventEditor({ slug, event }: { slug: string; event: LiveEvent }) {
+  const [open, setOpen] = useState(false);
+  const [fields, setFields] = useState({
+    title: event.title,
+    startDate: event.date,
+    endDate: event.endDate ?? '',
+    city: event.city,
+    country: event.country,
+    region: event.region,
+    category: event.category,
+    description: event.description,
+    website: event.website,
+  });
+  const [state, setState] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [error, setError] = useState('');
+
+  const set = (key: keyof typeof fields) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
+    setFields((f) => ({ ...f, [key]: e.target.value }));
+
+  const save = async () => {
+    setState('saving');
+    setError('');
+    try {
+      const res = await fetch('/api/association-console', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update-event', slug, eventId: event.id, fields: { ...fields, endDate: fields.endDate || '' } }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? 'Could not save');
+      setState('saved');
+      setTimeout(() => {
+        setState('idle');
+        setOpen(false);
+        window.location.reload();
+      }, 900);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not save');
+      setState('idle');
+    }
+  };
+
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="inline-flex items-center gap-1 rounded-full bg-blue-600 px-3 py-1 text-[11px] font-bold text-white transition hover:bg-blue-500"
+      >
+        <Pencil className="h-3 w-3" /> Edit
+      </button>
+    );
+  }
+
+  return (
+    <div className="mt-3 w-full rounded-xl border border-blue-100 bg-blue-50/40 p-4">
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="sm:col-span-2">
+          <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Title</label>
+          <input className={inputCls} value={fields.title} onChange={set('title')} />
+        </div>
+        <div>
+          <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Start date</label>
+          <input type="date" className={inputCls} value={fields.startDate} onChange={set('startDate')} />
+        </div>
+        <div>
+          <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">End date</label>
+          <input type="date" className={inputCls} value={fields.endDate} onChange={set('endDate')} />
+        </div>
+        <div>
+          <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">City</label>
+          <input className={inputCls} value={fields.city} onChange={set('city')} />
+        </div>
+        <div>
+          <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Country</label>
+          <input className={inputCls} value={fields.country} onChange={set('country')} />
+        </div>
+        <div>
+          <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Region</label>
+          <select className={inputCls} value={fields.region} onChange={set('region')}>
+            {REGIONS.map((r) => (
+              <option key={r} value={r}>
+                {r}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Type</label>
+          <select className={inputCls} value={fields.category} onChange={set('category')}>
+            {[...new Set([fields.category, ...CATEGORIES])].filter(Boolean).map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="sm:col-span-2">
+          <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Event website</label>
+          <input className={inputCls} value={fields.website} onChange={set('website')} />
+        </div>
+        <div className="sm:col-span-2">
+          <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Description</label>
+          <textarea className={`${inputCls} min-h-[90px]`} value={fields.description} onChange={set('description')} />
+        </div>
+      </div>
+      {error && <p className="mt-2 text-sm font-medium text-rose-600">{error}</p>}
+      <div className="mt-3 flex items-center gap-2">
+        <button
+          onClick={save}
+          disabled={state === 'saving'}
+          className="inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-blue-500 disabled:opacity-50"
+        >
+          {state === 'saving' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : state === 'saved' ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Check className="h-3.5 w-3.5" />}
+          {state === 'saved' ? 'Saved — updating everywhere' : 'Save changes'}
+        </button>
+        <button onClick={() => setOpen(false)} className="rounded-full border border-slate-200 px-4 py-2 text-xs font-bold text-slate-500 transition hover:bg-slate-50">
+          Cancel
+        </button>
+        <p className="ml-auto text-[11px] text-slate-400">Changes go live immediately — the IE team is notified.</p>
+      </div>
+    </div>
   );
 }
 
@@ -475,7 +603,7 @@ export function AssociationConsole({
                   >
                     <ExternalLink className="h-3 w-3" /> View
                   </a>
-                  <ChangeRequestButton slug={slug} eventTitle={e.title} kind="edit" />
+                  <EventEditor slug={slug} event={e} />
                   <ChangeRequestButton slug={slug} eventTitle={e.title} kind="remove" />
                   <BadgeSnippetButton eventSlug={e.slug} rated={e.rating !== null} />
                 </div>

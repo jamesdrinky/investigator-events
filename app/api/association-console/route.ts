@@ -108,6 +108,64 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true });
   }
 
+  // ── Direct edit of a live event ──────────────────────────────────────────
+  // Verified managers edit their own events in place — no review round-trip.
+  // Every edit is emailed to the team as an audit trail, and only events that
+  // actually belong to the association are editable. Title edits keep the
+  // existing slug so links never break.
+  if (body.action === 'update-event') {
+    const eventId = typeof body.eventId === 'string' ? body.eventId : '';
+    const f = body.fields ?? {};
+    if (!eventId) return NextResponse.json({ error: 'Missing event' }, { status: 400 });
+
+    const { data: event } = await (admin
+      .from('events')
+      .select('id, title, slug, association, organiser')
+      .eq('id', eventId)
+      .maybeSingle() as any);
+    if (!event) return NextResponse.json({ error: 'Event not found' }, { status: 404 });
+
+    const { eventMatchesAssociation } = await import('@/lib/data/association-console');
+    if (!eventMatchesAssociation({ association: event.association, organiser: event.organiser }, page)) {
+      return NextResponse.json({ error: 'Not your association’s event' }, { status: 403 });
+    }
+
+    const updates: Record<string, unknown> = {};
+    const setText = (key: string, value: unknown, max = 300) => {
+      if (typeof value === 'string' && value.trim()) updates[key] = value.trim().slice(0, max);
+    };
+    setText('title', f.title, 200);
+    setText('city', f.city, 100);
+    setText('country', f.country, 100);
+    setText('category', f.category, 60);
+    setText('description', f.description, 4000);
+    if (typeof f.website === 'string' && /^https?:\/\//.test(f.website.trim())) updates.website = f.website.trim().slice(0, 500);
+    if (typeof f.startDate === 'string' && DATE_RE.test(f.startDate)) {
+      updates.start_date = f.startDate;
+      updates.date = f.startDate;
+    }
+    if (typeof f.endDate === 'string' && DATE_RE.test(f.endDate)) updates.end_date = f.endDate;
+    if (f.endDate === null || f.endDate === '') updates.end_date = null;
+    if (typeof f.region === 'string' && REGIONS.includes(f.region)) updates.region = f.region;
+
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json({ error: 'Nothing to update' }, { status: 400 });
+    }
+
+    const { error } = await (admin.from('events') as any).update(updates).eq('id', eventId);
+    if (error) return NextResponse.json({ error: 'Could not save changes' }, { status: 500 });
+
+    await notifyTeam(
+      `Console edit — ${page.name}: ${event.title}`,
+      `<p><strong>${esc(user.email ?? '')}</strong> (${esc(page.name)}) edited <strong>${esc(event.title)}</strong> via the console:</p>
+       <ul>${Object.entries(updates)
+         .map(([key, value]) => `<li><strong>${esc(key)}</strong>: ${esc(String(value ?? '—')).slice(0, 200)}</li>`)
+         .join('')}</ul>
+       <p><a href="https://www.investigatorevents.com/events/${esc(event.slug)}">View the event</a></p>`
+    );
+    return NextResponse.json({ ok: true });
+  }
+
   // ── Request a change/removal of a live event ─────────────────────────────
   if (body.action === 'change-request') {
     const eventTitle = String(body.eventTitle ?? '').slice(0, 200);

@@ -367,7 +367,7 @@ function spotlightCard(ed: WeeklyEditorial) {
         <td style="vertical-align:top;">
           <p style="margin:0;font-size:17px;font-weight:800;color:${C.dark};line-height:1.25;">${escapeHtml(ed.spotlightTitle)}</p>
           <p style="margin:8px 0 0;font-size:13px;color:${C.body};line-height:1.6;">${escapeHtml(ed.spotlightBody)}</p>
-          ${cta ? `<p style="margin:14px 0 0;"><a href="${ed.spotlightCtaUrl}" style="display:inline-block;padding:9px 20px;border-radius:99px;font-size:12px;font-weight:700;color:${C.white};background-color:${C.purple};text-decoration:none;">${escapeHtml(ed.spotlightCtaLabel!)} &rarr;</a></p>` : ''}
+          ${cta ? `<p style="margin:14px 0 0;"><a href="${ed.spotlightCtaUrl}" class="btn-spotlight" style="display:inline-block;padding:9px 20px;border-radius:99px;font-size:12px;font-weight:700;color:${C.white};background-color:${C.purple};text-decoration:none;">${escapeHtml(ed.spotlightCtaLabel!)} &rarr;</a></p>` : ''}
         </td>
       </tr></table>
     </td></tr>
@@ -451,6 +451,7 @@ export function buildWeeklyNewsletterHtml({
   [data-ogsc] a { color: #2563eb !important; }
   [data-ogsc] a.btn-primary { color: #ffffff !important; background-color: #2563eb !important; }
   [data-ogsc] a.btn-outline { color: #2563eb !important; background-color: #eff6ff !important; }
+  [data-ogsc] a.btn-spotlight { color: #ffffff !important; background-color: #7c3aed !important; }
   [data-ogsc] .review-bg { background-color: #f0f4ff !important; }
   [data-ogsc] .bg-soft { background-color: #f8fafc !important; }
   [data-ogsc] .accent-bar { background-color: #2563eb !important; }
@@ -470,6 +471,7 @@ export function buildWeeklyNewsletterHtml({
     a { color: #2563eb !important; }
     a.btn-primary { color: #ffffff !important; background-color: #2563eb !important; }
     a.btn-outline { color: #2563eb !important; background-color: #eff6ff !important; }
+    a.btn-spotlight { color: #ffffff !important; background-color: #7c3aed !important; }
     .review-bg { background-color: #f0f4ff !important; }
     .bg-soft { background-color: #f8fafc !important; }
     img { opacity: 1 !important; }

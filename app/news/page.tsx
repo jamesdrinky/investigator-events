@@ -10,7 +10,9 @@ import {
   type Article,
 } from '@/lib/data/articles';
 
-export const revalidate = 120;
+// Per-request render — build-time data fetches are empty on Vercel, which
+// would otherwise freeze the hub's ISR snapshot in its empty state.
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'The Brief — Industry News',

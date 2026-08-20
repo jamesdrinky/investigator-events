@@ -1,4 +1,3 @@
-import { unstable_cache } from 'next/cache';
 import { createSupabasePublicServerClient } from '@/lib/supabase/public';
 
 export const ARTICLE_CATEGORIES = [
@@ -65,7 +64,10 @@ function mapRow(row: Record<string, unknown>): Article {
   };
 }
 
-async function fetchPublishedArticlesUncached(): Promise<Article[]> {
+// Deliberately uncached: build-time Supabase fetches come back empty on Vercel
+// (same quirk the sitemap works around), and unstable_cache would freeze that
+// empty result into the data cache. The query is tiny; per-request is fine.
+export async function fetchPublishedArticles(): Promise<Article[]> {
   const supabase = createSupabasePublicServerClient();
   const { data, error } = await (supabase
     .from('articles' as never)
@@ -75,11 +77,6 @@ async function fetchPublishedArticlesUncached(): Promise<Article[]> {
   if (error || !data) return [];
   return data.map(mapRow);
 }
-
-export const fetchPublishedArticles = unstable_cache(fetchPublishedArticlesUncached, ['published-articles'], {
-  revalidate: 120,
-  tags: ['articles'],
-});
 
 export async function fetchArticleBySlug(slug: string): Promise<Article | null> {
   const supabase = createSupabasePublicServerClient();

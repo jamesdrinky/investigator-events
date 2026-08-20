@@ -26,7 +26,11 @@ export function EventVideo({
   description?: string | null;
   logo?: string | null;
 }) {
-  const embed = /^https?:\/\//i.test(videoUrl) ? parseVideoUrl(videoUrl) : null;
+  // Signed storage URLs are our own hosted uploads — those must stream through
+  // the /api/video/<id> proxy (proper range responses + poster), not be treated
+  // as external file links just because the pathname ends in .mp4.
+  const isHostedUpload = videoUrl.includes('/storage/v1/object/sign/');
+  const embed = !isHostedUpload && /^https?:\/\//i.test(videoUrl) ? parseVideoUrl(videoUrl) : null;
 
   if (embed && (embed.kind === 'youtube' || embed.kind === 'vimeo')) {
     return (

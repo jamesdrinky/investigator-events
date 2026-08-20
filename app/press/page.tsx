@@ -170,8 +170,8 @@ export default function PressPage() {
       </section>
 
       {/* ── Sticky section nav ── */}
-      {/* Pinned just below the site header (fixed, ~76px + safe-area inset) */}
-      <nav className="sticky z-30 border-b border-slate-200/60 bg-white/85 backdrop-blur-md" style={{ top: 'calc(76px + var(--safe-top, 0px))' }}>
+      {/* Pinned just below the site header — ~52px tall on mobile, ~76px from lg up */}
+      <nav className="sticky top-[calc(3.25rem+var(--safe-top,0px))] z-30 border-b border-slate-200/60 bg-white/85 backdrop-blur-md lg:top-[calc(76px+var(--safe-top,0px))]">
         <div className="container-shell flex items-center gap-1 overflow-x-auto py-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {NAV.map((n) => (
             <a

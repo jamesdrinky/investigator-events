@@ -26,6 +26,7 @@ export function Footer({ className = '' }: { className?: string }) {
           <ul className="mt-5 space-y-3 text-sm text-slate-600">
             <li><Link href="/calendar" className="premium-link hover:text-slate-950">Calendar</Link></li>
             <li><Link href="/associations" className="premium-link hover:text-slate-950">Associations</Link></li>
+            <li><Link href="/news" className="premium-link hover:text-slate-950">News</Link></li>
             <li><Link href="/weekly" className="premium-link hover:text-slate-950">Weekly</Link></li>
             <li><Link href="/directory" className="premium-link hover:text-slate-950">Find a PI</Link></li>
             <li><Link href="/network" className="premium-link hover:text-slate-950">Directory map</Link></li>

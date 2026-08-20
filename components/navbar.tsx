@@ -15,6 +15,7 @@ import type { User as SupabaseUser } from '@supabase/supabase-js';
 const desktopNavItems: Array<{ href: Route; label: string; authOnly?: boolean }> = [
   { href: '/calendar', label: 'Events' },
   { href: '/associations', label: 'Associations' },
+  { href: '/news' as Route, label: 'News' },
   { href: '/people', label: 'Forum' },
   { href: '/reviews' as Route, label: 'Reviews', authOnly: true },
   { href: '/advice', label: 'Advice' },
@@ -25,6 +26,7 @@ const mobileMenuItems: Array<{ href: Route; label: string; authOnly?: boolean }>
   { href: '/calendar', label: 'Events' },
   { href: '/calendar?view=calendar' as Route, label: 'Calendar' },
   { href: '/associations', label: 'Associations' },
+  { href: '/news' as Route, label: 'News' },
   { href: '/people', label: 'Forum' },
   { href: '/reviews' as Route, label: 'Reviews', authOnly: true },
   { href: '/why-join-an-association' as Route, label: 'Why Join?' },

@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { fetchAllEvents } from '@/lib/data/events';
+import { fetchPublishedArticles } from '@/lib/data/articles';
 import { groupEventsByCountry } from '@/lib/utils/country-pages';
 import { buildAssociationDirectory } from '@/lib/data/associations';
 
@@ -15,6 +16,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const events = await fetchAllEvents();
+  const articles = await fetchPublishedArticles();
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: BASE_URL, changeFrequency: 'daily', priority: 1 },
@@ -23,6 +25,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/people`, changeFrequency: 'daily', priority: 0.7 },
     { url: `${BASE_URL}/directory`, changeFrequency: 'daily', priority: 0.7 },
     { url: `${BASE_URL}/weekly`, changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${BASE_URL}/news`, changeFrequency: 'daily', priority: 0.8 },
+    { url: `${BASE_URL}/news/submit`, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${BASE_URL}/advice`, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${BASE_URL}/about`, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${BASE_URL}/submit-event`, changeFrequency: 'monthly', priority: 0.5 },
@@ -34,6 +38,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/signin`, changeFrequency: 'monthly', priority: 0.3 },
     { url: `${BASE_URL}/signup`, changeFrequency: 'monthly', priority: 0.3 },
   ];
+
+  const articlePages: MetadataRoute.Sitemap = articles.map((a) => ({
+    url: `${BASE_URL}/news/${a.slug}`,
+    changeFrequency: 'weekly' as const,
+    priority: 0.7,
+  }));
 
   const eventPages: MetadataRoute.Sitemap = events
     .filter((e) => e.eventScope === 'main')
@@ -63,5 +73,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...eventPages, ...countryPages, ...partnerPages, ...monthPages];
+  return [...staticPages, ...articlePages, ...eventPages, ...countryPages, ...partnerPages, ...monthPages];
 }

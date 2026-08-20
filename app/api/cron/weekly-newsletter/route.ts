@@ -152,6 +152,30 @@ export async function GET(request: Request) {
     if (recipErr) console.error('Failed to log per-recipient rows:', recipErr.message);
   }
 
+  // Cross-publish the hand-written editorial to The Brief so each week's
+  // commentary survives the inbox. Skipped when there's no editorial row.
+  if (sent > 0 && editorial?.introText?.trim()) {
+    const weekOf = editorial.weekOf || new Date().toISOString().slice(0, 10);
+    const articleSlug = `weekly-briefing-${weekOf}`;
+    const bodyParts = [editorial.introText.trim()];
+    if (editorial.spotlightTitle?.trim() && editorial.spotlightBody?.trim()) {
+      bodyParts.push(`## ${editorial.spotlightTitle.trim()}`, editorial.spotlightBody.trim());
+    }
+    const { error: articleErr } = await (supabase.from('articles' as never).upsert({
+      slug: articleSlug,
+      title: subject,
+      dek: `The weekly briefing for the week of ${weekOf}.`,
+      body: bodyParts.join('\n\n'),
+      category: 'Industry news',
+      author_name: editorial.introByline?.split('·')[0]?.trim() || 'Investigator Events',
+      author_title: editorial.introByline?.split('·')[1]?.trim() || null,
+      source: 'newsletter',
+      status: 'published',
+      published_at: new Date().toISOString(),
+    } as never, { onConflict: 'slug' } as never) as any);
+    if (articleErr) console.error('Failed to cross-publish editorial to The Brief:', articleErr.message);
+  }
+
   return NextResponse.json({
     message: 'Newsletter sent',
     sent,

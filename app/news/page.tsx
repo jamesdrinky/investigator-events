@@ -2,7 +2,13 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Reveal } from '@/components/motion/reveal';
-import { fetchPublishedArticles, formatArticleDate, type Article } from '@/lib/data/articles';
+import {
+  categoryStyle,
+  fetchPublishedArticles,
+  formatArticleDate,
+  readMinutes,
+  type Article,
+} from '@/lib/data/articles';
 
 export const revalidate = 120;
 
@@ -12,29 +18,18 @@ export const metadata: Metadata = {
     'What’s happening in the professional investigations industry — news, association updates, event coverage, and the PI magazine shelf.',
 };
 
-function CategoryChip({ category }: { category: string }) {
+function PlayBadge() {
   return (
-    <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-blue-700 ring-1 ring-inset ring-blue-100">
-      {category}
+    <span className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-950/70 backdrop-blur-md ring-1 ring-white/20">
+      <svg viewBox="0 0 24 24" className="ml-0.5 h-4 w-4 fill-white" aria-hidden>
+        <path d="M8 5.14v13.72c0 .8.87 1.3 1.56.88l11-6.86a1.03 1.03 0 0 0 0-1.76l-11-6.86A1.03 1.03 0 0 0 8 5.14z" />
+      </svg>
     </span>
   );
 }
 
-function AuthorLine({ article }: { article: Article }) {
-  return (
-    <div className="flex items-center gap-2.5">
-      {article.authorAvatarUrl ? (
-        <Image src={article.authorAvatarUrl} alt="" width={28} height={28} className="h-7 w-7 rounded-full object-cover" />
-      ) : null}
-      <div className="min-w-0">
-        <p className="truncate text-xs font-semibold text-slate-800">{article.authorName ?? 'Investigator Events'}</p>
-        <p className="truncate text-[11px] text-slate-400">{formatArticleDate(article.publishedAt)}</p>
-      </div>
-    </div>
-  );
-}
-
 function FeaturedCard({ article }: { article: Article }) {
+  const style = categoryStyle(article.category);
   return (
     <Link
       href={`/news/${article.slug}`}
@@ -50,6 +45,7 @@ function FeaturedCard({ article }: { article: Article }) {
         />
       ) : null}
       <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-slate-950/10" />
+      <div aria-hidden className={`absolute inset-x-0 bottom-0 h-1.5 bg-gradient-to-r ${style.bar}`} />
       <div className="relative z-10 flex min-h-[22rem] flex-col justify-end p-6 sm:min-h-[26rem] sm:p-9">
         <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/15 bg-white/[0.08] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white/85 backdrop-blur-md">
           <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
@@ -60,7 +56,7 @@ function FeaturedCard({ article }: { article: Article }) {
         </h2>
         {article.dek ? <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-300 sm:text-[15px]">{article.dek}</p> : null}
         <p className="mt-4 text-xs font-semibold text-slate-400">
-          {article.authorName ?? 'Investigator Events'} · {formatArticleDate(article.publishedAt)}
+          {article.authorName ?? 'Investigator Events'} · {formatArticleDate(article.publishedAt)} · {readMinutes(article.body)} min read
         </p>
       </div>
     </Link>
@@ -68,36 +64,56 @@ function FeaturedCard({ article }: { article: Article }) {
 }
 
 function ArticleCard({ article }: { article: Article }) {
+  const style = categoryStyle(article.category);
   return (
     <Link
       href={`/news/${article.slug}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200/60 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+      className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200/60 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl"
     >
       <div className="relative h-44 overflow-hidden bg-slate-100">
         {article.heroImageUrl ? (
-          <Image
-            src={article.heroImageUrl}
-            alt=""
-            fill
-            className="object-cover transition duration-700 group-hover:scale-[1.04]"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          />
+          <>
+            <Image
+              src={article.heroImageUrl}
+              alt=""
+              fill
+              className="object-cover transition duration-700 group-hover:scale-[1.05]"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            />
+            <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-950/50 to-transparent" />
+          </>
         ) : (
-          <div className="flex h-full items-center justify-center bg-gradient-to-br from-blue-50 to-violet-50">
-            <Image src="/logo/ielogo1.PNG" alt="" width={56} height={56} className="h-14 w-14 rounded-2xl opacity-40" />
+          <div className={`flex h-full items-center justify-center bg-gradient-to-br ${style.bar} opacity-90`}>
+            <Image src="/logo/ielogo1.PNG" alt="" width={64} height={64} className="h-16 w-16 rounded-2xl shadow-lg" />
           </div>
         )}
         <div className="absolute left-3 top-3">
-          <CategoryChip category={article.category} />
+          <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] ring-1 ring-inset ${style.chip}`}>
+            {article.category}
+          </span>
         </div>
+        {article.videoEventSlug ? <PlayBadge /> : null}
       </div>
-      <div className="flex flex-1 flex-col p-5">
+      <div className="relative flex flex-1 flex-col p-5">
+        <div aria-hidden className={`absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r ${style.bar} opacity-0 transition-opacity duration-300 group-hover:opacity-100`} />
         <h3 className="text-[17px] font-bold leading-snug tracking-[-0.02em] text-slate-950 group-hover:text-blue-700">
           {article.title}
         </h3>
         {article.dek ? <p className="mt-2 line-clamp-2 text-[13px] leading-relaxed text-slate-500">{article.dek}</p> : null}
-        <div className="mt-auto pt-4">
-          <AuthorLine article={article} />
+        <div className="mt-auto flex items-center gap-2.5 pt-4">
+          {article.authorAvatarUrl ? (
+            <Image src={article.authorAvatarUrl} alt="" width={28} height={28} className="h-7 w-7 rounded-full object-cover" />
+          ) : (
+            <span aria-hidden className={`flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br ${style.bar} text-[11px] font-extrabold text-white`}>
+              {(article.authorName ?? 'IE').slice(0, 1)}
+            </span>
+          )}
+          <div className="min-w-0">
+            <p className="truncate text-xs font-semibold text-slate-800">{article.authorName ?? 'Investigator Events'}</p>
+            <p className="truncate text-[11px] text-slate-400">
+              {formatArticleDate(article.publishedAt)} · {readMinutes(article.body)} min
+            </p>
+          </div>
         </div>
       </div>
     </Link>
@@ -109,6 +125,7 @@ export default async function NewsPage() {
   const featured = articles.find((a) => a.featured) ?? articles[0] ?? null;
   const rest = articles.filter((a) => a.id !== featured?.id);
   const magazine = articles.filter((a) => a.category === 'Magazine');
+  const contributors = new Set(articles.map((a) => a.authorName).filter(Boolean)).size;
 
   return (
     <div className="relative">
@@ -154,6 +171,11 @@ export default async function NewsPage() {
                 Get the weekly briefing
               </Link>
             </div>
+            <div className="mt-7 flex flex-wrap gap-x-6 gap-y-2 text-xs font-semibold text-slate-400">
+              <span><span className="text-white">{articles.length}</span> stories</span>
+              <span><span className="text-white">{contributors}</span> contributor{contributors === 1 ? '' : 's'}</span>
+              <span>New every <span className="text-white">Monday</span> — with the briefing</span>
+            </div>
           </Reveal>
         </div>
       </section>
@@ -193,7 +215,7 @@ export default async function NewsPage() {
       <section className="border-b border-slate-200/60 bg-white">
         <div className="container-shell py-12 sm:py-16">
           <Reveal>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-indigo-500 sm:text-xs">The shelf</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-amber-600 sm:text-xs">The shelf</p>
             <h2 className="mt-3 text-xl font-bold tracking-[-0.02em] text-slate-950 sm:text-2xl">Magazine &amp; long reads</h2>
             {magazine.length > 0 ? (
               <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -202,11 +224,28 @@ export default async function NewsPage() {
                 ))}
               </div>
             ) : (
-              <div className="mt-6 rounded-2xl bg-gradient-to-br from-slate-50 to-blue-50/40 p-8 ring-1 ring-inset ring-slate-200/60 sm:p-10">
-                <p className="max-w-xl text-[15px] leading-relaxed text-slate-600">
-                  The PI magazine and selected long-form pieces are coming to the shelf. Publish with us —{' '}
-                  <Link href="/news/submit" className="font-semibold text-blue-600 hover:underline">pitch a story</Link>.
-                </p>
+              <div className="mt-6 flex flex-col items-center gap-8 rounded-3xl bg-gradient-to-br from-slate-950 to-slate-900 p-8 ring-1 ring-inset ring-white/5 sm:flex-row sm:p-10">
+                {/* Stylised magazine cover placeholder — swapped for the real cover when issues land */}
+                <div className="relative h-52 w-40 shrink-0 -rotate-3 transition-transform duration-500 hover:rotate-0">
+                  <div aria-hidden className="absolute inset-0 translate-x-2 translate-y-2 rounded-r-xl rounded-l-sm bg-slate-700/40 blur-sm" />
+                  <div className="relative flex h-full w-full flex-col justify-between overflow-hidden rounded-r-xl rounded-l-sm bg-gradient-to-br from-blue-600 via-violet-600 to-fuchsia-500 p-4 shadow-2xl">
+                    <div aria-hidden className="absolute left-0 top-0 h-full w-1.5 bg-black/25" />
+                    <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-white/80">The PI Magazine</p>
+                    <div>
+                      <p className="text-xl font-extrabold leading-tight text-white">Coming to the shelf</p>
+                      <p className="mt-1 text-[10px] font-semibold text-white/70">Long reads · Interviews · Casework</p>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <p className="max-w-xl text-[15px] leading-relaxed text-slate-300">
+                    The PI magazine and selected long-form pieces are coming to the shelf — a permanent home for the industry&apos;s
+                    deeper reads, right beside the news.
+                  </p>
+                  <Link href="/news/submit" className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-2.5 text-xs font-bold text-white ring-1 ring-inset ring-white/15 backdrop-blur-md transition hover:bg-white/20">
+                    Pitch a long read →
+                  </Link>
+                </div>
               </div>
             )}
           </Reveal>

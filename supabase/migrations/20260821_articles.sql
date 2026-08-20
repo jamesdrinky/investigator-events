@@ -27,3 +27,6 @@ alter table articles enable row level security;
 -- Public read of published articles only; writes go through the service role.
 create policy "articles_public_read" on articles
   for select using (status = 'published');
+
+-- Optional link to an event whose approved video should play inline in the article.
+alter table articles add column if not exists video_event_slug text;

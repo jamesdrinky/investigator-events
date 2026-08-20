@@ -11,6 +11,24 @@ export const ARTICLE_CATEGORIES = [
 
 export type ArticleCategory = (typeof ARTICLE_CATEGORIES)[number];
 
+/** Per-category accent so the hub reads as a colour-coded magazine, not a grid of grey. */
+export const CATEGORY_STYLE: Record<string, { chip: string; bar: string; ink: string }> = {
+  'Industry news': { chip: 'bg-blue-50 text-blue-700 ring-blue-200/70', bar: 'from-blue-600 to-cyan-400', ink: 'text-blue-600' },
+  'From the associations': { chip: 'bg-violet-50 text-violet-700 ring-violet-200/70', bar: 'from-violet-600 to-purple-400', ink: 'text-violet-600' },
+  'Event coverage': { chip: 'bg-cyan-50 text-cyan-700 ring-cyan-200/70', bar: 'from-cyan-600 to-teal-400', ink: 'text-cyan-600' },
+  Magazine: { chip: 'bg-amber-50 text-amber-700 ring-amber-200/70', bar: 'from-amber-500 to-orange-400', ink: 'text-amber-600' },
+  Community: { chip: 'bg-pink-50 text-pink-700 ring-pink-200/70', bar: 'from-fuchsia-600 to-pink-400', ink: 'text-pink-600' },
+};
+
+export function categoryStyle(category: string) {
+  return CATEGORY_STYLE[category] ?? CATEGORY_STYLE['Industry news'];
+}
+
+/** Rounded-up minutes at ~220 wpm — floor of 1 so nothing says "0 min". */
+export function readMinutes(body: string): number {
+  return Math.max(1, Math.round(body.split(/\s+/).length / 220));
+}
+
 export type Article = {
   id: string;
   slug: string;
@@ -25,6 +43,7 @@ export type Article = {
   source: 'editorial' | 'newsletter' | 'member';
   featured: boolean;
   publishedAt: string | null;
+  videoEventSlug: string | null;
 };
 
 function mapRow(row: Record<string, unknown>): Article {
@@ -42,6 +61,7 @@ function mapRow(row: Record<string, unknown>): Article {
     source: (row.source as Article['source']) ?? 'editorial',
     featured: Boolean(row.featured),
     publishedAt: (row.published_at as string | null) ?? null,
+    videoEventSlug: (row.video_event_slug as string | null) ?? null,
   };
 }
 

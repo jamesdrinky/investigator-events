@@ -597,3 +597,93 @@ export async function adminRemoveAssociationAction(formData: FormData) {
 
   revalidatePath('/admin');
 }
+
+/**
+ * Inline editor on the public event page (the admin pencil button).
+ *
+ * This deliberately runs server-side with the service-role client. The editor
+ * used to write straight from the browser with the anon key, which RLS quietly
+ * dropped — PostgREST answers 200 with zero rows affected and no error, so the
+ * UI showed "✓ Saved" and reloaded the unchanged event. Every edit was lost.
+ *
+ * Unlike updateEventAction this never regenerates the slug: the inline editor
+ * is for fixing details on a live event, and re-slugging would break its URL.
+ */
+export async function updateEventInlineAction(
+  eventId: string,
+  updates: {
+    title: string;
+    date: string;
+    endDate?: string;
+    city: string;
+    country: string;
+    region: string;
+    organiser: string;
+    association?: string;
+    category: string;
+    description: string;
+    website: string;
+    featured: boolean;
+    image_path?: string;
+  }
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  await ensureAdminSession();
+
+  if (!eventId) return { ok: false, error: 'Missing event id' };
+
+  let website: string;
+  try {
+    website = normalizeRequiredUrl(updates.website);
+  } catch {
+    return { ok: false, error: 'Website must be a valid URL' };
+  }
+
+  for (const [label, value] of [
+    ['Title', updates.title], ['Start date', updates.date], ['City', updates.city],
+    ['Country', updates.country], ['Region', updates.region],
+    ['Organiser', updates.organiser], ['Category', updates.category],
+  ] as const) {
+    if (!String(value ?? '').trim()) return { ok: false, error: `${label} is required` };
+  }
+
+  const payload: EventUpdate = {
+    title: updates.title.trim(),
+    start_date: updates.date,
+    end_date: updates.endDate?.trim() || null,
+    city: updates.city.trim(),
+    country: updates.country.trim(),
+    region: updates.region.trim(),
+    organiser: updates.organiser.trim(),
+    association: updates.association?.trim() || null,
+    category: updates.category.trim(),
+    description: updates.description.trim(),
+    website,
+    featured: updates.featured,
+    image_path: updates.image_path?.trim() || null,
+  };
+
+  const supabase = createSupabaseAdminServerClient();
+  const { data, error } = await supabase
+    .from('events')
+    .update(payload)
+    .eq('id', eventId)
+    .select('id');
+
+  if (error) {
+    console.error('Inline event update failed:', error.message);
+    return { ok: false, error: error.message };
+  }
+  // Zero rows means the write was filtered out rather than applied — the exact
+  // failure the old client-side version swallowed. Never report that as saved.
+  if (!data || data.length === 0) {
+    return { ok: false, error: 'No event was updated — the record may have been removed.' };
+  }
+
+  revalidatePath('/');
+  revalidatePath('/calendar');
+  revalidatePath('/weekly');
+  revalidatePath('/admin');
+  revalidatePath(`/events/${eventId}`);
+
+  return { ok: true };
+}

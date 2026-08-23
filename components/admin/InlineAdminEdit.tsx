@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Pencil, X, Save, Loader2 } from 'lucide-react';
-import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
+import { Pencil, X, Save, Loader2, AlertCircle } from 'lucide-react';
+import { updateEventInlineAction } from '@/app/admin/actions';
 
 interface InlineAdminEditProps {
   eventId: string;
@@ -27,29 +27,28 @@ export function InlineAdminEdit({ eventId, initialData }: InlineAdminEditProps) 
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState(initialData);
 
+  // Writes go through a server action on the service-role client. Doing this
+  // from the browser with the anon key looked like it worked — RLS dropped the
+  // update and PostgREST still answered 200 — so edits silently vanished.
   const handleSave = async () => {
     setSaving(true);
-    const supabase = createSupabaseBrowserClient();
-    await supabase.from('events').update({
-      title: data.title,
-      start_date: data.date,
-      end_date: data.endDate || null,
-      city: data.city,
-      country: data.country,
-      region: data.region,
-      organiser: data.organiser,
-      association: data.association || null,
-      category: data.category,
-      description: data.description,
-      website: data.website,
-      featured: data.featured,
-      image_path: data.image_path || null,
-    }).eq('id', eventId);
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => { setSaved(false); setOpen(false); window.location.reload(); }, 800);
+    setError(null);
+    try {
+      const result = await updateEventInlineAction(eventId, data);
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      setSaved(true);
+      setTimeout(() => { setSaved(false); setOpen(false); window.location.reload(); }, 800);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Save failed — please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (!open) {
@@ -113,6 +112,13 @@ export function InlineAdminEdit({ eventId, initialData }: InlineAdminEditProps) 
             <span className="text-sm font-medium text-slate-700">Featured event</span>
           </label>
         </div>
+
+        {error && (
+          <div className="mt-5 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
 
         <div className="mt-6 flex items-center gap-3">
           <button

@@ -19,7 +19,16 @@ export type WeeklyEditorial = {
   subjectOverride: string | null;
 };
 
-/** Newest row dated within the last 7 days — stale editorial never re-runs. */
+/**
+ * Newest row dated within the last 7 days — stale editorial never re-runs.
+ *
+ * The lower bound is exclusive on purpose. The newsletter goes out every 7
+ * days, so an inclusive `gte` let a row dated exactly 7 days ago match again:
+ * a week with no editorial written silently re-sent the previous week's
+ * commentary, subject line and all, over content that had since moved on.
+ * With `gt`, a missed week matches nothing and the email falls back to the
+ * generated layout — a duller send, but never a wrong one.
+ */
 export async function fetchCurrentEditorial(
   supabase: SupabaseClient
 ): Promise<WeeklyEditorial | null> {
@@ -30,7 +39,7 @@ export async function fetchCurrentEditorial(
   const { data, error } = await supabase
     .from('newsletter_editorial' as never)
     .select('*')
-    .gte('week_of', weekAgo)
+    .gt('week_of', weekAgo)
     .lte('week_of', new Date().toISOString().slice(0, 10))
     .order('week_of', { ascending: false })
     .limit(1)

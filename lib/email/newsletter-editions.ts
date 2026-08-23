@@ -43,7 +43,9 @@ export function buildRotatingWeeklySubject(
     : `Weekly Briefing — ${upcomingCount} event${upcomingCount !== 1 ? 's' : ''} across ${countries} countries`;
 
   const countdown = heroTitle && heroDaysAway && heroDaysAway > 0
-    ? `${heroDaysAway} days to ${heroTitle} — plus ${otherCount} more PI events`
+    ? heroDaysAway === 1
+      ? `Tomorrow: ${heroTitle} — plus ${otherCount} more PI events`
+      : `${heroDaysAway} days to ${heroTitle} — plus ${otherCount} more PI events`
     : classic;
 
   const cityLine = cities.length >= 3

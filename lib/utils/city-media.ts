@@ -38,7 +38,9 @@ const cityImageMap: Record<string, string> = {
   'New Delhi': 'memorial.jpg',
   'Texas': 'sanantonio.jpg',
   'Prague': 'budapest.jpg',
-  'San Jose': 'beach.jpg',
+  // WAD's mid-term is in San José, Costa Rica — a generic beach was standing in
+  // while costarica.jpg sat unused.
+  'San Jose': 'costarica.jpg',
   'Casablanca': 'casablanca.jpg',
   'Nashville': 'nashville.jpg',
   'Nashville, TN': 'nashville.jpg',
@@ -66,7 +68,8 @@ const cityImageMap: Record<string, string> = {
   'Wantagh': 'longisland.jpg',
   'Wantagh, NY': 'longisland.jpg',
   'Long Island': 'longisland.jpg',
-  'San José': 'beach.jpg',
+  'San José': 'costarica.jpg',
+  'San José, Costa Rica': 'costarica.jpg',
   'São Paulo': 'saopaulo.jpg',
   'Sao Paulo': 'saopaulo.jpg',
   'Myrtle Beach': 'myrtlebeach.avif',

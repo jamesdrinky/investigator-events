@@ -94,6 +94,41 @@ const cityImageMap: Record<string, string> = {
   'Barcelona': 'barcelona.jpg',
   'Online': 'online.png',
   'Welch, MN': 'minneapolis.jpg',
+
+  // Cities whose art was already sitting in /public/cities/ but had never been
+  // wired into this map, so every event in them fell through to the generic
+  // fallback. Added 24 Aug 2026 after an audit found 15 such images unused.
+  'Denver': 'denver.jpg',
+  'Denver, CO': 'denver.jpg',
+  'Detroit': 'detroit.jpg',
+  'Detroit, MI': 'detroit.jpg',
+  'Atlantic City': 'atlanticcity.jpg',
+  'Atlantic City, NJ': 'atlanticcity.jpg',
+  'Austin': 'austintexas.jpg',
+  'Austin, TX': 'austintexas.jpg',
+  'Austin, Texas': 'austintexas.jpg',
+  'Seattle': 'seattle.jpg',
+  'Seattle, WA': 'seattle.jpg',
+  'Las Vegas': 'lasvegas.jpg',
+  'Las Vegas, NV': 'lasvegas.jpg',
+  'Sydney': 'sydney.jpg',
+  'La Coruña': 'lacoruna.jpg',
+  'La Coruna': 'lacoruna.jpg',
+  'Bucuresti': 'bucuresti.jpg',
+  'Bucharest': 'bucuresti.jpg',
+  'Lochau': 'lochau.jpg',
+  'Rust': 'rust.jpg',
+  'Reston': 'reston.png',
+  'Reston, VA': 'reston.png',
+  'Cherokee': 'cherokee.jpg',
+  'Cherokee, NC': 'cherokee.jpg',
+  'Indiana': 'indiana.jpg',
+  'Orlando, Florida': 'orlando.jpg',
+  'Bohinjska Bistrica': 'slovenia.jpg',
+  'Mineola': 'longisland.jpg',
+  'Mineola, NY': 'longisland.jpg',
+  'Upland': 'la.jpg',
+  'Upland, CA': 'la.jpg',
 };
 
 /** Map specific event slugs to event-branded images */

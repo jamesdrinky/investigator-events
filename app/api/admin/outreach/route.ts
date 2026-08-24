@@ -25,10 +25,15 @@ export async function GET() {
     .order('name', { ascending: true });
 
   // Get all outreach sends
-  const { data: sends } = await supabase
+  // outreach_sends timestamps its rows sent_at, not created_at. Selecting a
+  // column that does not exist made PostgREST reject the whole query, and with
+  // the error unchecked `sends` came back null — so the dashboard reported every
+  // association as never contacted while 64 sends sat in the table.
+  const { data: sends, error: sendsError } = await supabase
     .from('outreach_sends' as any)
-    .select('association, status, created_at, recipient_email')
-    .order('created_at', { ascending: false }) as any;
+    .select('association, status, sent_at, recipient_email')
+    .order('sent_at', { ascending: false }) as any;
+  if (sendsError) console.error('Failed to load outreach sends:', sendsError.message);
 
   // Get event counts per association
   const { data: events } = await (supabase
@@ -46,7 +51,7 @@ export async function GET() {
   for (const s of (sends ?? [])) {
     const key = (s.association ?? '').toLowerCase();
     if (!sendsByAssoc.has(key)) {
-      sendsByAssoc.set(key, { status: s.status, date: s.created_at, email: s.recipient_email });
+      sendsByAssoc.set(key, { status: s.status, date: s.sent_at, email: s.recipient_email });
     }
   }
 

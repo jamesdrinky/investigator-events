@@ -91,6 +91,9 @@ async function parseEventData(formData: FormData, currentEventId?: string): Prom
   const country = parseRequired(formData, 'country');
   const organiser = parseRequired(formData, 'organiser');
   const association = String(formData.get('association') ?? '').trim();
+  // The admin form has always rendered a Co-association select, but this parser
+  // never read it — so choosing one silently did nothing on create and update.
+  const coAssociation = String(formData.get('coAssociation') ?? '').trim();
   const category = parseRequired(formData, 'category');
   const description = String(formData.get('description') ?? '').trim();
   const website = normalizeRequiredUrl(parseRequired(formData, 'website'));
@@ -113,6 +116,7 @@ async function parseEventData(formData: FormData, currentEventId?: string): Prom
     start_date: date,
     organiser,
     association: association || null,
+    co_association: coAssociation || null,
     category,
     event_scope: eventScope,
     website,

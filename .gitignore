@@ -39,3 +39,4 @@ TOMORROW.md
 # Generated newsletter previews (rendered from the DB / draft on demand)
 newsletter-dryrun.html
 newsletter-preview-*.html
+newsletter-SENDING-*.html

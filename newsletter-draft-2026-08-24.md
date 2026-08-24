@@ -10,23 +10,18 @@ B. Three NALI dates added — and the autumn season starts next week
 
 --- INTRO ---
 A quiet week on the calendar, and the last one for a while. The ACFE closed
-its Asia-Pacific fraud conference in Hong Kong on Wednesday, and the NCISS
-wrapped four days in Nashville on Saturday marking fifty years of the
-association. If you made it to either, we'd still love a photo and a few
-lines — the reviews below take a minute and they genuinely help whoever is
-deciding where to spend their budget next year.
+in Hong Kong on Wednesday and the NCISS wrapped its fiftieth-anniversary
+meeting in Nashville on Saturday. If you were at either, send us a photo and
+a few lines — the reviews below take a minute.
 
-New this week: NALI's calendar has landed. Region II meets in Detroit with
-MCPI on 24–25 September, Region I follows in Atlantic City on 15–16 October,
-and the Annual Meeting heads to Austin next February. All three are on the
-site now.
+NALI's calendar has landed: Region II in Detroit with MCPI on 24–25
+September, Region I in Atlantic City on 15–16 October, and the Annual Meeting
+in Austin next February.
 
-Make the most of the quiet, because the autumn season opens next Tuesday.
-WAD's congress runs in Cannes from 1–6 September, the CII holds its AGM in
-Prague across the same dates, and the SNARP AGM follows in Cannes on the 2nd.
-A fortnight after that, GSX opens in Atlanta and the ACFE's Africa conference
-in Johannesburg, both on 14–16 September. If you're still working out where
-to be this autumn, now's the moment to get it in the diary.
+Then the autumn season opens next Tuesday. WAD's congress runs in Cannes from
+1–6 September, the CII holds its AGM in Prague across the same dates, and the
+SNARP AGM follows in Cannes on the 2nd. GSX and the ACFE's Africa conference
+both land on 14–16 September. Worth getting in the diary.
 
 --- SPOTLIGHT ---
 kicker:    Next week

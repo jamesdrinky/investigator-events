@@ -83,9 +83,17 @@ async function main() {
   Object.entries(editorial).filter(([k]) => k.startsWith('spotlight')).forEach(([k, v]) => console.log(`  ${k}: ${v}`));
   console.log(`\ncounts — upcoming ${upcoming.length}, newlyAdded ${newlyAdded.length}, featured ${featured.length}, recentlyPast ${recentlyPast.length}`);
 
+  const { data: briefRows } = await (sb.from('articles' as never)
+    .select('slug, title, dek, category, published_at')
+    .eq('status', 'published')
+    .order('published_at', { ascending: false })
+    .limit(3) as any);
+  const briefArticles = (briefRows ?? []) as any[];
+
   const html = buildWeeklyNewsletterHtml({
     upcoming, newlyAdded, featured, recentlyPast,
     unsubscribeToken: 'preview-token',
+    articles: briefArticles,
     appPush: getWeeklyNewsletterAppPush('standard'),
     editorial: editorial as any,
     referralBlock: false,

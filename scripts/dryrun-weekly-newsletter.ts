@@ -128,9 +128,17 @@ async function main() {
   console.log('\n=== RECENTLY PAST (review prompts) ===');
   recentlyPast.forEach((e: any, i: number) => console.log(`${i + 1}. ${e.endDate ?? e.date}  ${e.title} — ${e.city}`));
 
+  const { data: briefRows } = await (supabase.from('articles' as never)
+    .select('slug, title, dek, category, published_at')
+    .eq('status', 'published')
+    .order('published_at', { ascending: false })
+    .limit(3) as any);
+  const briefArticles = (briefRows ?? []) as any[];
+
   const html = buildWeeklyNewsletterHtml({
     upcoming, newlyAdded, featured, recentlyPast,
     unsubscribeToken: 'dry-run-token',
+    articles: briefArticles,
     appPush, editorial, referralBlock,
   });
   const out = path.join(ROOT, 'newsletter-dryrun.html');

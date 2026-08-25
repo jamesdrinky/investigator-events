@@ -399,7 +399,7 @@ function statPill(value: string | number, label: string) {
 }
 
 export function buildWeeklyNewsletterHtml({
-  upcoming, newlyAdded, featured, recentlyPast = [], unsubscribeToken, appPush, globalLaunchBanner, preheader, editorial, referralBlock = false,
+  upcoming, newlyAdded, featured, recentlyPast = [], unsubscribeToken, appPush, globalLaunchBanner, preheader, editorial, referralBlock = false, articles = [],
 }: {
   upcoming: EventItem[];
   newlyAdded: EventItem[];
@@ -412,6 +412,9 @@ export function buildWeeklyNewsletterHtml({
   editorial?: WeeklyEditorial | null;
   /** Gated on the newsletter_referral feature flag — OFF until approved. */
   referralBlock?: boolean;
+  /** Recent pieces from The Brief. Articles previously had no distribution at
+   *  all — the newsletter published INTO the hub but never linked back out. */
+  articles?: { slug: string; title: string; dek?: string | null; category?: string | null }[];
 }): string {
   const displayUpcoming = mergeBearstoneNewsletterEvents(upcoming);
   const displayNewlyAdded = mergeBearstoneNewsletterEvents(newlyAdded);
@@ -632,6 +635,22 @@ export function buildWeeklyNewsletterHtml({
       <a href="${SITE}/submit-event" style="font-size:12px;color:${C.blue};text-decoration:none;font-weight:600;">Submit an event for free &rarr;</a>
     </td></tr>
   </table>
+
+  <!-- From The Brief — gives articles a route to the 200+ people who already open this -->
+  ${articles.length === 0 ? '' : `<table width="100%" cellpadding="0" cellspacing="0" style="margin-top:32px;">
+    <tr><td style="padding:0 0 10px;">
+      <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:${C.muted};">From The Brief</p>
+      <p style="margin:4px 0 0;font-size:13px;color:${C.muted};line-height:1.5;">Industry news and analysis from Investigator Events.</p>
+    </td></tr>
+    ${articles.slice(0, 3).map((a) => `<tr><td style="padding:10px 0;border-top:1px solid ${C.border};">
+      ${a.category ? `<p style="margin:0 0 4px;font-size:10.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:${C.blue};">${escapeHtml(a.category)}</p>` : ''}
+      <a href="${SITE}/news/${encodeURIComponent(a.slug)}?utm_source=newsletter&utm_medium=brief" style="font-size:15px;font-weight:700;color:${C.dark};text-decoration:none;line-height:1.35;">${escapeHtml(a.title)}</a>
+      ${a.dek ? `<p style="margin:5px 0 0;font-size:13px;color:${C.body};line-height:1.55;">${escapeHtml(a.dek)}</p>` : ''}
+    </td></tr>`).join('')}
+    <tr><td align="center" style="padding-top:14px;">
+      <a href="${SITE}/news?utm_source=newsletter&utm_medium=brief" style="font-size:12px;color:${C.blue};text-decoration:none;font-weight:600;">Read The Brief &rarr;</a>
+    </td></tr>
+  </table>`}
 
   <!-- Forward it on (suppressed when the stronger referral card is active — one ask, not two) -->
   ${referralBlock ? '' : `<table width="100%" cellpadding="0" cellspacing="0" style="margin-top:28px;">

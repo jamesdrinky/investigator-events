@@ -1,4 +1,8 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 
 export type BriefArticle = {
   slug: string;
@@ -18,8 +22,45 @@ function formatDate(iso: string | null) {
  * editorial sat invisible to anyone landing on the front page — and articles
  * are the one acquisition channel that compounds rather than depending on a
  * feed algorithm.
+ *
+ * Fetched client-side on purpose. The homepage is ISR (revalidate = 60) and
+ * Vercel's build-time Supabase fetches come back empty, which cached an empty
+ * block that never recovered — the same failure the news hub hit in 78f488d.
+ * Forcing the whole landing page dynamic to fix one section would put a
+ * database round-trip on every visit; loading just this block after hydration
+ * keeps the page cached. Articles are publicly readable, so the anon client is
+ * all it needs.
  */
-export function BriefHighlights({ articles }: { articles: BriefArticle[] }) {
+export function BriefHighlights() {
+  const [articles, setArticles] = useState<BriefArticle[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const supabase = createSupabaseBrowserClient();
+    // `articles` postdates the generated database types, so this is cast the
+    // same way the rest of the codebase reaches it.
+    (supabase
+      .from('articles' as never)
+      .select('slug, title, dek, category, published_at')
+      .eq('status', 'published')
+      .not('published_at', 'is', null)
+      .order('published_at', { ascending: false })
+      .limit(3) as any)
+      .then(({ data, error }: { data: unknown; error: unknown }) => {
+        if (cancelled || error || !data) return;
+        setArticles(
+          (data as any[]).map((a) => ({
+            slug: a.slug,
+            title: a.title,
+            dek: a.dek ?? null,
+            category: a.category ?? null,
+            publishedAt: a.published_at ?? null,
+          }))
+        );
+      });
+    return () => { cancelled = true; };
+  }, []);
+
   if (articles.length === 0) return null;
 
   const [lead, ...rest] = articles;

@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Save, Plus, ShieldCheck, Trash2, Flame, Award, Zap, Crown, Star, Shield, Globe2, Sparkles, ImagePlus, X, AlertTriangle, CheckCircle2, Circle } from 'lucide-react';
+import { Save, Plus, ShieldCheck, Trash2, Flame, Award, Zap, Crown, Star, Shield, Globe2, Sparkles, ImagePlus, X, AlertTriangle, CheckCircle2, Circle, AlertCircle} from 'lucide-react';
 import Image from 'next/image';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { getCountryFlag } from '@/lib/utils/location';
@@ -166,6 +166,7 @@ export default function EditProfilePage() {
   const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
   const [message, setMessage] = useState('');
 
   // Profile fields
@@ -314,8 +315,30 @@ export default function EditProfilePage() {
           is_current: e.is_current ?? false,
         })));
       }
+      setHydrated(true);
     });
   }, [router]);
+
+  // Unsaved-change tracking. Everything on this page lives in local state until
+  // "Save profile" is pressed, so a stray back-navigation used to discard the
+  // lot in silence — adding an association and leaving looked identical to
+  // adding one and saving.
+  const dirtySnapshot = useMemo(
+    () => JSON.stringify({ fullName, avatarUrl, bannerUrl, headline, country, specialisation, customTitle, useCustomTitle, bio, website, associations, experience, profileSections }),
+    [fullName, avatarUrl, bannerUrl, headline, country, specialisation, customTitle, useCustomTitle, bio, website, associations, experience, profileSections]
+  );
+  const savedSnapshot = useRef<string | null>(null);
+  useEffect(() => {
+    if (hydrated && savedSnapshot.current === null) savedSnapshot.current = dirtySnapshot;
+  }, [hydrated, dirtySnapshot]);
+  const hasUnsavedChanges = hydrated && savedSnapshot.current !== null && savedSnapshot.current !== dirtySnapshot;
+
+  useEffect(() => {
+    if (!hasUnsavedChanges) return;
+    const warn = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ''; };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [hasUnsavedChanges]);
 
   const addAssociation = () => {
     if (!newAssoc) return;
@@ -453,15 +476,31 @@ export default function EditProfilePage() {
     // Email notification preferences live in auth user metadata (no DB column needed)
     await supabase.auth.updateUser({ data: { email_prefs: emailPrefs } });
 
-    // Sync associations
-    await supabase.from('user_associations').delete().eq('user_id', userId);
-    if (associations.length > 0) {
-      await supabase.from('user_associations').insert(
-        associations.map((a) => ({
-          user_id: userId, association_name: a.association_name, association_slug: a.association_slug || null,
-          role: a.role || null, member_since: a.member_since ? parseInt(a.member_since) || null : null,
-        }))
-      );
+    // Sync associations. This deletes then re-inserts, so an unchecked failure
+    // on the insert would leave the member with no associations at all — the
+    // delete is only committed once the insert has actually landed.
+    const associationRows = associations.map((a) => ({
+      user_id: userId, association_name: a.association_name, association_slug: a.association_slug || null,
+      role: a.role || null, member_since: a.member_since ? parseInt(a.member_since) || null : null,
+    }));
+    const { data: previousAssociations } = await supabase.from('user_associations').select('*').eq('user_id', userId);
+    const { error: assocDeleteError } = await supabase.from('user_associations').delete().eq('user_id', userId);
+    if (assocDeleteError) {
+      setSaving(false);
+      setMessage(`Could not update your associations: ${assocDeleteError.message}`);
+      return;
+    }
+    if (associationRows.length > 0) {
+      const { error: assocInsertError } = await supabase.from('user_associations').insert(associationRows);
+      if (assocInsertError) {
+        // Put back what was there rather than leaving the member empty-handed.
+        if (previousAssociations?.length) {
+          await supabase.from('user_associations').insert(previousAssociations as never);
+        }
+        setSaving(false);
+        setMessage(`Could not save your associations: ${assocInsertError.message}`);
+        return;
+      }
     }
 
     // Sync work experience
@@ -488,6 +527,7 @@ export default function EditProfilePage() {
       );
     }
 
+    savedSnapshot.current = dirtySnapshot;
     setSaving(false);
     setMessage('Profile saved!');
     setTimeout(() => setMessage(''), 3000);
@@ -1064,10 +1104,16 @@ export default function EditProfilePage() {
           </div>
 
           {/* Save */}
-          <div className="mt-8 flex flex-wrap items-center gap-4">
+          <div className={`mt-8 flex flex-wrap items-center gap-4 ${hasUnsavedChanges ? 'sticky bottom-4 z-30 rounded-2xl border border-amber-200 bg-amber-50/95 p-4 shadow-lg backdrop-blur' : ''}`}>
             <button type="button" onClick={handleSave} disabled={saving} className="btn-primary flex items-center gap-2 px-6 py-3 text-sm">
               <Save className="h-4 w-4" /> {saving ? 'Saving...' : 'Save profile'}
             </button>
+            {hasUnsavedChanges && !saving && (
+              <span className="flex items-center gap-1.5 text-sm font-semibold text-amber-700">
+                <AlertCircle className="h-4 w-4" />
+                Unsaved changes — nothing is stored until you save
+              </span>
+            )}
             {message && (
               <span className="flex items-center gap-2 text-sm font-medium text-emerald-600">
                 {message}

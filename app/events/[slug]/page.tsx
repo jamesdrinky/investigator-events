@@ -10,6 +10,7 @@ import { fetchAllEvents, fetchEventBySlug } from '@/lib/data/events';
 import { formatEventDate, parseDate } from '@/lib/utils/date';
 import { getCountryFlag } from '@/lib/utils/location';
 import { getAssociationBrandLogoSrc, shouldInvertLogoOnLight } from '@/lib/utils/association-branding';
+import { findAssociationRecordByLabel } from '@/lib/data/associations';
 import { EventCommunityTabs } from '@/components/EventCommunityTabs';
 import { AttendeeAvatars } from '@/components/AttendeeAvatars';
 import { StickyGoingBar } from '@/components/StickyGoingBar';
@@ -72,6 +73,33 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
   const country = event.country ?? 'Unknown';
   const city = event.city ?? 'TBC';
   const organiser = event.association ?? event.organiser ?? 'TBC';
+
+  // The association was previously plain text here, so there was no way to get
+  // from an event to the association's own page — the pages existed but were
+  // effectively unreachable from the place people actually land.
+  const associationRecord = event.association ? findAssociationRecordByLabel(event.association) : null;
+  const coAssociationRecord = event.coAssociation ? findAssociationRecordByLabel(event.coAssociation) : null;
+
+  const associationLink = (label: string, record: { slug: string } | null) =>
+    record ? (
+      <a
+        href={`/associations/${record.slug}`}
+        className="font-semibold text-blue-600 underline decoration-blue-200 underline-offset-2 transition hover:text-blue-700 hover:decoration-blue-400"
+      >
+        {label}
+      </a>
+    ) : (
+      <>{label}</>
+    );
+
+  const associationValue = event.association ? (
+    <>
+      {associationLink(event.association, associationRecord)}
+      {event.coAssociation ? <> &amp; {associationLink(event.coAssociation, coAssociationRecord)}</> : null}
+    </>
+  ) : (
+    'Not specified'
+  );
   const website = event.website?.trim();
   const title = event.title ?? 'Event';
   const eventDate = event.date ? formatEventDate(event) : 'TBC';
@@ -331,13 +359,13 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
               <div className="rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm">
                 <h3 className="text-sm font-bold text-slate-950">Event details</h3>
                 <dl className="mt-4 space-y-3">
-                  {[
+                  {([
                     { label: 'Event type', value: category },
                     { label: 'Region', value: region },
                     { label: 'Host', value: event.organiser ?? organiser },
-                    { label: 'Association', value: event.coAssociation ? `${event.association ?? 'Not specified'} & ${event.coAssociation}` : event.association ?? 'Not specified' },
+                    { label: 'Association', value: associationValue },
                     { label: 'Scope', value: event.eventScope === 'main' ? 'Major event' : 'Additional listing' },
-                  ].map((item) => (
+                  ] as { label: string; value: React.ReactNode }[]).map((item) => (
                     <div key={item.label} className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3 last:border-0 last:pb-0">
                       <dt className="text-xs text-slate-400">{item.label}</dt>
                       <dd className="text-right text-sm font-medium text-slate-900">{item.value}</dd>

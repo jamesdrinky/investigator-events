@@ -2,6 +2,8 @@ import { fetchAllEvents } from '@/lib/data/events';
 import { fetchPendingEventSubmissions, fetchArchivedEventSubmissions } from '@/lib/data/event-submissions';
 import { fetchAdvertiserLeads } from '@/lib/data/advertiser-leads';
 import { hasValidAdminSessionCookie } from '@/lib/admin/session';
+import { AssociationRelationships } from '@/components/admin/AssociationRelationships';
+import { fetchAssociationDossiers } from '@/lib/data/association-relationships';
 import { eventCountries, eventRegions } from '@/lib/forms/event-form-options';
 import {
   adminLoginAction,
@@ -18,7 +20,7 @@ import {
   adminAddAssociationAction,
   adminRemoveAssociationAction
 } from '@/app/admin/actions';
-import { Calendar, Users, FileText, Megaphone, Globe, MapPin, Tag, ExternalLink, CheckCircle2, XCircle, Plus, Trash2, ShieldCheck, AlertTriangle, Mail, Send, Film, Archive, RotateCcw, Radar } from 'lucide-react';
+import { Calendar, Users, FileText, Megaphone, Globe, MapPin, Tag, ExternalLink, CheckCircle2, XCircle, Plus, Trash2, ShieldCheck, AlertTriangle, Mail, Send, Film, Archive, RotateCcw, Radar, Handshake} from 'lucide-react';
 import { VerificationCodeManager } from '@/components/admin/VerificationCodeManager';
 import { ModerationPanel } from '@/components/admin/ModerationPanel';
 import { QuickAddEvent } from '@/components/admin/QuickAddEvent';
@@ -313,7 +315,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
   const reengageIneligibleCount = allUsers.filter((u) => !newsletterEligibleSet.has(u.id)).length;
   // Unknown tab (stale link, not-yet-deployed feature) falls back to overview
   // instead of rendering an empty content area.
-  const knownTabs = ['overview', 'submissions', 'events', 'inquiries', 'newsletter', 'users', 'verification', 'moderation', 'outreach', 'video-invite', 'pipeline', 'reengage'];
+  const knownTabs = ['overview', 'submissions', 'events', 'inquiries', 'newsletter', 'users', 'verification', 'moderation', 'outreach', 'video-invite', 'pipeline', 'reengage', 'relationships'];
   const activeTab = knownTabs.includes(searchParams?.tab ?? '') ? (searchParams!.tab as string) : 'overview';
   const countries = new Set(events.map((e) => e.country));
   const mainEvents = events.filter((e) => e.eventScope === 'main');
@@ -395,6 +397,7 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
               group: 'Growth',
               tabs: [
                 { id: 'outreach', label: 'Outreach', icon: Send, count: null, alert: false },
+                { id: 'relationships', label: 'Relationships', icon: Handshake, count: null, alert: false },
                 { id: 'reengage', label: 'Re-engage', icon: Send, count: null, alert: false },
                 { id: 'inquiries', label: 'Ad inquiries', icon: Megaphone, count: advertiserLeads.length, alert: false },
               ],
@@ -865,6 +868,10 @@ export default async function AdminPage({ searchParams }: { searchParams?: { err
           })()}
 
           {/* Advertising Inquiries */}
+          {activeTab === 'relationships' && (
+            <AssociationRelationships dossiers={await fetchAssociationDossiers()} />
+          )}
+
           {activeTab === 'verification' && (
             <div className="space-y-6">
               <AssociationAdminManager associations={associationPages.map((a) => ({ id: a.id, name: a.name }))} />

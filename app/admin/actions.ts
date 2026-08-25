@@ -691,3 +691,53 @@ export async function updateEventInlineAction(
 
   return { ok: true };
 }
+
+/**
+ * Mike's association relationship map. One row per association, upserted as he
+ * works through the list — so a half-finished pass is never lost, and the
+ * outreach scripts can branch on how well he actually knows each one.
+ */
+export async function saveAssociationRelationshipAction(input: {
+  associationCode: string;
+  associationName: string;
+  level: 'close' | 'known' | 'cold' | 'skip' | null;
+  contactName: string;
+  contactEmail: string;
+  note: string;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  await ensureAdminSession();
+
+  const code = input.associationCode?.trim();
+  if (!code) return { ok: false, error: 'Missing association' };
+
+  if (input.level && !['close', 'known', 'cold', 'skip'].includes(input.level)) {
+    return { ok: false, error: 'Unknown relationship level' };
+  }
+
+  const email = input.contactEmail?.trim();
+  if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+    return { ok: false, error: 'That email address does not look right' };
+  }
+
+  const supabase = createSupabaseAdminServerClient();
+  const { data, error } = await (supabase.from('association_relationships' as never).upsert({
+    association_code: code,
+    association_name: input.associationName?.trim() || code,
+    level: input.level,
+    contact_name: input.contactName?.trim() || null,
+    contact_email: email || null,
+    note: input.note?.trim() || null,
+    updated_at: new Date().toISOString(),
+  } as never, { onConflict: 'association_code' } as never).select('association_code') as any);
+
+  if (error) {
+    console.error('Relationship save failed:', error.message);
+    return { ok: false, error: error.message };
+  }
+  if (!data || data.length === 0) {
+    return { ok: false, error: 'Nothing was saved — please try again.' };
+  }
+
+  revalidatePath('/admin');
+  return { ok: true };
+}

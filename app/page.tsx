@@ -12,6 +12,7 @@ import { AppPromo } from '@/components/home/AppPromo';
 import { WhatYouGet } from '@/components/home/WhatYouGet';
 import { VerifiedInvestigators, type VerifiedMember } from '@/components/home/VerifiedInvestigators';
 import { FinalConversionCTA } from '@/components/home/FinalConversionCTA';
+import { BriefHighlights, type BriefArticle } from '@/components/home/BriefHighlights';
 import { EventsShowcase, type ShowcaseEvent } from '@/components/home/EventsShowcase';
 import { fetchAllEvents, fetchFeaturedEvents } from '@/lib/data/events';
 import { getCoverageMetrics } from '@/lib/utils/coverage';
@@ -96,11 +97,33 @@ async function fetchVerifiedMembers(): Promise<{ members: VerifiedMember[]; coun
   }
 }
 
+/** Three most recent published pieces from The Brief, for the homepage block. */
+async function fetchBriefHighlights(): Promise<BriefArticle[]> {
+  const supabase = createSupabaseAdminServerClient();
+  const { data, error } = await (supabase
+    .from('articles' as never)
+    .select('slug, title, dek, category, published_at')
+    .eq('status', 'published')
+    .not('published_at', 'is', null)
+    .order('published_at', { ascending: false })
+    .limit(3) as any);
+
+  if (error || !data) return [];
+  return (data as any[]).map((a) => ({
+    slug: a.slug,
+    title: a.title,
+    dek: a.dek ?? null,
+    category: a.category ?? null,
+    publishedAt: a.published_at ?? null,
+  }));
+}
+
 export default async function HomePage() {
-  const [featuredEvents, allEvents, verifiedData] = await Promise.all([
+  const [featuredEvents, allEvents, verifiedData, briefArticles] = await Promise.all([
     fetchFeaturedEvents(6),
     fetchAllEvents(),
     fetchVerifiedMembers(),
+    fetchBriefHighlights(),
   ]);
   const mainEvents = sortEventsByDate(allEvents.filter((event) => event.eventScope === 'main'));
   const coverage = getCoverageMetrics(mainEvents);
@@ -194,6 +217,14 @@ export default async function HomePage() {
             totalCount={100}
             countriesCount={verifiedData.countries}
           />
+        </div>
+      )}
+
+      {/* 5b. THE BRIEF — both viewports. Sits after the people section: events,
+           then who's going, then what's being written about the industry. */}
+      {briefArticles.length > 0 && (
+        <div data-homepage-section className="order-6 mobile-section-divider sm:order-none">
+          <BriefHighlights articles={briefArticles} />
         </div>
       )}
 

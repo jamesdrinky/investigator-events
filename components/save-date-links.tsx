@@ -41,12 +41,28 @@ export function SaveDateLinks({ event, compact = false }: SaveDateLinksProps) {
         >
           Add to Google Calendar
         </a>
+        {/* "Download ICS" meant nothing to anyone outside tech — the file IS
+            Apple Calendar and Outlook, so the options now name the apps people
+            are actually looking for. Both point at the real /api/ics endpoint
+            rather than a data: URL, which iOS Safari would not open. */}
+        <a
+          href={`/api/ics?event=${encodeURIComponent(event.slug || event.id)}`}
+          className="mt-1 block rounded-xl px-3 py-2 text-sm text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-700"
+        >
+          Add to Apple Calendar
+        </a>
+        <a
+          href={`/api/ics?event=${encodeURIComponent(event.slug || event.id)}`}
+          className="mt-1 block rounded-xl px-3 py-2 text-sm text-slate-700 transition hover:bg-indigo-50 hover:text-indigo-700"
+        >
+          Add to Outlook
+        </a>
         <a
           href={getIcsHref(event)}
           download={`${event.slug || event.id}.ics`}
-          className="mt-1 block rounded-xl px-3 py-2 text-sm text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-700"
+          className="mt-1 block rounded-xl px-3 py-2 text-xs text-slate-400 transition hover:bg-slate-50 hover:text-slate-600"
         >
-          Download ICS
+          Download .ics file
         </a>
       </div>
     </details>

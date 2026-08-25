@@ -46,7 +46,9 @@ export async function GET(request: NextRequest) {
       {
         headers: {
           'Content-Type': 'text/calendar; charset=utf-8',
-          'Content-Disposition': `inline; filename="${eventSlug}.ics"`,
+          // attachment, not inline: browsers hand an attachment to the OS,
+          // which opens it in Calendar. Inline just renders it as text.
+          'Content-Disposition': `attachment; filename="${eventSlug}.ics"`,
           'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=3600',
         },
       }

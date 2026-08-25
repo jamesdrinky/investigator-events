@@ -2,6 +2,9 @@
 
 import type { EventItem } from '@/lib/data/events';
 import { canGenerateCalendarLinks, getGoogleCalendarUrl, getIcsHref } from '@/lib/utils/calendar-links';
+import { isNativeApp, openInAppBrowser } from '@/lib/capacitor';
+
+const SITE = 'https://www.investigatorevents.com';
 
 interface SaveDateLinksProps {
   event: EventItem;
@@ -10,6 +13,16 @@ interface SaveDateLinksProps {
 
 export function SaveDateLinks({ event, compact = false }: SaveDateLinksProps) {
   const canSave = canGenerateCalendarLinks(event);
+  const icsUrl = `/api/ics?event=${encodeURIComponent(event.slug || event.id)}`;
+
+  // WKWebView will neither render nor download text/calendar, so inside the
+  // iOS app the link simply did nothing when tapped. Hand the URL to the
+  // system browser instead, which offers "Add to Calendar" properly.
+  const openIcs = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!isNativeApp) return;
+    e.preventDefault();
+    void openInAppBrowser(`${SITE}${icsUrl}`);
+  };
 
   if (!canSave) {
     if (compact) {
@@ -46,13 +59,15 @@ export function SaveDateLinks({ event, compact = false }: SaveDateLinksProps) {
             are actually looking for. Both point at the real /api/ics endpoint
             rather than a data: URL, which iOS Safari would not open. */}
         <a
-          href={`/api/ics?event=${encodeURIComponent(event.slug || event.id)}`}
+          href={icsUrl}
+          onClick={openIcs}
           className="mt-1 block rounded-xl px-3 py-2 text-sm text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-700"
         >
           Add to Apple Calendar
         </a>
         <a
-          href={`/api/ics?event=${encodeURIComponent(event.slug || event.id)}`}
+          href={icsUrl}
+          onClick={openIcs}
           className="mt-1 block rounded-xl px-3 py-2 text-sm text-slate-700 transition hover:bg-indigo-50 hover:text-indigo-700"
         >
           Add to Outlook

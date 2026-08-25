@@ -45,7 +45,7 @@ export async function fetchAssociationDossiers(): Promise<AssociationDossier[]> 
     supabase.from('association_pages').select('name, slug, contact_email, country'),
     (supabase.from('events').select('association, title, organiser, start_date, city, slug')
       .eq('approved', true).gte('start_date', today).order('start_date') as any),
-    supabase.from('user_associations').select('association_name, role, user_id'),
+    supabase.from('user_associations').select('association_name, association_slug, role, user_id'),
     supabase.from('profiles').select('id, full_name'),
     (supabase.from('outreach_sends' as any).select('association') as any),
     (supabase.from('association_videos' as any).select('event_slug, status') as any),
@@ -99,7 +99,11 @@ export async function fetchAssociationDossiers(): Promise<AssociationDossier[]> 
   }
 
   for (const membership of ((membershipsRes.data ?? []) as any[])) {
-    const row = byKey.get(normalise(membership.association_name));
+    // Prefer the slug: the same association is stored under several display
+    // names (the picker saved short codes, then full names), so matching on
+    // the name alone splits one association's members across two buckets.
+    const row = byKey.get(normalise(membership.association_slug))
+      ?? byKey.get(normalise(membership.association_name));
     if (!row) continue;
     row.memberCount += 1;
     const name = profileName.get(membership.user_id);

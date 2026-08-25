@@ -71,14 +71,21 @@ export default function MyAssociationsPage() {
               .from('events')
               .select('id, title, city, country, start_date, slug')
               .eq('approved', true)
-              .ilike('association', assoc.association_name)
+              // Events store the short code ("WAD"), so matching on the full
+              // display name ("World Association of Detectives") found nothing.
+              .or(`association.ilike.${assoc.association_slug},association.ilike."${assoc.association_name.replace(/"/g, '')}"`)
               .gte('start_date', new Date().toISOString().split('T')[0])
               .order('start_date', { ascending: true })
               .limit(3),
+            // Count by slug, not name. The same association is stored under
+            // more than one spelling — the picker used to save short codes
+            // ("WAD") and now saves full names — so counting by name reported
+            // WAD as 3 members when 39 people had joined. Every row has the
+            // right slug.
             supabase
               .from('user_associations')
               .select('id', { count: 'exact', head: true })
-              .eq('association_name', assoc.association_name),
+              .eq('association_slug', assoc.association_slug),
           ]);
 
           return {

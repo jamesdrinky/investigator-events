@@ -19,6 +19,7 @@ import { getCoverageMetrics } from '@/lib/utils/coverage';
 import { parseDate, sortEventsByDate, formatEventDate } from '@/lib/utils/date';
 import { getEventSlug } from '@/lib/utils/event-slugs';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
+import { createSupabasePublicServerClient } from '@/lib/supabase/public';
 
 const FeaturedEventsSection = nextDynamic(
   () => import('@/components/home/FeaturedEventsSection').then((m) => m.FeaturedEventsSection),
@@ -99,7 +100,10 @@ async function fetchVerifiedMembers(): Promise<{ members: VerifiedMember[]; coun
 
 /** Three most recent published pieces from The Brief, for the homepage block. */
 async function fetchBriefHighlights(): Promise<BriefArticle[]> {
-  const supabase = createSupabaseAdminServerClient();
+  // Public client, not the admin one: articles carry a public read policy for
+  // published rows, and the service-role key is not guaranteed to exist in
+  // preview environments — which silently emptied this block there.
+  const supabase = createSupabasePublicServerClient();
   const { data, error } = await (supabase
     .from('articles' as never)
     .select('slug, title, dek, category, published_at')

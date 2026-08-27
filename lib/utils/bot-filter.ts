@@ -27,3 +27,30 @@ export function looksLikeBotProfile(profile: { full_name?: string | null; avatar
 
   return false;
 }
+
+/**
+ * Heuristic to detect machine-generated gibberish in free-text form fields
+ * ("haVMIpZwRXGrgZXmsbtAA", "TMBNISOYuMWkUOCZreWv").
+ *
+ * Length alone is not safe here — plenty of real company names are long single
+ * tokens ("Investigations", "Blackthorn"), and counting case flips wrongly
+ * condemns ordinary CamelCase brands ("KrollAssociates", "IntelliCorp").
+ *
+ * What actually separates the bot strings is *repeated blocks of capitals in
+ * the middle of the token* — real CamelCase capitalises one letter per word,
+ * never "VMI...RX...ZX". Vowel starvation is the backstop for the single-block
+ * variants ("yjMqKWXPXrTfsGpDgXq"), pitched low enough that consonant-heavy
+ * real words like "Blackthorn" stay clear.
+ */
+export function looksLikeRandomString(value: string): boolean {
+  const token = value.trim();
+  if (token.includes(' ') || token.length < 9) return false;
+  if (!/^[a-z0-9]+$/i.test(token)) return false;
+
+  // Two or more runs of consecutive capitals. One run is normal ("ABCInvestigations").
+  const capitalRuns = (token.match(/[A-Z]{2,}/g) ?? []).length;
+  if (capitalRuns >= 2) return true;
+
+  const vowels = (token.match(/[aeiou]/gi) ?? []).length;
+  return vowels / token.length < 0.15;
+}

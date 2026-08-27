@@ -51,6 +51,9 @@ export function AdvertiserLeadForm() {
         <p className="relative rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{state.message}</p>
       )}
 
+      {/* Honeypot — hidden from people, irresistible to bots. */}
+      <input type="text" name="companyWebsite" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
+
       <div className="relative grid gap-4 sm:grid-cols-2">
         <label className="block text-sm text-slate-700">
           Company Name

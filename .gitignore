@@ -41,3 +41,6 @@ newsletter-dryrun.html
 newsletter-preview-*.html
 newsletter-SENDING-*.html
 outreach-previews/
+
+# Generated email/worksheet previews — regenerate with scripts/preview-outreach-emails.ts
+outreach-previews/

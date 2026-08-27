@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { processOutreachQueue } from '@/lib/email/association-outreach';
+import { processVideoReminders } from '@/lib/email/video-reminder';
 import { verifyCronSecret } from '@/lib/security/server';
 import { normalizeEmailPrefs, emailAllowed } from '@/lib/notifications-prefs';
 
@@ -7,7 +8,7 @@ export async function GET(request: Request) {
   const authError = verifyCronSecret(request);
   if (authError) return authError;
 
-  const [outreach, digest, reviewPrompts, dateWatch] = await Promise.all([
+  const [outreach, digest, reviewPrompts, dateWatch, videoReminders] = await Promise.all([
     processOutreachQueue().catch((err) => {
       console.error('Outreach queue failed:', err);
       return { sent: 0, failed: 0, error: true };
@@ -24,6 +25,10 @@ export async function GET(request: Request) {
       console.error('Date watch alerts failed:', err);
       return { sent: 0, error: true };
     }),
+    processVideoReminders().catch((err) => {
+      console.error('Video reminders failed:', err);
+      return { sent: 0, cancelled: 0, failed: 0, error: true };
+    }),
   ]);
 
   return NextResponse.json({
@@ -32,6 +37,7 @@ export async function GET(request: Request) {
     digest,
     reviewPrompts,
     dateWatch,
+    videoReminders,
     timestamp: new Date().toISOString(),
   });
 }

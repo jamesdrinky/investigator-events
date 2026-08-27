@@ -17,6 +17,7 @@ import {
   setAdminSessionCookie
 } from '@/lib/admin/session';
 import { queueApprovalOutreachEmail } from '@/lib/email/association-outreach';
+import { findAssociationRecordByLabel } from '@/lib/data/associations';
 import { buildSubmissionApprovedEmail, buildSubmissionRejectedEmail } from '@/lib/email/submission-confirmation';
 import { Resend } from 'resend';
 
@@ -313,6 +314,9 @@ export async function approveSubmissionAction(formData: FormData) {
 
   // Email the submitter that their event is approved & live (fire-and-forget).
   const resendKey = process.env.RESEND_API_KEY;
+  const videoUploadUrl = finalPayload.slug
+    ? `https://investigatorevents.com/events/${finalPayload.slug}/submit-video`
+    : null;
   if (resendKey && submission.contact_email) {
     const eventUrl = finalPayload.slug
       ? `https://investigatorevents.com/events/${finalPayload.slug}`
@@ -321,8 +325,22 @@ export async function approveSubmissionAction(formData: FormData) {
       from: 'Investigator Events <info@investigatorevents.com>',
       to: submission.contact_email,
       subject: `Your event is live — ${submission.event_name}`,
-      html: buildSubmissionApprovedEmail(submission.event_name, eventUrl),
+      html: buildSubmissionApprovedEmail(submission.event_name, eventUrl, videoUploadUrl ?? undefined),
     }).catch((err) => console.error('Approval email failed:', err));
+  }
+
+  // Book the four-week video nudge sequence. Only where there's an event page
+  // to upload against — without a slug the reminder has nowhere to send them.
+  if (submission.contact_email && videoUploadUrl) {
+    const { enqueueVideoReminders } = await import('@/lib/email/video-reminder');
+    await enqueueVideoReminders({
+      eventSubmissionId: submissionId,
+      eventName: submission.event_name,
+      eventSlug: finalPayload.slug ?? null,
+      associationSlug: findAssociationRecordByLabel(finalPayload.association ?? submission.organiser ?? '')?.slug ?? null,
+      recipientEmail: submission.contact_email,
+      recipientName: submission.organiser ?? null,
+    }).catch((err) => console.error('Enqueue video reminders failed:', err));
   }
 
   // Notify the submitter that their event was approved (fire-and-forget)

@@ -105,7 +105,7 @@ export function buildSubmissionConfirmationEmail(eventName: string): string {
 }
 
 /** Sent to the submitter when an admin approves & publishes their event. */
-export function buildSubmissionApprovedEmail(eventName: string, eventUrl: string): string {
+export function buildSubmissionApprovedEmail(eventName: string, eventUrl: string, videoUploadUrl?: string): string {
   const safeName = escapeHtml(eventName);
   const link = eventUrl || `${SITE}/calendar`;
   return `<!DOCTYPE html>
@@ -194,6 +194,38 @@ export function buildSubmissionApprovedEmail(eventName: string, eventUrl: string
             </td></tr>
           </table>
         </td></tr>
+
+        <!-- The video offer. Placed after "fill the room" on purpose: the ask
+             lands better once the organiser is already thinking about turnout,
+             and it is the opening move of the four-week reminder sequence. -->
+        ${videoUploadUrl ? `
+        <tr><td style="background-color:${C.white};padding:0 32px 32px;">
+          <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="border-top:1px solid ${C.border};">
+            <tr><td style="padding-top:24px;">
+              <p style="margin:0;font-size:17px;font-weight:800;color:${C.dark};text-align:center;">
+                Want a video on the page? 🎥
+              </p>
+              <p style="margin:12px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
+                We will feature a short promotional video for <strong>${safeName}</strong> on its event page — free. Up to 45 seconds, filmed on a phone, telling people who it is for and why they should come. Listings with a video hold attention far longer than text alone.
+              </p>
+              <table cellpadding="0" cellspacing="0" role="presentation" style="margin:20px auto 0;">
+                <tr><td align="center" style="background-color:${C.blue};border-radius:99px;">
+                  <!--[if mso]>
+                  <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${videoUploadUrl}" style="height:46px;v-text-anchor:middle;width:200px;" arcsize="50%" fillcolor="${C.blue}" stroke="false">
+                    <v:textbox inset="0,0,0,0"><center style="color:#ffffff;font-family:sans-serif;font-size:14px;font-weight:600;">Upload your video</center></v:textbox>
+                  </v:roundrect>
+                  <![endif]-->
+                  <!--[if !mso]><!-->
+                  <a href="${videoUploadUrl}" style="display:inline-block;padding:14px 36px;background-color:${C.blue};color:${C.white};text-decoration:none;font-size:14px;font-weight:600;border-radius:99px;">
+                    Upload your video
+                  </a>
+                  <!--<![endif]-->
+                </td></tr>
+              </table>
+            </td></tr>
+          </table>
+        </td></tr>
+        ` : ''}
 
         <!-- Brand divider -->
         <tr><td>

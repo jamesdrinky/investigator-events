@@ -3,6 +3,17 @@ import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 export const VIDEO_SUBMISSIONS_FLAG = 'video_submissions';
 
 /**
+ * Arms the automated video-reminder sequence. Ships OFF: the code can be
+ * deployed and reviewed without a single organiser being emailed, and the
+ * sequence only starts once someone deliberately turns it on.
+ *
+ * Note the explicit `false` default at every call site — unlike the other
+ * flags, a missing row or a failed read must mean "do not send", never
+ * "send". A DB hiccup is not permission to email people.
+ */
+export const VIDEO_REMINDERS_FLAG = 'video_reminders';
+
+/**
  * Read a feature flag. Reads go through the service-role admin client (the
  * feature_flags table has no public RLS policies). Defaults to `defaultValue`
  * (true) if the row is missing or the read errors, so a transient DB hiccup

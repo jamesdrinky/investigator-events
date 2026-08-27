@@ -40,7 +40,7 @@ function foldLine(line: string): string {
   return parts.join('\r\n');
 }
 
-function eventToVevent(event: EventItem, dtstamp: string): string[] {
+function eventToVevent(event: EventItem, dtstamp: string, subscribable: boolean): string[] {
   const pageUrl = `${SITE}/events/${event.slug}?utm_source=ics&utm_medium=calendar`;
   const description = [
     event.description?.trim(),
@@ -61,7 +61,10 @@ function eventToVevent(event: EventItem, dtstamp: string): string[] {
     `LOCATION:${escapeIcs(getEventLocation(event))}`,
     `URL:${pageUrl}`,
     ...(event.category ? [`CATEGORIES:${escapeIcs(event.category)}`] : []),
-    'TRANSP:TRANSPARENT',
+    // Feed entries are free/transparent — a subscribed industry calendar must
+    // not make someone look busy for every event in the profession. An event
+    // the user deliberately added is the opposite: they mean to be there.
+    subscribable ? 'TRANSP:TRANSPARENT' : 'TRANSP:OPAQUE',
     'END:VEVENT',
   ];
 }
@@ -70,11 +73,24 @@ export interface FeedOptions {
   /** Shown as the calendar name in Google/Apple/Outlook. */
   name: string;
   description?: string;
+  /**
+   * True (the default) for the subscribable feeds — the calendar the user
+   * keeps in their app forever.
+   *
+   * MUST be false for a one-off "add to calendar" download. Apple Calendar
+   * decides what a .ics *is* from its headers: with X-WR-CALNAME and the
+   * refresh hints present it treats the file as a calendar to subscribe to,
+   * so tapping add silently creates a NEW calendar named after the event and
+   * files the event in there. The confirmation looks identical to a normal
+   * add, and the event never appears in the user's own calendar.
+   */
+  subscribable?: boolean;
 }
 
 /** Build a complete subscribable VCALENDAR from a list of events. */
 export function buildIcsFeed(events: EventItem[], options: FeedOptions): string {
   const dtstamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+  const subscribable = options.subscribable ?? true;
 
   const lines: string[] = [
     'BEGIN:VCALENDAR',
@@ -82,12 +98,18 @@ export function buildIcsFeed(events: EventItem[], options: FeedOptions): string 
     'PRODID:-//Investigator Events//Calendar Feed//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
-    `X-WR-CALNAME:${escapeIcs(options.name)}`,
-    ...(options.description ? [`X-WR-CALDESC:${escapeIcs(options.description)}`] : []),
-    // Hint clients to refresh twice a day so new events appear promptly.
-    'REFRESH-INTERVAL;VALUE=DURATION:PT12H',
-    'X-PUBLISHED-TTL:PT12H',
-    ...events.flatMap((event) => eventToVevent(event, dtstamp)),
+    // Calendar-level identity and refresh hints belong to a subscription.
+    // On a single-event download they are what makes Apple Calendar spawn a
+    // new calendar instead of adding the event — see FeedOptions.subscribable.
+    ...(subscribable
+      ? [
+          `X-WR-CALNAME:${escapeIcs(options.name)}`,
+          ...(options.description ? [`X-WR-CALDESC:${escapeIcs(options.description)}`] : []),
+          'REFRESH-INTERVAL;VALUE=DURATION:PT12H',
+          'X-PUBLISHED-TTL:PT12H',
+        ]
+      : []),
+    ...events.flatMap((event) => eventToVevent(event, dtstamp, subscribable)),
     'END:VCALENDAR',
   ];
 

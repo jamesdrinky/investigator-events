@@ -42,6 +42,8 @@ export async function GET(request: NextRequest) {
         description: single[0].website
           ? `${single[0].title} — ${single[0].website}`
           : `${single[0].title} — investigatorevents.com`,
+        // One event the user asked to save — not a calendar to subscribe to.
+        subscribable: false,
       }),
       {
         headers: {

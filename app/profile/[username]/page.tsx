@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Calendar, MapPin, ShieldCheck, Star, Globe, ExternalLink, Users, Pencil, ArrowRight, MessageCircle, Briefcase } from 'lucide-react';
 import { createSupabaseSSRServerClient } from '@/lib/supabase/ssr-server';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
+import { fetchArticlesByAuthor, formatArticleDate } from '@/lib/data/articles';
 import { getCountryFlag } from '@/lib/utils/location';
 import { UserAvatar } from '@/components/UserAvatar';
 import { ExpandableText } from '@/components/ExpandableText';
@@ -96,7 +97,7 @@ export default async function PublicProfilePage({ params }: { params: { username
   const adminClient = createSupabaseAdminServerClient();
   const [
     assocsRes, verifsRes, connRes, sectionsRes, attendingRowsRes,
-    experienceRes, recentPostsRes, reviewRowsRes, newsletterRes,
+    experienceRes, recentPostsRes, reviewRowsRes, newsletterRes, publishedArticles,
   ] = await Promise.all([
     supabase.from('user_associations').select('*').eq('user_id', profile.id),
     supabase.from('member_verifications').select('association_name, status, expires_at').eq('user_id', profile.id),
@@ -109,6 +110,7 @@ export default async function PublicProfilePage({ params }: { params: { username
     isOwner && userEmail
       ? (adminClient.from('newsletter_subscribers' as any).select('id, status').ilike('email', userEmail.trim()).in('status', ['active', 'pending']).maybeSingle() as any)
       : Promise.resolve({ data: null }),
+    fetchArticlesByAuthor(profile.id),
   ]);
 
   const assocs = assocsRes.data;
@@ -441,6 +443,33 @@ export default async function PublicProfilePage({ params }: { params: { username
           </div>
           </div>
         ))}
+
+        {/* ═══ PUBLISHED ═══
+            A member's byline, shown to everyone who visits. The point of the
+            strip is social: people write for The Brief because the credit
+            lands somewhere permanent and public. */}
+        {publishedArticles.length > 0 && (
+          <div className="mt-4 rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm sm:p-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-bold text-slate-900">Published in The Brief</h2>
+              <Link href="/news" className="text-xs font-semibold transition hover:underline" style={{ color: accentColor }}>The Brief</Link>
+            </div>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              {publishedArticles.map((article) => (
+                <Link
+                  key={article.id}
+                  href={`/news/${article.slug}`}
+                  className="group rounded-xl border border-slate-100 bg-slate-50/50 p-3.5 transition hover:shadow-sm"
+                >
+                  <span className="text-[10px] font-bold uppercase tracking-[0.16em]" style={{ color: accentColor }}>{article.category}</span>
+                  <p className="mt-1.5 line-clamp-2 text-sm font-semibold text-slate-900 group-hover:underline">{article.title}</p>
+                  {article.dek ? <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-slate-500">{article.dek}</p> : null}
+                  <p className="mt-2 text-[11px] text-slate-400">{formatArticleDate(article.publishedAt)}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* ═══ ACTIVITY ═══ */}
         {hasActivity && (

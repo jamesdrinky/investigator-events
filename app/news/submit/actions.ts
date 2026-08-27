@@ -3,6 +3,8 @@
 import { redirect } from 'next/navigation';
 import { Resend } from 'resend';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
+import { createSupabaseSSRServerClient } from '@/lib/supabase/ssr-server';
+import { associationRecords } from '@/lib/data/associations';
 import {
   assertSameOriginRequest,
   enforceRateLimitAsync,
@@ -16,6 +18,7 @@ import { ARTICLE_CATEGORIES } from '@/lib/data/articles';
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 4;
 const categories = new Set<string>(ARTICLE_CATEGORIES);
+const associationSlugs = new Set<string>(associationRecords.map((a) => a.slug));
 
 function sanitizeText(value: string, maxLength: number) {
   return value.replace(/[\u0000-\u001f\u007f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, maxLength);
@@ -70,6 +73,24 @@ export async function submitStoryAction(formData: FormData) {
     const authorTitle = sanitizeText(String(formData.get('authorTitle') ?? ''), 140);
     const email = parseRequired(formData, 'email', 160).toLowerCase();
 
+    // Optional attribution to an association page. Anything not in our own
+    // records is dropped rather than rejected — a bad value shouldn't cost
+    // someone the article they just wrote.
+    const rawAssociation = sanitizeText(String(formData.get('associationSlug') ?? ''), 80);
+    const associationSlug = associationSlugs.has(rawAssociation) ? rawAssociation : null;
+
+    // Signed-in submitters get the piece tied to their profile, so the byline
+    // strip on /profile/[username] can find it later. Anonymous submissions
+    // still work exactly as before.
+    let authorUserId: string | null = null;
+    try {
+      const ssr = await createSupabaseSSRServerClient();
+      const { data } = await ssr.auth.getUser();
+      authorUserId = data.user?.id ?? null;
+    } catch {
+      authorUserId = null;
+    }
+
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Invalid email');
     if (!categories.has(category)) throw new Error('Invalid category');
     if (body.length < 200) throw new Error('Story too short');
@@ -94,6 +115,8 @@ export async function submitStoryAction(formData: FormData) {
       status: 'pending',
       submitter_name: authorName,
       submitter_email: email,
+      association_slug: associationSlug,
+      author_user_id: authorUserId,
     } as never) as unknown as Promise<{ error: { message: string } | null }>);
     if (error) throw new Error(error.message);
 
@@ -112,6 +135,7 @@ export async function submitStoryAction(formData: FormData) {
             { label: 'Category', value: category },
             { label: 'Author', value: `${authorName}${authorTitle ? ` — ${authorTitle}` : ''}` },
             { label: 'Email', value: email },
+            { label: 'Association', value: associationSlug ?? '—' },
           ],
           cta: { label: 'Review in admin', url: 'https://www.investigatorevents.com/admin/news' },
         }),

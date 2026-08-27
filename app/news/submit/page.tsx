@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { submitStoryAction } from '@/app/news/submit/actions';
 import { createSignedFormState } from '@/lib/security/server';
 import { ARTICLE_CATEGORIES } from '@/lib/data/articles';
+import { associationRecords } from '@/lib/data/associations';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,10 +15,18 @@ const promises = [
   { title: 'Real reach', desc: 'The Brief feeds the weekly newsletter and our social channels.' },
 ];
 
-export default function SubmitStoryPage({ searchParams }: { searchParams?: { status?: string } }) {
+const associationOptions = [...associationRecords]
+  .map((a) => ({ slug: a.slug, name: a.name }))
+  .sort((a, b) => a.name.localeCompare(b.name));
+
+export default function SubmitStoryPage({ searchParams }: { searchParams?: { status?: string; association?: string } }) {
   const isSuccess = searchParams?.status === 'success';
   const isError = searchParams?.status === 'error';
   const formState = createSignedFormState('submit-story');
+  // Arrives pre-selected when the writer came from an association page.
+  const presetAssociation = associationOptions.some((a) => a.slug === searchParams?.association)
+    ? searchParams?.association
+    : undefined;
 
   return (
     <section className="relative bg-slate-50">
@@ -96,6 +105,19 @@ export default function SubmitStoryPage({ searchParams }: { searchParams?: { sta
                     <label htmlFor="dek" className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-slate-500">One-line summary <span className="font-normal normal-case text-slate-400">(optional)</span></label>
                     <input id="dek" name="dek" maxLength={240} placeholder="The standfirst under your headline" className={fieldClass} />
                   </div>
+                </div>
+
+                <div>
+                  <label htmlFor="associationSlug" className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-slate-500">Association <span className="font-normal normal-case text-slate-400">(optional)</span></label>
+                  <select id="associationSlug" name="associationSlug" className={fieldClass} defaultValue={presetAssociation ?? ''}>
+                    <option value="">Not association-specific</option>
+                    {associationOptions.map((a) => (
+                      <option key={a.slug} value={a.slug}>{a.name}</option>
+                    ))}
+                  </select>
+                  <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
+                    Picking one also publishes the article on that association&apos;s page.
+                  </p>
                 </div>
 
                 <div>

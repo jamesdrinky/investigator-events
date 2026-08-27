@@ -15,6 +15,7 @@ interface AssocMember { user_id: string; role: string | null; member_since: numb
 interface AssocPost { id: string; title: string | null; content: string; image_url: string | null; link_url: string | null; is_pinned: boolean; likes_count: number; created_at: string; author_name: string | null; author_avatar: string | null; }
 interface AssocJob { id: string; title: string; description: string; location: string | null; country: string | null; type: string | null; specialisation: string | null; created_at: string; }
 interface AssocVideo { id: string; title: string; description: string | null; videoUrl: string; thumbnailUrl: string | null; submitterName: string; isPaid: boolean; createdAt: string; }
+interface AssocArticle { id: string; slug: string; title: string; dek: string | null; category: string; heroImageUrl: string | null; authorName: string | null; publishedAt: string | null; minutes: number; }
 
 interface Props {
   page: { name: string; slug: string; description: string | null; country: string | null; website: string | null; founded_year: number | null; member_count: number | null; contact_email: string | null; social_links: any; is_verified: boolean; logo_url: string | null; cover_image_url: string | null; };
@@ -26,6 +27,7 @@ interface Props {
   posts: AssocPost[];
   jobs: AssocJob[];
   videos: AssocVideo[];
+  articles: AssocArticle[];
   videoSubmissionsEnabled: boolean;
   platformMembers: number;
   verifiedCount: number;
@@ -105,7 +107,7 @@ function timeAgo(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
 }
 
-export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past, members, posts, jobs, videos, videoSubmissionsEnabled, platformMembers, verifiedCount }: Props) {
+export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past, members, posts, jobs, videos, articles, videoSubmissionsEnabled, platformMembers, verifiedCount }: Props) {
   const videoContactHref = `mailto:info@investigatorevents.com?subject=${encodeURIComponent(`Feature a video — ${page.name}`)}`;
   const [isVerifiedMember, setIsVerifiedMember] = useState(false);
   const [isMember, setIsMember] = useState(false);
@@ -433,6 +435,66 @@ export function AssociationPageTabs({ page, logoSrc, invertLogo, upcoming, past,
 
       {/* ═══ VIDEOS SECTION (above members when videos exist) ═══ */}
       {videos.length > 0 && videosSection}
+
+      {/* ═══ ARTICLES SECTION ═══
+          The association's own writing in The Brief. Always rendered — the
+          empty state is the ask, and the ask is the whole point: association
+          pages are where organisers already look, so this is where inviting
+          them to publish actually converts. */}
+      <div className="border-t border-slate-200/40 bg-white">
+        <div className="container-shell py-12 sm:py-16">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="eyebrow">In The Brief</p>
+              <h2 className="section-title !mt-3">Articles from {page.name}</h2>
+            </div>
+            <Link
+              href={`/news/submit?association=${page.slug}` as Route}
+              className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+            >
+              <Plus className="h-4 w-4" />
+              Write an article
+            </Link>
+          </div>
+
+          {articles.length > 0 ? (
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {articles.map((a) => (
+                <Link
+                  key={a.id}
+                  href={`/news/${a.slug}` as Route}
+                  className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200/60 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl"
+                >
+                  <div className="relative h-40 overflow-hidden bg-slate-100">
+                    {a.heroImageUrl ? (
+                      <Image src={a.heroImageUrl} alt="" fill className="object-cover transition duration-500 group-hover:scale-105" sizes="(max-width: 640px) 100vw, 33vw" />
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-slate-100 to-slate-200" />
+                    )}
+                  </div>
+                  <div className="flex flex-1 flex-col p-5">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-blue-600">{a.category}</span>
+                    <h3 className="mt-2 text-base font-bold leading-snug tracking-[-0.01em] text-slate-950 group-hover:text-blue-700">{a.title}</h3>
+                    {a.dek ? <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-600">{a.dek}</p> : null}
+                    <p className="mt-auto pt-4 text-xs font-semibold text-slate-400">
+                      {a.authorName ?? page.name} · {a.minutes} min read
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-8 rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50/60 px-6 py-10 text-center">
+              <p className="text-sm font-semibold text-slate-700">No articles from {page.name} yet</p>
+              <p className="mx-auto mt-2 max-w-lg text-sm leading-relaxed text-slate-500">
+                Association updates, case studies, conference write-ups, regulatory changes — anything the wider
+                investigations industry should know. Published pieces appear here and in{' '}
+                <Link href={'/news' as Route} className="font-semibold text-blue-600 hover:underline">The Brief</Link>.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* ═══ POSTS SECTION ═══ */}
       {posts.length > 0 && (

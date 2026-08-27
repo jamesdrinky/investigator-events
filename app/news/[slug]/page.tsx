@@ -6,6 +6,7 @@ import { Reveal } from '@/components/motion/reveal';
 import { ArticleShare } from '@/components/news/ArticleShare';
 import { EventVideo } from '@/components/EventVideo';
 import { fetchApprovedVideosForEvent } from '@/lib/data/association-videos';
+import { associationRecords } from '@/lib/data/associations';
 import {
   categoryStyle,
   fetchArticleBySlug,
@@ -39,6 +40,9 @@ export default async function ArticlePage({ params }: Props) {
 
   const blocks = parseArticleBody(article.body);
   const style = categoryStyle(article.category);
+  const association = article.associationSlug
+    ? associationRecords.find((a) => a.slug === article.associationSlug) ?? null
+    : null;
   const [related, videos] = await Promise.all([
     fetchPublishedArticles().then((all) => all.filter((a) => a.slug !== article.slug).slice(0, 3)),
     article.videoEventSlug ? fetchApprovedVideosForEvent(article.videoEventSlug) : Promise.resolve([]),
@@ -91,6 +95,14 @@ export default async function ArticlePage({ params }: Props) {
                 <p className="text-xs text-slate-400">
                   {article.authorTitle ? `${article.authorTitle} · ` : ''}
                   {formatArticleDate(article.publishedAt)}
+                  {association ? (
+                    <>
+                      {' · '}
+                      <Link href={`/associations/${association.slug}`} className="font-semibold text-slate-300 underline-offset-2 hover:text-white hover:underline">
+                        {association.name}
+                      </Link>
+                    </>
+                  ) : null}
                 </p>
               </div>
             </div>

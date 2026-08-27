@@ -43,6 +43,8 @@ export type Article = {
   featured: boolean;
   publishedAt: string | null;
   videoEventSlug: string | null;
+  associationSlug: string | null;
+  authorUserId: string | null;
 };
 
 function mapRow(row: Record<string, unknown>): Article {
@@ -61,6 +63,8 @@ function mapRow(row: Record<string, unknown>): Article {
     featured: Boolean(row.featured),
     publishedAt: (row.published_at as string | null) ?? null,
     videoEventSlug: (row.video_event_slug as string | null) ?? null,
+    associationSlug: (row.association_slug as string | null) ?? null,
+    authorUserId: (row.author_user_id as string | null) ?? null,
   };
 }
 
@@ -88,6 +92,38 @@ export async function fetchArticleBySlug(slug: string): Promise<Article | null> 
     .maybeSingle() as unknown as Promise<{ data: Record<string, unknown> | null; error: unknown }>);
   if (error || !data) return null;
   return mapRow(data);
+}
+
+/**
+ * Published pieces attributed to an association, for its own page. Ordered
+ * newest-first like the hub, and capped — an association page is a summary of
+ * the association, not a second news archive.
+ */
+export async function fetchArticlesForAssociation(slug: string, limit = 6): Promise<Article[]> {
+  const supabase = createSupabasePublicServerClient();
+  const { data, error } = await (supabase
+    .from('articles' as never)
+    .select('*')
+    .eq('status', 'published')
+    .eq('association_slug', slug)
+    .order('published_at', { ascending: false })
+    .limit(limit) as unknown as Promise<{ data: Record<string, unknown>[] | null; error: unknown }>);
+  if (error || !data) return [];
+  return data.map(mapRow);
+}
+
+/** What a given member has published, for the byline strip on their profile. */
+export async function fetchArticlesByAuthor(userId: string, limit = 4): Promise<Article[]> {
+  const supabase = createSupabasePublicServerClient();
+  const { data, error } = await (supabase
+    .from('articles' as never)
+    .select('*')
+    .eq('status', 'published')
+    .eq('author_user_id', userId)
+    .order('published_at', { ascending: false })
+    .limit(limit) as unknown as Promise<{ data: Record<string, unknown>[] | null; error: unknown }>);
+  if (error || !data) return [];
+  return data.map(mapRow);
 }
 
 export function formatArticleDate(iso: string | null): string {

@@ -222,6 +222,41 @@ export function createSignedFormState(scope: string) {
   return { issuedAt, token };
 }
 
+/**
+ * One-click newsletter subscribe links for members who were never asked.
+ *
+ * The signature covers the email itself, so a link works for exactly one
+ * mailbox and cannot be edited into a subscription for someone else. Clicking
+ * a link delivered to your own inbox is the affirmative act that makes this
+ * valid consent — which is why the link carries no expiry: an invitation
+ * someone answers three months late is still their own decision.
+ */
+export function createNewsletterOptInToken(email: string) {
+  const normalized = email.trim().toLowerCase();
+  const payload = Buffer.from(normalized, 'utf8').toString('base64url');
+  return `${payload}.${sign(`newsletter-opt-in:${normalized}`)}`;
+}
+
+/** Returns the email the token was minted for, or null if it fails to verify. */
+export function verifyNewsletterOptInToken(token: string): string | null {
+  const separator = token.lastIndexOf('.');
+  if (separator <= 0) return null;
+
+  const payload = token.slice(0, separator);
+  const signature = token.slice(separator + 1);
+
+  let email: string;
+  try {
+    email = Buffer.from(payload, 'base64url').toString('utf8');
+  } catch {
+    return null;
+  }
+  if (!email) return null;
+
+  if (!safeCompare(signature, sign(`newsletter-opt-in:${email}`))) return null;
+  return email;
+}
+
 export function verifySignedFormState(scope: string, issuedAt: string, token: string, maxAgeMs = 2 * 60 * 60 * 1000) {
   const issuedAtNumber = Number(issuedAt);
 

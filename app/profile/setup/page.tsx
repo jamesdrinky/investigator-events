@@ -40,6 +40,7 @@ export default function ProfileSetupPage() {
   const [fullName, setFullName] = useState('');
   const [country, setCountry] = useState('');
   const [specialisation, setSpecialisation] = useState('');
+  const [newsletterOptIn, setNewsletterOptIn] = useState(false);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -153,6 +154,17 @@ export default function ProfileSetupPage() {
       is_public: true,
     });
 
+    if (newsletterOptIn) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email) {
+        fetch('/api/newsletter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: user.email }),
+        }).catch(() => {});
+      }
+    }
+
     setSaving(false);
     router.push('/calendar');
   };
@@ -238,6 +250,25 @@ export default function ProfileSetupPage() {
                     {SPECIALISATIONS.map((s) => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
+
+                {/* The only place OAuth signups are ever asked about the
+                    newsletter — they never see the sign-up form's checkbox, so
+                    without this every LinkedIn/Apple/Google member silently
+                    misses the list. Left unticked deliberately: a pre-ticked box
+                    is not consent, and the confirmation email needs a real
+                    affirmative action behind it. */}
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+                  <input
+                    type="checkbox"
+                    checked={newsletterOptIn}
+                    onChange={(e) => setNewsletterOptIn(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-xs leading-relaxed text-slate-600">
+                    <span className="block text-sm font-medium text-slate-800">Send me the weekly newsletter</span>
+                    Events coming up in your region, industry news from The Brief, and what your associations are doing. One email a week — unsubscribe any time.
+                  </span>
+                </label>
               </div>
             </div>
           )}

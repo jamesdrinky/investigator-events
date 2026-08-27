@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Heart, MessageCircle, Send, ImagePlus, LinkIcon, X, Trash2, Pin, Share2 } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { looksLikeBotProfile } from '@/lib/utils/bot-filter';
@@ -291,6 +292,21 @@ export function CommunityFeed() {
           <button type="button" onClick={() => setModerationError(null)} className="font-semibold underline">Dismiss</button>
         </div>
       )}
+      {/* Bridge to The Brief. The compose box below is for a quick thought; a
+          piece worth a byline belongs in the news hub, where it also lands on
+          the author's profile and their association's page. */}
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-blue-200/60 bg-blue-50/60 px-4 py-3">
+        <p className="text-sm text-slate-700">
+          Got something longer to say? Publish it properly in <strong>The Brief</strong>.
+        </p>
+        <Link
+          href="/news/submit"
+          className="shrink-0 rounded-full bg-slate-900 px-4 py-2 text-xs font-bold text-white transition hover:bg-slate-800"
+        >
+          Write an article
+        </Link>
+      </div>
+
       {/* Compose box */}
       {userId && (
         <div className="rounded-2xl border border-slate-200/60 bg-white p-4 shadow-sm sm:p-5">

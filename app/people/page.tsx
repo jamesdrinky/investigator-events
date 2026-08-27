@@ -196,7 +196,7 @@ function PeoplePageInner() {
               onClick={() => setTab('feed')}
               className={`flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1.5 text-[11px] font-semibold transition sm:gap-1.5 sm:px-5 sm:py-2 sm:text-sm ${tab === 'feed' ? 'bg-blue-600 text-white shadow' : 'text-slate-500 hover:text-slate-700'}`}
             >
-              <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Feed
+              <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Discussion
             </button>
             <Link
               href="/reviews"

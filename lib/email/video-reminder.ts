@@ -70,7 +70,7 @@ export const VIDEO_REMINDER_STEPS: Array<{
   },
 ];
 
-function buildReminderEmail(opts: {
+export function buildVideoReminderEmail(opts: {
   eventName: string;
   recipientName: string | null;
   uploadUrl: string;
@@ -327,7 +327,7 @@ export async function processVideoReminders(): Promise<{
         from: FROM,
         to: row.recipient_email,
         subject: config.subject(row.event_name),
-        html: buildReminderEmail({
+        html: buildVideoReminderEmail({
           eventName: row.event_name,
           recipientName: row.recipient_name,
           uploadUrl,

@@ -426,21 +426,49 @@ export async function approveSubmissionAction(formData: FormData) {
     console.error('country event push failed:', err);
   }
 
-  // Send outreach email to association contact (once per association, fire-and-forget)
+  // Introduce the platform to the association — but only when that is someone
+  // other than the person who just submitted the event.
+  //
+  // This was passed submission.contact_email unconditionally, which is the same
+  // inbox that received "Your event is live" moments earlier. The organiser got
+  // the same news twice, hours apart, the second time written as though we had
+  // never met. An introduction is for a stranger; someone who has just used the
+  // platform is not one.
+  //
+  // So the introduction now goes to the association's OWN published contact,
+  // and only when that differs from the submitter.
   if (submission.contact_email) {
-    // Extract association name from notes "[Association: XYZ]" or fall back to organiser
     const assocMatch = submission.notes?.match(/\[Association:\s*(.+?)\]/);
     const association = (assocMatch?.[1] && assocMatch[1] !== 'other')
       ? assocMatch[1]
       : submission.organiser;
 
-    queueApprovalOutreachEmail({
-      contactEmail: submission.contact_email,
-      contactName: submission.organiser,
-      eventName: submission.event_name,
-      association,
-      region: submission.region ?? undefined,
-    }).catch((err) => console.error('Approval outreach email failed:', err));
+    const associationSlug = findAssociationRecordByLabel(
+      finalPayload.association ?? association ?? ''
+    )?.slug ?? null;
+
+    let associationContactEmail: string | null = null;
+    if (associationSlug) {
+      const { data: page } = await supabase
+        .from('association_pages')
+        .select('contact_email')
+        .eq('slug', associationSlug)
+        .maybeSingle();
+      associationContactEmail = (page as { contact_email: string | null } | null)?.contact_email ?? null;
+    }
+
+    const submitter = submission.contact_email.trim().toLowerCase();
+    const target = associationContactEmail?.trim().toLowerCase() ?? null;
+
+    if (target && target !== submitter) {
+      queueApprovalOutreachEmail({
+        contactEmail: associationContactEmail!,
+        contactName: association ?? 'there',
+        eventName: submission.event_name,
+        association: association ?? 'your association',
+        region: submission.region ?? undefined,
+      }).catch((err) => console.error('Approval outreach email failed:', err));
+    }
   }
 
   revalidatePath('/');

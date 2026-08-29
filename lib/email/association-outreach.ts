@@ -56,6 +56,21 @@ interface ApprovalOutreachParams {
   region?: string;
 }
 
+/**
+ * Platform scale, quoted in cold and introduction outreach.
+ *
+ * Lived in two copy-pasted sentences and went stale in both: it still claimed
+ * 55 events, 15 countries and 100 subscribers when the real figures were 81,
+ * 21 and 203. Defined once here so there is a single number to update.
+ *
+ * Deliberately rounded DOWN. An understated figure stays true as we grow; an
+ * overstated one is a claim we have to defend to an association considering
+ * whether to trust us. Last checked 29 Aug 2026: 81 events, 55 associations,
+ * 21 event countries, 203 subscribers.
+ */
+export const PLATFORM_BLURB =
+  'The platform now hosts over 80 events from 50+ associations across 20+ countries, with a weekly newsletter reaching over 200 subscribers and growing every week.';
+
 export function buildApprovalOutreachEmail(params: ApprovalOutreachParams): string {
   const { contactName, eventName, association } = params;
 
@@ -334,7 +349,7 @@ export function buildIntroductionOutreachEmail(params: { contactName: string; as
           ${eventList ? `<ul style="margin:12px 0;padding-left:20px;">${eventList}</ul>` : ''}
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
-            Investigator Events was founded to give our profession a single, freely accessible home for conferences, training and community gatherings worldwide. The platform now hosts over 55 events from 50+ associations across 15 countries, with a weekly newsletter reaching over 100 subscribers and growing every week.
+            Investigator Events was founded to give our profession a single, freely accessible home for conferences, training and community gatherings worldwide. ${PLATFORM_BLURB}
           </p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
@@ -418,7 +433,7 @@ export function buildColdOutreachEmail(params: { contactName: string; associatio
           </p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
-            Investigator Events was founded to give our profession a single, freely accessible home for conferences, training and community gatherings worldwide. The platform now hosts over 55 events from 50+ associations across 15 countries, with a weekly newsletter reaching over 100 subscribers and growing every week.
+            Investigator Events was founded to give our profession a single, freely accessible home for conferences, training and community gatherings worldwide. ${PLATFORM_BLURB}
           </p>
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">

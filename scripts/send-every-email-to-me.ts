@@ -31,9 +31,8 @@ async function collect(): Promise<Item[]> {
   const { buildVideoReminderEmail, VIDEO_REMINDER_STEPS } = await import('../lib/email/video-reminder');
   const { buildApprovalOutreachEmail, buildIntroductionOutreachEmail, buildColdOutreachEmail } =
     await import('../lib/email/association-outreach');
-  const { buildVideoInviteEmail } = await import('../lib/email/video-invite');
+  const { buildVideoInviteEmail, DEFAULT_VIDEO_INVITE_BODY, DEFAULT_VIDEO_INVITE_SUBJECT } = await import('../lib/email/video-invite');
   const { buildDailyDigestEmail } = await import('../lib/email/daily-digest');
-  const { buildNotificationEmail } = await import('../lib/email/notification-email');
   const { buildCreateAccountPitchEmail } = await import('../lib/email/create-account-pitch');
   const { buildAppLaunchAnnounceEmail } = await import('../lib/email/app-launch-announce');
   const { buildReengagementEmail } = await import('../lib/email/reengagement');
@@ -72,14 +71,13 @@ async function collect(): Promise<Item[]> {
     { name: 'outreach: approval', subject: `${EVENT} is live on Investigator Events`, html: () => buildApprovalOutreachEmail({ contactEmail: TO, contactName: 'Mike', eventName: EVENT, association: 'WAD', region: 'International' }) },
     { name: 'outreach: introduction', subject: 'WAD on Investigator Events', html: () => buildIntroductionOutreachEmail({ contactName: 'Mike', association: 'WAD', eventNames: [EVENT], eventSlugs: ['wad-conference-2026'], memberCount: 39, slug: 'wad' }) },
     { name: 'outreach: cold', subject: 'Investigator Events — WAD', html: () => buildColdOutreachEmail({ contactName: 'Mike', association: 'WAD', slug: 'wad', memberCount: 39 }) },
-    { name: 'video invite (cold, 17 targets)', subject: 'A video for the WAD Conference', html: () => buildVideoInviteEmail({ recipientName: 'Mike', association: 'WAD', conference: EVENT, bodyText: 'We would like to feature a short video for {{conference}} on Investigator Events, free of charge.', video: null, sender: 'mike' }) },
+    { name: 'video invite (cold, 17 targets)', subject: DEFAULT_VIDEO_INVITE_SUBJECT, html: () => buildVideoInviteEmail({ recipientName: 'Mike', association: 'WAD', conference: EVENT, subject: DEFAULT_VIDEO_INVITE_SUBJECT, bodyText: DEFAULT_VIDEO_INVITE_BODY, video: null, sender: 'mike' }) },
 
     // ── Notifications ──
     { name: 'daily-digest', subject: 'Your Investigator Events digest', html: () => buildDailyDigestEmail('James', [
         { type: 'follow', actorName: 'Mike LaCorte', actorAvatar: null, actorUsername: 'mike', createdAt: new Date().toISOString() },
         { type: 'connection_request', actorName: 'Sarah Chen', actorAvatar: null, actorUsername: 'sarah', createdAt: new Date().toISOString() },
       ]) },
-    { name: 'notification', subject: 'You have a new notification', html: () => buildNotificationEmail({ title: 'Mike LaCorte started following you', body: 'Tap to view their profile.', actorName: 'Mike LaCorte', link: `${SITE}/people`, ctaText: 'View profile' }) },
     { name: 'admin-alert', subject: 'New story submitted', html: () => buildAdminAlertEmail({ heading: 'New story for The Brief', intro: 'A member submitted a story for review.', rows: [{ label: 'Title', value: 'Inside the WAD conference' }, { label: 'Author', value: 'James Drinkwater' }], cta: { label: 'Review in admin', url: `${SITE}/admin/news` } }) },
   ];
 

@@ -11,6 +11,15 @@ import path from 'path';
 
 const ROOT = process.cwd();
 
+/** The Monday on or before today, in YYYY-MM-DD. Issues are keyed by week. */
+function currentMonday(): string {
+  const d = new Date();
+  const day = d.getUTCDay(); // 0 = Sunday
+  const back = day === 0 ? 6 : day - 1;
+  d.setUTCDate(d.getUTCDate() - back);
+  return d.toISOString().slice(0, 10);
+}
+
 async function loadLocalEnv() {
   const c = await readFile(path.join(ROOT, '.env.local'), 'utf8');
   for (const l of c.split('\n')) {
@@ -44,7 +53,13 @@ function field(block: string, key: string): string | null {
 
 async function main() {
   await loadLocalEnv();
-  const weekOf = process.argv[2] ?? '2026-08-24';
+  // Default to the Monday of the current week. This used to be a hardcoded
+  // date, which meant running the script bare silently previewed — and with
+  // --apply, WROTE — a stale editorial from a previous week.
+  // Skip flags: `--apply` as argv[2] was being read as the week, which sent the
+  // script looking for newsletter-draft---apply.md.
+  const weekArg = process.argv.slice(2).find((a) => !a.startsWith('--'));
+  const weekOf = weekArg ?? currentMonday();
   const md = await readFile(path.join(ROOT, `newsletter-draft-${weekOf}.md`), 'utf8');
 
   const subject = section(md, 'SUBJECT \\(recommended\\)').split('\n')[0].trim();

@@ -12,7 +12,7 @@
  * without scrolling.
  */
 
-const SITE = 'https://investigatorevents.com';
+const SITE = 'https://www.investigatorevents.com';
 const LOGO = `${SITE}/logo/ielogo1.PNG`;
 const HERO = `${SITE}/email/app-launch-hero.jpeg`;
 const APP_STORE_URL = 'https://apps.apple.com/app/id6769977101';

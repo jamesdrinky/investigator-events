@@ -1,4 +1,4 @@
-const SITE = 'https://investigatorevents.com';
+const SITE = 'https://www.investigatorevents.com';
 
 export function buildConfirmationEmail(token: string): string {
   const confirmUrl = `${SITE}/api/newsletter/confirm?token=${token}`;

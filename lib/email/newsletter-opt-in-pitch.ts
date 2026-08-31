@@ -10,7 +10,7 @@
  * /newsletter?email=... page. Leaving as a placeholder param.
  */
 
-const SITE = 'https://investigatorevents.com';
+const SITE = 'https://www.investigatorevents.com';
 const LOGO = `${SITE}/logo/ielogo1.PNG`;
 const WAVE = `${SITE}/email/wave-banner.png`;
 

@@ -5,7 +5,7 @@ import { slugifyEventTitle } from '@/lib/utils/event-slugs';
 import { buildAppPushBanner, buildGlobalLaunchBanner, type AppPushSize, type AppPushRegion } from './app-push-banner';
 import type { WeeklyEditorial } from './weekly-editorial';
 
-const SITE = 'https://investigatorevents.com';
+const SITE = 'https://www.investigatorevents.com';
 const LOGO = `${SITE}/logo/ielogo1.PNG`;
 const WAVE = `${SITE}/email/wave-banner.png`;
 

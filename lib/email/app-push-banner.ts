@@ -14,7 +14,7 @@
  * accurate by noting that EU App Store rollout is still pending.
  */
 
-const SITE = 'https://investigatorevents.com';
+const SITE = 'https://www.investigatorevents.com';
 const APP_STORE_URL = 'https://apps.apple.com/us/app/investigator-events/id6769977101';
 const LOGO = `${SITE}/logo/ielogo1.PNG`;
 const APP_LAUNCH_GRAPHIC = `${SITE}/email/app-launch-hero.jpeg`;

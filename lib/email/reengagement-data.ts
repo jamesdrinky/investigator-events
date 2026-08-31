@@ -3,7 +3,7 @@ import type { Database } from '@/lib/types/database';
 import { getProfileCompletion } from '@/lib/utils/profile-completion';
 import type { ReengagementInput } from '@/lib/email/reengagement';
 
-const SITE = 'https://investigatorevents.com';
+const SITE = 'https://www.investigatorevents.com';
 
 const FIELD_HREF: Record<string, string> = {
   full_name: `${SITE}/profile/edit`,

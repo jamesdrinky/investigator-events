@@ -14,7 +14,7 @@ import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
 import { escapeHtml } from '@/lib/security/server';
 import { isFeatureEnabled, VIDEO_REMINDERS_FLAG } from '@/lib/data/feature-flags';
 
-const SITE = 'https://investigatorevents.com';
+const SITE = 'https://www.investigatorevents.com';
 const LOGO = `${SITE}/logo/ielogo1.PNG`;
 const WAVE = `${SITE}/email/wave-banner.png`;
 const FROM = 'Investigator Events <info@investigatorevents.com>';

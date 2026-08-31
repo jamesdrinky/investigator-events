@@ -11,7 +11,7 @@
  * CTA points at the real /signup page (LinkedIn / Google / Apple / email).
  */
 
-const SITE = 'https://investigatorevents.com';
+const SITE = 'https://www.investigatorevents.com';
 const LOGO = `${SITE}/logo/ielogo1.PNG`;
 const WAVE = `${SITE}/email/wave-banner.png`;
 const SIGNUP_URL = `${SITE}/signup`;

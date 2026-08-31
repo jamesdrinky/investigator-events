@@ -1,6 +1,6 @@
 import { escapeHtml } from '@/lib/security/server';
 
-const SITE = 'https://investigatorevents.com';
+const SITE = 'https://www.investigatorevents.com';
 const LOGO = `${SITE}/logo/ielogo1.PNG`;
 const WAVE = `${SITE}/email/wave-banner.png`;
 

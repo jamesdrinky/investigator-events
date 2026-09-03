@@ -184,6 +184,7 @@ export function LoggedInHome() {
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [upcomingGoing, setUpcomingGoing] = useState<QuickEvent[]>([]);
+  const [upcomingGoingCount, setUpcomingGoingCount] = useState(0);
   const [savedEvents, setSavedEvents] = useState<QuickEvent[]>([]);
   const [upcomingAll, setUpcomingAll] = useState<QuickEvent[]>([]);
   const [pastAttended, setPastAttended] = useState<PastAttendedEvent[]>([]);
@@ -256,10 +257,19 @@ export function LoggedInHome() {
       setUserAssociations(userAssocs);
       setAssociationCount(userAssocs.length);
 
-      // Split attendees by date — single query, two derivations
-      const todayMs = Date.now();
+      // Split attendees by date — single query, two derivations.
+      //
+      // Compare against the START of today, not the current moment: start_date
+      // is a plain date, so it parses to midnight, and `>= Date.now()` dropped
+      // an event on the morning of the day it began.
+      const todayMs = new Date(`${todayStr}T00:00:00.000Z`).getTime();
       const allAttending = (attendeesRes.data ?? []).map((r: any) => r.events).filter(Boolean);
-      setUpcomingGoing(allAttending.filter((e: any) => new Date(e.start_date).getTime() >= todayMs).slice(0, 5));
+      const upcomingAttending = allAttending.filter((e: any) => new Date(e.start_date).getTime() >= todayMs);
+      // The count is the real total; the list below it is capped for display.
+      // These were the same array once, so the "Going" stat silently stopped
+      // counting at 5 however many events you were actually attending.
+      setUpcomingGoingCount(upcomingAttending.length);
+      setUpcomingGoing(upcomingAttending.slice(0, 5));
       const reviewedEventIds = new Set((userReviewsRes.data ?? []).map((r: any) => r.event_id));
       setPastAttended(
         allAttending
@@ -394,7 +404,7 @@ export function LoggedInHome() {
           {/* Quick stats row — bigger, individually accent-glowed glass tiles */}
           <div className="mt-6 grid grid-cols-4 gap-2 lg:mt-7 lg:gap-3">
             {[
-              { href: '/my-events', icon: Calendar, value: upcomingGoing.length, label: 'Going', accent: 'from-blue-400/40 to-blue-500/0', iconColor: 'text-blue-300' },
+              { href: '/my-events', icon: Calendar, value: upcomingGoingCount, label: 'Going', accent: 'from-blue-400/40 to-blue-500/0', iconColor: 'text-blue-300' },
               { href: '/my-connections', icon: Users, value: connectionCount, label: 'Network', accent: 'from-purple-400/40 to-purple-500/0', iconColor: 'text-purple-300' },
               { href: '/messages', icon: MessageCircle, value: unreadMessages, label: 'Messages', accent: 'from-cyan-400/40 to-cyan-500/0', iconColor: 'text-cyan-300' },
               { href: '/my-associations', icon: Globe, value: associationCount, label: 'Assocs', accent: 'from-amber-400/40 to-amber-500/0', iconColor: 'text-amber-300' },

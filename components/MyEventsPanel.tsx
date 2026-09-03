@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Calendar, MapPin, ChevronRight, Ticket, Plus } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { UserAvatar } from '@/components/UserAvatar';
+import { getEventImage, getCityHeroImageUrl } from '@/lib/utils/city-media';
 
 type MyEvent = {
   id: string;
@@ -88,6 +89,13 @@ export function MyEventsPanel() {
   const upcoming = events.filter((e) => !e.is_past);
   const past = events.filter((e) => e.is_past);
   const nextEvent = upcoming[0];
+  // Same fallback chain the event page uses, so an event with no image_path
+  // still gets a backdrop here instead of a flat panel.
+  const nextEventCover = nextEvent
+    ? (nextEvent.image_path && /^(\/(cities|events|images)\/|https?:\/\/)/.test(nextEvent.image_path)
+        ? nextEvent.image_path
+        : getEventImage(nextEvent.slug ?? '') ?? getCityHeroImageUrl(nextEvent.city ?? '') ?? null)
+    : null;
 
   return (
     <div className="mb-8 sm:mb-12">
@@ -112,9 +120,9 @@ export function MyEventsPanel() {
         {nextEvent && (
           <Link href={`/events/${nextEvent.slug}`} className="group relative block overflow-hidden border-b border-slate-100">
             {/* Background image */}
-            {nextEvent.image_path && (
+            {nextEventCover && (
               <div className="absolute inset-0">
-                <Image src={nextEvent.image_path} alt="" fill className="object-cover opacity-[0.08] transition-opacity duration-500 group-hover:opacity-[0.15]" />
+                <Image src={nextEventCover} alt="" fill className="object-cover opacity-[0.08] transition-opacity duration-500 group-hover:opacity-[0.15]" />
               </div>
             )}
             <div className="relative flex items-center gap-4 px-5 py-5 sm:gap-5 sm:px-6">

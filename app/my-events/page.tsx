@@ -6,6 +6,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { UserAvatar } from '@/components/UserAvatar';
+import { getEventImage, getCityHeroImageUrl } from '@/lib/utils/city-media';
 
 interface EventItem {
   id: string;
@@ -13,6 +14,7 @@ interface EventItem {
   city: string;
   country: string;
   start_date: string;
+  end_date?: string | null;
   slug: string;
   association: string | null;
   image_path: string | null;
@@ -48,7 +50,7 @@ export default function MyEventsPage() {
       const [goingRes, reviewsRes, assocsRes] = await Promise.all([
         supabase
           .from('event_attendees')
-          .select('event_id, events:event_id(id, title, city, country, start_date, slug, association, image_path)')
+          .select('event_id, events:event_id(id, title, city, country, start_date, end_date, slug, association, image_path)')
           .eq('user_id', uid)
           .eq('is_going', true) as any,
         supabase.from('event_reviews').select('event_id').eq('user_id', uid),
@@ -68,7 +70,7 @@ export default function MyEventsPage() {
       if (assocNames.length > 0) {
         const { data: recEvents } = await supabase
           .from('events')
-          .select('id, title, city, country, start_date, slug, association, image_path')
+          .select('id, title, city, country, start_date, end_date, slug, association, image_path')
           .eq('approved', true)
           .in('association', assocNames)
           .gte('start_date', now.toISOString().split('T')[0])
@@ -79,7 +81,7 @@ export default function MyEventsPage() {
         // Fallback: show upcoming events
         const { data: upcoming } = await supabase
           .from('events')
-          .select('id, title, city, country, start_date, slug, association, image_path')
+          .select('id, title, city, country, start_date, end_date, slug, association, image_path')
           .eq('approved', true)
           .eq('event_scope', 'main')
           .gte('start_date', now.toISOString().split('T')[0])
@@ -137,7 +139,15 @@ export default function MyEventsPage() {
     );
   }
 
-  const hasImage = (e: EventItem) => e.image_path && /^(\/(cities|events|images)\/|https?:\/\/)/.test(e.image_path);
+  // The event page resolves a cover through a fallback chain — a curated
+  // per-slug image, then a city image — so an event with no image_path still
+  // shows a picture there. This page read image_path raw, which is why the
+  // same event looked fine on its own page and blank in this list.
+  const coverFor = (e: EventItem): string | null => {
+    const direct = e.image_path && /^(\/(cities|events|images)\/|https?:\/\/)/.test(e.image_path) ? e.image_path : null;
+    return direct ?? getEventImage(e.slug ?? '') ?? getCityHeroImageUrl(e.city ?? '') ?? null;
+  };
+  const hasImage = (e: EventItem) => !!coverFor(e);
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_25%,#f0e8ff_50%,#f4f0ff_75%,#f8fbff_100%)] pt-16 lg:pt-20">
@@ -187,7 +197,7 @@ export default function MyEventsPage() {
                     <Link href={`/events/${event.slug}` as Route} className="flex min-w-0 items-center gap-3">
                       {hasImage(event) ? (
                         <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg">
-                          <img src={event.image_path!} alt="" className="h-full w-full object-cover" />
+                          <img src={coverFor(event)!} alt="" className="h-full w-full object-cover" />
                         </div>
                       ) : (
                         <div className="flex h-14 w-14 flex-shrink-0 flex-col items-center justify-center rounded-lg bg-blue-50">

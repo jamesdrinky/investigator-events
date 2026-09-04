@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { MapPin, ChevronRight, Ticket } from 'lucide-react';
+import { MapPin, ChevronRight, ChevronDown, Ticket } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { UserAvatar } from '@/components/UserAvatar';
 import { getEventImage, getCityHeroImageUrl } from '@/lib/utils/city-media';
@@ -45,6 +45,9 @@ export function MyEventsPanel() {
   const [loading, setLoading] = useState(true);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [fullName, setFullName] = useState<string | null>(null);
+  // Folded on load: the next event is the useful part, and eight of them
+  // unfolded pushes the actual calendar off the screen.
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -162,8 +165,20 @@ export function MyEventsPanel() {
           </Link>
         )}
 
-        {/* Rest of upcoming events */}
+        {/* Everything after the next event folds away. */}
         {upcoming.length > 1 && (
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            aria-expanded={expanded}
+            className="flex w-full items-center justify-center gap-1.5 border-t border-slate-100 px-5 py-3 text-xs font-semibold text-slate-500 transition hover:bg-slate-50 hover:text-slate-700 sm:px-6"
+          >
+            {expanded ? 'Show less' : `Show ${upcoming.length - 1} more`}
+            <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} />
+          </button>
+        )}
+
+        {upcoming.length > 1 && expanded && (
           <div className="divide-y divide-slate-50">
             {upcoming.slice(1).map((e) => (
               <Link key={e.id} href={`/events/${e.slug}`} className="group flex items-center gap-4 px-5 py-3.5 transition hover:bg-slate-50/50 sm:px-6">

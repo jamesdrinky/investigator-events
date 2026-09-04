@@ -119,8 +119,11 @@ export function MyEventsPanel() {
             Same treatment as the home screen's Up Next card, which is the
             strongest thing in the app; no reason to invent a second style. */}
         {nextEvent && (
-          <Link href={`/events/${nextEvent.slug}`} className="group relative block px-5 pb-4 sm:px-6">
-            <div className="relative overflow-hidden rounded-2xl bg-slate-900">
+          <Link href={`/events/${nextEvent.slug}`} className="group relative block">
+            {/* Full-bleed to the panel edges. Inset here made this card
+                narrower than the search block and the featured card below it,
+                so the page lost its left edge halfway down. */}
+            <div className="relative overflow-hidden border-y border-slate-100 bg-slate-900">
               {nextEventCover ? (
                 <Image
                   src={nextEventCover}

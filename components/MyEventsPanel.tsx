@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Calendar, MapPin, ChevronRight, Ticket, Plus } from 'lucide-react';
+import { MapPin, ChevronRight, Ticket } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { UserAvatar } from '@/components/UserAvatar';
 import { getEventImage, getCityHeroImageUrl } from '@/lib/utils/city-media';
@@ -100,50 +100,64 @@ export function MyEventsPanel() {
   return (
     <div className="mb-8 sm:mb-12">
       <div className="overflow-hidden rounded-2xl border border-slate-200/60 bg-white shadow-[0_8px_30px_-12px_rgba(15,23,42,0.08)]">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 sm:px-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/25">
-              <Ticket className="h-5 w-5" />
-            </div>
-            <div>
-              <h2 className="text-sm font-bold text-slate-900">My Events</h2>
-              <p className="text-[11px] text-slate-400">{upcoming.length} upcoming{past.length > 0 ? ` · ${past.length} attended` : ''}</p>
-            </div>
+        {/* Header — no submit button here: the page hero already has one, and
+            two of them a hundred pixels apart reads as a mistake. */}
+        <div className="flex items-baseline justify-between px-5 pb-3 pt-4 sm:px-6">
+          <div className="flex items-center gap-2.5">
+            <Ticket className="h-4 w-4 text-blue-600" />
+            <h2 className="text-[15px] font-bold tracking-[-0.01em] text-slate-900">My events</h2>
           </div>
-          <Link href="/submit-event" className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 hover:shadow-sm">
-            <Plus className="h-3.5 w-3.5" /> Submit event
-          </Link>
+          <p className="text-[11px] font-medium text-slate-400">
+            {upcoming.length} upcoming{past.length > 0 ? ` · ${past.length} attended` : ''}
+          </p>
         </div>
 
-        {/* Next event highlight */}
+        {/* Next event — a real image card rather than a photo at 8% opacity.
+            Same treatment as the home screen's Up Next card, which is the
+            strongest thing in the app; no reason to invent a second style. */}
         {nextEvent && (
-          <Link href={`/events/${nextEvent.slug}`} className="group relative block overflow-hidden border-b border-slate-100">
-            {/* Background image */}
-            {nextEventCover && (
-              <div className="absolute inset-0">
-                <Image src={nextEventCover} alt="" fill className="object-cover opacity-[0.08] transition-opacity duration-500 group-hover:opacity-[0.15]" />
-              </div>
-            )}
-            <div className="relative flex items-center gap-4 px-5 py-5 sm:gap-5 sm:px-6">
-              {/* Countdown */}
-              <div className="flex h-16 w-16 flex-shrink-0 flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/20 sm:h-20 sm:w-20">
-                <span className="text-xl font-bold sm:text-2xl">{new Date((nextEvent.start_date ?? '') + 'T00:00:00Z').getUTCDate()}</span>
-                <span className="text-[10px] font-semibold uppercase tracking-wider opacity-80">{new Date((nextEvent.start_date ?? '') + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' })}</span>
-              </div>
-              {/* Details */}
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-blue-600">{daysUntil(nextEvent.start_date)}</span>
-                  <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-medium text-slate-500">{nextEvent.category}</span>
+          <Link href={`/events/${nextEvent.slug}`} className="group relative block px-5 pb-4 sm:px-6">
+            <div className="relative overflow-hidden rounded-2xl bg-slate-900">
+              {nextEventCover ? (
+                <Image
+                  src={nextEventCover}
+                  alt=""
+                  fill
+                  sizes="(max-width: 640px) 100vw, 640px"
+                  className="object-cover transition duration-700 group-hover:scale-[1.04]"
+                />
+              ) : null}
+              {/* Scrim: dark enough at the base for white text to hold up on
+                  any photo, clear at the top so the image still reads. */}
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/55 to-slate-950/10" />
+
+              <div className="relative flex min-h-[13rem] flex-col justify-between p-4 sm:min-h-[15rem] sm:p-5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-full bg-blue-600 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
+                    {daysUntil(nextEvent.start_date)}
+                  </span>
+                  {nextEvent.category ? (
+                    <span className="rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-semibold text-white/90 backdrop-blur-sm">
+                      {nextEvent.category}
+                    </span>
+                  ) : null}
                 </div>
-                <h3 className="mt-1.5 truncate text-base font-bold text-slate-900 group-hover:text-blue-600 sm:text-lg">{nextEvent.title}</h3>
-                <div className="mt-1 flex items-center gap-3 text-xs text-slate-500">
-                  <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {nextEvent.city}, {nextEvent.country}</span>
-                  <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {formatDate(nextEvent.start_date)}</span>
+
+                <div>
+                  {/* Two lines, so an event does not lose its own name. */}
+                  <h3 className="line-clamp-2 text-lg font-bold leading-tight tracking-[-0.02em] text-white sm:text-xl">
+                    {nextEvent.title}
+                  </h3>
+                  {/* One date, not two — the tile used to repeat what this line
+                      already said. */}
+                  <p className="mt-1.5 flex items-center gap-1.5 text-xs text-white/75">
+                    <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                    <span className="truncate">{nextEvent.city}, {nextEvent.country}</span>
+                    <span aria-hidden className="text-white/40">·</span>
+                    <span className="flex-shrink-0">{formatDate(nextEvent.start_date)}</span>
+                  </p>
                 </div>
               </div>
-              <ChevronRight className="h-5 w-5 flex-shrink-0 text-slate-300 transition group-hover:translate-x-1 group-hover:text-blue-500" />
             </div>
           </Link>
         )}
@@ -158,7 +172,7 @@ export function MyEventsPanel() {
                   <span className="text-[8px] font-semibold uppercase text-slate-400">{new Date((e.start_date ?? '') + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' })}</span>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-slate-900 group-hover:text-blue-600">{e.title}</p>
+                  <p className="line-clamp-2 text-sm font-semibold leading-snug text-slate-900 group-hover:text-blue-600">{e.title}</p>
                   <p className="truncate text-[11px] text-slate-400">{e.city}, {e.country} · {daysUntil(e.start_date)}</p>
                 </div>
                 <ChevronRight className="h-4 w-4 flex-shrink-0 text-slate-200 transition group-hover:text-blue-400" />

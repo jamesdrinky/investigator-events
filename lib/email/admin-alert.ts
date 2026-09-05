@@ -31,11 +31,21 @@ export function buildAdminAlertEmail({ heading, intro, rows, cta }: AdminAlertOp
     ? `<a href="${escapeHtml(cta.url)}" style="display:inline-block;margin-top:20px;padding:11px 24px;background:#0f172a;color:#fff;text-decoration:none;font-size:14px;font-weight:600;border-radius:99px">${escapeHtml(cta.label)}</a>`
     : '';
 
-  return `<div style="font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:520px;margin:0 auto;padding:24px;color:#0f172a">
+  // A complete document, not a bare <div>. This string is the entire body of
+  // four different emails, and a fragment renders unpredictably in Outlook and
+  // reads as sloppy to spam filters.
+  return `<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light only" />
+</head>
+<body style="margin:0;padding:0;background-color:#f1f5f9">
+  <div style="font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:520px;margin:0 auto;padding:24px;color:#0f172a">
     <h2 style="margin:0 0 6px;font-size:19px">${escapeHtml(heading)}</h2>
     <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#334155">${escapeHtml(intro)}</p>
     <table style="width:100%;border-collapse:collapse;border-top:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;margin-top:4px">${rowsHtml}</table>
     ${ctaHtml}
     <p style="margin:22px 0 0;font-size:12px;color:#94a3b8">Investigator Events · internal notification</p>
-  </div>`;
+  </div>
+</body></html>`;
 }

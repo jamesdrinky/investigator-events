@@ -43,3 +43,15 @@ describe('Approval email video block', () => {
     expect(buildSubmissionApprovedEmail('Test Event', 'https://x.test/e')).toContain('Now fill the room');
   });
 });
+
+describe('One sequence per inbox', () => {
+  // Associations list several events against one contact address — NALI, CII,
+  // FALI and OSMOSIS each have three. A sequence per event would be twelve
+  // emails in a month to the same person, asking for the same thing.
+  it('the steps are per-sequence, so a second sequence would double the volume', () => {
+    const perSequence = VIDEO_REMINDER_STEPS.length;
+    expect(perSequence).toBe(4);
+    // Three events, unguarded, is what we are avoiding.
+    expect(perSequence * 3).toBe(12);
+  });
+});

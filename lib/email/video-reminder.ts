@@ -179,6 +179,26 @@ export async function enqueueVideoReminders(input: EnqueueVideoRemindersInput): 
   if (!input.recipientEmail) return { queued: 0 };
 
   const supabase = createSupabaseAdminServerClient();
+
+  // One conversation per inbox. Associations list several events with the same
+  // contact address — NALI, CII, FALI and OSMOSIS each have three — and a
+  // sequence per event would mean twelve emails in a month asking the same
+  // person for a video. If they already have an open sequence, this event does
+  // not start another; the ask is the same either way.
+  const { data: openSequence } = await (supabase
+    .from('video_reminders' as never)
+    .select('event_name')
+    .eq('recipient_email', input.recipientEmail.toLowerCase())
+    .eq('status', 'pending')
+    .limit(1) as unknown as Promise<{ data: { event_name: string }[] | null }>);
+
+  if (openSequence && openSequence.length > 0) {
+    console.info(
+      `Video reminders skipped for "${input.eventName}" — ${input.recipientEmail} already has an open sequence for "${openSequence[0].event_name}"`
+    );
+    return { queued: 0 };
+  }
+
   const now = Date.now();
   const rows = VIDEO_REMINDER_STEPS.map((s) => ({
     event_submission_id: input.eventSubmissionId,

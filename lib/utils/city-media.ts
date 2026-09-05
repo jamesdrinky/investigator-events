@@ -59,6 +59,8 @@ const cityImageMap: Record<string, string> = {
   'Escondido, CA': 'la.jpg',
   'Vienna': 'vienna.jpg',
   'Bremen': 'conventioncentre.jpg',
+  Brooklyn: 'brooklyn.jpg',
+  'Brooklyn, NY': 'brooklyn.jpg',
   'New York': 'nyc.jpg',
   'New York City': 'nyc.jpg',
   'New York, NY': 'nyc.jpg',

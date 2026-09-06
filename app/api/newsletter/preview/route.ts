@@ -1,3 +1,4 @@
+import type { AppPushSize } from '@/lib/email/app-push-banner';
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { fetchAllEvents } from '@/lib/data/events';
@@ -40,9 +41,10 @@ export async function GET(request: Request) {
   const regionParam = searchParams.get('region');
   const region = regionParam === 'eu-pending' ? ('eu-pending' as const) : ('available' as const);
   const edition = getWeeklyNewsletterEdition(searchParams.get('edition'));
-  const appPush: { size: 'hero' | 'compact'; region: 'available' | 'eu-pending' } | null =
+  const appPush: { size: AppPushSize; region: 'available' | 'eu-pending' } | null =
     appPushParam === 'hero' ? { size: 'hero', region }
     : appPushParam === 'compact' ? { size: 'compact', region }
+    : appPushParam === 'android-launch' ? { size: 'android-launch', region }
     : getWeeklyNewsletterAppPush(edition);
 
   const editorial = await fetchCurrentEditorial(createSupabaseAdminServerClient());

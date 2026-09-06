@@ -14,8 +14,9 @@
  * accurate by noting that EU App Store rollout is still pending.
  */
 
+import { APP_STORE_URL, PLAY_STORE_URL } from '@/lib/data/app-links';
+
 const SITE = 'https://www.investigatorevents.com';
-const APP_STORE_URL = 'https://apps.apple.com/us/app/investigator-events/id6769977101';
 const LOGO = `${SITE}/logo/ielogo1.PNG`;
 const APP_LAUNCH_GRAPHIC = `${SITE}/email/app-launch-hero.jpeg`;
 
@@ -34,13 +35,13 @@ const C = {
   amberBg: '#fef3c7',
 };
 
-export type AppPushSize = 'hero' | 'compact';
+export type AppPushSize = 'hero' | 'compact' | 'android-launch';
 export type AppPushRegion = 'available' | 'eu-pending';
 
 export function buildGlobalLaunchBanner(): string {
   return `
   <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:28px;">
-    <tr><td style="border-radius:18px;overflow:hidden;background-color:#06081a;background-image:linear-gradient(145deg,#06081a 0%,#0e1e6e 52%,#190d46 100%);">
+    <tr><td class="dark-card" style="border-radius:18px;overflow:hidden;background-color:#06081a;background-image:linear-gradient(145deg,#06081a 0%,#0e1e6e 52%,#190d46 100%);">
 
       <!-- App hero image -->
       <a href="${APP_STORE_URL}" style="display:block;text-decoration:none;line-height:0;font-size:0;">
@@ -59,10 +60,10 @@ export function buildGlobalLaunchBanner(): string {
               </td>
               <td style="vertical-align:middle;">
                 <p style="margin:0;font-size:15px;font-weight:800;color:#ffffff;line-height:1.2;letter-spacing:-0.01em;">Investigator Events</p>
-                <p style="margin:3px 0 0;font-size:11px;color:#93c5fd;line-height:1.3;">Free &middot; iPhone &middot; App Store</p>
+                <p style="margin:3px 0 0;font-size:11px;color:#93c5fd;line-height:1.3;">Free &middot; iPhone &amp; Android</p>
                 <table cellpadding="0" cellspacing="0" style="margin-top:6px;"><tr>
-                  <td style="padding-right:5px;"><span style="display:inline-block;padding:3px 9px;border-radius:99px;font-size:9px;font-weight:700;background-color:rgba(74,222,128,0.18);border:1px solid rgba(74,222,128,0.35);color:#4ade80;letter-spacing:0.06em;text-transform:uppercase;">&#9679; iOS Live</span></td>
-                  <td><span style="display:inline-block;padding:3px 9px;border-radius:99px;font-size:9px;font-weight:700;background-color:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);color:#94a3b8;letter-spacing:0.06em;text-transform:uppercase;">Android Soon</span></td>
+                  <td style="padding-right:5px;"><span class="on-dark-ok" style="display:inline-block;padding:3px 9px;border-radius:99px;font-size:9px;font-weight:700;background-color:rgba(74,222,128,0.18);border:1px solid rgba(74,222,128,0.35);color:#4ade80;letter-spacing:0.06em;text-transform:uppercase;">&#9679; iOS Live</span></td>
+                  <td><span class="on-dark-ok" style="display:inline-block;padding:3px 9px;border-radius:99px;font-size:9px;font-weight:700;background-color:rgba(74,222,128,0.18);border:1px solid rgba(74,222,128,0.35);color:#4ade80;letter-spacing:0.06em;text-transform:uppercase;">&#9679; Android Live</span></td>
                 </tr></table>
               </td>
             </tr>
@@ -123,6 +124,7 @@ export function buildAppPushBanner({
   region: AppPushRegion;
 }): string {
   if (size === 'hero') return heroBanner(region);
+  if (size === 'android-launch') return androidLaunchBanner();
   return compactBanner(region);
 }
 
@@ -141,8 +143,7 @@ function heroBanner(region: AppPushRegion): string {
       </td></tr>
     </table>
     <p style="margin:12px 0 0;font-size:11px;color:#94a3b8;text-align:center;line-height:1.55;">
-      Live in 175 countries on iOS &middot; Android coming soon.<br/>
-      EU App Store rollout is expected next week — if it is not in your store yet, it will be soon.
+      Live on iPhone and Android, in 175 countries.
     </p>`;
 
   return `
@@ -152,7 +153,7 @@ function heroBanner(region: AppPushRegion): string {
         <img src="${APP_LAUNCH_GRAPHIC}" alt="Investigator Events is live on the App Store" width="504" style="display:block;width:100%;height:auto;border:0;" />
       </a>
     </td></tr>
-    <tr><td style="padding:22px 24px 26px;border-radius:0 0 18px 18px;background-color:${C.dark};background-image:linear-gradient(135deg,${C.dark} 0%,#0b2f88 52%,#123fbd 100%);">
+    <tr><td class="dark-card" style="padding:22px 24px 26px;border-radius:0 0 18px 18px;background-color:${C.dark};background-image:linear-gradient(135deg,${C.dark} 0%,#0b2f88 52%,#123fbd 100%);">
       <table cellpadding="0" cellspacing="0" role="presentation" style="margin:0 auto 18px;">
         <tr>
           <td style="vertical-align:middle;padding-right:12px;">
@@ -160,7 +161,7 @@ function heroBanner(region: AppPushRegion): string {
           </td>
           <td style="vertical-align:middle;text-align:left;">
             <p style="margin:0;font-size:15px;font-weight:800;color:${C.white};line-height:1.15;">Investigator Events</p>
-            <p style="margin:3px 0 0;font-size:11px;color:#93c5fd;line-height:1.3;">Now on the App Store</p>
+            <p style="margin:3px 0 0;font-size:11px;color:#93c5fd;line-height:1.3;">On the App Store &amp; Google Play</p>
           </td>
         </tr>
       </table>
@@ -171,7 +172,7 @@ function heroBanner(region: AppPushRegion): string {
         Investigator Events is live in your pocket.
       </p>
       <p style="margin:10px 0 0;font-size:14px;color:#cbd5e1;line-height:1.55;text-align:center;">
-        The all-in-one platform for investigators to connect, learn and grow is now live on iPhone in 175 countries.
+        The all-in-one platform for investigators to connect, learn and grow is now live on iPhone and Android, in 175 countries.
       </p>
       <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin:20px 0 0;">
         <tr>
@@ -182,7 +183,7 @@ function heroBanner(region: AppPushRegion): string {
             <p style="margin:0;padding:12px 6px;border:1px solid rgba(255,255,255,0.16);border-radius:12px;color:${C.white};font-size:11px;line-height:1.4;background-color:rgba(255,255,255,0.06);"><strong style="font-size:16px;">iOS</strong><br/>live now</p>
           </td>
           <td width="33.33%" style="padding:0 4px;text-align:center;">
-            <p style="margin:0;padding:12px 6px;border:1px solid rgba(255,255,255,0.16);border-radius:12px;color:${C.white};font-size:11px;line-height:1.4;background-color:rgba(255,255,255,0.06);"><strong style="font-size:16px;">EU</strong><br/>next week</p>
+            <p style="margin:0;padding:12px 6px;border:1px solid rgba(255,255,255,0.16);border-radius:12px;color:${C.white};font-size:11px;line-height:1.4;background-color:rgba(255,255,255,0.06);"><strong style="font-size:16px;">Android</strong><br/>live now</p>
           </td>
         </tr>
       </table>
@@ -192,22 +193,84 @@ function heroBanner(region: AppPushRegion): string {
 }
 
 function compactBanner(region: AppPushRegion): string {
-  const right = region === 'eu-pending'
-    ? `<span style="display:inline-block;padding:8px 16px;background-color:${C.amberBg};color:#92400e;font-size:11px;font-weight:700;border-radius:99px;">EU: coming soon</span>`
-    : `<a href="${APP_STORE_URL}" style="display:inline-block;padding:10px 22px;background-color:${C.dark};color:${C.white};text-decoration:none;font-size:12px;font-weight:700;border-radius:99px;">Get the iOS app</a>`;
+  // Both stores are live, so the strip carries two links rather than one CTA.
+  // 'eu-pending' is kept only so old callers still type-check; the EU rollout
+  // completed, and the copy no longer promises anything is on its way.
+  void region;
 
   return `
   <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:28px;">
     <tr><td style="padding:16px 18px;border:1px solid ${C.border};border-radius:12px;background-color:${C.blueBg};">
       <table width="100%" cellpadding="0" cellspacing="0"><tr>
         <td style="vertical-align:middle;">
-          <p style="margin:0;font-size:13px;font-weight:700;color:${C.dark};">Investigator Events for iOS</p>
+          <p style="margin:0;font-size:13px;font-weight:700;color:${C.dark};">Investigator Events for iPhone &amp; Android</p>
           <p style="margin:3px 0 0;font-size:11px;color:${C.muted};line-height:1.4;">The whole calendar + network in your pocket.</p>
         </td>
         <td style="vertical-align:middle;text-align:right;white-space:nowrap;">
-          ${right}
+          <a href="${APP_STORE_URL}" style="display:inline-block;padding:10px 16px;background-color:${C.dark};color:${C.white};text-decoration:none;font-size:12px;font-weight:700;border-radius:99px;">App&nbsp;Store</a>
+          <a href="${PLAY_STORE_URL}" style="display:inline-block;margin-left:6px;padding:10px 16px;background-color:${C.dark};color:${C.white};text-decoration:none;font-size:12px;font-weight:700;border-radius:99px;">Google&nbsp;Play</a>
         </td>
       </tr></table>
     </td></tr>
   </table>`;
 }
+
+/**
+ * Android launch week. Mid-weight card for the top of the weekly email —
+ * heavier than the compact strip, lighter than the full iOS launch hero,
+ * because most of this list already has the iPhone app.
+ */
+function androidLaunchBanner(): string {
+  const storeButton = (href: string, label: string, fill: string, text: string, cls: string) => `
+    <td style="padding:0 4px;">
+      <!--[if mso]>
+      <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${href}" style="height:44px;v-text-anchor:middle;width:150px;" arcsize="50%" fillcolor="${fill}" stroke="f">
+        <w:anchorlock/><center style="color:${text};font-family:sans-serif;font-size:13px;font-weight:bold;">${label}</center>
+      </v:roundrect>
+      <![endif]-->
+      <!--[if !mso]><!-->
+      <a class="${cls}" href="${href}" style="display:block;padding:13px 10px;background-color:${fill};color:${text};text-decoration:none;font-size:13px;font-weight:700;border-radius:99px;text-align:center;">${label}</a>
+      <!--<![endif]-->
+    </td>`;
+
+  return `
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:28px;">
+    <tr><td class="dark-card" style="border-radius:18px;padding:26px 22px 24px;background-color:#0f172a;background-image:linear-gradient(135deg,#0f172a 0%,#0b2f88 55%,#123fbd 100%);">
+
+      <!-- App identity -->
+      <table cellpadding="0" cellspacing="0" role="presentation" style="margin:0 auto 18px;">
+        <tr>
+          <td style="vertical-align:middle;padding-right:12px;">
+            <img src="${LOGO}" alt="Investigator Events" width="52" height="52" style="display:block;width:52px;height:52px;border-radius:14px;background-color:${C.white};border:1px solid rgba(255,255,255,0.25);" />
+          </td>
+          <td style="vertical-align:middle;text-align:left;">
+            <p style="margin:0;font-size:15px;font-weight:800;color:${C.white};line-height:1.15;">Investigator Events</p>
+            <table cellpadding="0" cellspacing="0" style="margin-top:6px;"><tr>
+              <td style="padding-right:5px;"><span class="on-dark-ok" style="display:inline-block;padding:3px 9px;border-radius:99px;font-size:9px;font-weight:700;background-color:rgba(74,222,128,0.18);border:1px solid rgba(74,222,128,0.35);color:#4ade80;letter-spacing:0.06em;text-transform:uppercase;">&#9679; iOS Live</span></td>
+              <td><span class="on-dark-ok" style="display:inline-block;padding:3px 9px;border-radius:99px;font-size:9px;font-weight:700;background-color:rgba(74,222,128,0.18);border:1px solid rgba(74,222,128,0.35);color:#4ade80;letter-spacing:0.06em;text-transform:uppercase;">&#9679; Android Live</span></td>
+            </tr></table>
+          </td>
+        </tr>
+      </table>
+
+      <p style="margin:0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;color:#93c5fd;text-align:center;" class="on-dark-accent">New this week</p>
+      <p style="margin:10px 0 0;font-size:26px;font-weight:800;color:${C.white};letter-spacing:-0.025em;text-align:center;line-height:1.15;">Now on Android.</p>
+      <p class="on-dark-muted" style="margin:10px 0 0;font-size:14px;color:#cbd5e1;line-height:1.55;text-align:center;">
+        The app went live on Google Play this weekend. Whichever phone you carry, the whole calendar &mdash; and everyone on it &mdash; travels with you.
+      </p>
+
+      <!-- Both stores -->
+      <table cellpadding="0" cellspacing="0" role="presentation" style="margin:22px auto 0;">
+        <tr>
+          ${storeButton(APP_STORE_URL, 'Download for iPhone', C.white, '#0f172a', 'btn-store-light')}
+          ${storeButton(PLAY_STORE_URL, 'Get it on Google Play', '#1d4ed8', '#ffffff', 'btn-store-ghost')}
+        </tr>
+      </table>
+
+      <p class="on-dark-muted" style="margin:14px 0 0;font-size:11px;color:#94a3b8;text-align:center;line-height:1.55;">
+        Free &middot; 175 countries &middot; same account on both
+      </p>
+    </td></tr>
+  </table>`;
+}
+

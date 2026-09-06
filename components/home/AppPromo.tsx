@@ -339,7 +339,7 @@ export function AppPromo({ liveEventCount, countriesCount }: AppPromoProps) {
 
         {/* Trust line below the card */}
         <p className="mt-6 text-center text-[11px] font-medium text-white/45 sm:text-xs">
-          Available on iOS now <ArrowRight className="inline h-3 w-3" /> Android coming soon
+          Available now on iOS <ArrowRight className="inline h-3 w-3" /> and Android
         </p>
       </div>
     </section>

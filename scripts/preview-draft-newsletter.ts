@@ -60,6 +60,14 @@ async function main() {
   // script looking for newsletter-draft---apply.md.
   const weekArg = process.argv.slice(2).find((a) => !a.startsWith('--'));
   const weekOf = weekArg ?? currentMonday();
+  // Drafts are written the night before, when currentMonday() is still LAST
+  // Monday and "recently past" has not yet swallowed the weekend's events —
+  // so the preview showed a review section the real send would not have.
+  // --as-of=<iso> renders the email as of the moment the cron will fire.
+  const asOfArg = process.argv.slice(2).find((a) => a.startsWith('--as-of='))?.slice('--as-of='.length);
+  const asOf = asOfArg ? new Date(asOfArg) : new Date(`${weekOf}T08:00:00Z`);
+  if (Number.isNaN(asOf.getTime())) throw new Error(`--as-of is not a date: ${asOfArg}`);
+  console.log(`week ${weekOf} · rendering as of ${asOf.toISOString()}`);
   const md = await readFile(path.join(ROOT, `newsletter-draft-${weekOf}.md`), 'utf8');
 
   const subject = section(md, 'SUBJECT \\(recommended\\)').split('\n')[0].trim();
@@ -84,18 +92,22 @@ async function main() {
   const { getWeeklyCollections } = await import('@/lib/data/weekly');
   const { buildWeeklyNewsletterHtml } = await import('@/lib/email/weekly-newsletter');
   const { createSupabaseAdminServerClient } = await import('@/lib/supabase/admin');
-  const { getWeeklyNewsletterAppPush } = await import('@/lib/email/newsletter-editions');
+  const { getWeeklyNewsletterAppPush, getWeeklyNewsletterEdition } = await import('@/lib/email/newsletter-editions');
+
+  // Same resolution the cron does, so the preview cannot drift from the send.
+  const edition = getWeeklyNewsletterEdition(null, asOf);
 
   const sb = createSupabaseAdminServerClient();
   const { data: rows } = await (sb.from('events' as never).select('*').order('start_date', { ascending: true }) as any);
   const events = ((rows ?? []) as any[]).filter((r) => r.approved !== false).map(mapEventRowToItem).filter((e: any) => e !== null) as any[];
-  const { upcoming, newlyAdded, featured, recentlyPast } = getWeeklyCollections(events);
+  const { upcoming, newlyAdded, featured, recentlyPast } = getWeeklyCollections(events, asOf);
 
   console.log('SUBJECT:', subject);
   console.log('\nBYLINE :', byline);
   console.log('\nINTRO  :\n' + introText.split('\n\n').map((p) => '  ' + p).join('\n\n'));
   console.log('\nSPOTLIGHT:');
   Object.entries(editorial).filter(([k]) => k.startsWith('spotlight')).forEach(([k, v]) => console.log(`  ${k}: ${v}`));
+  console.log(`\nedition: ${edition}  appPush: ${JSON.stringify(getWeeklyNewsletterAppPush(edition))}`);
   console.log(`\ncounts — upcoming ${upcoming.length}, newlyAdded ${newlyAdded.length}, featured ${featured.length}, recentlyPast ${recentlyPast.length}`);
 
   const { data: briefRows } = await (sb.from('articles' as never)
@@ -109,7 +121,7 @@ async function main() {
     upcoming, newlyAdded, featured, recentlyPast,
     unsubscribeToken: 'preview-token',
     articles: briefArticles,
-    appPush: getWeeklyNewsletterAppPush('standard'),
+    appPush: getWeeklyNewsletterAppPush(edition),
     editorial: editorial as any,
     referralBlock: false,
   });

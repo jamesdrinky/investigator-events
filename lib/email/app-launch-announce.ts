@@ -168,7 +168,7 @@ export function buildAppLaunchAnnounceEmail({
                 </td></tr>
               </table>
               <p style="margin:12px 0 0;font-size:11px;color:#94a3b8;line-height:1.5;">
-                Free &middot; iPhone &amp; iPad &middot; Android coming soon
+                Free &middot; iPhone, iPad &amp; Android
               </p>
             </td></tr>
 

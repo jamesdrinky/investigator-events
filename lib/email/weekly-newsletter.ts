@@ -31,15 +31,28 @@ function fmtDate(d: string) { return new Date(`${d}T00:00:00Z`).toLocaleDateStri
 function fmtShort(d: string) { return new Date(`${d}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' }); }
 function daysUntil(d: string) { return Math.ceil((new Date(`${d}T00:00:00Z`).getTime() - Date.now()) / 86400000); }
 
+/**
+ * The site serves three association logos as WebP, which Outlook on Windows
+ * cannot decode — NALI, WAPI and SPI came through as broken-image boxes.
+ * A PNG twin sits beside each one for email use only; the web keeps WebP.
+ */
+function logoUrl(fileName: string | undefined | null): string | null {
+  if (!fileName) return null;
+  const emailSafe = fileName.endsWith('.webp')
+    ? `${fileName.slice(0, -'.webp'.length)}-email.png`
+    : fileName;
+  return `${SITE}/associations/${emailSafe}`;
+}
+
 function assocLogo(ev: EventItem) {
   const b = findAssociationBranding(ev.association ?? ev.organiser);
-  return b?.logoFileName ? `${SITE}/associations/${b.logoFileName}` : null;
+  return logoUrl(b?.logoFileName);
 }
 
 function coAssocLogo(ev: EventItem) {
   if (!ev.coAssociation) return null;
   const b = findAssociationBranding(ev.coAssociation);
-  return b?.logoFileName ? `${SITE}/associations/${b.logoFileName}` : null;
+  return logoUrl(b?.logoFileName);
 }
 
 function hostName(ev: EventItem) {
@@ -245,7 +258,9 @@ function reviewCard(ev: EventItem) {
   const lg = assocLogo(ev);
   const host = hostName(ev);
   const img = eventCover(ev);
-  const url = `${SITE}/events/${ev.slug}`;
+  // #reviews opens the review tab and scrolls to it — without the hash the
+  // reader lands at the top of the page and has to hunt for the box.
+  const url = `${SITE}/events/${ev.slug}#reviews`;
 
   return `
   <tr><td style="padding-bottom:10px;">
@@ -305,7 +320,7 @@ function howToSection() {
   const items = [
     { emoji: '&#128100;', title: 'Update your profile', desc: 'Add your specialisation and associations.', link: `${SITE}/profile/edit`, cta: 'Edit profile' },
     { emoji: '&#129309;', title: 'Connect with others', desc: 'Follow investigators. Grow your network.', link: `${SITE}/people`, cta: 'Browse' },
-    { emoji: '&#11088;', title: 'Review past events', desc: 'Help others decide where to go next.', link: `${SITE}/calendar`, cta: 'Find events' },
+    { emoji: '&#11088;', title: 'Review past events', desc: 'Help others decide where to go next.', link: `${SITE}/my-events`, cta: 'My events' },
   ];
   return `
   <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:40px;">
@@ -433,7 +448,11 @@ export function buildWeeklyNewsletterHtml({
     || (displayNewlyAdded.length > 0
       ? `${displayNewlyAdded.length} just added · ${displayUpcoming.length} upcoming across ${countries} countries — see what's on`
       : `${displayUpcoming.length} upcoming investigator events across ${countries} countries`);
-  const appHeroBanner = appPush?.size === 'hero' ? buildAppPushBanner({ size: 'hero', region: appPush.region ?? 'available' }) : '';
+  // 'hero' and 'android-launch' both sit at the top of the email, above the
+  // featured event; 'compact' sits mid-email after the spotlight.
+  const appHeroBanner = appPush && appPush.size !== 'compact'
+    ? buildAppPushBanner({ size: appPush.size, region: appPush.region ?? 'available' })
+    : '';
   const appCompactBanner = appPush?.size === 'compact' ? buildAppPushBanner({ size: 'compact', region: appPush.region ?? 'available' }) : '';
   const globalLaunchHtml = globalLaunchBanner ? buildGlobalLaunchBanner() : '';
   const isAppHero = Boolean(appHeroBanner);
@@ -473,11 +492,25 @@ export function buildWeeklyNewsletterHtml({
   [data-ogsc] .review-bg { background-color: #f0f4ff !important; }
   [data-ogsc] .bg-soft { background-color: #f8fafc !important; }
   [data-ogsc] .accent-bar { background-color: #2563eb !important; }
+  [data-ogsc] .dark-card { background-color: #0f172a !important; border-color: rgba(255,255,255,0.14) !important; }
+  [data-ogsc] .dark-card table, [data-ogsc] .dark-card tr, [data-ogsc] .dark-card td, [data-ogsc] .dark-card div, [data-ogsc] .dark-card p, [data-ogsc] .dark-card span, [data-ogsc] .dark-card h1, [data-ogsc] .dark-card h2, [data-ogsc] .dark-card h3 { color: #ffffff !important; background-color: transparent !important; }
+  [data-ogsc] .dark-card .on-dark-muted { color: #94a3b8 !important; }
+  [data-ogsc] .dark-card .on-dark-accent { color: #93c5fd !important; }
+  [data-ogsc] .dark-card .on-dark-ok { color: #4ade80 !important; }
+  [data-ogsc] .dark-card a.btn-store-light { color: #0f172a !important; background-color: #ffffff !important; }
+  [data-ogsc] .dark-card a.btn-store-ghost { color: #ffffff !important; background-color: #1d4ed8 !important; }
   [data-ogsc] img { opacity: 1 !important; }
   [data-ogsb] body, [data-ogsb] #wrapper, [data-ogsb] table, [data-ogsb] td { background-color: #ffffff !important; }
 
   /* ── ProtonMail dark mode ── */
   .protonmail-dark body, .protonmail-dark table, .protonmail-dark td { background-color: #ffffff !important; color: #0f172a !important; }
+  .protonmail-dark .dark-card { background-color: #0f172a !important; border-color: rgba(255,255,255,0.14) !important; }
+  .protonmail-dark .dark-card table, .protonmail-dark .dark-card tr, .protonmail-dark .dark-card td, .protonmail-dark .dark-card div, .protonmail-dark .dark-card p, .protonmail-dark .dark-card span, .protonmail-dark .dark-card h1, .protonmail-dark .dark-card h2, .protonmail-dark .dark-card h3 { color: #ffffff !important; background-color: transparent !important; }
+  .protonmail-dark .dark-card .on-dark-muted { color: #94a3b8 !important; }
+  .protonmail-dark .dark-card .on-dark-accent { color: #93c5fd !important; }
+  .protonmail-dark .dark-card .on-dark-ok { color: #4ade80 !important; }
+  .protonmail-dark .dark-card a.btn-store-light { color: #0f172a !important; background-color: #ffffff !important; }
+  .protonmail-dark .dark-card a.btn-store-ghost { color: #ffffff !important; background-color: #1d4ed8 !important; }
 
   /* ── Generic dark mode override ── */
   @media (prefers-color-scheme: dark) {
@@ -492,6 +525,13 @@ export function buildWeeklyNewsletterHtml({
     a.btn-spotlight { color: #ffffff !important; background-color: #7c3aed !important; }
     .review-bg { background-color: #f0f4ff !important; }
     .bg-soft { background-color: #f8fafc !important; }
+    .dark-card { background-color: #0f172a !important; border-color: rgba(255,255,255,0.14) !important; }
+    .dark-card table, .dark-card tr, .dark-card td, .dark-card div, .dark-card p, .dark-card span, .dark-card h1, .dark-card h2, .dark-card h3 { color: #ffffff !important; background-color: transparent !important; }
+    .dark-card .on-dark-muted { color: #94a3b8 !important; }
+    .dark-card .on-dark-accent { color: #93c5fd !important; }
+    .dark-card .on-dark-ok { color: #4ade80 !important; }
+    .dark-card a.btn-store-light { color: #0f172a !important; background-color: #ffffff !important; }
+    .dark-card a.btn-store-ghost { color: #ffffff !important; background-color: #1d4ed8 !important; }
     img { opacity: 1 !important; }
   }
 
@@ -509,7 +549,7 @@ export function buildWeeklyNewsletterHtml({
 <div id="wrapper" style="background-color:#ffffff;">
 
 <!-- Preheader -->
-<div style="display:none;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:#ffffff;">${isAppHero ? 'The Investigator Events iOS app is live in 175 countries; EU rollout is expected next week.' : preheaderText} &middot; investigatorevents.com &#847; &#847; &#847; &#847; &#847;</div>
+<div style="display:none;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:#ffffff;">${preheaderText} &middot; investigatorevents.com &#847; &#847; &#847; &#847; &#847;</div>
 
 <table width="100%" cellpadding="0" cellspacing="0" class="outer" style="background-color:#ffffff;">
 <tr><td align="center" class="outer-wrap" style="padding:16px;">
@@ -538,7 +578,11 @@ export function buildWeeklyNewsletterHtml({
   <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:22px;">
     <tr><td>
       <p style="margin:0;font-size:28px;font-weight:800;color:${C.dark};letter-spacing:-0.03em;line-height:1.15;">Weekly Briefing</p>
-      <p style="margin:6px 0 0;font-size:13px;color:${C.muted};line-height:1.4;">${isAppHero ? 'This week: the Investigator Events app is live, plus the latest PI conferences, meetings, and networking updates.' : 'Your weekly roundup of PI conferences, meetings, and networking events worldwide.'}</p>
+      <p style="margin:6px 0 0;font-size:13px;color:${C.muted};line-height:1.4;">${appPush?.size === 'android-launch'
+        ? 'This week: the app lands on Android, plus the latest PI conferences, meetings, and networking updates.'
+        : isAppHero
+          ? 'This week: the Investigator Events app is live, plus the latest PI conferences, meetings, and networking updates.'
+          : 'Your weekly roundup of PI conferences, meetings, and networking events worldwide.'}</p>
     </td></tr>
   </table>
 

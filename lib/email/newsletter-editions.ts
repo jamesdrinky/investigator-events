@@ -1,16 +1,44 @@
-export type WeeklyNewsletterEdition = 'standard' | 'app-launch';
+export type WeeklyNewsletterEdition = 'standard' | 'app-launch' | 'android-launch';
 
 export const APP_LAUNCH_NEWSLETTER_SUBJECT = 'Investigator Events is live on the App Store — Weekly Briefing';
+export const ANDROID_LAUNCH_NEWSLETTER_SUBJECT = 'Investigator Events is now on Android — Weekly Briefing';
 
-export function getWeeklyNewsletterEdition(value: string | null | undefined): WeeklyNewsletterEdition {
-  // Default to the standard weekly edition — the app-launch promo has run its
-  // course (same subject + hero banner for weeks). Pass ?edition=app-launch to
-  // explicitly re-run the launch promo.
-  return value === 'app-launch' ? 'app-launch' : 'standard';
+/**
+ * The single Monday that carries the Android launch card. Vercel's cron hits
+ * the route with no query string, so the edition has to come from the date —
+ * and it has to expire on its own, or every week after this one keeps
+ * announcing a launch that already happened.
+ */
+export const ANDROID_LAUNCH_WEEK_OF = '2026-09-07';
+
+/** The Monday on or before `now`, in YYYY-MM-DD. Issues are keyed by week. */
+function mondayOf(now: Date): string {
+  const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const day = d.getUTCDay(); // 0 = Sunday
+  d.setUTCDate(d.getUTCDate() - (day === 0 ? 6 : day - 1));
+  return d.toISOString().slice(0, 10);
+}
+
+export function getWeeklyNewsletterEdition(
+  value: string | null | undefined,
+  now = new Date()
+): WeeklyNewsletterEdition {
+  // An explicit ?edition= always wins, including ?edition=standard to opt out.
+  if (value === 'app-launch') return 'app-launch';
+  if (value === 'android-launch') return 'android-launch';
+  if (value === 'standard') return 'standard';
+  // Android launched on Google Play on 6 Sep 2026; this is the Monday after.
+  if (mondayOf(now) === ANDROID_LAUNCH_WEEK_OF) return 'android-launch';
+  // Otherwise the standard weekly. The iOS app-launch promo has run its course
+  // (same subject + hero banner for weeks); pass ?edition=app-launch to re-run.
+  return 'standard';
 }
 
 export function getWeeklyNewsletterSubject(edition: WeeklyNewsletterEdition, fallbackSubject: string) {
   if (edition === 'app-launch') return APP_LAUNCH_NEWSLETTER_SUBJECT;
+  // The Android edition still lets a hand-written subject win, because the
+  // week's events are usually the better hook — see the draft's SUBJECT block.
+  if (edition === 'android-launch') return fallbackSubject || ANDROID_LAUNCH_NEWSLETTER_SUBJECT;
   // Standard editions use the content-driven subject built from the week's events.
   return fallbackSubject;
 }
@@ -59,7 +87,7 @@ export function buildRotatingWeeklySubject(
 export function getWeeklyNewsletterAppPush(edition: WeeklyNewsletterEdition) {
   // app-launch = full hero promo; standard = a small compact strip (still
   // promotes the app, without dominating the top of every weekly email).
-  return edition === 'app-launch'
-    ? { size: 'hero' as const, region: 'available' as const }
-    : { size: 'compact' as const, region: 'available' as const };
+  if (edition === 'app-launch') return { size: 'hero' as const, region: 'available' as const };
+  if (edition === 'android-launch') return { size: 'android-launch' as const, region: 'available' as const };
+  return { size: 'compact' as const, region: 'available' as const };
 }

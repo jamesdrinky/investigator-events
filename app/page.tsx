@@ -107,17 +107,29 @@ export default async function HomePage() {
   const coverage = getCoverageMetrics(mainEvents);
   const now = new Date();
   const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-  const upcomingEvents = mainEvents.filter((event) => parseDate(event.date).getTime() >= today.getTime());
+  // Keyed off the end date so an event that is running right now still counts
+  // as upcoming — using the start date made multi-day conferences drop off the
+  // homepage on the morning they opened.
+  const upcomingEvents = mainEvents.filter(
+    (event) => parseDate(event.endDate ?? event.date).getTime() >= today.getTime()
+  );
 
-  const heroEvents = (featuredEvents.length > 0 ? featuredEvents : upcomingEvents).slice(0, 4);
-  const featuredCarouselEvents = featuredEvents.length > 0 ? featuredEvents : upcomingEvents.slice(0, 8);
+  /**
+   * Featured events lead, then upcoming ones fill the rest of the slot. Taking
+   * featured alone left the hero as short as the number of flagged events —
+   * and only two are ever flagged ahead at once, so it would have gone from
+   * four cards to two.
+   */
+  const fillFromUpcoming = (seed: typeof featuredEvents, size: number) => {
+    const seen = new Set(seed.map((e) => e.id));
+    return [...seed, ...upcomingEvents.filter((e) => !seen.has(e.id))].slice(0, size);
+  };
+
+  const heroEvents = fillFromUpcoming(featuredEvents, 4);
+  const featuredCarouselEvents = fillFromUpcoming(featuredEvents, 8);
 
   // EventsShowcase is mobile-only — desktop keeps the original sections.
-  const showcaseFeed = (() => {
-    const featuredIds = new Set(featuredEvents.map((e) => e.id));
-    const remainingUpcoming = upcomingEvents.filter((e) => !featuredIds.has(e.id));
-    return [...featuredEvents, ...remainingUpcoming].slice(0, 7);
-  })();
+  const showcaseFeed = fillFromUpcoming(featuredEvents, 7);
   const toShowcase = (e: typeof showcaseFeed[number]): ShowcaseEvent => ({
     id: e.id,
     title: e.title,

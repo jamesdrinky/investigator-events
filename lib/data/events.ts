@@ -3,6 +3,7 @@ import { createSupabasePublicServerClient } from '@/lib/supabase/public';
 import type { Database } from '@/lib/types/database';
 import { slugifyEventTitle } from '@/lib/utils/event-slugs';
 import { getEventImage, getCityHeroImageUrl } from '@/lib/utils/city-media';
+import { parseDate } from '@/lib/utils/date';
 
 export interface EventItem {
   id: string;
@@ -82,6 +83,12 @@ export function mapEventRowToItem(row: CompatEventRow): EventItem | null {
   };
 }
 
+/** Midnight today, UTC — the cutoff for "has this already finished?". */
+function todayUtcMs(): number {
+  const now = new Date();
+  return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+}
+
 async function fetchRawEvents(): Promise<CompatEventRow[]> {
   const supabase = createSupabasePublicServerClient();
   const { data, error } = await supabase.from('events').select('*').order('start_date', { ascending: true });
@@ -109,9 +116,29 @@ async function fetchVisibleEvents(): Promise<EventItem[]> {
   return fetchVisibleEventsCached();
 }
 
+/**
+ * Featured events that have not already happened.
+ *
+ * The `featured` flag is set once and nobody goes back to unset it, so without
+ * a date bound this returned whatever was flagged earliest — rows are ordered
+ * by start_date, so the six oldest won the slice and the homepage hero sat on
+ * events from April while GSX in a week's time never made the cut.
+ *
+ * The bound is the end date, not the start: an event running right now is the
+ * most relevant thing on the site, and keying off the start date made it
+ * disappear the morning it opened.
+ */
 export async function fetchFeaturedEvents(limit = 6): Promise<EventItem[]> {
   const events = await fetchVisibleEvents();
-  return events.filter((event) => event.featured && event.eventScope === 'main').slice(0, limit);
+  const today = todayUtcMs();
+  return events
+    .filter(
+      (event) =>
+        event.featured &&
+        event.eventScope === 'main' &&
+        parseDate(event.endDate ?? event.date).getTime() >= today
+    )
+    .slice(0, limit);
 }
 
 export async function fetchAllEvents(): Promise<EventItem[]> {

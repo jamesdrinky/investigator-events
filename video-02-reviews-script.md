@@ -1,89 +1,82 @@
 # Video 2 — "How to review an event"
 
-**Length:** ~40s · **Audio:** music, no voice · **Captions:** burned in, no voiceover
-**Shoot on:** your iPhone, inside the app, signed in as yourself
-**Frame:** portrait 1080×1920 straight out of iOS screen recording — same as the launch video
+**Three cuts out of one shoot:**
+| Cut | Length | Who it goes to |
+|---|---|---|
+| `both` | ~40s | Your own feed / the platform |
+| `wad` | ~22s | Share with WAD |
+| `cii` | ~22s | Share with the CII |
 
-**Why the phone again:** no cursor to smooth, correct aspect ratio with no cropping, and it
-drops into the existing mockup frame unchanged. The emulator route is gone anyway — `adb`
-and `emulator` are no longer installed on the Mac.
-
-**The two events, both 1–6 September, both now with real reviews:**
-- WAD Conference 2026 — Cannes — **6 reviews**, all 5★ (Mike LaCorte is one)
-- CII AGM 2026 — Prague — **5 reviews**, all 5★ (David J. Karas, who hosted it, is one)
-
-Equal airtime is right, and the numbers back it up: 6 and 5.
+**Shoot on:** your iPhone, **inside the app** (not Safari — we want the tab bar visible)
+**Signed in as:** yourself · **Focus/DND ON** · **mic OFF** (music goes on in the edit)
+**Output:** portrait 1080×1920 straight out of iOS screen recording
 
 ---
 
-## Before you hit record
+## Why three recordings, not five
 
-1. Sign in to the app as yourself.
-2. Open both event pages once and come back out — warms them so nothing spins on camera.
-3. **Focus / DND ON.** A banner across the top kills the take.
-4. Control Centre → screen record. **Mic off** — the track goes on in the edit.
-
-**Retakes are free.** You can only review an event once, so the form disappears after you
-submit. If a take is bad, say so and I delete the row — the form comes straight back.
+Each single-event cut has to stand on its own — a video sent to WAD can't open on a
+list with the CII in it. So each event gets its own opener (its hero), and the shared
+list is recorded separately, used only in the `both` cut.
 
 ---
 
-## Shot 1 — the two events (0:00–0:05)
+# RECORDING 1 — the pair  ·  ~6 seconds
+**Used in:** `both` only
 
-**Do:** Events tab. Both are at the top of the recently-finished list. Let them sit on
-screen together for a full two seconds before you touch anything.
-
-**Caption:** `Two events wrapped last week`
-
-## Shot 2 — WAD, what's already there (0:05–0:10)
-
-**Do:** Open **WAD Conference 2026**. It lands on Reviews. Scroll slowly through the six.
-
-**Caption:** `Six people have already said how it went`
-
-**Why:** This is the whole argument. Nobody leaves the first review; everybody adds to a pile.
-
-## Shot 3 — WAD, leave one (0:10–0:22)
-
-**Do:**
-- Tap the **5th star**. Hold — 🤩 *Excellent* appears and the detail panel slides in.
-- Tap through the five: Content & Speakers, Networking, Organisation, Venue & Location,
-  Value for Money. Don't rush these, the sliding-in is the nicest moment in the app.
-- **Yes** on "Would you recommend this event?"
-- Type one short line. I'll speed-ramp the typing in the edit, so type naturally.
-- Submit.
-
-**Captions:** `Tap your rating` → `Rate the parts that matter` → `Two lines is plenty` → `Done`
-
-## Shot 4 — CII, what's already there (0:22–0:27)
-
-**Do:** Back → **CII AGM 2026**. Scroll its five. Pause a beat on David Karas — he hosted
-it and still reviewed it.
-
-**Caption:** `Same in Prague`
-
-## Shot 5 — CII, leave one (0:27–0:37)
-
-**Do:** The same five beats, the same pace. Different star count if you like — it does not
-have to be 5★ twice.
-
-**Caption:** `Every event. Same thirty seconds.`
-
-## End card (0:37–0:42)
-
-Static: **"Were you there? Leave a review."** + logo + App Store / Google Play badges.
-I already have this card built from the Android launch (`/api/og/stores`).
+Events tab → the recently-finished list. Get **WAD and CII on screen together** and hold
+still for a full three seconds. Don't tap anything. That's the whole take.
 
 ---
 
-## The one thing to decide
+# RECORDING 2 — WAD  ·  ~35 seconds
+**Used in:** `both` + `wad`
 
-Submitting on camera posts a **real, public review under your own name** on WAD and CII.
-You did not attend either. Two clean ways round it:
+Start **on the WAD Conference 2026 page, already open, scrolled to the top.**
 
-- **Film it, then I delete both rows the moment you send me the footage.** The video shows
-  the real mechanics, your real profile, and nothing false stays on the site. ← recommended
-- Film on a throwaway account. Safer, but the reviewer name on screen looks like a test
-  account, which undercuts it.
+1. **Hold 2s** on the hero — Cannes, 1–6 September. This is the `wad` cut's opening frame.
+2. Scroll down to **Reviews**. Go slowly through the **six** already there — Mike LaCorte's
+   is one of them. Give it 6–8 seconds. *This is the most persuasive part of the video.*
+3. Tap the **5th star**. Wait — 🤩 *Excellent* appears and the detail panel slides in.
+4. Tap through all five: Content & Speakers · Networking · Organisation · Venue & Location ·
+   Value for Money. Don't rush — the slide-in is the nicest animation in the app.
+5. **Yes** on "Would you recommend this event?"
+6. Type a short line. Keep it under ten words so the typing isn't long. I'll speed it up anyway.
+7. **Submit.** Hold 2s on the confirmation.
 
-Either way, do not leave a 5★ write-up of an event you were not at sitting on a public page.
+---
+
+# RECORDING 3 — CII  ·  ~35 seconds
+**Used in:** `both` + `cii`
+
+Start **on the CII AGM 2026 page, already open, scrolled to the top.**
+
+Exactly the same seven beats, same pace. Its Reviews tab has **five**, including
+**David J. Karas** — he hosted it and still reviewed it, so let that one sit on screen.
+
+Rate it honestly; it does not have to be 5★ twice.
+
+---
+
+## Before you press record
+
+1. Open both event pages once and back out — warms them so nothing spins on camera.
+2. **DND on.** One banner across the top kills the take.
+3. Control Centre → screen record, **mic off**.
+
+## Retakes
+
+Steps 1–6 you can redo as many times as you like — nothing is saved until you submit.
+**Only step 7 is one-shot**, because the form disappears once you've reviewed. If you want
+another go, tell me and I delete the row — the form comes straight back.
+
+## One thing to confirm
+
+Submitting posts a **real, public review under your name** on two events. If you weren't at
+either, say so and I'll delete both rows the moment you send me the footage — the video still
+shows the real mechanics and your real profile, and nothing false stays on a public page.
+
+## Send me
+
+The three recordings. Naming doesn't matter, I'll sort them. Drop them in `~/Downloads`
+like the launch footage and tell me they're there.

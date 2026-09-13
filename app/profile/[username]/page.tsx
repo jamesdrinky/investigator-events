@@ -513,12 +513,16 @@ export default async function PublicProfilePage({ params }: { params: { username
               {(reviewRows ?? []).map((r) => {
                 const ev = r.event_id ? eventMap.get(r.event_id) : undefined;
                 return (
-                  <div key={r.id} className="rounded-xl border border-slate-100 bg-slate-50/50 p-3.5 transition hover:shadow-sm">
+                  <div key={r.id} className="min-w-0 overflow-hidden rounded-xl border border-slate-100 bg-slate-50/50 p-3.5 transition hover:shadow-sm">
                     <div className="flex items-center justify-between gap-2">
-                      <Link href={ev?.slug ? `/events/${ev.slug}` : '/calendar'} className="truncate text-sm font-bold text-slate-900 transition hover:text-blue-600">
+                      {/* min-w-0 lets `truncate` actually shrink this: a flex
+                          child defaults to min-width:auto, so a long title
+                          refused to ellipsize and shoved the stars off the
+                          right edge of the card instead. */}
+                      <Link href={ev?.slug ? `/events/${ev.slug}` : '/calendar'} className="min-w-0 truncate text-sm font-bold text-slate-900 transition hover:text-blue-600">
                         {ev?.title ?? 'Event'}
                       </Link>
-                      <div className="flex gap-0.5">
+                      <div className="flex shrink-0 gap-0.5">
                         {[1, 2, 3, 4, 5].map((s) => (
                           <Star key={s} className={`h-3.5 w-3.5 ${s <= (r.rating ?? 0) ? 'fill-amber-400 text-amber-400' : 'fill-slate-200 text-slate-200'}`} />
                         ))}

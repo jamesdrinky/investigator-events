@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Calendar, MapPin } from 'lucide-react';
+import { getCityHeroImageUrl, getEventImage } from '@/lib/utils/city-media';
 
 type AttendedEvent = {
   id: string;
@@ -16,9 +17,18 @@ type AttendedEvent = {
   is_past: boolean;
 };
 
-function getImageSrc(image_path: string | null) {
+/**
+ * Stored path first, then the same city lookup the rest of the site uses.
+ *
+ * This used to drop straight to fallback.jpg whenever image_path was null,
+ * which put the generic online-meeting photo on real, physical conferences —
+ * WAD's mid-term in San José and the IKD assembly in Sorrento both had a
+ * perfectly good city shot sitting unused.
+ */
+function getImageSrc(event: Pick<AttendedEvent, 'image_path' | 'slug' | 'city'>) {
+  const { image_path, slug, city } = event;
   if (image_path && /^(\/(cities|events|images)\/|https?:\/\/)/.test(image_path)) return image_path;
-  return '/cities/fallback.jpg';
+  return getEventImage(slug) ?? getCityHeroImageUrl(city) ?? '/cities/fallback.jpg';
 }
 
 export function EventsAttendanceStack({ events }: { events: AttendedEvent[] }) {
@@ -60,7 +70,7 @@ export function EventsAttendanceStack({ events }: { events: AttendedEvent[] }) {
                 }}
               >
                 <Image
-                  src={getImageSrc(event.image_path)}
+                  src={getImageSrc(event)}
                   alt={event.title}
                   fill
                   className="object-cover"
@@ -97,7 +107,7 @@ export function EventsAttendanceStack({ events }: { events: AttendedEvent[] }) {
                     className="group/card flex items-center gap-3 rounded-xl border border-slate-100 p-2.5 transition hover:border-blue-200 hover:shadow-sm"
                   >
                     <div className="relative h-11 w-11 flex-shrink-0 overflow-hidden rounded-full border-2 border-white shadow-sm">
-                      <Image src={getImageSrc(event.image_path)} alt={event.title} fill className="object-cover" />
+                      <Image src={getImageSrc(event)} alt={event.title} fill className="object-cover" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-slate-900 group-hover/card:text-blue-600">{event.title}</p>
@@ -124,7 +134,7 @@ export function EventsAttendanceStack({ events }: { events: AttendedEvent[] }) {
                     className="group/card flex items-center gap-3 rounded-xl border border-slate-100 p-2.5 transition hover:border-blue-200 hover:shadow-sm"
                   >
                     <div className="relative h-11 w-11 flex-shrink-0 overflow-hidden rounded-full border-2 border-white shadow-sm">
-                      <Image src={getImageSrc(event.image_path)} alt={event.title} fill className="object-cover" />
+                      <Image src={getImageSrc(event)} alt={event.title} fill className="object-cover" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-slate-900 group-hover/card:text-blue-600">{event.title}</p>

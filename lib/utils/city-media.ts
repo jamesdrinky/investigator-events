@@ -86,6 +86,10 @@ const cityImageMap: Record<string, string> = {
   'Montréal': 'montreal.avif',
   'Montréal, QC': 'montreal.avif',
   'Montreal': 'montreal.avif',
+  // The IX Congreso Internacional de Seguridad Privada, Oct 2026. The file
+  // arrived spelled 'cartegena' — renamed to match the city.
+  'Cartagena': 'cartagena.jpg',
+  'Cartagena, Colombia': 'cartagena.jpg',
   'Costa Mesa': 'costamesa.jpg',
   'Costa Mesa, CA': 'costamesa.jpg',
   'Minneapolis': 'minneapolis.jpg',

@@ -13,6 +13,7 @@ import { getAssociationBrandLogoSrc, shouldInvertLogoOnLight } from '@/lib/utils
 import { findAssociationRecordByLabel } from '@/lib/data/associations';
 import { EventCommunityTabs } from '@/components/EventCommunityTabs';
 import { AssociationLogoRow } from '@/components/AssociationLogos';
+import { NewsletterInline } from '@/components/NewsletterInline';
 import { AttendeeAvatars } from '@/components/AttendeeAvatars';
 import { StickyGoingBar } from '@/components/StickyGoingBar';
 import { EventShareButtons } from '@/components/EventShareButtons';
@@ -392,6 +393,15 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
 
         {/* Community — Going / Discussion / Reviews */}
         <EventCommunityTabs eventId={event.id} isPast={isPastEvent} />
+
+        {/* Quiet sign-up — removes itself for anyone already subscribed, so it
+            can sit on every event page without nagging the same people. */}
+        <NewsletterInline
+          className="mt-10"
+          heading="Get events like this every Monday"
+          sub="New events, approaching deadlines and one standout. A two-minute read."
+          source="event-page"
+        />
 
         {/* Related events */}
         {relatedEvents.length > 0 && (

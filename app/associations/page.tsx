@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { NewsletterInline } from '@/components/NewsletterInline';
 import { AssociationsDirectory } from '@/components/associations/associations-directory';
 import { AssociationLogoMarquee } from '@/components/associations/association-logo-marquee';
 import { Reveal } from '@/components/motion/reveal';
@@ -113,6 +114,12 @@ export default async function AssociationsPage() {
       {/* ── Directory ── */}
       <div className="container-shell relative py-10 sm:py-16">
         <AssociationsDirectory associations={associations} stats={stats} />
+        <NewsletterInline
+          className="mt-10"
+          heading="Every association's events, every Monday"
+          sub="One email a week covering every event on this page, plus everything else worldwide."
+          source="associations-index"
+        />
       </div>
     </section>
   );

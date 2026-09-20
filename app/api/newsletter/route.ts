@@ -23,6 +23,24 @@ function normalizeEmail(value: unknown) {
   return typeof value === 'string' ? value.trim().toLowerCase() : '';
 }
 
+/**
+ * Success response that also marks this browser as subscribed, so the
+ * inline sign-up boxes across the site quietly disappear instead of
+ * asking someone who has already joined. One year, lax so it survives
+ * the click through from the confirmation email.
+ */
+function subscribedResponse(message: string) {
+  const res = NextResponse.json({ message });
+  res.cookies.set('ie_newsletter', '1', {
+    maxAge: 60 * 60 * 24 * 365,
+    path: '/',
+    sameSite: 'lax',
+    httpOnly: false, // read client-side to hide boxes without a round trip
+    secure: process.env.NODE_ENV === 'production',
+  });
+  return res;
+}
+
 export async function POST(request: Request) {
   try {
     assertSameOriginRequest();
@@ -89,7 +107,7 @@ export async function POST(request: Request) {
 
     if (existing) {
       if (existing.status === 'active') {
-        return NextResponse.json({ message: 'Already subscribed' });
+        return subscribedResponse('Already subscribed');
       }
       if (existing.status === 'unsubscribed') {
         // Re-subscribe
@@ -103,7 +121,7 @@ export async function POST(request: Request) {
       if (token) {
         await sendConfirmationEmail(email, token);
       }
-      return NextResponse.json({ message: 'Check your email to confirm your subscription' });
+      return subscribedResponse('Check your email to confirm your subscription');
     }
 
     // Insert new subscriber as pending. Store the canonical form so future
@@ -116,7 +134,7 @@ export async function POST(request: Request) {
 
     if (insertError) {
       if (insertError.code === '23505') {
-        return NextResponse.json({ message: 'Already subscribed' });
+        return subscribedResponse('Already subscribed');
       }
       console.error('newsletter_insert_failed', { code: insertError.code });
       return NextResponse.json({ error: 'Unable to subscribe right now' }, { status: 500 });
@@ -127,7 +145,7 @@ export async function POST(request: Request) {
       await sendConfirmationEmail(email, inserted.unsubscribe_token);
     }
 
-    return NextResponse.json({ message: 'Check your email to confirm your subscription' });
+    return subscribedResponse('Check your email to confirm your subscription');
   } catch (error) {
     if (error instanceof RateLimitError) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });

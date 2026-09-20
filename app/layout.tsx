@@ -105,7 +105,10 @@ export default function RootLayout({
           ><PageTransition>{children}</PageTransition></main>
         <Analytics />
         <AppUpdater />
-          <Footer className="hidden lg:block" />
+          {/* The footer was desktop-only, so privacy, terms and contact were
+              invisible to every phone visitor and to a mobile-first crawler.
+              pb keeps it clear of the fixed bottom tab bar on small screens. */}
+          <Footer className="pb-[var(--app-bottom-nav-height,0px)] lg:pb-0" />
         </div>
         <MobileBackButton />
         <BottomTabBar />

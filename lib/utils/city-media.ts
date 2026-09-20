@@ -86,6 +86,9 @@ const cityImageMap: Record<string, string> = {
   'Montréal': 'montreal.avif',
   'Montréal, QC': 'montreal.avif',
   'Montreal': 'montreal.avif',
+  // Host town of the FSPD/SFPP/IKD AGM, June 2027.
+  'Einsiedeln': 'einsiedeln.jpg',
+  'Einsiedeln, Switzerland': 'einsiedeln.jpg',
   // The IX Congreso Internacional de Seguridad Privada, Oct 2026. The file
   // arrived spelled 'cartegena' — renamed to match the city.
   'Cartagena': 'cartagena.jpg',

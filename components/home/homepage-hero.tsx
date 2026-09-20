@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { NewsletterInline } from '@/components/NewsletterInline';
 import Image from 'next/image';
 import { ShinyButton } from '@/components/ui/shiny-button';
 import { useMemo, useState, useEffect, useCallback } from 'react';
@@ -302,6 +303,18 @@ export function HomepageHero({ events, stats }: HomepageHeroProps) {
                 </div>
               );
             })}
+          </div>
+
+          {/* Newsletter is the one funnel every visitor should land in, so it
+              sits in the hero rather than three screens down. It removes
+              itself for anyone already subscribed. */}
+          <div className="mx-auto mt-6 max-w-md sm:mt-8">
+            <NewsletterInline
+              tone="dark"
+              heading="Never miss another investigator event"
+              sub="Every Monday: new events, approaching deadlines, one standout. A two-minute read."
+              source="homepage-hero"
+            />
           </div>
         </div>
 

@@ -74,3 +74,28 @@ export function buildAssociationLinks(input: {
   for (const label of parseAssociationList(input.patrons)) links.push({ label, role: 'patron' });
   return links;
 }
+
+/**
+ * Does this event belong to `needle` (an association slug or name)?
+ *
+ * Checks every linked association, not just the primary one. Three callers
+ * had grown their own copy of this test against `association` alone, so a
+ * body that co-hosts or is a patron was missing from its own page, its
+ * embedded widget and its calendar feed — the three places an association
+ * actually looks.
+ */
+export function eventMatchesAssociation(
+  event: { associations?: { label: string }[]; association?: string; organiser?: string },
+  needle: string
+): boolean {
+  const target = needle.trim().toLowerCase();
+  if (!target) return true;
+
+  const candidates = [
+    ...(event.associations?.map((a) => a.label) ?? []),
+    event.association,
+    event.organiser,
+  ].filter(Boolean) as string[];
+
+  return candidates.some((c) => c.toLowerCase().includes(target));
+}

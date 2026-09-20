@@ -151,7 +151,9 @@ export default async function HomePage() {
   const heroStats = [
     { label: 'Countries', value: coverage.totalCountries },
     { label: 'Live events', value: coverage.totalEvents },
-    { label: 'Associations', value: `${uniqueAssociations - 1}+` }
+    // Math.max guards a cold cache: with no events the set is empty and the
+    // hero rendered "ASSOCIATIONS -1+", which reads as broken.
+    { label: 'Associations', value: `${Math.max(0, uniqueAssociations - 1)}+` }
   ];
 
   return (

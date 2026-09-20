@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { eventMatchesAssociation } from '@/lib/data/event-associations';
 import { fetchAllEvents } from '@/lib/data/events';
 import { formatEventDate, parseDate } from '@/lib/utils/date';
 import { getCountryFlag } from '@/lib/utils/location';
@@ -39,12 +40,7 @@ export async function GET(request: NextRequest) {
   const events = (await fetchAllEvents())
     .filter((e) => e.eventScope === 'main' && parseDate(e.date).getTime() >= now)
     .filter((e) => !country || countrySlug(e.country ?? '') === country)
-    .filter(
-      (e) =>
-        !association ||
-        (e.association ?? '').toLowerCase().includes(association) ||
-        (e.organiser ?? '').toLowerCase().includes(association)
-    )
+    .filter((e) => !association || eventMatchesAssociation(e, association))
     .sort((a, b) => parseDate(a.date).getTime() - parseDate(b.date).getTime())
     .slice(0, limit);
 

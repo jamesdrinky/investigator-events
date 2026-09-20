@@ -26,12 +26,16 @@ export function NewsletterInline({
   sub = 'New events, approaching deadlines, one standout. A two-minute read.',
   source = 'inline',
   className = '',
+  tone = 'light',
 }: {
   heading?: string;
   sub?: string;
   source?: string;
   className?: string;
+  /** 'dark' for the navy homepage hero, where light-on-white would vanish. */
+  tone?: 'light' | 'dark';
 }) {
+  const dark = tone === 'dark';
   const [subscribed, setSubscribed] = useState<boolean | null>(null);
   const [email, setEmail] = useState('');
   const [state, setState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
@@ -73,16 +77,26 @@ export function NewsletterInline({
 
   if (state === 'done') {
     return (
-      <div className={`rounded-2xl border border-emerald-200/70 bg-emerald-50/50 p-4 text-center ${className}`}>
-        <p className="text-sm font-semibold text-slate-900">{message}</p>
+      <div
+        className={`rounded-2xl border p-4 text-center ${className} ${
+          dark
+            ? 'border-emerald-400/30 bg-emerald-400/10'
+            : 'border-emerald-200/70 bg-emerald-50/50'
+        }`}
+      >
+        <p className={`text-sm font-semibold ${dark ? 'text-emerald-200' : 'text-slate-900'}`}>{message}</p>
       </div>
     );
   }
 
   return (
-    <div className={`rounded-2xl border border-slate-200/70 bg-slate-50/60 p-4 sm:p-5 ${className}`}>
-      <p className="text-sm font-bold text-slate-900">{heading}</p>
-      <p className="mt-1 text-xs leading-relaxed text-slate-500">{sub}</p>
+    <div
+      className={`rounded-2xl border p-4 sm:p-5 ${className} ${
+        dark ? 'border-white/12 bg-white/[0.06] backdrop-blur-sm' : 'border-slate-200/70 bg-slate-50/60'
+      }`}
+    >
+      <p className={`text-sm font-bold ${dark ? 'text-white' : 'text-slate-900'}`}>{heading}</p>
+      <p className={`mt-1 text-xs leading-relaxed ${dark ? 'text-blue-100/60' : 'text-slate-500'}`}>{sub}</p>
       <form onSubmit={submit} className="mt-3 flex flex-col gap-2 sm:flex-row">
         <input
           type="email"
@@ -91,17 +105,25 @@ export function NewsletterInline({
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@firm.com"
           aria-label="Email address"
-          className="h-11 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3.5 text-[16px] text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 sm:text-sm"
+          className={`h-11 min-w-0 flex-1 rounded-xl border px-3.5 text-[16px] outline-none transition focus:ring-2 sm:text-sm ${
+            dark
+              ? 'border-white/15 bg-white/10 text-white placeholder:text-blue-100/40 focus:border-blue-300 focus:ring-blue-400/25'
+              : 'border-slate-200 bg-white text-slate-900 focus:border-blue-400 focus:ring-blue-400/20'
+          }`}
         />
         <button
           type="submit"
           disabled={state === 'loading'}
-          className="h-11 shrink-0 rounded-xl bg-slate-900 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-60"
+          className={`h-11 shrink-0 rounded-xl px-5 text-sm font-semibold transition disabled:opacity-60 ${
+            dark ? 'bg-white text-slate-950 hover:bg-blue-50' : 'bg-slate-900 text-white hover:bg-slate-800'
+          }`}
         >
           {state === 'loading' ? 'Joining…' : 'Subscribe free'}
         </button>
       </form>
-      {state === 'error' && <p className="mt-2 text-xs text-rose-600">{message}</p>}
+      {state === 'error' && (
+        <p className={`mt-2 text-xs ${dark ? 'text-rose-300' : 'text-rose-600'}`}>{message}</p>
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { NewsletterInline } from '@/components/NewsletterInline';
 import Link from 'next/link';
 import { ArrowRight, Sparkles, Calendar, MapPin } from 'lucide-react';
 import type { EventItem } from '@/lib/data/events';
@@ -86,6 +87,16 @@ export function MobileHero({ events, stats }: MobileHeroProps) {
             </div>
           ))}
         </div>
+
+        {/* Newsletter — the one funnel, in the hero rather than three
+            screens down. Hides itself for existing subscribers. */}
+        <NewsletterInline
+          className="mt-7"
+          tone="dark"
+          heading="Never miss another investigator event"
+          sub="Every Monday: new events, deadlines, one standout. A two-minute read."
+          source="mobile-hero"
+        />
 
         {/* Featured event preview card */}
         {featured && (

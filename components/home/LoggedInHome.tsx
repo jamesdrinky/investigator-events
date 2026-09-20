@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { NewsletterInline } from '@/components/NewsletterInline';
 import { Calendar, Users, Star, Bell, ChevronRight, MapPin, Bookmark, Search, MessageCircle, Globe, Send, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import type { Route } from 'next';
@@ -557,6 +558,17 @@ export function LoggedInHome() {
             </div>
           </div>
         )}
+
+        {/* Newsletter — for account holders who never subscribed. The box
+            checks the signed-in account's email, so it is invisible to
+            anyone already on the list. */}
+        <div className="px-4 pt-6 lg:px-0">
+          <NewsletterInline
+            heading="You have an account, but not the Monday briefing"
+            sub="New events, approaching deadlines and one standout, once a week. Unsubscribe any time."
+            source="dashboard"
+          />
+        </div>
 
         {/* ── Your associations ── */}
         {userAssociations.length > 0 && (

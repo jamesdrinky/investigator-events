@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { eventMatchesAssociation } from '@/lib/data/event-associations';
 import { createSupabaseSSRServerClient } from '@/lib/supabase/ssr-server';
 import { fetchAllEvents } from '@/lib/data/events';
 import { getAssociationBrandLogoSrc, shouldInvertLogoOnLight } from '@/lib/utils/association-branding';
@@ -77,10 +78,13 @@ export default async function AssociationPage({ params }: { params: { slug: stri
   const postRows = postRowsRes.data;
   const jobRows = jobRowsRes.data;
 
-  const assocEvents = allEvents.filter((e) => {
-    const assocLower = (e.association ?? e.organiser ?? '').toLowerCase();
-    return assocLower.includes(page.slug) || assocLower.includes(page.name.toLowerCase());
-  });
+  // Match against every linked association, not just the primary one.
+  // Checking `association` alone meant a body that co-hosts or is a patron
+  // never saw the event on its own page — BUDEG, ÖDV and FSPD all back the
+  // D.A.CH Forum, but only SFPP sits in the legacy column.
+  const assocEvents = allEvents.filter(
+    (e) => eventMatchesAssociation(e, page.slug) || eventMatchesAssociation(e, page.name)
+  );
 
   const now = new Date();
   const upcoming = assocEvents

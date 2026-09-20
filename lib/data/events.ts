@@ -5,6 +5,14 @@ import { slugifyEventTitle } from '@/lib/utils/event-slugs';
 import { getEventImage, getCityHeroImageUrl } from '@/lib/utils/city-media';
 import { parseDate } from '@/lib/utils/date';
 
+export type EventAssociationRole = 'host' | 'co-host' | 'patron' | 'supporter';
+
+export interface EventAssociation {
+  label: string;
+  role: EventAssociationRole;
+  position: number;
+}
+
 export interface EventItem {
   id: string;
   title: string;
@@ -18,6 +26,12 @@ export interface EventItem {
   organiser: string;
   association?: string;
   coAssociation?: string;
+  /**
+   * Every association tied to this event, in display order. Populated from
+   * event_associations; `association`/`coAssociation` remain as the legacy
+   * two-slot view of the same data so existing callers keep working.
+   */
+  associations?: EventAssociation[];
   category: string;
   description: string;
   website: string;
@@ -100,13 +114,52 @@ async function fetchRawEvents(): Promise<CompatEventRow[]> {
   return (data ?? []) as CompatEventRow[];
 }
 
+/**
+ * Every association link, grouped by event. One query for the whole table —
+ * it has one row per (event, association) and the site reads all events at
+ * once anyway, so a per-event lookup would be 60+ round trips for no gain.
+ */
+async function fetchAssociationsByEvent(): Promise<Map<string, EventAssociation[]>> {
+  const supabase = createSupabasePublicServerClient();
+  const { data, error } = await (supabase
+    .from('event_associations' as never)
+    .select('event_id, label, role, position')
+    .order('position', { ascending: true }) as any);
+
+  const byEvent = new Map<string, EventAssociation[]>();
+  if (error || !data) return byEvent;
+
+  for (const row of data as { event_id: string; label: string; role: EventAssociationRole; position: number }[]) {
+    const list = byEvent.get(row.event_id) ?? [];
+    list.push({ label: row.label, role: row.role, position: row.position });
+    byEvent.set(row.event_id, list);
+  }
+  return byEvent;
+}
+
 const fetchVisibleEventsCached = unstable_cache(
   async (): Promise<EventItem[]> => {
-    const rows = await fetchRawEvents();
+    const [rows, assocByEvent] = await Promise.all([
+      fetchRawEvents(),
+      fetchAssociationsByEvent(),
+    ]);
     return rows
       .filter((row) => row.approved !== false)
       .map(mapEventRowToItem)
-      .filter((event): event is EventItem => event !== null);
+      .filter((event): event is EventItem => event !== null)
+      .map((event) => {
+        const linked = assocByEvent.get(event.id);
+        if (!linked || linked.length === 0) return event;
+        const sorted = [...linked].sort((a, b) => a.position - b.position);
+        return {
+          ...event,
+          associations: sorted,
+          // Keep the legacy two-slot view in sync so every existing caller —
+          // the newsletter, cards, OG images — keeps working untouched.
+          association: event.association ?? sorted[0]?.label,
+          coAssociation: event.coAssociation ?? sorted[1]?.label,
+        };
+      });
   },
   ['visible-events'],
   { revalidate: 60 } // Cache for 60 seconds

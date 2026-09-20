@@ -12,6 +12,7 @@ import { getCountryFlag } from '@/lib/utils/location';
 import { getAssociationBrandLogoSrc, shouldInvertLogoOnLight } from '@/lib/utils/association-branding';
 import { findAssociationRecordByLabel } from '@/lib/data/associations';
 import { EventCommunityTabs } from '@/components/EventCommunityTabs';
+import { AssociationLogoRow } from '@/components/AssociationLogos';
 import { AttendeeAvatars } from '@/components/AttendeeAvatars';
 import { StickyGoingBar } from '@/components/StickyGoingBar';
 import { EventShareButtons } from '@/components/EventShareButtons';
@@ -92,7 +93,13 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
       <>{label}</>
     );
 
-  const associationValue = event.association ? (
+  // Three or more partners get the grouped row — a flat "A & B & C & D"
+  // line loses the distinction between a host and a patron, which is the
+  // thing the associations themselves care about most.
+  const linkedAssociations = event.associations ?? [];
+  const associationValue = linkedAssociations.length >= 3 ? (
+    <AssociationLogoRow associations={linkedAssociations} />
+  ) : event.association ? (
     <>
       {associationLink(event.association, associationRecord)}
       {event.coAssociation ? <> &amp; {associationLink(event.coAssociation, coAssociationRecord)}</> : null}

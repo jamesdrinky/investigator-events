@@ -18,6 +18,7 @@ import {
 } from '@/lib/admin/session';
 import { queueApprovalOutreachEmail } from '@/lib/email/association-outreach';
 import { findAssociationRecordByLabel } from '@/lib/data/associations';
+import { syncEventAssociations, buildAssociationLinks } from '@/lib/data/event-associations';
 import { buildSubmissionApprovedEmail, buildSubmissionRejectedEmail } from '@/lib/email/submission-confirmation';
 import { Resend } from 'resend';
 
@@ -212,11 +213,20 @@ export async function createEventAction(formData: FormData) {
 
   const payload = await parseEventData(formData);
   const supabase = createSupabaseAdminServerClient();
-  const { error } = await supabase.from('events').insert(payload);
+  const { data: created, error } = await supabase.from('events').insert(payload).select('id').single();
 
   if (error) {
     console.error('Event create failed:', error.message);
     throw new Error('Failed to create event');
+  }
+
+  if (created?.id) {
+    await syncEventAssociations(supabase, created.id, buildAssociationLinks({
+      association: payload.association,
+      coAssociation: payload.co_association,
+      additional: String(formData.get('additionalAssociations') ?? ''),
+      patrons: String(formData.get('patronAssociations') ?? ''),
+    }));
   }
 
   revalidatePath('/');
@@ -238,6 +248,13 @@ export async function updateEventAction(formData: FormData) {
     console.error('Event update failed:', error.message);
     throw new Error('Failed to update event');
   }
+
+  await syncEventAssociations(supabase, id, buildAssociationLinks({
+    association: payload.association,
+    coAssociation: payload.co_association,
+    additional: String(formData.get('additionalAssociations') ?? ''),
+    patrons: String(formData.get('patronAssociations') ?? ''),
+  }));
 
   revalidatePath('/');
   revalidatePath('/calendar');
@@ -295,11 +312,26 @@ export async function approveSubmissionAction(formData: FormData) {
     description
   };
 
-  const { error: createError } = await supabase.from('events').insert(finalPayload);
+  const { data: createdEvent, error: createError } = await supabase
+    .from('events')
+    .insert(finalPayload)
+    .select('id')
+    .single();
 
   if (createError) {
     console.error('Approve submission failed:', createError.message);
     throw new Error('Failed to approve event submission');
+  }
+
+  // Approving is the only path a public submission takes into the calendar,
+  // so it is also where the association links have to be written.
+  if (createdEvent?.id) {
+    await syncEventAssociations(supabase, createdEvent.id, buildAssociationLinks({
+      association: finalPayload.association,
+      coAssociation: finalPayload.co_association,
+      additional: String(formData.get('additionalAssociations') ?? ''),
+      patrons: String(formData.get('patronAssociations') ?? ''),
+    }));
   }
 
   const { error: updateError } = await supabase
@@ -438,9 +470,14 @@ export async function approveSubmissionAction(formData: FormData) {
   // So the introduction now goes to the association's OWN published contact,
   // and only when that differs from the submitter.
   if (submission.contact_email) {
+    // The tag can now carry several bodies — "[Association: SFPP, WAD]" —
+    // so take the first for the lookup. findAssociationRecordByLabel does an
+    // exact alias match, and handing it the whole joined string matches
+    // nothing, which would silently drop the outreach link.
     const assocMatch = submission.notes?.match(/\[Association:\s*(.+?)\]/);
-    const association = (assocMatch?.[1] && assocMatch[1] !== 'other')
-      ? assocMatch[1]
+    const primaryAssoc = assocMatch?.[1]?.split(',')[0]?.trim();
+    const association = (primaryAssoc && primaryAssoc !== 'other')
+      ? primaryAssoc
       : submission.organiser;
 
     const associationSlug = findAssociationRecordByLabel(

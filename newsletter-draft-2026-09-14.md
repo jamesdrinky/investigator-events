@@ -27,12 +27,3 @@ from 14 October, and the IX Congreso Internacional de Seguridad Privada in
 Cartagena on the 29th.
 
 --- SPOTLIGHT ---
-kicker:    New this week
-title:     A first for German-speaking investigators
-body:      The D.A.CH Forum runs in Lochau from Thursday to Saturday — the
-           first of its kind, held under the joint patronage of BUDEG, ÖDV,
-           FSPD and SFPP. Three days on the Austrian shore of Lake Constance
-           for investigators working across Germany, Austria and Switzerland.
-cta_label: See the programme
-cta_url:   https://www.investigatorevents.com/events/1-d-a-ch-forum
-image_url: https://www.investigatorevents.com/cities/lochau.jpg

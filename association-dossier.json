@@ -1,0 +1,1320 @@
+[
+ {
+  "name": "ASIS International",
+  "code": "ASIS",
+  "slug": "asis",
+  "country": "United States",
+  "email": "asis@asisonline.org",
+  "events": [
+   {
+    "title": "Secure Horizons 2026",
+    "date": "2026-09-12",
+    "city": "Atlanta, GA",
+    "organiser": "ASIS International",
+    "slug": "secure-horizons-2026"
+   },
+   {
+    "title": "GSX 2026 (Global Security Exchange)",
+    "date": "2026-09-14",
+    "city": "Atlanta, GA",
+    "organiser": "ASIS International",
+    "slug": "gsx-2026"
+   },
+   {
+    "title": "ASIS Asia-Pacific 2026",
+    "date": "2026-10-15",
+    "city": "TBC",
+    "organiser": "ASIS International",
+    "slug": "asis-asia-pacific-2026"
+   },
+   {
+    "title": "GSX 2027 (Global Security Exchange)",
+    "date": "2027-09-20",
+    "city": "Orlando, FL",
+    "organiser": "ASIS International",
+    "slug": "gsx-2027"
+   }
+  ],
+  "organisers": [
+   "ASIS International"
+  ],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [
+   {
+    "subject": "From Financial Crime to Corporate Security Managing Risk in a Volatile World is live on Investigator Events",
+    "at": "2026-06-05",
+    "status": "failed"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "Council of International Investigators",
+  "code": "CII",
+  "slug": "cii",
+  "country": "International",
+  "email": "office@cii2.org",
+  "events": [
+   {
+    "title": "CII Asian Regional Meeting",
+    "date": "2027-04-01",
+    "city": "Colombo",
+    "organiser": "Emily Ziebka",
+    "slug": "cii-asian-regional-meeting-2"
+   },
+   {
+    "title": "CII European Regional Meeting",
+    "date": "2027-05-06",
+    "city": "Paris",
+    "organiser": "Emily Ziebka",
+    "slug": "cii-european-regional-meeting-2"
+   },
+   {
+    "title": "CII North American Regional Meeting",
+    "date": "2027-05-13",
+    "city": "Seattle",
+    "organiser": "Emily Ziebka",
+    "slug": "cii-north-american-regional-meeting"
+   }
+  ],
+  "organisers": [
+   "Emily Ziebka"
+  ],
+  "seniorMembers": [
+   {
+    "name": "Debra Allen",
+    "role": "Board Member",
+    "verified": true,
+    "senior": true
+   },
+   {
+    "name": "Gautam Kumar",
+    "role": "President",
+    "verified": false,
+    "senior": true
+   },
+   {
+    "name": "Keith Elliott - CFE, CII, Keynote Speaker",
+    "role": "Regional Director ",
+    "verified": false,
+    "senior": true
+   }
+  ],
+  "memberCount": 13,
+  "contacted": [
+   {
+    "subject": "CII North American Regional Meeting is live on Investigator Events",
+    "at": "2026-06-12",
+    "status": "failed"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "National Association of Legal Investigators",
+  "code": "NALI",
+  "slug": "nali",
+  "country": "United States",
+  "email": "info@nalionline.org",
+  "events": [
+   {
+    "title": "NALI Region II Conference with MCPI",
+    "date": "2026-09-24",
+    "city": "Detroit",
+    "organiser": "Val Vail-Shirey",
+    "slug": "nali-region-ii-conference-with-mcpi"
+   },
+   {
+    "title": "NALI Region I Conference",
+    "date": "2026-10-15",
+    "city": "Atlantic City",
+    "organiser": "Val Vail-Shirey",
+    "slug": "nali-region-i-conference"
+   },
+   {
+    "title": "NALI Annual Meeting",
+    "date": "2027-02-01",
+    "city": "Austin, Texas",
+    "organiser": "Val Vail-Shirey",
+    "slug": "nali-annual-meeting"
+   }
+  ],
+  "organisers": [
+   "Val Vail-Shirey"
+  ],
+  "seniorMembers": [],
+  "memberCount": 7,
+  "contacted": [
+   {
+    "subject": "NALI Annual Meeting is live on Investigator Events",
+    "at": "2026-08-23",
+    "status": "failed"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "Association of Certified Fraud Examiners",
+  "code": "ACFE",
+  "slug": "acfe",
+  "country": "United States",
+  "email": "Events@ACFE.com",
+  "events": [
+   {
+    "title": "ACFE Anti-Fraud Conference Africa 2026",
+    "date": "2026-09-14",
+    "city": "Johannesburg",
+    "organiser": "ACFE",
+    "slug": "acfe-anti-fraud-conference-africa-2026"
+   },
+   {
+    "title": "ACFE Fraud Conference Canada 2026",
+    "date": "2026-11-15",
+    "city": "Montréal, QC",
+    "organiser": "ACFE",
+    "slug": "acfe-fraud-conference-canada-2026"
+   }
+  ],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [],
+  "hasVideo": false
+ },
+ {
+  "name": "ANDR",
+  "code": "ANDR",
+  "slug": "andr",
+  "country": "Romania",
+  "email": "romania@i-k-d.com",
+  "events": [
+   {
+    "title": "P.I.INTERNATIONAL SUMMER SCHOOL",
+    "date": "2026-10-14",
+    "city": "Bucuresti",
+    "organiser": "Maria Bumbaru/Ariella Kraft",
+    "slug": "p-i-international-summer-school"
+   }
+  ],
+  "organisers": [
+   "Maria Bumbaru/Ariella Kraft"
+  ],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [
+   {
+    "subject": "Introducing Investigator Events — free global PI calendar",
+    "at": "2026-05-05",
+    "status": "sent"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "Associated Licensed Detectives of New York State",
+  "code": "ALDONYS",
+  "slug": "aldonys",
+  "country": "United States",
+  "email": "president@aldonys.org",
+  "events": [
+   {
+    "title": "ALDONYS 2026 Person of the Year Gala",
+    "date": "2026-11-04",
+    "city": "New York",
+    "organiser": "ALDONYS",
+    "slug": "aldonys-2026-person-of-the-year-gala"
+   }
+  ],
+  "organisers": [],
+  "seniorMembers": [
+   {
+    "name": "Matthew Spaier",
+    "role": "Chairman",
+    "verified": false,
+    "senior": true
+   }
+  ],
+  "memberCount": 7,
+  "contacted": [],
+  "hasVideo": false
+ },
+ {
+  "name": "Association of British Investigators (ABI)",
+  "code": "Association of British Investigators (ABI)",
+  "slug": null,
+  "country": null,
+  "email": null,
+  "events": [
+   {
+    "title": "Professional Investigators Conference 2027",
+    "date": "2027-04-16",
+    "city": "TBC",
+    "organiser": "Association of British Investigators (ABI)",
+    "slug": "professional-investigators-conference-2027"
+   }
+  ],
+  "organisers": [
+   "Association of British Investigators (ABI)"
+  ],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [],
+  "hasVideo": true
+ },
+ {
+  "name": "California Association of Judgment Professionals",
+  "code": "CAJP",
+  "slug": "cajp",
+  "country": "United States",
+  "email": null,
+  "events": [
+   {
+    "title": "2026 CAJP Annual Conference",
+    "date": "2026-10-17",
+    "city": "Costa Mesa, CA",
+    "organiser": "CAJP",
+    "slug": "cajp-2026-annual-conference"
+   }
+  ],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [],
+  "hasVideo": false
+ },
+ {
+  "name": "Colegio Profesional de Detectives Privados de Galicia",
+  "code": "CODEGA",
+  "slug": "codega",
+  "country": "Spain",
+  "email": "info@codega.es",
+  "events": [
+   {
+    "title": "II CONGRESO CODEGA: DETECTIVES, JUSTICIA Y SEGURIDAD",
+    "date": "2026-10-03",
+    "city": "La Coruña",
+    "organiser": "CODEGA",
+    "slug": "ii-congreso-codega-detectives-justicia-y-seguridad"
+   }
+  ],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [
+   {
+    "subject": "II CONGRESO CODEGA: DETECTIVES, JUSTICIA Y SEGURIDAD is live on Investigator Events",
+    "at": "2026-08-12",
+    "status": "sent"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "Florida Association of Licensed Investigators",
+  "code": "FALI",
+  "slug": "fali",
+  "country": "United States",
+  "email": "admin@fali.org",
+  "events": [
+   {
+    "title": "FALI Conference 2027",
+    "date": "2027-04-29",
+    "city": "Orlando, Florida",
+    "organiser": "Amy O'Rourke",
+    "slug": "fali-conference-2027"
+   }
+  ],
+  "organisers": [
+   "Amy O'Rourke"
+  ],
+  "seniorMembers": [],
+  "memberCount": 9,
+  "contacted": [
+   {
+    "subject": "FALI Conference 2027 is live on Investigator Events",
+    "at": "2026-05-24",
+    "status": "failed"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "Minnesota Association of Private Investigators",
+  "code": "MAPI",
+  "slug": "mapi",
+  "country": "United States",
+  "email": "mapiboard@gmail.com",
+  "events": [
+   {
+    "title": "MAPI Fall Conference 2026",
+    "date": "2026-10-20",
+    "city": "Welch, MN",
+    "organiser": "MAPI",
+    "slug": "mapi-fall-conference-2026"
+   }
+  ],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [],
+  "hasVideo": false
+ },
+ {
+  "name": "North Carolina Association of Private Investigators",
+  "code": "NCAPI",
+  "slug": "ncapi",
+  "country": "United States",
+  "email": "president@ncapi.com",
+  "events": [
+   {
+    "title": "NCAPI 2027 Annual Conference",
+    "date": "2027-04-19",
+    "city": "Cherokee",
+    "organiser": "NCAPI / Dionne Porter",
+    "slug": "ncapi-2027-annual-conference"
+   }
+  ],
+  "organisers": [
+   "NCAPI / Dionne Porter"
+  ],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [
+   {
+    "subject": "NCAPI 2027 Annual Conference is live on Investigator Events",
+    "at": "2026-05-17",
+    "status": "failed"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "ODV",
+  "code": "ODV",
+  "slug": null,
+  "country": null,
+  "email": null,
+  "events": [
+   {
+    "title": "General conference | Seehotel Rust",
+    "date": "2026-10-23",
+    "city": "Rust",
+    "organiser": "Andreas Nehyba, Andreas Schweitzer, Udo Muchitsch",
+    "slug": "general-conference-seehotel-rust"
+   }
+  ],
+  "organisers": [
+   "Andreas Nehyba, Andreas Schweitzer, Udo Muchitsch"
+  ],
+  "seniorMembers": [],
+  "memberCount": 6,
+  "contacted": [
+   {
+    "subject": "Introducing Investigator Events — free global PI calendar",
+    "at": "2026-05-05",
+    "status": "sent"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "Professional Background Screening Association",
+  "code": "PBSA",
+  "slug": "pbsa",
+  "country": "United States",
+  "email": "info@thepbsa.org",
+  "events": [
+   {
+    "title": "PBSA 2026 Canada Conference",
+    "date": "2026-11-05",
+    "city": "Ontario",
+    "organiser": "PBSA",
+    "slug": "pbsa-2026-canada-conference"
+   }
+  ],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [],
+  "hasVideo": false
+ },
+ {
+  "name": "SNARP",
+  "code": "SNARP",
+  "slug": "snarp",
+  "country": "France",
+  "email": "france@i-k-d.com",
+  "events": [
+   {
+    "title": "SNARP AGM",
+    "date": "2026-09-02",
+    "city": "Cannes",
+    "organiser": "SNARP",
+    "slug": "snarp-agm"
+   }
+  ],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [
+   {
+    "subject": "SNARP AGM is live on Investigator Events",
+    "at": "2026-04-30",
+    "status": "sent"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "Southern California Fraud Investigators Association",
+  "code": "SCFIA",
+  "slug": "scfia",
+  "country": "United States",
+  "email": "dwilliams@dcwpi.com",
+  "events": [
+   {
+    "title": "48th SCFIA Annual Anti-Fraud Conference",
+    "date": "2026-11-03",
+    "city": "TBC",
+    "organiser": "SCFIA",
+    "slug": "scfia-48th-annual-anti-fraud-conference-2026"
+   }
+  ],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [],
+  "hasVideo": false
+ },
+ {
+  "name": "World Association of Detectives",
+  "code": "WAD",
+  "slug": "wad",
+  "country": "International",
+  "email": null,
+  "events": [
+   {
+    "title": "WAD Mid-Term Meeting 2027",
+    "date": "2027-03-03",
+    "city": "San José",
+    "organiser": "WAD",
+    "slug": "wad-conference-2027"
+   }
+  ],
+  "organisers": [],
+  "seniorMembers": [
+   {
+    "name": "Christian Mönch",
+    "role": "Member Board of Directors, Area Governor Europe incl. Israel",
+    "verified": true,
+    "senior": true
+   },
+   {
+    "name": "Mike LaCorte",
+    "role": "Past President & Chairman",
+    "verified": true,
+    "senior": true
+   },
+   {
+    "name": "Matthias Willenbrink",
+    "role": "Past President",
+    "verified": true,
+    "senior": true
+   },
+   {
+    "name": "philip ryffel",
+    "role": "President",
+    "verified": true,
+    "senior": true
+   },
+   {
+    "name": "Matthew Spaier",
+    "role": "Designated Director",
+    "verified": false,
+    "senior": true
+   },
+   {
+    "name": "Laura Giuliani",
+    "role": "Past President- Life Member of the Board",
+    "verified": false,
+    "senior": true
+   },
+   {
+    "name": "JE Cohen",
+    "role": "Board Director ",
+    "verified": true,
+    "senior": true
+   }
+  ],
+  "memberCount": 36,
+  "contacted": [
+   {
+    "subject": "A free promotional spot for WAD 2026 on Investigator Events",
+    "at": "2026-07-10",
+    "status": "sent"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "World Association of Professional Investigators",
+  "code": "WAPI",
+  "slug": "wapi",
+  "country": "United Kingdom",
+  "email": "generalsecretary@wapi.org",
+  "events": [
+   {
+    "title": "World Association of Professional Investigators Conference and Evening Banquet",
+    "date": "2026-11-21",
+    "city": "London",
+    "organiser": "Chris Millar",
+    "slug": "world-association-of-professional-investigators-conference-and-evening-banquet"
+   }
+  ],
+  "organisers": [
+   "Chris Millar"
+  ],
+  "seniorMembers": [
+   {
+    "name": "Natalie  Mccullins",
+    "role": "Governing Council Member",
+    "verified": false,
+    "senior": true
+   }
+  ],
+  "memberCount": 6,
+  "contacted": [],
+  "hasVideo": false
+ },
+ {
+  "name": "APDPE",
+  "code": null,
+  "slug": "apdpe",
+  "country": "Spain",
+  "email": "info@apdpe.es",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 2,
+  "contacted": [
+   {
+    "subject": "Introducing Investigator Events — free global PI calendar",
+    "at": "2026-05-05",
+    "status": "sent"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "APDU",
+  "code": null,
+  "slug": "apdu",
+  "country": "Ukraine",
+  "email": "office@apdua.org",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [
+   {
+    "subject": "Introducing Investigator Events — free global PI calendar",
+    "at": "2026-05-05",
+    "status": "sent"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "ARD",
+  "code": null,
+  "slug": "ard",
+  "country": "Russian Federation",
+  "email": "ard-2003@mail.ru",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 3,
+  "contacted": [
+   {
+    "subject": "Introducing Investigator Events — free global PI calendar",
+    "at": "2026-05-05",
+    "status": "sent"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "Association of British Investigators",
+  "code": null,
+  "slug": "abi",
+  "country": "United Kingdom",
+  "email": null,
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [
+   {
+    "name": "Mark Hodgson",
+    "role": "Vice President ",
+    "verified": true,
+    "senior": true
+   },
+   {
+    "name": "Mike LaCorte",
+    "role": "President",
+    "verified": true,
+    "senior": true
+   },
+   {
+    "name": "Gavin Robertson",
+    "role": "Former Vice President",
+    "verified": true,
+    "senior": true
+   }
+  ],
+  "memberCount": 15,
+  "contacted": [],
+  "hasVideo": false
+ },
+ {
+  "name": "Association of Workplace Investigators",
+  "code": null,
+  "slug": "awi",
+  "country": "United States",
+  "email": "office@awi.org",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [],
+  "hasVideo": false
+ },
+ {
+  "name": "Biznesa Drosiba",
+  "code": null,
+  "slug": "biznesa-drosiba",
+  "country": "Latvia",
+  "email": "office@businesecurity.lv",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [
+   {
+    "subject": "Introducing Investigator Events — free global PI calendar",
+    "at": "2026-05-05",
+    "status": "sent"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "BuDEG",
+  "code": null,
+  "slug": "budeg",
+  "country": "Germany",
+  "email": "info@budeg.de",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 3,
+  "contacted": [
+   {
+    "subject": "Introducing Investigator Events — free global PI calendar",
+    "at": "2026-05-05",
+    "status": "sent"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "California Association of Licensed Investigators",
+  "code": null,
+  "slug": "cali",
+  "country": "United States",
+  "email": "info@cali-pi.org",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 5,
+  "contacted": [
+   {
+    "subject": "CALI Inland Empire District Mixer is live on Investigator Events",
+    "at": "2026-06-05",
+    "status": "failed"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "CKDS",
+  "code": null,
+  "slug": "ckds",
+  "country": "Czech Republic",
+  "email": "sekretariat@ckds.cz",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [
+   {
+    "subject": "Introducing Investigator Events — free global PI calendar",
+    "at": "2026-05-05",
+    "status": "sent"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "Col·legi Oficial de Detectius Privats de Catalunya",
+  "code": null,
+  "slug": "codpcat",
+  "country": "Spain",
+  "email": "info@collegidetectius.org",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 2,
+  "contacted": [],
+  "hasVideo": false
+ },
+ {
+  "name": "Detective Association of Finland",
+  "code": null,
+  "slug": "detective-association-of-finland",
+  "country": "Finland",
+  "email": "info@suomenyksityisetsivat.com",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [
+   {
+    "subject": "Introducing Investigator Events — free global PI calendar",
+    "at": "2026-05-05",
+    "status": "sent"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "DeZRS",
+  "code": null,
+  "slug": "dzrs",
+  "country": "Slovenia",
+  "email": "info@detektivska-zbornica.si",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [],
+  "hasVideo": false
+ },
+ {
+  "name": "EURODET",
+  "code": null,
+  "slug": "eurodet",
+  "country": "Austria",
+  "email": "office@eurodet.at",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [
+   {
+    "subject": "Introducing Investigator Events — free global PI calendar",
+    "at": "2026-05-05",
+    "status": "sent"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "FAPI",
+  "code": null,
+  "slug": "fapi",
+  "country": "Italy",
+  "email": "FAPI@i-k-d.com",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 6,
+  "contacted": [
+   {
+    "subject": "Introducing Investigator Events — free global PI calendar",
+    "at": "2026-05-05",
+    "status": "sent"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "FDDE",
+  "code": null,
+  "slug": "fdde",
+  "country": "Denmark",
+  "email": "chairman@fdde.dk",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [
+   {
+    "subject": "Introducing Investigator Events — free global PI calendar",
+    "at": "2026-05-05",
+    "status": "sent"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "FEWA - Expert Witness Association",
+  "code": null,
+  "slug": "fewa",
+  "country": "United Kingdom",
+  "email": "info@forensic.org",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [],
+  "hasVideo": false
+ },
+ {
+  "name": "Georgia Association of Professional Private Investigators",
+  "code": null,
+  "slug": "gappi",
+  "country": "United States",
+  "email": "info@gappi.org",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [],
+  "hasVideo": false
+ },
+ {
+  "name": "Hungarian Detective Association",
+  "code": null,
+  "slug": "hungarian-detective-association",
+  "country": "Hungary",
+  "email": "iroda@detektivszovetseg.hu",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [
+   {
+    "subject": "Introducing Investigator Events — free global PI calendar",
+    "at": "2026-05-05",
+    "status": "sent"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "IAIACE",
+  "code": null,
+  "slug": "iaiace",
+  "country": "Belgium",
+  "email": "marecs.office@gmail.com",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [
+   {
+    "name": "Igor Tsminskyi",
+    "role": "Vice President International",
+    "verified": true,
+    "senior": true
+   }
+  ],
+  "memberCount": 2,
+  "contacted": [
+   {
+    "subject": "Introducing Investigator Events — free global PI calendar",
+    "at": "2026-05-05",
+    "status": "sent"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "IBPI",
+  "code": null,
+  "slug": "ibpi",
+  "country": "Israel",
+  "email": "ipi.org2017@gmail.com",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 1,
+  "contacted": [
+   {
+    "subject": "Introducing Investigator Events — free global PI calendar",
+    "at": "2026-05-05",
+    "status": "sent"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "IKD - Internationale Kommission der Detektiv-Verbände",
+  "code": null,
+  "slug": "ikd",
+  "country": "International",
+  "email": null,
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [
+   {
+    "name": "Mike LaCorte",
+    "role": "Secretary General",
+    "verified": true,
+    "senior": true
+   }
+  ],
+  "memberCount": 9,
+  "contacted": [],
+  "hasVideo": false
+ },
+ {
+  "name": "Intellenet",
+  "code": null,
+  "slug": "intellenet",
+  "country": "United States",
+  "email": "jstein@elpspda.com",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 14,
+  "contacted": [
+   {
+    "subject": "Introducing Investigator Events — free global PI calendar",
+    "at": "2026-05-05",
+    "status": "sent"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "LIDEPPE",
+  "code": null,
+  "slug": "lideppe",
+  "country": "Portugal",
+  "email": "geral@lideppe.com",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [
+   {
+    "subject": "Introducing Investigator Events — free global PI calendar",
+    "at": "2026-05-05",
+    "status": "sent"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "NCISS",
+  "code": null,
+  "slug": "nciss",
+  "country": "United States",
+  "email": "president@nciss.org",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [
+   {
+    "name": "Matthew Spaier",
+    "role": "Reg Director",
+    "verified": false,
+    "senior": true
+   },
+   {
+    "name": "Dean A. Beers",
+    "role": "Past President",
+    "verified": true,
+    "senior": true
+   },
+   {
+    "name": "Fernando Alvarez",
+    "role": "Vice President",
+    "verified": true,
+    "senior": true
+   }
+  ],
+  "memberCount": 10,
+  "contacted": [
+   {
+    "subject": "NCISS's events are live on Investigator Events",
+    "at": "2026-05-05",
+    "status": "sent"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "NFES",
+  "code": null,
+  "slug": "nfes",
+  "country": "Norway",
+  "email": "post@nfes.no",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [
+   {
+    "subject": "Introducing Investigator Events — free global PI calendar",
+    "at": "2026-05-05",
+    "status": "sent"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "ODV",
+  "code": null,
+  "slug": "oedv",
+  "country": "Austria",
+  "email": "office@oedv.at",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [],
+  "hasVideo": false
+ },
+ {
+  "name": "Oregon Association of Licensed Investigators",
+  "code": null,
+  "slug": "oali",
+  "country": "United States",
+  "email": "Secretary@oali.org",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [],
+  "hasVideo": false
+ },
+ {
+  "name": "PDPR",
+  "code": null,
+  "slug": "pdpr",
+  "country": "Romania",
+  "email": "secretariat@patronatul-detectivilor.ro",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 1,
+  "contacted": [
+   {
+    "subject": "Introducing Investigator Events — free global PI calendar",
+    "at": "2026-05-05",
+    "status": "sent"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "Pennsylvania Association of Licensed Investigators",
+  "code": null,
+  "slug": "pali",
+  "country": "United States",
+  "email": null,
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [
+   {
+    "name": "Marc Bourne",
+    "role": "President",
+    "verified": false,
+    "senior": true
+   }
+  ],
+  "memberCount": 1,
+  "contacted": [],
+  "hasVideo": false
+ },
+ {
+  "name": "Private Investigators Association of Idaho",
+  "code": null,
+  "slug": "piai",
+  "country": "United States",
+  "email": "contact@piai.us",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [],
+  "hasVideo": false
+ },
+ {
+  "name": "Professional Association of Wisconsin Licensed Investigators",
+  "code": null,
+  "slug": "pawli",
+  "country": "United States",
+  "email": null,
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [],
+  "hasVideo": false
+ },
+ {
+  "name": "PSLD",
+  "code": null,
+  "slug": "psld",
+  "country": "Poland",
+  "email": "biuro@psld.pl",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [
+   {
+    "subject": "Introducing Investigator Events — free global PI calendar",
+    "at": "2026-05-05",
+    "status": "sent"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "SAD",
+  "code": null,
+  "slug": "sad",
+  "country": "Serbia",
+  "email": "info@udruzenjedetektiva.rs",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [
+   {
+    "subject": "Introducing Investigator Events — free global PI calendar",
+    "at": "2026-05-05",
+    "status": "sent"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "SFPP",
+  "code": null,
+  "slug": "sfpp",
+  "country": "Switzerland",
+  "email": "phr@investigation.ch",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [
+   {
+    "name": "philip ryffel",
+    "role": "President",
+    "verified": true,
+    "senior": true
+   }
+  ],
+  "memberCount": 1,
+  "contacted": [
+   {
+    "subject": "Introducing Investigator Events — free global PI calendar",
+    "at": "2026-05-05",
+    "status": "sent"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "Society of Professional Investigators",
+  "code": null,
+  "slug": "spi",
+  "country": "United States",
+  "email": "president@spinyc.org",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [
+   {
+    "name": "Michael P. Reynolds",
+    "role": "Sergeant at Arms",
+    "verified": false,
+    "senior": true
+   },
+   {
+    "name": "Emmanuelle Welch",
+    "role": "Past vice president",
+    "verified": false,
+    "senior": true
+   }
+  ],
+  "memberCount": 7,
+  "contacted": [
+   {
+    "subject": "June Dinner-Seminar on The power of Connection is live on Investigator Events",
+    "at": "2026-06-12",
+    "status": "failed"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "South Carolina Association of Legal Investigators",
+  "code": null,
+  "slug": "scali",
+  "country": "United States",
+  "email": "admin@whitesellpi.com",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [],
+  "hasVideo": false
+ },
+ {
+  "name": "SYL",
+  "code": null,
+  "slug": "syl",
+  "country": "Finland",
+  "email": "liitto@yksityisetsiva.fi",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [
+   {
+    "subject": "Introducing Investigator Events — free global PI calendar",
+    "at": "2026-05-05",
+    "status": "sent"
+   }
+  ],
+  "hasVideo": false
+ },
+ {
+  "name": "Taiwan Association of Professional Detectives",
+  "code": null,
+  "slug": "tapd",
+  "country": "Taiwan",
+  "email": "astridchang12@gmail.com",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 0,
+  "contacted": [],
+  "hasVideo": false
+ },
+ {
+  "name": "Texas Association of Licensed Investigators",
+  "code": null,
+  "slug": "tali",
+  "country": "United States",
+  "email": "admin@tali.org",
+  "events": [],
+  "organisers": [],
+  "seniorMembers": [],
+  "memberCount": 7,
+  "contacted": [],
+  "hasVideo": false
+ }
+]

@@ -114,6 +114,14 @@ function EventFields({
         </select>
       </div>
       <div>
+        <label htmlFor={`${idPrefix}-additional-associations`} className="text-xs font-medium uppercase tracking-wider text-slate-500">Further co-hosts</label>
+        <input id={`${idPrefix}-additional-associations`} name="additionalAssociations" defaultValue={(defaults as any)?.additionalAssociations ?? ''} placeholder="Comma separated, e.g. NALI, MCPI" className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20" />
+      </div>
+      <div>
+        <label htmlFor={`${idPrefix}-patron-associations`} className="text-xs font-medium uppercase tracking-wider text-slate-500">Patrons</label>
+        <input id={`${idPrefix}-patron-associations`} name="patronAssociations" defaultValue={(defaults as any)?.patronAssociations ?? ''} placeholder="Comma separated, e.g. BUDEG, ÖDV, FSPD" className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20" />
+      </div>
+      <div>
         <label htmlFor={`${idPrefix}-category`} className="text-xs font-medium uppercase tracking-wider text-slate-500">Category</label>
         <input id={`${idPrefix}-category`} name="category" required defaultValue={defaults?.category ?? ''} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20" />
       </div>

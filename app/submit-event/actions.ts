@@ -98,9 +98,17 @@ async function parseSubmissionData(formData: FormData): Promise<Omit<EventSubmis
   const eventScopeRaw = parseRequired(formData, 'eventScope', 20);
   const endDate = parseDateValue(formData, 'endDate', false);
   const association = parseOptional(formData, 'association', 140);
+  // The form has always rendered a Co-association select but this action
+  // never read it, so a joint event lost its second body on submission.
+  // event_submissions has no association column — it travels in the notes
+  // tag, which the admin approval form reads back.
+  const coAssociation = parseOptional(formData, 'co_association', 140);
   const rawNotes = parseOptional(formData, 'notes', 2000);
-  const notes = association && association !== 'other'
-    ? `[Association: ${association}]\n${rawNotes}`.trim()
+  const associationLabels = [association, coAssociation]
+    .map((v) => v?.trim())
+    .filter((v): v is string => Boolean(v) && v !== 'other');
+  const notes = associationLabels.length > 0
+    ? `[Association: ${associationLabels.join(', ')}]\n${rawNotes}`.trim()
     : rawNotes;
   const eventScope = eventScopeRaw === 'secondary' ? 'secondary' : 'main';
 

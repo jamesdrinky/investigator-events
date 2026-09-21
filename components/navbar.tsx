@@ -1,7 +1,7 @@
 'use client';
 
 import type { Route } from 'next';
-import { Menu, X, LogOut, User, Send, Bell, UserPlus, UserCheck, Heart, MessageCircle, CheckCircle } from 'lucide-react';
+import { Menu, X, LogOut, User, Send, Bell, UserPlus, UserCheck, Heart, MessageCircle, CheckCircle, Mail } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
@@ -327,7 +327,10 @@ export function Navbar() {
                         ) : (
                           notifications.map((n: any) => {
                             const actor = n.actor;
-                            const actorName = actor?.full_name ?? 'Someone';
+                            // Notifications sent by the platform itself have no
+                            // actor — review prompts already did, and read as
+                            // "Someone <body>". Name the sender instead.
+                            const actorName = actor?.full_name ?? 'Investigator Events';
                             const timeAgo = getTimeAgo(n.created_at);
 
                             const typeIcon = n.type === 'follow' ? <UserPlus className="h-3 w-3 text-blue-500" />
@@ -335,6 +338,7 @@ export function Navbar() {
                               : n.type === 'connection_accepted' ? <UserCheck className="h-3 w-3 text-emerald-500" />
                               : n.type === 'post_like' ? <Heart className="h-3 w-3 text-pink-500" />
                               : n.type === 'post_comment' ? <MessageCircle className="h-3 w-3 text-violet-500" />
+                              : n.type === 'newsletter_invite' ? <Mail className="h-3 w-3 text-blue-500" />
                               : <CheckCircle className="h-3 w-3 text-blue-500" />;
 
                             const actionText = n.type === 'follow' ? 'started following you'

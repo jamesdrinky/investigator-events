@@ -9,12 +9,14 @@ import { UserAvatar } from '@/components/UserAvatar';
 
 type EventResult = { id: string; title: string; slug: string | null; start_date: string | null; city: string; country: string; association: string | null; organiser: string | null; description: string | null };
 type PersonResult = { id: string; full_name: string | null; username: string | null; avatar_url: string | null; country: string | null; specialisation: string | null };
+type AssociationResult = { id: string; slug: string; name: string; logo_url: string | null; country: string | null };
 
 export function GlobalSearch({ isDark }: { isDark?: boolean }) {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [events, setEvents] = useState<EventResult[]>([]);
   const [people, setPeople] = useState<PersonResult[]>([]);
+  const [associations, setAssociations] = useState<AssociationResult[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [focusIndex, setFocusIndex] = useState(-1);
@@ -23,21 +25,23 @@ export function GlobalSearch({ isDark }: { isDark?: boolean }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
 
-  const totalResults = events.length + people.length;
+  const totalResults = events.length + people.length + associations.length;
 
   const doSearch = useCallback(async (q: string) => {
-    if (q.length < 2) { setEvents([]); setPeople([]); return; }
+    if (q.length < 2) { setEvents([]); setPeople([]); setAssociations([]); return; }
     setLoading(true);
     const supabase = createSupabaseBrowserClient();
     // Sanitize search term for PostgREST - escape special chars
     const safe = q.replace(/[%_\\()\[\]]/g, '');
-    if (!safe) { setEvents([]); setPeople([]); setLoading(false); return; }
-    const [{ data: ev }, { data: ppl }] = await Promise.all([
+    if (!safe) { setEvents([]); setPeople([]); setAssociations([]); setLoading(false); return; }
+    const [{ data: ev }, { data: ppl }, { data: assoc }] = await Promise.all([
       supabase.from('events').select('id, title, slug, start_date, city, country, association, organiser, description').eq('approved', true).or(`title.ilike.%${safe}%,city.ilike.%${safe}%,country.ilike.%${safe}%,association.ilike.%${safe}%,organiser.ilike.%${safe}%,description.ilike.%${safe}%`).limit(8),
       supabase.from('profiles').select('id, full_name, username, avatar_url, country, specialisation').eq('is_public', true).not('username', 'is', null).or(`full_name.ilike.%${safe}%,username.ilike.%${safe}%,specialisation.ilike.%${safe}%,country.ilike.%${safe}%`).limit(5),
+      supabase.from('association_pages' as never).select('id, slug, name, logo_url, country').or(`name.ilike.%${safe}%,slug.ilike.%${safe}%`).limit(5),
     ]);
     setEvents(ev ?? []);
     setPeople(ppl ?? []);
+    setAssociations((assoc ?? []) as AssociationResult[]);
     setLoading(false);
     setFocusIndex(-1);
   }, []);
@@ -82,9 +86,10 @@ export function GlobalSearch({ isDark }: { isDark?: boolean }) {
     router.push(path as any);
   };
 
-  const allItems: Array<{ type: 'event' | 'person'; data: EventResult | PersonResult }> = [
+  const allItems: Array<{ type: 'event' | 'person' | 'association'; data: EventResult | PersonResult | AssociationResult }> = [
     ...events.map((e) => ({ type: 'event' as const, data: e })),
     ...people.map((p) => ({ type: 'person' as const, data: p })),
+    ...associations.map((a) => ({ type: 'association' as const, data: a })),
   ];
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -95,6 +100,7 @@ export function GlobalSearch({ isDark }: { isDark?: boolean }) {
       const item = allItems[focusIndex];
       if (item.type === 'event') navigate(`/events/${(item.data as EventResult).slug}`);
       if (item.type === 'person' && (item.data as PersonResult).username) navigate(`/profile/${(item.data as PersonResult).username}`);
+      if (item.type === 'association') navigate(`/associations/${(item.data as AssociationResult).slug}`);
     }
     if (e.key === 'Escape') { setOpen(false); setMobileOpen(false); }
   };
@@ -166,6 +172,26 @@ export function GlobalSearch({ isDark }: { isDark?: boolean }) {
               ))}
             </div>
           )}
+
+          {associations.length > 0 && (
+            <div className="border-t border-slate-100 p-2">
+              <p className="px-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">Associations</p>
+              {associations.map((a, ai) => (
+                <button key={a.id} type="button" onClick={() => navigate(`/associations/${a.slug}`)}
+                  className={`flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left transition ${focusIndex === events.length + people.length + ai ? 'bg-blue-50' : 'hover:bg-slate-50'}`}>
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white">
+                    {a.logo_url
+                      ? <img src={a.logo_url} alt="" className="h-full w-full object-contain" />
+                      : <span className="text-[10px] font-bold text-slate-500">{a.name.slice(0, 2).toUpperCase()}</span>}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-slate-900">{a.name}</p>
+                    <p className="text-[11px] text-slate-400">{a.country ? `${getCountryFlag(a.country)} ${a.country}` : 'Association'}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -232,6 +258,26 @@ export function GlobalSearch({ isDark }: { isDark?: boolean }) {
                 <div>
                   <p className="text-sm font-medium text-slate-900">{p.full_name ?? p.username}</p>
                   <p className="text-xs text-slate-400">{p.country ? `${getCountryFlag(p.country)} ` : ''}{p.specialisation || (p.username ? `@${p.username}` : '')}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {associations.length > 0 && (
+          <div>
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">Associations</p>
+            {associations.map((a) => (
+              <button key={a.id} type="button" onClick={() => navigate(`/associations/${a.slug}`)}
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-slate-50">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white">
+                  {a.logo_url
+                    ? <img src={a.logo_url} alt="" className="h-full w-full object-contain" />
+                    : <span className="text-[10px] font-bold text-slate-500">{a.name.slice(0, 2).toUpperCase()}</span>}
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-slate-900">{a.name}</p>
+                  <p className="text-xs text-slate-400">{a.country ? `${getCountryFlag(a.country)} ${a.country}` : 'Association'}</p>
                 </div>
               </button>
             ))}

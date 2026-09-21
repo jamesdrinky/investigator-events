@@ -357,6 +357,12 @@ export function Navbar() {
                                 <div className="relative flex-shrink-0">
                                   {actor?.avatar_url ? (
                                     <img src={actor.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover" />
+                                  ) : !actor ? (
+                                    /* Sent by the platform, not a person. The
+                                       initial-letter fallback rendered a grey
+                                       circle with "I" in it, which looked like
+                                       a broken avatar rather than the brand. */
+                                    <img src="/logo/ielogo1.PNG" alt="" className="h-10 w-10 rounded-full object-cover ring-1 ring-slate-200" />
                                   ) : (
                                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-500">
                                       {actorName.charAt(0)}

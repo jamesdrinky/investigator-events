@@ -17,7 +17,7 @@ const ROOT = process.cwd();
 const TYPE = 'newsletter_invite';
 const TITLE = 'The Monday briefing';
 // Rendered after the sender name: "Investigator Events <body>".
-const BODY = 'sends a two-minute briefing every Monday — you are not on it yet';
+const BODY = '— TALI, NALI Detroit and PBSA all open this week. Get the Monday briefing.';
 const LINK = '/weekly';
 
 async function loadEnv() {

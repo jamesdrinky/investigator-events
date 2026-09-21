@@ -67,8 +67,45 @@ export function CinematicNewsletterPage() {
   const heroScale = useTransform(scrollYProgress, [0, 0.15], [1, 1.08]);
 
   return (
-    <div ref={containerRef} className="relative min-h-[200vh] sm:min-h-[280vh]">
-      {/* ── Sticky viewport ── */}
+    <>
+      {/* ── Mobile ──
+          The cinematic treatment below is scroll-jacked: two screen-heights
+          of scrolling, with the hero and the card stacked inside one sticky
+          h-screen box. On a phone that reads as a screen of empty gradient,
+          a card floating mid-viewport, and a sign-up field low enough the
+          keyboard covers it — and h-screen is 100vh, which on iOS is taller
+          than the visible area.
+
+          Mobile gets a plain page instead, form near the top. A separate
+          block rather than disabling the transforms, so neither layout
+          flashes on hydration. */}
+      <div className="bg-[linear-gradient(170deg,#f0f4ff_0%,#e8eeff_45%,#f8fbff_100%)] px-4 pb-10 pt-8 sm:hidden">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-indigo-500">Newsletter</p>
+        <h1 className="mt-3 text-[2.1rem] font-bold leading-[0.95] tracking-[-0.05em] text-slate-950">
+          Stay ahead of the calendar.
+        </h1>
+        <p className="mt-3 text-[15px] leading-relaxed text-slate-500">
+          A short weekly email with new events, key dates, and one standout listing.
+        </p>
+
+        <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(145deg,#06091a,#0d1840)] p-5">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-cyan-400">Weekly Intelligence</p>
+          <h2 className="mt-2 text-xl font-bold leading-tight tracking-[-0.03em] text-white">
+            The PI industry, delivered to your inbox.
+          </h2>
+          <div className="mt-5">
+            <NewsletterSignupForm />
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {['Free forever', 'No spam', '2 min read'].map((t) => (
+              <span key={t} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-white/40">{t}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+    <div ref={containerRef} className="relative hidden sm:block sm:min-h-[280vh]">
+      {/* ── Sticky viewport (desktop only) ── */}
       <div className="sticky top-0 h-screen overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(165deg,#f0f4ff_0%,#e8eeff_25%,#f0e8ff_50%,#f4f0ff_75%,#f8fbff_100%)]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(99,102,241,0.1),transparent_50%),radial-gradient(circle_at_70%_80%,rgba(236,72,153,0.06),transparent_50%)]" />
@@ -120,8 +157,9 @@ export function CinematicNewsletterPage() {
           </div>
         </motion.div>
       </div>
+    </div>
 
-      {/* ── Below fold ── */}
+      {/* ── Below fold — shared by both layouts ── */}
       <div className="relative z-30 bg-white">
         {/* Features — 3D depth cards */}
         <div className="relative overflow-hidden py-16 sm:py-24">
@@ -242,6 +280,6 @@ export function CinematicNewsletterPage() {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

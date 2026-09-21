@@ -53,6 +53,18 @@ function SignUpPageInner() {
 
       trackEvent('signup_completed', { newsletterOptIn: Boolean(newsletterOptIn) });
 
+      // Log the answer either way — a decline previously left no trace, so
+      // "did this person say no, or never see the question?" was unanswerable.
+      fetch('/api/newsletter/consent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: newsletterOptIn ? 'accepted' : 'declined',
+          source: 'email-signup',
+          email,
+        }),
+      }).catch(() => {});
+
       // Subscribe to newsletter if opted in
       if (newsletterOptIn) {
         fetch('/api/newsletter', {

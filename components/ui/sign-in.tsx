@@ -84,7 +84,13 @@ export function AuthPage({
   const [email, setEmail] = useState(initialEmail ?? '');
   const [password, setPassword] = useState('');
   const [tosAccepted, setTosAccepted] = useState(false);
-  const [newsletterOptIn, setNewsletterOptIn] = useState(true);
+  // Unticked by default. This was useState(true) from 23 Apr 2026, so the
+  // newsletter box on the email sign-up form arrived pre-ticked — and a
+  // pre-ticked box is not valid consent under GDPR, because consent has to
+  // be an affirmative act. The double opt-in that follows does rescue most
+  // of it (clicking the confirmation link is affirmative), but the box
+  // itself should never have been doing the asking.
+  const [newsletterOptIn, setNewsletterOptIn] = useState(false);
   // Honeypot — humans never touch this (display: none + tabindex=-1).
   // Bots that crawl the form auto-fill every input; the API rejects if non-empty.
   const [websiteUrl, setWebsiteUrl] = useState('');

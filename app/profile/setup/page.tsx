@@ -154,15 +154,26 @@ export default function ProfileSetupPage() {
       is_public: true,
     });
 
-    if (newsletterOptIn) {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user?.email) {
-        fetch('/api/newsletter', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: user.email }),
-        }).catch(() => {});
-      }
+    // Log the answer either way. Only acting on a tick meant a decline left
+    // no trace, so there was no way to tell someone who said no from someone
+    // who never saw the question.
+    const { data: { user } } = await supabase.auth.getUser();
+    fetch('/api/newsletter/consent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: newsletterOptIn ? 'accepted' : 'declined',
+        source: 'profile-setup',
+        email: user?.email,
+      }),
+    }).catch(() => {});
+
+    if (newsletterOptIn && user?.email) {
+      fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email }),
+      }).catch(() => {});
     }
 
     setSaving(false);

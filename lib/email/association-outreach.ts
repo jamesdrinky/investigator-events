@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
 import { createSupabaseAdminServerClient } from '@/lib/supabase/admin';
+import { findAssociationRecordByLabel } from '@/lib/data/associations';
 
 const SITE = 'https://www.investigatorevents.com';
 const LOGO = `${SITE}/logo/ielogo1.PNG`;
@@ -73,6 +74,9 @@ export const PLATFORM_BLURB =
 
 export function buildApprovalOutreachEmail(params: ApprovalOutreachParams): string {
   const { contactName, eventName, association } = params;
+  // Only mention the association's page when one actually exists — a link to
+  // a page we have not built would be worse than saying nothing.
+  const associationSlug = findAssociationRecordByLabel(association)?.slug ?? null;
 
   return `<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -123,6 +127,11 @@ export function buildApprovalOutreachEmail(params: ApprovalOutreachParams): stri
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
             With that in mind, I would be very grateful if you could send a short circular to your members encouraging them to do three things. First, to visit <a href="${SITE}" style="color:${C.blue};text-decoration:none;">investigatorevents.com</a> and take a look at the calendar. Second, to subscribe so they receive notifications of upcoming events. And third, to set up a profile, which lets them connect with fellow investigators across jurisdictions and follow the events and associations that matter to them.
           </p>
+
+          ${associationSlug ? `
+          <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
+            You now also have a dedicated page at <a href="${SITE}/associations/${associationSlug}" style="color:${C.blue};text-decoration:none;">investigatorevents.com/associations/${associationSlug}</a>, which gathers every one of your events in one place alongside your logo and details. Members can add ${association} to their own profile, which lists them on that page and means they see your events wherever they are on the site. There is no cost for any of this, and there never will be — associations are why the calendar exists.
+          </p>` : ''}
 
           <p style="margin:16px 0 0;font-size:15px;color:${C.body};line-height:1.7;">
             To make that easier, I’ve drafted a short paragraph below that you are welcome to use as it stands, adapt, or rewrite entirely as you see fit.

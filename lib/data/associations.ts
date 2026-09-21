@@ -424,6 +424,16 @@ export const associationRecords: AssociationRecord[] = [
     logoFileName: 'aldonys.png'
   },
   {
+    slug: 'wali',
+    shortName: 'WALI',
+    name: 'Washington Association of Legal Investigators',
+    country: 'United States',
+    region: 'North America',
+    website: 'https://wali.org/',
+    aliases: ['WALI', 'Washington Association of Legal Investigators'],
+    logoFileName: 'wali.png'
+  },
+  {
     slug: 'nali',
     shortName: 'NALI',
     name: 'National Association of Legal Investigators',

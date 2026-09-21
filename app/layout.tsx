@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Cormorant_Garamond, Plus_Jakarta_Sans } from 'next/font/google';
 import { CookieBanner } from '@/components/CookieBanner';
 import { Footer } from '@/components/footer';
+import { KeyboardInsets } from '@/components/KeyboardInsets';
 import { Analytics } from '@vercel/analytics/react';
 import { AppUpdater } from '@/components/AppUpdater';
 import { Navbar } from '@/components/navbar';
@@ -111,6 +112,7 @@ export default function RootLayout({
               mobile home; a compact bar is the fix, not this one. */}
           <Footer className="hidden lg:block" />
         </div>
+        <KeyboardInsets />
         <MobileBackButton />
         <BottomTabBar />
         <PasswordRecoveryHandler />

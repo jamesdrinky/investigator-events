@@ -67,6 +67,8 @@ const cityImageMap: Record<string, string> = {
   'Warsaw': 'warsaw.jpg',
   'Bonita Springs': 'bonitasprings.jpg',
   'Bonita Springs, FL': 'bonitasprings.jpg',
+  'Altamonte Springs': 'altamontesprings.jpg',
+  'Altamonte Springs, FL': 'altamontesprings.jpg',
   'Wantagh': 'longisland.jpg',
   'Wantagh, NY': 'longisland.jpg',
   'Long Island': 'longisland.jpg',
